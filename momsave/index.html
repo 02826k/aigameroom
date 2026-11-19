@@ -182,7 +182,6 @@
 
       <!-- 2단 -->
       <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
-
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
           <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer">
             🎵 배경음 ON
@@ -910,7 +909,7 @@
       function gameClear() {
         running = false;
         stopBGM();
-        const bonus = state.isVip ? 5000 : 2500;
+        const bonus = 2500;
         score += bonus;
         const finalScore = Math.floor(score);
         if (finalScore > state.highScore) state.highScore = finalScore;
@@ -925,7 +924,7 @@
         document.getElementById('overlayIcon').textContent = '🎉';
         document.getElementById('overlayTitle').textContent = 'GAME CLEAR! 엄마 구출 성공!';
         document.getElementById('overlayTitle').className = 'text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight';
-        document.getElementById('overlaySub').innerHTML = `엄마를 무사히 구출했습니다! · 최종 점수: <strong class="text-amber-300 text-base">${finalScore.toLocaleString()}점</strong>`;
+        document.getElementById('overlaySub').innerHTML = `엄마를 무사히 구출했습니다!<br/>최종 점수: <strong class="text-amber-300">${finalScore.toLocaleString()}점</strong> · 클리어 타임: <strong class="text-sky-300">${formatTimeSec(state.lastClearTime)}</strong>`;
         document.getElementById('overlayStartBtn').textContent = '▶ 처음부터 다시하기';
         document.getElementById('overlayLobbyBtn').classList.remove('hidden');
         document.getElementById('gameOverlay').classList.remove('hidden');
@@ -1042,8 +1041,7 @@
         en.hp -= dmg;
         en.hitFlash = 0.08;
         if (en.hp <= 0) {
-          const mult = state.isVip ? 2 : 1;
-          const pts = en.score * mult;
+          const pts = en.score;
           score += pts;
           floatingTexts.push({ x: en.x, y: en.y - 28, text: `+${pts}`, color: '#fde047', life: 0.8 });
 
@@ -1076,8 +1074,7 @@
           boss.defeated = true;
           boss.active = false;
 
-          const mult = state.isVip ? 2 : 1;
-          score += (1000 * sector) * mult;
+          score += 1000 * sector;
           player.hp = Math.min(player.maxHp, player.hp + 40);
           updateHud();
 
@@ -2515,20 +2512,26 @@
 
       const fullscreenStage = document.getElementById('fullscreenStage');
       const fullscreenBtn = document.getElementById('fullscreenBtn');
+      function lockOrientationMode(mode) {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock(mode).catch(() => {
+            if (mode === 'portrait' && screen.orientation.unlock) {
+              try { screen.orientation.unlock(); } catch (err) {}
+            }
+          });
+        }
+      }
+
       fullscreenBtn.addEventListener('click', async () => {
         try {
           if (!document.fullscreenElement) {
             await fullscreenStage.requestFullscreen();
             fullscreenBtn.textContent = '✕ 축소';
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape').catch(() => {});
-            }
+            lockOrientationMode('landscape');
           } else {
             await document.exitFullscreen();
             fullscreenBtn.textContent = '⛶ 전체화면';
-            if (screen.orientation && screen.orientation.unlock) {
-              try { screen.orientation.unlock(); } catch (err) {}
-            }
+            lockOrientationMode('portrait');
           }
         } catch (e) {
           showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
@@ -2538,8 +2541,8 @@
       document.addEventListener('fullscreenchange', () => {
         const isFs = Boolean(document.fullscreenElement);
         fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
-        if (!isFs && screen.orientation && screen.orientation.unlock) {
-          try { screen.orientation.unlock(); } catch (err) {}
+        if (!isFs) {
+          lockOrientationMode('portrait');
         }
         requestAnimationFrame(() => setTimeout(resizeCanvas, 120));
       });
