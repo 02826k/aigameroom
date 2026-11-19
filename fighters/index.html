@@ -813,20 +813,89 @@
       // ==========================================
       let pickTarget = 'p1';
 
+      const FACE_IRIS = { akira:'#1e293b', pai:'#7c2d12', jacky:'#3f2a14', wolf:'#0e7490', sarah:'#1d4ed8', lau:'#422006' };
       function makeFaceSvg(f) {
-        const isArmSkill = f.skill.button === 'punch';
-        const svgBg = isArmSkill ? '#172554' : '#4c0519';
-        const svgStroke = isArmSkill ? '#60a5fa' : '#fb7185';
+        const id = 'fp_' + f.id, sk = f.skin, sk2 = jSh(sk, -38), sk3 = jSh(sk, 22);
+        const ol = '#0b0d17', iris = FACE_IRIS[f.id] || '#222';
+        const hairHi = jSh(f.hair, 60), wide = f.id === 'wolf' ? 1.14 : 1;
+        const style = f.hairStyle;
+        const backHair = style === 'ponytail'
+          ? `<path d="M55 22 C86 14 82 62 62 76 C68 54 62 40 54 32Z" fill="${f.hair}" stroke="${ol}" stroke-width="1.6"/>`
+          : style === 'long'
+          ? `<path d="M22 28 C4 40 6 76 18 92 L32 70Z M58 28 C76 40 74 76 62 92 L48 70Z" fill="${f.hair}" stroke="${ol}" stroke-width="1.6"/>` : '';
+        const frontHair = {
+          spike: 'M20 38 L15 21 L26 27 L27 8 L37 21 L45 3 L49 21 L60 8 L58 26 L66 22 L61 40 C57 30 24 29 20 38Z',
+          short: 'M20 38 C17 18 33 10 42 10 C58 10 65 22 60 38 C55 29 47 26 40 27 C32 27 25 31 20 38Z',
+          ponytail: 'M20 38 C18 18 32 9 43 10 C58 11 64 24 60 38 C54 28 46 25 38 28 C32 30 26 33 20 38Z',
+          long: 'M19 40 C14 16 32 6 43 8 C60 9 67 24 61 40 C55 30 47 25 38 27 C30 29 24 34 19 40Z'
+        }[style] || '';
+        let outfit;
+        if (f.body === 'bare') {
+          outfit = `<path d="M2 96 C4 72 22 66 40 66 C58 66 76 72 78 96Z" fill="url(#${id}s)" stroke="${ol}" stroke-width="2"/>
+            <path d="M40 68 L40 90 M24 76 Q32 84 40 80 Q48 84 56 76" stroke="${sk2}" stroke-width="1.8" fill="none"/>
+            <path d="M2 90 L78 90 L78 96 L2 96Z" fill="${f.belt}" stroke="${ol}" stroke-width="1.4"/>`;
+        } else if (f.body === 'gi') {
+          outfit = `<path d="M4 96 C6 72 24 66 40 66 C56 66 74 72 76 96Z" fill="${f.top}" stroke="${ol}" stroke-width="2"/>
+            <path d="M28 66 L42 92 L54 66 L47 66 L42 78 L35 66Z" fill="${sk}" stroke="${ol}" stroke-width="1.6"/>
+            <path d="M28 66 L44 96 M54 66 L40 96" stroke="${jSh(f.top,-70)}" stroke-width="1.6"/>
+            <rect x="4" y="88" width="72" height="8" fill="${f.belt}" stroke="${ol}" stroke-width="1.2"/>`;
+        } else if (f.body === 'jacket') {
+          outfit = `<path d="M3 96 C5 72 24 66 40 66 C56 66 75 72 77 96Z" fill="${f.top}" stroke="${ol}" stroke-width="2"/>
+            <path d="M30 66 L40 96 L50 66 L44 66 L40 78 L36 66Z" fill="#171717" stroke="${ol}" stroke-width="1.4"/>
+            <path d="M16 72 L22 96 M64 72 L58 96" stroke="${f.stripe}" stroke-width="3.5"/>
+            <path d="M32 64 L40 78 L48 64" fill="none" stroke="${f.stripe}" stroke-width="2.4"/>`;
+        } else {
+          outfit = `<path d="M6 96 C8 72 25 66 40 66 C55 66 72 72 74 96Z" fill="${f.top}" stroke="${ol}" stroke-width="2"/>
+            <path d="M30 66 Q40 80 50 66" fill="${sk}" stroke="${ol}" stroke-width="1.6"/>
+            <path d="M10 82 L70 82" stroke="${f.stripe || f.trim}" stroke-width="4"/>
+            <path d="M18 72 L26 96 M62 72 L54 96" stroke="${f.trim}" stroke-width="2.2"/>`;
+        }
+        const band = f.headband ? `<path d="M20 33 Q40 22 60 33 L60 38 Q40 28 20 38Z" fill="${f.headband}" stroke="${ol}" stroke-width="1.4"/>
+            <path d="M20 34 L6 42 L9 33 L3 28 L20 30Z" fill="${f.headband}" stroke="${ol}" stroke-width="1.2"/>` : '';
+        const beard = f.id === 'wolf' ? `<path d="M24 50 C27 68 53 68 56 50 C50 60 30 60 24 50Z" fill="${f.hair}" opacity=".7"/>` : '';
+        const scar = f.id === 'jacky' ? `<path d="M52 42 L56 52" stroke="#9f1239" stroke-width="1.8" stroke-linecap="round"/>`
+                   : f.id === 'lau' ? `<path d="M28 34 L35 48 M30 34 L37 47" stroke="#b91c1c" stroke-width="1.3" stroke-linecap="round"/>` : '';
+        const earring = (f.id === 'pai' || f.id === 'sarah') ? `<circle cx="${f.id==='pai'?21:19}" cy="52" r="2.4" fill="#fde047" stroke="${ol}" stroke-width=".8"/>
+            <circle cx="59" cy="52" r="2.4" fill="#fde047" stroke="${ol}" stroke-width=".8"/>` : '';
+        const lips = (f.id === 'pai' || f.id === 'sarah') ? '#e11d48' : '#7c2d12';
         return `
-          <svg viewBox="0 0 64 64" class="w-9 h-9 sm:w-11 sm:h-11 mx-auto drop-shadow">
-            <rect x="4" y="4" width="56" height="56" rx="12" fill="${svgBg}" stroke="${svgStroke}" stroke-width="2.5"/>
-            <path d="M16 58 C18 44, 46 44, 48 58 Z" fill="${f.top}"/>
-            <circle cx="32" cy="30" r="14" fill="${f.skin}"/>
-            <path d="M18 26 C18 13, 46 13, 46 26 C42 20, 22 20, 18 26 Z" fill="${f.hair}"/>
-            ${f.headband ? `<rect x="18" y="21" width="28" height="4.5" rx="2" fill="${f.headband}"/>` : ''}
-            <rect x="24" y="28" width="4.5" height="3" rx="1" fill="#0f172a"/>
-            <rect x="35.5" y="28" width="4.5" height="3" rx="1" fill="#0f172a"/>
-            <path d="M27 37 Q32 40 37 37" stroke="#7c2d12" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <svg viewBox="0 0 80 96" class="w-full max-w-[48px] sm:max-w-[64px] h-auto mx-auto drop-shadow-lg" style="overflow:visible">
+            <defs>
+              <linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${jSh(f.aura,-30)}"/><stop offset="1" stop-color="#0b1020"/></linearGradient>
+              <radialGradient id="${id}g" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="${f.aura}" stop-opacity=".85"/><stop offset="1" stop-color="${f.aura}" stop-opacity="0"/></radialGradient>
+              <linearGradient id="${id}f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sk3}"/><stop offset="1" stop-color="${sk2}"/></linearGradient>
+              <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sk3}"/><stop offset="1" stop-color="${sk2}"/></linearGradient>
+              <clipPath id="${id}c"><rect x="1" y="1" width="78" height="94" rx="12"/></clipPath>
+            </defs>
+            <g clip-path="url(#${id}c)">
+              <rect width="80" height="96" fill="url(#${id}b)"/>
+              <rect width="80" height="96" fill="url(#${id}g)"/>
+              <path d="M-10 20 L90 -6 M-10 40 L90 14 M-10 62 L90 36" stroke="#fff" stroke-opacity=".10" stroke-width="5"/>
+              <g transform="translate(40 0) scale(${wide} 1) translate(-40 0)">
+                ${backHair}
+                ${outfit}
+                <path d="M33 56 H47 V70 Q40 76 33 70Z" fill="${sk2}" stroke="${ol}" stroke-width="1.6"/>
+                <path d="M22 38 C22 22 58 22 58 38 L57 50 C55 62 47 68 40 68 C33 68 25 62 23 50Z" fill="url(#${id}f)" stroke="${ol}" stroke-width="2"/>
+                <ellipse cx="21.5" cy="45" rx="3" ry="5" fill="${sk2}" stroke="${ol}" stroke-width="1.4"/>
+                <ellipse cx="58.5" cy="45" rx="3" ry="5" fill="${sk2}" stroke="${ol}" stroke-width="1.4"/>
+                ${beard}
+                <path d="M23 50 C25 62 33 67 40 67" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.4"/>
+                <ellipse cx="31" cy="43" rx="5" ry="3" fill="#fff" stroke="${ol}" stroke-width="1.3"/>
+                <ellipse cx="49" cy="43" rx="5" ry="3" fill="#fff" stroke="${ol}" stroke-width="1.3"/>
+                <circle cx="32" cy="43" r="2.5" fill="${iris}"/><circle cx="48" cy="43" r="2.5" fill="${iris}"/>
+                <circle cx="32.6" cy="42.2" r=".8" fill="#fff"/><circle cx="48.6" cy="42.2" r=".8" fill="#fff"/>
+                <path d="M25 36 L37 39.5 M55 36 L43 39.5" stroke="${f.hair}" stroke-width="3" stroke-linecap="round"/>
+                <path d="M25 36 L37 39.5 M55 36 L43 39.5" stroke="${ol}" stroke-width=".6" stroke-linecap="round" opacity=".6"/>
+                <path d="M40 45 L38 52 L42 52.5" fill="none" stroke="${sk2}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M33.5 58 Q40 61.5 47 57" fill="none" stroke="${lips}" stroke-width="2" stroke-linecap="round"/>
+                ${scar}${earring}
+                <path d="${frontHair}" fill="${f.hair}" stroke="${ol}" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M30 20 Q40 14 50 22" fill="none" stroke="${hairHi}" stroke-width="2.2" stroke-linecap="round" opacity=".75"/>
+                ${band}
+              </g>
+              <path d="M0 0 H80 V34 C56 24 24 24 0 34Z" fill="#fff" opacity=".07"/>
+            </g>
+            <rect x="1" y="1" width="78" height="94" rx="12" fill="none" stroke="${f.aura}" stroke-width="2.4"/>
           </svg>
         `;
       }
@@ -857,7 +926,7 @@
 
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `relative p-1.5 rounded-xl border-2 transition cursor-pointer flex flex-col items-center gap-1 ${baseBgClass} ${borderClass}`;
+          btn.className = `relative p-1.5 rounded-xl border-2 transition cursor-pointer flex flex-col items-center gap-1 hover:-translate-y-0.5 ${baseBgClass} ${borderClass}`;
           btn.innerHTML = `
             ${makeFaceSvg(f)}
             <div class="text-[10px] sm:text-xs font-black text-white leading-tight truncate w-full text-center">${f.name}</div>
@@ -1201,6 +1270,11 @@
         const a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a), ny = Math.cos(a);
         const g = ctx.createLinearGradient(x0 + nx * r0, y0 + ny * r0, x0 - nx * r0, y0 - ny * r0);
         g.addColorStop(0, jSh(c, 70)); g.addColorStop(0.4, jSh(c, 5)); g.addColorStop(1, jSh(c, -65));
+        ctx.save(); ctx.strokeStyle = 'rgba(6,8,18,.92)'; ctx.lineWidth = 3.6; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(x0 + nx * r0, y0 + ny * r0); ctx.lineTo(x1 + nx * r1, y1 + ny * r1);
+        ctx.lineTo(x1 - nx * r1, y1 - ny * r1); ctx.lineTo(x0 - nx * r0, y0 - ny * r0); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x0, y0, r0, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x1, y1, r1, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.moveTo(x0 + nx * r0, y0 + ny * r0);
@@ -1426,7 +1500,7 @@
         ctx.beginPath();
         ctx.moveTo(-14, -6); ctx.lineTo(14, -6); ctx.lineTo(20, -36); ctx.quadraticCurveTo(4, -46, -16, -38);
         ctx.closePath();
-        ctx.fill();
+        ctx.fill(); ctx.strokeStyle = 'rgba(6,8,18,.92)'; ctx.lineWidth = 3; ctx.stroke();
         ctx.fillStyle = tpl.stripe || 'rgba(0,0,0,.12)';
         ctx.beginPath(); ctx.moveTo(-15, -24); ctx.lineTo(17, -24); ctx.lineTo(18, -29); ctx.lineTo(-15, -30); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,.16)';
@@ -1450,7 +1524,7 @@
         ctx.beginPath();
         ctx.moveTo(-6, -64); ctx.quadraticCurveTo(-6, -80, 6, -79); ctx.quadraticCurveTo(18, -77, 18, -64);
         ctx.lineTo(19, -60); ctx.lineTo(15, -56); ctx.quadraticCurveTo(10, -50, 3, -52); ctx.quadraticCurveTo(-6, -54, -6, -64);
-        ctx.fill();
+        ctx.fill(); ctx.strokeStyle = 'rgba(6,8,18,.92)'; ctx.lineWidth = 2.6; ctx.stroke();
 
         const HS = {
           spike: [[-14,-82],[-6,-90],[4,-96],[14,-92],[21,-82],[19,-72]],
@@ -1471,7 +1545,7 @@
         HS[tpl.hairStyle || 'short'].forEach(q => ctx.lineTo(q[0], q[1]));
         ctx.lineTo(13, -74); ctx.lineTo(4, -72); ctx.lineTo(-4, -70);
         ctx.closePath();
-        ctx.fill();
+        ctx.fill(); ctx.strokeStyle = 'rgba(6,8,18,.92)'; ctx.lineWidth = 2.4; ctx.stroke();
 
         ctx.fillStyle = jSh(tpl.hair, 55);
         ctx.beginPath(); ctx.moveTo(-4, -86); ctx.lineTo(4, -92); ctx.lineTo(10, -87); ctx.lineTo(2, -83); ctx.fill();
@@ -1480,8 +1554,9 @@
           ctx.fillRect(-7, -76, 26, 4.5);
           ctx.beginPath(); ctx.moveTo(-7, -74); ctx.lineTo(-22, -70 + sway); ctx.lineTo(-20, -76 + sway); ctx.lineTo(-7, -76); ctx.fill();
         }
-        ctx.fillStyle = '#fff'; ctx.fillRect(10, -67, 5, 3);
+        ctx.fillStyle = '#fff'; ctx.fillRect(9.5, -67.5, 6.5, 3.6);
         ctx.fillStyle = '#0f172a'; ctx.fillRect(12.5, -67, 2.5, 3); ctx.fillRect(9, -71, 7, 1.8);
+        ctx.strokeStyle = tpl.hair; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(8, -73); ctx.lineTo(17, -70.5); ctx.stroke();
         ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 1.4;
         ctx.beginPath(); ctx.moveTo(11, -57); ctx.lineTo(16, -58); ctx.stroke();
         ctx.restore();
