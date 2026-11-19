@@ -331,10 +331,10 @@
             </div>
           </div>
           <div class="grid grid-cols-2 gap-x-3 gap-y-2.5 shrink-0" style="transform:rotate(-6deg)">
-            <button id="btn1" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#7dd3fc,#2563eb 60%,#1e3a8a)"><span class="text-lg leading-none">1</span><span class="text-[10px]">약손</span></button>
-            <button id="btn2" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#a5b4fc,#4f46e5 60%,#312e81)"><span class="text-lg leading-none">2</span><span class="text-[10px]">강손</span></button>
-            <button id="btn3" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fdba74,#ea580c 60%,#7c2d12)"><span class="text-lg leading-none">3</span><span class="text-[10px]">약발</span></button>
-            <button id="btn4" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fca5a5,#dc2626 60%,#7f1d1d)"><span class="text-lg leading-none">4</span><span class="text-[10px]">강발</span></button>
+            <button id="btn1" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#7dd3fc,#2563eb 60%,#1e3a8a)"><span class="text-lg leading-none">1</span><span class="text-[10px]">왼손</span></button>
+            <button id="btn2" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#a5b4fc,#4f46e5 60%,#312e81)"><span class="text-lg leading-none">2</span><span class="text-[10px]">오른손</span></button>
+            <button id="btn3" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fdba74,#ea580c 60%,#7c2d12)"><span class="text-lg leading-none">3</span><span class="text-[10px]">왼발</span></button>
+            <button id="btn4" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fca5a5,#dc2626 60%,#7f1d1d)"><span class="text-lg leading-none">4</span><span class="text-[10px]">오른발</span></button>
           </div>
         </div>
       </section>
@@ -419,37 +419,37 @@
           id:'akira', name:'아키라', style:'팔극권',
           skin:'#f2c29b', hair:'#14151a', headband:'#ef4444', top:'#f1f5f9', stripe:null, sleeve:'#e2e8f0', pants:'#d6d3d1', trim:'#94a3b8', shoe:'#f2c29b', glove:'#f2c29b', belt:'#18181b',
           hairStyle:'spike', body:'gi', bulk:1.05, h:1, aura:'#38bdf8', power:1.15, speed:215,
-          skill:{ name:'철산고!', button:'punch', buttonLabel:'팔(강손)', motion:'tetsuzanko', dur:0.50, lunge:440, reach:100, dmg:25 }
+          skill:{ name:'철산고!', button:'punch', buttonLabel:'오른손', motion:'tetsuzanko', dur:0.50, lunge:440, reach:100, dmg:25 }
         },
         pai: {
           id:'pai', name:'파이', style:'연권',
           skin:'#f7d5b0', hair:'#18181b', headband:'#f43f5e', top:'#be123c', stripe:'#fde047', sleeve:null, pants:'#1f2937', trim:'#fde047', shoe:'#be123c', glove:'#f7d5b0', belt:'#fde047',
           hairStyle:'ponytail', body:'suit', bulk:0.86, h:0.93, aura:'#fb7185', power:0.95, speed:265,
-          skill:{ name:'비연각!', button:'kick', buttonLabel:'발(강발)', motion:'flying_kick', dur:0.48, lunge:390, vy:-290, reach:115, dmg:22 }
+          skill:{ name:'비연각!', button:'kick', buttonLabel:'오른발', motion:'flying_kick', dur:0.48, lunge:390, vy:-290, reach:115, dmg:22 }
         },
         jacky: {
           id:'jacky', name:'잭키', style:'절권도',
           skin:'#f0b98f', hair:'#facc15', headband:null, top:'#dc2626', stripe:'#f8fafc', sleeve:null, pants:'#22232b', trim:'#dc2626', shoe:'#f1f5f9', glove:'#17171c', belt:'#d4a017',
           hairStyle:'spike', body:'jacket', bulk:1, h:1, aura:'#fbbf24', power:1.05, speed:245,
-          skill:{ name:'섬머솔트 킥!', button:'kick', buttonLabel:'발(강발)', motion:'somersault', dur:0.50, lunge:250, vy:-580, reach:110, dmg:24 }
+          skill:{ name:'섬머솔트 킥!', button:'kick', buttonLabel:'오른발', motion:'somersault', dur:0.50, lunge:250, vy:-580, reach:110, dmg:24 }
         },
         wolf: {
           id:'wolf', name:'울프', style:'레슬링',
           skin:'#e0a070', hair:'#a16207', headband:null, top:'#e0a070', stripe:null, sleeve:null, pants:'#b91c1c', trim:'#fbbf24', shoe:'#1f2937', glove:'#fbbf24', belt:'#fbbf24',
           hairStyle:'long', body:'bare', bulk:1.32, h:1.04, aura:'#f97316', power:1.25, speed:190,
-          skill:{ name:'자이언트 스윙!', button:'punch', buttonLabel:'팔(강손)', motion:'lariat_slam', dur:0.54, lunge:240, reach:92, dmg:27 }
+          skill:{ name:'자이언트 스윙!', button:'punch', buttonLabel:'오른손', motion:'lariat_slam', dur:0.54, lunge:240, reach:92, dmg:27 }
         },
         sarah: {
           id:'sarah', name:'사라', style:'마샬아츠',
           skin:'#fbe0c8', hair:'#fde047', headband:null, top:'#38bdf8', stripe:'#f8fafc', sleeve:null, pants:'#0ea5e9', trim:'#f8fafc', shoe:'#f8fafc', glove:'#f8fafc', belt:'#f8fafc',
           hairStyle:'ponytail', body:'suit', bulk:0.88, h:0.95, aura:'#22d3ee', power:1.0, speed:255,
-          skill:{ name:'라이징 니!', button:'kick', buttonLabel:'발(강발)', motion:'rising_knee', dur:0.46, lunge:320, vy:-450, reach:106, dmg:23 }
+          skill:{ name:'라이징 니!', button:'kick', buttonLabel:'오른발', motion:'rising_knee', dur:0.46, lunge:320, vy:-450, reach:106, dmg:23 }
         },
         lau: {
           id:'lau', name:'라우', style:'호권',
           skin:'#f0c090', hair:'#1c1917', headband:null, top:'#f59e0b', stripe:null, sleeve:'#f59e0b', pants:'#451a03', trim:'#fde68a', shoe:'#292524', glove:'#f0c090', belt:'#7c2d12',
           hairStyle:'short', body:'gi', bulk:1, h:0.98, aura:'#fb923c', power:1.1, speed:225,
-          skill:{ name:'호포 연격!', button:'punch', buttonLabel:'팔(강손)', motion:'tiger_palm', dur:0.48, lunge:330, reach:108, dmg:23 }
+          skill:{ name:'호포 연격!', button:'punch', buttonLabel:'오른손', motion:'tiger_palm', dur:0.48, lunge:330, reach:108, dmg:23 }
         }
       };
 
@@ -1256,17 +1256,25 @@
         if (hit) { lean = -0.35; hx = -6; }
         if (pose) { lean = 0.02; hy -= 3 + Math.sin(t * 10) * 2; }
 
+        // 해부학적 좌/우 팔다리 일치: dir===1(오른쪽 봄)이면 앞쪽이 오른손/오른발(S), dir===-1(왼쪽 봄)이면 앞쪽이 왼손/왼발(!S)
+        const useFg = (f.dir === 1) ? S : !S;
+
         if (punching && !M) {
-          lean = 0.1 + ext * 0.16;
+          lean = 0.1 + ext * (S ? 0.18 : 0.12);
           hx = ext * (S ? 8 : 4);
           if (S) ff = [24 + ext * 10, 0];
         }
         if (kicking && !M) {
           kk = (ext + 0.25) / 1.25;
-          lean = 0.05 - kk * 0.3;
-          hx = -kk * 6;
-          ff = [14 + kk * (S ? 84 : 66), -22 - kk * (S ? 60 : 36)];
-          rf = [-20, 0];
+          lean = 0.05 - kk * (S ? 0.34 : 0.24);
+          hx = -kk * (S ? 8 : 4);
+          if (useFg) {
+            ff = [14 + kk * (S ? 84 : 68), -20 - kk * (S ? 58 : 38)];
+            rf = [-20, 0];
+          } else {
+            ff = [18, 0];
+            rf = [-8 + kk * (S ? 102 : 84), -22 - kk * (S ? 60 : 42)];
+          }
         }
 
         if (M === 'tetsuzanko') {
@@ -1294,8 +1302,8 @@
 
         if (punching && !M) {
           const L = ext * (S ? 58 : 48);
-          if (S) { rh = [sx + 26 + L, sy + 2]; fh = [sx + 22, sy - 8]; }
-          else { fh = [sx + 30 + L, sy + 1]; }
+          if (useFg) { fh = [sx + 30 + L, sy + 1]; rh = [sx + 16, sy - 6]; }
+          else { rh = [sx + 26 + L, sy + 2]; fh = [sx + 20, sy - 8]; }
         }
         if (kicking && !M) {
           fh = [sx + 22, sy - 14];
@@ -1377,7 +1385,7 @@
           ctx.lineTo(k.jx - 3, k.jy);
           ctx.lineTo(k.ex - 2, k.ey);
           ctx.stroke();
-          const a = (kicking && fx === ff[0]) ? Math.atan2(k.ey - k.jy, k.ex - k.jx) : 0.1;
+          const a = (kicking && ((useFg && fx === ff[0]) || (!useFg && fx === rf[0]))) ? Math.atan2(k.ey - k.jy, k.ex - k.jx) : 0.1;
           jLimb(k.ex, k.ey, k.ex + Math.cos(a) * 17, k.ey + Math.sin(a) * 17, 6.8, 5.2, jSh(tpl.shoe, dk));
           ctx.fillStyle = jSh(tpl.trim, dk);
           ctx.beginPath();
@@ -1397,8 +1405,8 @@
           ctx.fill();
         };
 
-        leg(rf[0], rf[1], -38);
-        if (!(punching && S) && M !== 'lariat_slam' && M !== 'tiger_palm') arm(rh, -38);
+        if (!(kicking && !useFg)) leg(rf[0], rf[1], -38);
+        if (!(punching && !useFg) && M !== 'lariat_slam' && M !== 'tiger_palm') arm(rh, -38);
 
         ctx.save();
         ctx.translate(hx, hy);
@@ -1479,7 +1487,8 @@
         ctx.restore();
 
         leg(ff[0], ff[1], 0);
-        if ((punching && S) || M === 'lariat_slam' || M === 'tiger_palm') arm(rh, 0);
+        if (kicking && !useFg) leg(rf[0], rf[1], 0);
+        if ((punching && !useFg) || M === 'lariat_slam' || M === 'tiger_palm') arm(rh, 0);
         arm(fh, 0);
 
         if (((punching || kicking) && ext > 0.45) || K) {
@@ -1488,7 +1497,7 @@
           ctx.strokeStyle = K ? tpl.aura : 'rgba(255,220,140,.5)';
           ctx.globalAlpha = K ? 0.75 : 1;
           ctx.lineWidth = K ? 18 : 9;
-          const e = kicking ? ff : (S ? rh : fh);
+          const e = kicking ? (useFg ? ff : rf) : (useFg ? fh : rh);
           const o = kicking ? [hx, hy] : [sx + 4, sy];
           ctx.beginPath();
           ctx.moveTo(o[0], o[1]);
