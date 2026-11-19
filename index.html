@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="AI게임장" />
-  <link rel="icon" type="image/png" href="https://vusana-ai.github.io/aigameroom/icon.png" />
-  <link rel="apple-touch-icon" href="https://vusana-ai.github.io/aigameroom/icon.png" />
+  <link rel="icon" type="image/png" href="https://02826k.github.io/aigameroom/icon.png" />
+  <link rel="apple-touch-icon" href="https://02826k.github.io/aigameroom/icon.png" />
   <title>AI게임장 — 메인</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -77,8 +77,8 @@
     <!-- 중앙 프로필 로고 & 인사말 -->
     <header class="flex flex-col items-center text-center mb-5">
       <div class="w-24 h-24 rounded-full overflow-hidden shadow-md bg-slate-900 border-2 border-white/80 flex items-center justify-center mb-3">
-        <img src="https://vusana-ai.github.io/aigameroom/icon.png" alt="AI게임장" class="w-full h-full object-cover"
-          onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://vusana-ai.github.io/aigameroom/icon.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}" />
+        <img src="https://02826k.github.io/aigameroom/icon.png" alt="AI게임장" class="w-full h-full object-cover"
+          onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://02826k.github.io/aigameroom/icon.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}" />
         <span class="hidden w-full h-full items-center justify-center text-3xl">🎮</span>
       </div>
       <p class="text-[15px] font-bold text-[#2b2623] tracking-tight">즐거운 시간 되세요~</p>
@@ -205,7 +205,7 @@
         </li>
       </ul>
       <div class="flex flex-col gap-2">
-        <a href="https://vusana-ai.github.io/shortcut/" target="_blank" rel="noopener noreferrer"
+        <a href="https://02826k.github.io/aigameroom/shortcut/" target="_blank" rel="noopener noreferrer"
           class="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black text-center transition">
           📲 앱 설치 & 바로가기 안내 페이지
         </a>
@@ -226,22 +226,22 @@
 
   <script>
     (() => {
-      const BASE_URL = 'https://vusana-ai.github.io';
+      const BASE_URL = 'https://02826k.github.io/aigameroom';
       const API_BASE_URL = 'https://02826k.duckdns.org';
       const TOKEN_KEY = 'hero_clicker_jwt_token';
       const USER_KEY = 'hero_clicker_username';
       const GOOGLE_PLAY_SKU = 'vip_lifetime_pass';
       const VIP_PRICE = 7000;
 
-      // 게임 목록 데이터 (폴더명 = vusana-ai.github.io/<folder>/, 아이콘 = <folder>/icon.png)
+      // 게임 목록 데이터 (폴더명 = 02826k.github.io/aigameroom/<folder>/, 아이콘 = <folder>/icon.png)
       const ITEMS = [
         {
           id: 'vip',
           type: 'vip',
           title: 'VIP 가입하기 / 게임장 안내',
           subtitle: '— 결제 시스템 준비중 —',
-          icon: 'https://vusana-ai.github.io/aigameroom/icon.png',
-          fallbackIcon: `${BASE_URL}/aigameroom/icon.png`,
+          icon: 'https://02826k.github.io/aigameroom/icon.png',
+          fallbackIcon: `${BASE_URL}/icon.png`,
           emoji: '👑',
           keywords: 'vip 가입 안내 결제'
         },
@@ -465,7 +465,7 @@
 
       // 공유 버튼
       document.getElementById('shareBtn').addEventListener('click', async () => {
-        const shareUrl = `${BASE_URL}/aigameroom/`;
+        const shareUrl = `${BASE_URL}/`;
         if (navigator.share) {
           try {
             await navigator.share({
