@@ -31,6 +31,28 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
     ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
+    @keyframes grenadeFlash {
+      0% { opacity: 0.85; transform: scale(0.95); }
+      100% { opacity: 0; transform: scale(1.05); }
+    }
+    .grenade-flash-anim {
+      animation: grenadeFlash 0.65s ease-out forwards;
+    }
+    #fullscreenMain:fullscreen {
+      max-width: 100% !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      background: #020617 !important;
+      padding: 8px !important;
+      gap: 6px !important;
+      overflow: hidden !important;
+    }
+    #fullscreenMain:fullscreen #arenaWrap {
+      flex: 1 1 0% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col select-none">
@@ -57,13 +79,20 @@
     </div>
   </header>
 
-  <!-- 메인 게임 영역 -->
-  <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-2 py-2 flex flex-col gap-1.5">
-    <!-- VIP생존본능 / RANK / 전체화면 바 -->
-    <div class="flex items-center justify-end gap-1.5 shrink-0">
-      <button id="autoDodgeBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap">🛡️ VIP생존본능 OFF</button>
-      <button id="rankOpenBtn" type="button" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap">🏆 RANK</button>
-      <button id="fullscreenBtn" type="button" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[11px] font-black cursor-pointer active:scale-95 transition shadow whitespace-nowrap">⛶ 전체화면</button>
+  <!-- 메인 게임 영역 (전체화면 대상: 나가기 버튼 아래부터 게임화면 바닥까지) -->
+  <main id="fullscreenMain" class="flex-1 min-h-0 w-full max-w-md mx-auto px-2 py-2 flex flex-col gap-1.5">
+    <!-- 상단 컨트롤 바: 왼쪽 상단 수류탄 개수 표시 / 오른쪽 VIP생존본능·RANK·전체화면 -->
+    <div class="flex items-center justify-between gap-1 shrink-0">
+      <button id="grenadeBtn" type="button" class="px-2.5 py-1 rounded-lg bg-rose-950/90 hover:bg-rose-900 border border-rose-500/60 text-rose-200 text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap flex items-center gap-1 shadow">
+        <span>💣</span>
+        <span>수류탄 <span id="grenadeCountVal" class="text-amber-300">0</span>개</span>
+      </button>
+
+      <div class="flex items-center gap-1 shrink-0">
+        <button id="autoDodgeBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-[10px] sm:text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap">🛡️ VIP생존본능 OFF</button>
+        <button id="rankOpenBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 text-[10px] sm:text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap">🏆 RANK</button>
+        <button id="fullscreenBtn" type="button" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[10px] sm:text-[11px] font-black cursor-pointer active:scale-95 transition shadow whitespace-nowrap">⛶ 전체화면</button>
+      </div>
     </div>
 
     <div class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-2 flex items-center justify-between shadow-xl shrink-0">
@@ -84,8 +113,13 @@
     </div>
 
     <!-- 게임 캔버스 아레나 -->
-    <div class="relative w-full flex-1 min-h-0 bg-slate-950 border-2 border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
+    <div id="arenaWrap" class="relative w-full flex-1 min-h-0 bg-slate-950 border-2 border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
       <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+      <!-- 수류탄 폭발 플래시 이펙트 -->
+      <div id="grenadeExplosionOverlay" class="hidden pointer-events-none absolute inset-0 bg-gradient-to-b from-amber-300/70 via-orange-500/55 to-rose-600/70 flex items-center justify-center z-25 grenade-flash-anim">
+        <div class="text-2xl font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">💥 수류탄 폭발! 전멸!</div>
+      </div>
 
       <!-- 보스 경고 배너 -->
       <div id="bossAlert" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-rose-600/95 border border-rose-300 px-4 py-1.5 rounded-full text-xs font-black text-white shadow-lg animate-bounce z-20">
@@ -111,9 +145,9 @@
       </div>
 
       <!-- 레벨업 업그레이드 선택 팝업 -->
-      <div id="upgradeModal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 text-center z-40 hidden">
-        <h2 class="text-lg font-black text-amber-300">🎉 레벨 업! 무기 및 능력 강화</h2>
-        <div id="upgradeOptions" class="flex flex-col gap-2.5 w-full max-w-xs mt-2"></div>
+      <div id="upgradeModal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-2.5 p-4 text-center z-40 hidden">
+        <h2 class="text-base sm:text-lg font-black text-amber-300">🎉 레벨 업! 무기 및 능력 강화</h2>
+        <div id="upgradeOptions" class="flex flex-col gap-2 w-full max-w-sm mt-1"></div>
       </div>
 
     </div>
@@ -125,7 +159,7 @@
       <div class="flex items-center justify-between gap-2">
         <div>
           <h2 class="text-sm sm:text-base font-black text-amber-300">🏆 좀비 서바이벌 TOP 10</h2>
-          <div class="text-[10px] text-slate-400">최고 점수 기준 · 전화번호 중간자리 보호</div>
+          <div class="text-[10px] text-slate-400">최고 점수 &amp; 도달 스테이지 · 전화번호 중간자리 보호</div>
         </div>
         <div class="flex items-center gap-1.5">
           <button id="refreshRankingBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄 새로고침</button>
@@ -230,7 +264,7 @@
     }
 
     const GAME_ID = 'zombie_survival';
-        const ADMIN_VIP_PHONES = [];
+    const ADMIN_VIP_PHONES = [];
     const TOKEN_KEY = 'hero_clicker_jwt_token';
     const USER_KEY = 'hero_clicker_username';
     const AUDIO_PREF_KEY = 'zombie_survival_audio_v1';
@@ -274,6 +308,7 @@
       isVip: localStorage.getItem('hero_clicker_is_vip') === 'true',
       autoDodge: false,
       bestScore: 0,
+      bestStage: 1,
       serverSaveData: null
     };
     let isRegisterMode = false;
@@ -341,6 +376,14 @@
           g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
           o.connect(g); g.connect(c.destination);
           o.start(now); o.stop(now + 0.25);
+        } else if (type === 'boom') {
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(140, now);
+          o.frequency.exponentialRampToValueAtTime(30, now + 0.55);
+          g.gain.setValueAtTime(0.18, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.56);
+          o.connect(g); g.connect(c.destination);
+          o.start(now); o.stop(now + 0.58);
         } else if (type === 'gameover') {
           o.type = 'sawtooth';
           o.frequency.setValueAtTime(220, now);
@@ -430,22 +473,35 @@
       }, 2200);
     }
 
-    function enterPortraitFullscreen() {
-      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
+    const fullscreenMain = document.getElementById('fullscreenMain');
+    function lockPortrait() {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('portrait').catch(() => {});
       }
     }
 
-    function exitFullscreenRestore() {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+    async function enterPortraitFullscreen() {
+      try {
+        if (!document.fullscreenElement && fullscreenMain && fullscreenMain.requestFullscreen) {
+          await fullscreenMain.requestFullscreen();
+        }
+        lockPortrait();
+      } catch (e) {
+        showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
       }
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('portrait').catch(() => {});
-      }
+      setTimeout(resizeCanvas, 80);
+      setTimeout(resizeCanvas, 250);
+    }
+
+    async function exitFullscreenRestore() {
+      try {
+        lockPortrait();
+        if (document.fullscreenElement && document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      } catch (e) {}
+      setTimeout(resizeCanvas, 80);
+      setTimeout(resizeCanvas, 250);
     }
 
     const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -456,7 +512,9 @@
       });
       document.addEventListener('fullscreenchange', () => {
         fullscreenBtn.textContent = document.fullscreenElement ? '✕ 축소' : '⛶ 전체화면';
+        lockPortrait();
         setTimeout(resizeCanvas, 80);
+        setTimeout(resizeCanvas, 250);
       });
     }
 
@@ -506,6 +564,11 @@
     let bossSpawned = false;
     let spawnTimer = null;
 
+    // 5단계 업그레이드 상수
+    const MAX_UPGRADE_STEP = 5;
+    // 속사 5단계 쿨다운 테이블 (0단계: 28 -> 5단계: 8)
+    const RAPID_FIRE_COOLDOWNS = [28, 23, 18, 14, 11, 8];
+
     let player = {
       x: canvas.width / 2,
       y: canvas.height / 2,
@@ -517,17 +580,88 @@
       exp: 0,
       maxExp: 30,
       damage: 18,
-      attackSpeed: 16,
+      rapidLevel: 0,        // 0 ~ 5단계
+      attackSpeed: RAPID_FIRE_COOLDOWNS[0],
       attackCooldown: 0,
       range: 210,
       facingAngle: 0,
-      multiShot: 1
+      multiShotLevel: 0,    // 0 ~ 5단계 (0단계=기본 1발, 5단계=1+5=6발)
+      multiShot: 1,
+      grenades: 0
     };
 
     let zombies = [];
     let bullets = [];
     let gems = [];
     let particles = [];
+
+    function updateGrenadeUI() {
+      const el = document.getElementById('grenadeCountVal');
+      if (el) el.textContent = player.grenades;
+    }
+
+    function useGrenade() {
+      if (gameState !== 'PLAY') {
+        showToast('전투 중에만 수류탄을 사용할 수 있습니다.');
+        return;
+      }
+      if (player.grenades <= 0) {
+        showToast('보유한 수류탄이 없습니다! 레벨업에서 획득하세요.');
+        return;
+      }
+      player.grenades--;
+      updateGrenadeUI();
+      playSfx('boom');
+
+      // 폭발 시각 효과
+      const expEl = document.getElementById('grenadeExplosionOverlay');
+      if (expEl) {
+        expEl.classList.remove('hidden');
+        expEl.classList.remove('grenade-flash-anim');
+        void expEl.offsetWidth;
+        expEl.classList.add('grenade-flash-anim');
+        setTimeout(() => expEl.classList.add('hidden'), 680);
+      }
+
+      // 화면의 모든 적 제거 처리
+      let killedCount = 0;
+      let bossKilled = false;
+
+      for (let i = zombies.length - 1; i >= 0; i--) {
+        const z = zombies[i];
+        for (let p = 0; p < 8; p++) {
+          particles.push({
+            x: z.x, y: z.y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 20,
+            color: z.isBoss ? '#f43f5e' : '#f97316'
+          });
+        }
+        score += z.isBoss ? 500 : 15;
+        gems.push({ x: z.x, y: z.y, val: z.expVal, radius: z.isBoss ? 10 : 6 });
+        if (z.isBoss) bossKilled = true;
+        else killedCount++;
+      }
+
+      zombies = [];
+      document.getElementById('scoreVal').textContent = score.toLocaleString();
+      if (score > userState.bestScore) userState.bestScore = score;
+
+      if (bossKilled) {
+        nextStage();
+        return;
+      }
+
+      stageKills += killedCount;
+      if (stageKills >= stageTargetKills && !bossSpawned) {
+        spawnZombie(true);
+      }
+      updateStageUI();
+      showToast(`💣 수류탄 투척! 적 ${killedCount}마리 일소!`);
+    }
+
+    document.getElementById('grenadeBtn').addEventListener('click', useGrenade);
 
     // ==========================================
     // 1. 통합 DB 로그인 / 로그아웃 / 저장 로직
@@ -537,7 +671,6 @@
         document.getElementById('vipBadge').classList.remove('hidden');
         if (gameState === 'PLAY') {
           player.maxHp = Math.max(player.maxHp, 150);
-          player.multiShot = Math.max(2, player.multiShot);
         }
       } else {
         userState.autoDodge = false;
@@ -585,10 +718,13 @@
           : {};
         baseSave.isVip = Boolean(baseSave.isVip || userState.isVip);
         const bestZombieScore = Math.max(score, userState.bestScore, Number(baseSave.zombieSurvival?.score || 0));
+        const bestZombieStage = Math.max(stage, userState.bestStage, Number(baseSave.zombieSurvival?.stage || 1));
         userState.bestScore = bestZombieScore;
+        userState.bestStage = bestZombieStage;
+        baseSave.stage = bestZombieStage;
         baseSave.zombieSurvival = {
           score: bestZombieScore,
-          stage: Math.max(stage, Number(baseSave.zombieSurvival?.stage || 1)),
+          stage: bestZombieStage,
           updatedAt: new Date().toISOString()
         };
         userState.serverSaveData = baseSave;
@@ -599,7 +735,7 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${userState.token}`
           },
-          body: JSON.stringify({ gameId: GAME_ID, score: bestZombieScore, saveData: baseSave })
+          body: JSON.stringify({ gameId: GAME_ID, score: bestZombieScore, stage: bestZombieStage, saveData: baseSave })
         });
         if (res.ok) fetchAndRenderRanking();
         if (res.status === 401 || res.status === 403) {
@@ -628,6 +764,7 @@
         userState.serverSaveData = data.saveData || {};
         userState.isVip = Boolean(data.isVip || userState.serverSaveData.isVip || isAdminAccount(userState.username));
         userState.bestScore = Math.max(userState.bestScore, Number(userState.serverSaveData?.zombieSurvival?.score || 0));
+        userState.bestStage = Math.max(userState.bestStage, Number(userState.serverSaveData?.zombieSurvival?.stage || userState.serverSaveData?.stage || 1));
         syncSharedAuth(userState.token, userState.username, userState.isVip);
         applyVipUI();
       } catch (e) {
@@ -717,6 +854,7 @@
         bgmEnabled: true,
         isVip: isAdminAccount(fullPhoneId),
         autoClickEnabled: false,
+        stage,
         zombieSurvival: { score, stage }
       };
 
@@ -748,6 +886,7 @@
           result.isVip || userState.serverSaveData.isVip || isAdminAccount(userState.username)
         );
         userState.bestScore = Math.max(userState.bestScore, Number(userState.serverSaveData?.zombieSurvival?.score || 0));
+        userState.bestStage = Math.max(userState.bestStage, Number(userState.serverSaveData?.zombieSurvival?.stage || userState.serverSaveData?.stage || 1));
 
         syncSharedAuth(userState.token, userState.username, userState.isVip);
 
@@ -815,10 +954,10 @@
       if (!autoDodgeBtn) return;
       if (userState.autoDodge) {
         autoDodgeBtn.textContent = '🛡️ VIP생존본능 ON';
-        autoDodgeBtn.className = 'px-2.5 py-1 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white text-[11px] font-black shadow transition active:scale-95 cursor-pointer whitespace-nowrap';
+        autoDodgeBtn.className = 'px-2 py-1 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white text-[10px] sm:text-[11px] font-black shadow transition active:scale-95 cursor-pointer whitespace-nowrap';
       } else {
         autoDodgeBtn.textContent = '🛡️ VIP생존본능 OFF';
-        autoDodgeBtn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-[11px] font-black transition active:scale-95 cursor-pointer whitespace-nowrap';
+        autoDodgeBtn.className = 'px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-[10px] sm:text-[11px] font-black transition active:scale-95 cursor-pointer whitespace-nowrap';
       }
     }
     const vipNoticeModal = document.getElementById('vipNoticeModal');
@@ -871,7 +1010,13 @@
     canvas.addEventListener('pointercancel', resetTouch);
 
     let keys = {};
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keydown', e => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (k === 'g' && !e.repeat && gameState === 'PLAY') {
+        useGrenade();
+      }
+    });
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
     function updateStageUI() {
@@ -905,13 +1050,20 @@
       player.maxHp = userState.isVip ? 150 : 100;
       player.hp = player.maxHp;
       player.damage = userState.isVip ? 24 : 18;
-      player.multiShot = userState.isVip ? 2 : 1;
-      player.attackSpeed = 16;
+      // 처음에 총을 1발 쏘는 것으로 시작 +5까지 업그레이드
+      player.multiShotLevel = 0;
+      player.multiShot = 1;
+      // 속사도 5단계까지만, 처음에 느리게 시작
+      player.rapidLevel = 0;
+      player.attackSpeed = RAPID_FIRE_COOLDOWNS[0];
+      player.grenades = 0;
 
       document.getElementById('scoreVal').textContent = '0';
       document.getElementById('levelVal').textContent = '1';
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('bossAlert').classList.add('hidden');
+      document.getElementById('upgradeModal').classList.add('hidden');
+      updateGrenadeUI();
       updateStageUI();
 
       if (audioPrefs.bgmEnabled) startBGM();
@@ -969,6 +1121,7 @@
     function nextStage() {
       gameState = 'STAGE_CLEAR';
       playSfx('levelup');
+      if (stage + 1 > userState.bestStage) userState.bestStage = stage + 1;
       syncUserToServer();
       const clearBanner = document.getElementById('stageClearAlert');
       document.getElementById('nextStageText').textContent = `STAGE ${stage + 1} 구역으로 진입합니다!`;
@@ -977,6 +1130,7 @@
       setTimeout(() => {
         clearBanner.classList.add('hidden');
         stage++;
+        if (stage > userState.bestStage) userState.bestStage = stage;
         stageKills = 0;
         stageTargetKills = 15 + stage * 5;
         bossSpawned = false;
@@ -1052,7 +1206,7 @@
         player.facingAngle = Math.atan2(nearest.y - player.y, nearest.x - player.x);
         if (player.attackCooldown <= 0) {
           for (let i = 0; i < player.multiShot; i++) {
-            let spread = (i - (player.multiShot - 1) / 2) * 0.14;
+            let spread = (i - (player.multiShot - 1) / 2) * 0.13;
             let angle = player.facingAngle + spread;
             bullets.push({
               x: player.x + Math.cos(angle) * 18,
@@ -1114,7 +1268,7 @@
               document.getElementById('scoreVal').textContent = score.toLocaleString();
               if (score > userState.bestScore) {
                 userState.bestScore = score;
-                      }
+              }
               playSfx('kill');
               gems.push({ x: z.x, y: z.y, val: z.expVal, radius: z.isBoss ? 10 : 6 });
               zombies.splice(zIdx, 1);
@@ -1159,6 +1313,23 @@
       }
     }
 
+    function buildStepBoxesHtml(currentStep, maxStep, isMax) {
+      let boxes = '<div class="flex items-center gap-1">';
+      for (let i = 1; i <= maxStep; i++) {
+        const filled = i <= currentStep;
+        boxes += `<span class="w-3.5 h-3.5 rounded-[3px] border ${
+          filled
+            ? 'bg-amber-400 border-amber-200 shadow-[0_0_6px_rgba(251,191,36,0.75)]'
+            : 'bg-slate-950 border-slate-600'
+        }"></span>`;
+      }
+      boxes += '</div>';
+      if (isMax) {
+        boxes += '<span class="text-[10px] font-black text-emerald-300 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.5 rounded mt-1">업그레이드 완료</span>';
+      }
+      return boxes;
+    }
+
     function levelUp() {
       playSfx('levelup');
       player.level++;
@@ -1172,18 +1343,96 @@
       const container = document.getElementById('upgradeOptions');
       container.innerHTML = '';
 
+      const isMultiMax = player.multiShotLevel >= MAX_UPGRADE_STEP;
+      const isRapidMax = player.rapidLevel >= MAX_UPGRADE_STEP;
+
       const options = [
-        { title: '🔥 탄환 화력 강화 (+10)', desc: '총알의 기본 데미지가 상승합니다.', action: () => { player.damage += 10; } },
-        { title: '🔫 멀티 샷 (+1발)', desc: '동시에 발사되는 총알 수가 늘어납니다.', action: () => { player.multiShot = Math.min(5, player.multiShot + 1); } },
-        { title: '⚡ 속사 개조', desc: '연사 속도가 대폭 빨라집니다.', action: () => { player.attackSpeed = Math.max(5, player.attackSpeed - 3); } },
-        { title: '💖 응급 치료 키트', desc: '체력을 100% 회복하고 최대 체력이 증가합니다.', action: () => { player.maxHp += 30; player.hp = player.maxHp; } }
+        {
+          id: 'multi',
+          title: `🔫 멀티 샷 (+${player.multiShotLevel}/${MAX_UPGRADE_STEP})`,
+          desc: isMultiMax
+            ? `현재 총 ${player.multiShot}발 발사 (최대 단계 달성)`
+            : `동시 발사 탄환이 1발 추가됩니다. (현재 ${player.multiShot}발 → ${player.multiShot + 1}발)`,
+          isMax: isMultiMax,
+          hasGauge: true,
+          currentStep: player.multiShotLevel,
+          maxStep: MAX_UPGRADE_STEP,
+          action: () => {
+            if (player.multiShotLevel >= MAX_UPGRADE_STEP) return;
+            player.multiShotLevel++;
+            player.multiShot = 1 + player.multiShotLevel;
+          }
+        },
+        {
+          id: 'rapid',
+          title: `⚡ 속사 개조 (${player.rapidLevel}/${MAX_UPGRADE_STEP}단계)`,
+          desc: isRapidMax
+            ? '최고 연사 속도에 도달했습니다.'
+            : '연사 속도가 한 단계 빨라집니다.',
+          isMax: isRapidMax,
+          hasGauge: true,
+          currentStep: player.rapidLevel,
+          maxStep: MAX_UPGRADE_STEP,
+          action: () => {
+            if (player.rapidLevel >= MAX_UPGRADE_STEP) return;
+            player.rapidLevel++;
+            player.attackSpeed = RAPID_FIRE_COOLDOWNS[player.rapidLevel];
+          }
+        },
+        {
+          id: 'damage',
+          title: '🔥 탄환 화력 강화 (+10)',
+          desc: `총알의 기본 데미지가 상승합니다. (현재 ${player.damage})`,
+          isMax: false,
+          hasGauge: false,
+          action: () => { player.damage += 10; }
+        },
+        {
+          id: 'heal',
+          title: '💖 응급 치료 키트',
+          desc: '체력을 100% 회복하고 최대 체력이 +30 증가합니다.',
+          isMax: false,
+          hasGauge: false,
+          action: () => { player.maxHp += 30; player.hp = player.maxHp; }
+        },
+        {
+          id: 'grenade',
+          title: '💣 수류탄 (+1개)',
+          desc: `사용 시 화면의 모든 적을 즉시 제거합니다. (보유: ${player.grenades}개)`,
+          isMax: false,
+          hasGauge: false,
+          action: () => {
+            player.grenades++;
+            updateGrenadeUI();
+            showToast(`💣 수류탄 획득! (보유 ${player.grenades}개)`);
+          }
+        }
       ];
 
-      options.sort(() => 0.5 - Math.random()).slice(0, 3).forEach(opt => {
-        let btn = document.createElement('button');
-        btn.className = 'w-full p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-left transition cursor-pointer';
-        btn.innerHTML = `<div class="text-xs font-black text-amber-300">${opt.title}</div><div class="text-[10px] text-slate-400 mt-0.5">${opt.desc}</div>`;
+      const picked = options.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+      picked.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = Boolean(opt.isMax);
+        btn.className = opt.isMax
+          ? 'w-full p-2.5 bg-slate-900/60 border border-slate-700/70 rounded-xl text-left opacity-70 cursor-not-allowed flex items-center justify-between gap-2'
+          : 'w-full p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/70 rounded-xl text-left transition active:scale-98 cursor-pointer flex items-center justify-between gap-2';
+
+        const rightSideHtml = opt.hasGauge
+          ? `<div class="flex flex-col items-end shrink-0">${buildStepBoxesHtml(opt.currentStep, opt.maxStep, opt.isMax)}</div>`
+          : '';
+
+        btn.innerHTML = `
+          <div class="min-w-0">
+            <div class="text-xs font-black ${opt.isMax ? 'text-slate-400' : 'text-amber-300'} truncate">${opt.title}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">${opt.desc}</div>
+          </div>
+          ${rightSideHtml}
+        `;
+
         btn.onclick = () => {
+          if (opt.isMax) return;
           opt.action();
           modal.classList.add('hidden');
           gameState = 'PLAY';
@@ -1198,6 +1447,7 @@
       stopBGM();
       playSfx('gameover');
       clearInterval(spawnTimer);
+      if (stage > userState.bestStage) userState.bestStage = stage;
       syncUserToServer();
       document.getElementById('overlayTitle').textContent = "생존 실패!";
       document.getElementById('overlayDesc').textContent = `도달 스테이지: STAGE ${stage} | 최종 점수: ${score}점`;
@@ -1339,9 +1589,10 @@
         if (!res.ok) throw new Error();
         const rankings = (data.rankings || []).slice(0, 10);
         if (data.myRank) {
-          myEl.textContent = `${data.totalPlayers || rankings.length}명 중 ${data.myRank.rank}위 · ${(data.myRank.score || 0).toLocaleString()}점`;
+          const myStage = data.myRank.stage ?? data.myRank.saveData?.zombieSurvival?.stage ?? data.myRank.saveData?.stage ?? userState.bestStage ?? 1;
+          myEl.textContent = `${data.totalPlayers || rankings.length}명 중 ${data.myRank.rank}위 · STAGE ${myStage} · ${(data.myRank.score || 0).toLocaleString()}점`;
         } else if (userState.loggedIn) {
-          myEl.textContent = '플레이 완료 시 순위 자동 등록';
+          myEl.textContent = `최고 STAGE ${userState.bestStage} · 플레이 완료 시 순위 등록`;
         } else {
           myEl.textContent = '로그인 후 플레이 시 등록';
         }
@@ -1351,12 +1602,16 @@
           return;
         }
         rankings.forEach(it => {
+          const stg = it.stage ?? it.saveData?.zombieSurvival?.stage ?? it.saveData?.stage ?? (it.isMe ? userState.bestStage : 1);
           const row = document.createElement('div');
           row.className = 'rounded-lg px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-[11px]' + (it.isMe ? ' ring-1 ring-rose-400' : '');
           row.innerHTML =
-            '<div class="min-w-0 font-bold text-slate-100 truncate">' +
-              it.rank + '. ' + maskPhoneMiddle(it.maskedName) +
-              (it.isMe ? ' <span class="text-rose-300 text-[10px]">(나)</span>' : '') +
+            '<div class="min-w-0 flex items-center gap-1.5">' +
+              '<span class="font-bold text-slate-100 truncate">' +
+                it.rank + '. ' + maskPhoneMiddle(it.maskedName) +
+                (it.isMe ? ' <span class="text-rose-300 text-[10px]">(나)</span>' : '') +
+              '</span>' +
+              '<span class="px-1.5 py-0.5 rounded bg-rose-950/90 border border-rose-500/40 text-rose-300 text-[10px] font-extrabold shrink-0">STAGE ' + stg + '</span>' +
             '</div>' +
             '<span class="font-black text-amber-300 shrink-0">' + (it.score || 0).toLocaleString() + ' 점</span>';
           box.appendChild(row);
