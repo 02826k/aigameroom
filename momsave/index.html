@@ -166,41 +166,16 @@
   <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/30">
     <div class="max-w-5xl mx-auto flex flex-col gap-2">
       <!-- 1단 -->
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0 flex-wrap">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
           <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400/25 to-amber-600/25 text-amber-300 font-extrabold text-sm border border-amber-500/40 shadow-inner shrink-0">🛸</span>
-          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">엄마 구하기 <span class="text-amber-400">: 외계인 침공</span></h1>
-
-          <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0">
-            👤 게스트
-          </span>
-
-          <button id="vipOpenBtn" type="button" title="VIP 특전 보기"
-            class="vip-btn-glow px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white border border-amber-300/80 transition active:scale-95 flex items-center gap-1 cursor-pointer shrink-0">
-            <span>👑</span>
-            <span id="vipHeaderBtnLabel">VIP</span>
-          </button>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">엄마 구하기 <span class="text-amber-400">: 외계인 침공</span></h1>
         </div>
 
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-amber-500/15 border border-amber-500/40 text-amber-300 flex items-center gap-1 shadow-sm">
-            <span>🏆</span>
-            <span id="highScoreDisplay">0</span>
-          </div>
-
-          <button id="serverSaveGoldBtn" type="button" title="클릭하여 서버 로그인 및 데이터 영구 저장"
-            class="group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-3.5 h-3.5 shrink-0 gold-bar-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.5 7.5L8.5 5H15.5L18.5 7.5L21 17.5H3L5.5 7.5Z" fill="#78350F" stroke="#451A03" stroke-width="1.4" stroke-linejoin="round"/>
-              <path d="M8.5 5H15.5L17 9.5H7L8.5 5Z" fill="#FEF08A"/>
-              <path d="M7 9.5H17L19.2 16.5H4.8L7 9.5Z" fill="#F59E0B"/>
-              <path d="M8.8 6.2H15.2L16.1 8.6H7.9L8.8 6.2Z" fill="#FFFFFF" fill-opacity="0.55"/>
-            </svg>
-            <span id="serverSaveBtnLabel">로그인</span>
-          </button>
-
-          <button id="logoutBtn" type="button" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer">
-            로그아웃
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="authHeaderBtn" type="button"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap">
+            로그인
           </button>
         </div>
       </div>
@@ -209,11 +184,14 @@
       <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
 
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-          <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
+          <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer">
             🎵 배경음 ON
           </button>
-          <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
+          <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer">
             🔊 효과음 ON
+          </button>
+          <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer">
+            나가기
           </button>
         </div>
       </div>
@@ -253,12 +231,12 @@
           <p id="overlaySub" class="text-xs sm:text-sm text-slate-300 max-w-md mt-2 leading-relaxed">
             학교를 탈출해 외계인에게 납치된 엄마를 구출하라!
           </p>
-          <div class="mt-6 flex items-center justify-center gap-2.5 flex-wrap">
-            <button id="overlayStartBtn" type="button" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 active:scale-95 transition cursor-pointer">
+          <div class="mt-6 w-full max-w-xs flex items-center justify-center gap-2.5">
+            <button id="overlayStartBtn" type="button" class="flex-1 py-3.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/25 active:scale-95 transition cursor-pointer whitespace-nowrap">
               ▶ 구출 작전 시작
             </button>
-            <button id="overlayLobbyBtn" type="button" class="hidden px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 font-black text-sm sm:text-base shadow-lg active:scale-95 transition cursor-pointer">
-              🏠 로비로
+            <button id="overlayLobbyBtn" type="button" class="hidden flex-1 py-3.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 font-black text-sm shadow-lg active:scale-95 transition cursor-pointer whitespace-nowrap">
+              나가기
             </button>
           </div>
         </div>
@@ -443,6 +421,8 @@
       let state = {
         highScore: 0,
         bestSector: 1,
+        bestTime: null,
+        lastClearTime: null,
         soundEnabled: true,
         bgmEnabled: true,
         isVip: false
@@ -478,7 +458,8 @@
               gameId: GAME_ID,
               saveData: state,
               score: state.highScore,
-              bestSector: state.bestSector
+              bestSector: state.bestSector,
+              clearTime: state.bestTime
             })
           });
           if (res.status === 401 || res.status === 403) { handleLogout(true); return; }
@@ -501,6 +482,9 @@
             const sd = typeof data.saveData === 'string' ? JSON.parse(data.saveData) : data.saveData;
             state.highScore = Math.max(state.highScore, Number(sd.highScore || 0));
             state.bestSector = Math.max(state.bestSector, Number(sd.bestSector || 1));
+            if (typeof sd.bestTime === 'number' && sd.bestTime > 0) {
+              state.bestTime = state.bestTime ? Math.min(state.bestTime, sd.bestTime) : sd.bestTime;
+            }
             state.isVip = Boolean(data.isVip || sd.isVip || state.isVip);
             saveState(false);
             updateHeaderUI();
@@ -713,6 +697,7 @@
 
       let running = false;
       let score = 0;
+      let elapsedTime = 0;
       let sector = 1;
       let spawnTimer = 0;
       let screenShake = 0;
@@ -865,6 +850,7 @@
 
       function resetMatch() {
         score = 0;
+        elapsedTime = 0;
         spawnTimer = 0.5;
         screenShake = 0;
         rescueSequence = false;
@@ -886,8 +872,21 @@
         getAC();
         resetMatch();
         running = true;
+        document.getElementById('overlayLobbyBtn').classList.add('hidden');
         document.getElementById('gameOverlay').classList.add('hidden');
         if (state.bgmEnabled) startBGM();
+      }
+
+      function returnToMomLobby() {
+        running = false;
+        stopBGM();
+        document.getElementById('overlayIcon').textContent = '🛸';
+        document.getElementById('overlayTitle').textContent = '엄마 구하기';
+        document.getElementById('overlayTitle').className = 'text-2xl sm:text-3xl font-black text-amber-400 tracking-tight';
+        document.getElementById('overlaySub').textContent = '학교를 탈출해 외계인에게 납치된 엄마를 구출하라!';
+        document.getElementById('overlayStartBtn').textContent = '▶ 구출 작전 시작';
+        document.getElementById('overlayLobbyBtn').classList.add('hidden');
+        document.getElementById('gameOverlay').classList.remove('hidden');
       }
 
       function gameOver() {
@@ -903,7 +902,7 @@
         document.getElementById('overlayTitle').textContent = '작전 실패';
         document.getElementById('overlayTitle').className = 'text-2xl sm:text-3xl font-black text-rose-400 tracking-tight';
         document.getElementById('overlaySub').innerHTML = `최종 점수: <strong class="text-amber-300 text-base">${finalScore.toLocaleString()}점</strong>`;
-        document.getElementById('overlayStartBtn').textContent = '🔄 다시 도전하기';
+        document.getElementById('overlayStartBtn').textContent = '다시 도전하기';
         document.getElementById('overlayLobbyBtn').classList.remove('hidden');
         document.getElementById('gameOverlay').classList.remove('hidden');
       }
@@ -916,6 +915,10 @@
         const finalScore = Math.floor(score);
         if (finalScore > state.highScore) state.highScore = finalScore;
         state.bestSector = 4;
+        state.lastClearTime = Number(elapsedTime.toFixed(1));
+        if (!state.bestTime || state.lastClearTime < state.bestTime) {
+          state.bestTime = state.lastClearTime;
+        }
         saveState(true);
         updateHeaderUI();
 
@@ -1124,6 +1127,7 @@
           }
         }
 
+        if (!rescueSequence) elapsedTime += dt;
         if (screenShake > 0) screenShake = Math.max(0, screenShake - dt * 30);
         if (player.fireCd > 0) player.fireCd = Math.max(0, player.fireCd - dt);
         if (player.recoil > 0) player.recoil = Math.max(0, player.recoil - dt * 36);
@@ -2031,6 +2035,43 @@
         ctx.restore();
       }
 
+      function formatTimeSec(sec) {
+        const s = Math.max(0, Number(sec || 0));
+        const m = Math.floor(s / 60);
+        const rem = Math.floor(s % 60);
+        return `${String(m).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+      }
+
+      // 게임 화면 우측 상단 골드(점수) & 타임 HUD 렌더링
+      function renderTopRightHud() {
+        ctx.save();
+        const boxW = 192;
+        const boxH = 42;
+        const boxX = CAM_W - boxW - 14;
+        const boxY = 12;
+
+        ctx.fillStyle = 'rgba(9, 13, 22, 0.84)';
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.55)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '900 12px "Inter", "Noto Sans KR", sans-serif';
+        ctx.textBaseline = 'middle';
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fde047';
+        ctx.fillText(`🏆 ${Math.floor(score).toLocaleString()}`, boxX + 10, boxY + boxH / 2);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#7dd3fc';
+        ctx.fillText(`⏱ ${formatTimeSec(elapsedTime)}`, boxX + boxW - 10, boxY + boxH / 2);
+
+        ctx.restore();
+      }
+
       // 게임 시작/스테이지 진입 시 화면 중앙 STAGE 1 배너 렌더링
       function renderCenterStageBanner() {
         if (!stageBanner.active) return;
@@ -2409,6 +2450,7 @@
         ctx.restore();
 
         renderTopLeftHud();
+        renderTopRightHud();
         renderCenterStageBanner();
 
         ctx.restore();
@@ -2443,7 +2485,8 @@
       // 5. HUD & 입력 이벤트 바인딩 (기존 게임패드)
       // ==========================================
       function updateHud() {
-        document.getElementById('highScoreDisplay').textContent = Math.floor(score).toLocaleString();
+        const hsEl = document.getElementById('highScoreDisplay');
+        if (hsEl) hsEl.textContent = Math.floor(score).toLocaleString();
         document.getElementById('waveDisplay').textContent = SECTOR_INFO[sector].title;
 
         document.querySelectorAll('.weapon-slot-btn').forEach(btn => {
@@ -2477,18 +2520,28 @@
           if (!document.fullscreenElement) {
             await fullscreenStage.requestFullscreen();
             fullscreenBtn.textContent = '✕ 축소';
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(() => {});
+            }
           } else {
             await document.exitFullscreen();
             fullscreenBtn.textContent = '⛶ 전체화면';
+            if (screen.orientation && screen.orientation.unlock) {
+              try { screen.orientation.unlock(); } catch (err) {}
+            }
           }
         } catch (e) {
           showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
         }
-        setTimeout(resizeCanvas, 100);
+        setTimeout(resizeCanvas, 120);
       });
       document.addEventListener('fullscreenchange', () => {
-        fullscreenBtn.textContent = document.fullscreenElement ? '✕ 축소' : '⛶ 전체화면';
-        requestAnimationFrame(() => setTimeout(resizeCanvas, 100));
+        const isFs = Boolean(document.fullscreenElement);
+        fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
+        if (!isFs && screen.orientation && screen.orientation.unlock) {
+          try { screen.orientation.unlock(); } catch (err) {}
+        }
+        requestAnimationFrame(() => setTimeout(resizeCanvas, 120));
       });
 
       window.addEventListener('orientationchange', () => {
@@ -2645,7 +2698,8 @@
                   <span class="font-bold text-slate-100 truncate">${maskPhoneMiddle(item.maskedName)}</span>
                   ${item.isMe ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">나</span>' : ''}
                 </div>
-                <div class="text-right shrink-0">
+                <div class="text-right shrink-0 flex items-center gap-2">
+                  ${(item.clearTime || item.saveData?.bestTime) ? `<span class="text-[10px] font-bold text-sky-300">⏱ ${formatTimeSec(item.clearTime || item.saveData?.bestTime)}</span>` : ''}
                   <span class="font-black text-emerald-400">${Number(item.score || 0).toLocaleString()}점</span>
                 </div>
               </div>
@@ -2657,22 +2711,20 @@
       }
 
       function updateHeaderUI() {
-        document.getElementById('highScoreDisplay').textContent = state.highScore.toLocaleString();
-        document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP 적용중' : 'VIP';
-
-        const badge = document.getElementById('userBadge');
-        const loginBtn = document.getElementById('serverSaveGoldBtn');
-        const outBtn = document.getElementById('logoutBtn');
+        const btn = document.getElementById('authHeaderBtn');
+        if (!btn) return;
+        const isVip = state.isVip || localStorage.getItem('hero_clicker_is_vip') === 'true';
         if (authToken && currentUsername) {
-          badge.textContent = `📱 ${maskPhoneMiddle(currentUsername)}`;
-          badge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-amber-500/15 border border-amber-500/40 text-amber-300 shrink-0';
-          loginBtn.classList.add('hidden');
-          outBtn.classList.remove('hidden');
+          if (isVip) {
+            btn.textContent = '👑 VIP 로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/70 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
+          } else {
+            btn.textContent = '로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
+          }
         } else {
-          badge.textContent = '👤 게스트';
-          badge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0';
-          loginBtn.classList.remove('hidden');
-          outBtn.classList.add('hidden');
+          btn.textContent = '로그인';
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
         }
       }
 
@@ -2704,32 +2756,55 @@
       });
 
       document.getElementById('overlayStartBtn').addEventListener('click', startGame);
-      document.getElementById('overlayLobbyBtn').addEventListener('click', () => {
-        window.location.href = 'https://02826k.github.io/aigameroom/';
-      });
+      document.getElementById('overlayLobbyBtn').addEventListener('click', returnToMomLobby);
       document.getElementById('refreshRankingBtn').addEventListener('click', () => { fetchRanking(); showToast('🏆 랭킹을 갱신했습니다.'); });
+
+      function updateAudioButtons() {
+        const bgmBtn = document.getElementById('bgmToggleBtn');
+        const sfxBtn = document.getElementById('soundToggleBtn');
+        if (bgmBtn) {
+          bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+          bgmBtn.className = state.bgmEnabled
+            ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer'
+            : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+        }
+        if (sfxBtn) {
+          sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+          sfxBtn.className = state.soundEnabled
+            ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer'
+            : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+        }
+      }
+      updateAudioButtons();
 
       document.getElementById('bgmToggleBtn').addEventListener('click', () => {
         state.bgmEnabled = !state.bgmEnabled;
         saveState(false);
-        document.getElementById('bgmToggleBtn').textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+        updateAudioButtons();
         if (state.bgmEnabled && running) startBGM(); else stopBGM();
       });
       document.getElementById('soundToggleBtn').addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled;
         saveState(false);
-        document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+        updateAudioButtons();
+      });
+      document.getElementById('headerExitLobbyBtn').addEventListener('click', () => {
+        window.location.href = 'https://02826k.github.io/aigameroom/';
       });
 
       const authModal = document.getElementById('authModal');
       const phoneInput = document.getElementById('authPhoneDigits');
       const pinInput = document.getElementById('authPinCode');
-      document.getElementById('serverSaveGoldBtn').addEventListener('click', () => {
-        if (authToken) syncSaveToServer(true);
-        else { authModal.classList.remove('hidden'); authModal.classList.add('flex'); phoneInput.focus(); }
+      document.getElementById('authHeaderBtn').addEventListener('click', () => {
+        if (authToken && currentUsername) {
+          if (confirm('로그아웃 하시겠습니까?')) handleLogout(false);
+        } else {
+          authModal.classList.remove('hidden');
+          authModal.classList.add('flex');
+          phoneInput.focus();
+        }
       });
       document.getElementById('authCloseBtn').addEventListener('click', () => { authModal.classList.add('hidden'); authModal.classList.remove('flex'); });
-      document.getElementById('logoutBtn').addEventListener('click', () => handleLogout(false));
       document.getElementById('modeLoginBtn').addEventListener('click', () => {
         isRegisterMode = false;
         document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer';
@@ -2789,7 +2864,7 @@
 
       const vipModal = document.getElementById('vipModal');
       let tossWidgets = null;
-      document.getElementById('vipOpenBtn').addEventListener('click', async () => {
+      document.getElementById('vipOpenBtn')?.addEventListener('click', async () => {
         vipModal.classList.remove('hidden');
         vipModal.classList.add('flex');
         if (tossWidgets || typeof TossPayments === 'undefined') return;
