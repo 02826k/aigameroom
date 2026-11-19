@@ -67,76 +67,65 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 h-dvh overflow-hidden flex flex-col">
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2 sticky top-0 z-20 shadow-lg shadow-black/20">
-    <div class="max-w-4xl mx-auto flex flex-col gap-1.5">
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-3 py-1.5 sticky top-0 z-20 shadow-lg shadow-black/20 shrink-0">
+    <div class="max-w-4xl mx-auto flex flex-col gap-1">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/25 to-blue-600/25 text-cyan-400 font-extrabold text-sm border border-cyan-500/40 shadow-inner shrink-0">🧱</span>
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-cyan-500/25 to-blue-600/25 text-cyan-400 font-extrabold text-sm border border-cyan-500/40 shadow-inner shrink-0">🧱</span>
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">벽돌깨기</h1>
         </div>
-        <button id="authHeaderBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+        <button id="authHeaderBtn" type="button" class="px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
           로그인
         </button>
       </div>
 
-      <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
-        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
-        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
-        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
+      <div class="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-800/70">
+        <button id="bgmToggleBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+        <button id="soundToggleBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
-    <!-- Top Status Card -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/30">
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-        <div class="sm:col-span-5 bg-gradient-to-br from-cyan-950/40 via-slate-950/90 to-slate-950/90 border border-cyan-500/35 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2.5 shadow-inner">
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5">
-              <span class="text-xs">🏆</span>
-              <span class="text-[11px] text-cyan-300/90 font-bold tracking-tight">아케이드 전적</span>
-              <span id="scoreBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-semibold border border-cyan-500/30">
-                STAGE 1
-              </span>
-            </div>
-            <div class="text-lg sm:text-xl font-black text-cyan-400 tracking-tight mt-0.5" id="scoreDisplay">점수: 0 점</div>
-            <div class="text-[10px] text-slate-400 truncate" id="scoreSubText">벽돌을 깨고 아이템을 획득하세요!</div>
+  <main class="flex-1 min-h-0 max-w-4xl w-full mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col gap-1.5">
+    <!-- Top Status Card (컴팩트) -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl shadow-black/30 shrink-0">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-1.5">
+        <div class="flex-1 bg-gradient-to-br from-cyan-950/40 via-slate-950/90 to-slate-950/90 border border-cyan-500/35 rounded-lg px-2.5 py-1.5 flex items-center justify-between gap-2 shadow-inner">
+          <div class="min-w-0 flex items-center gap-2">
+            <span id="scoreBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30 shrink-0">
+              STAGE 1/10
+            </span>
+            <div class="text-sm sm:text-base font-black text-cyan-400 tracking-tight truncate" id="scoreDisplay">점수: 0 점</div>
           </div>
-          <button id="startGameBtn" type="button" class="shrink-0 px-3.5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-md transition active:scale-95 cursor-pointer">
+          <button id="startGameBtn" type="button" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow transition active:scale-95 cursor-pointer">
             게임 시작
           </button>
         </div>
 
-        <div class="sm:col-span-7 grid grid-cols-2 gap-2">
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl px-3 py-2 flex flex-col justify-center">
-            <div class="text-[11px] text-slate-400 font-medium">남은 목숨</div>
-            <div class="text-xs sm:text-sm font-bold text-rose-400 truncate mt-0.5" id="livesDisplay">❤️❤️❤️</div>
+        <div class="flex items-center justify-between gap-1.5 bg-slate-950/80 border border-slate-800/90 rounded-lg px-2.5 py-1.5">
+          <div class="flex items-center gap-2.5">
+            <div class="text-xs font-bold text-rose-400" id="livesDisplay">❤️❤️❤️</div>
+            <div class="text-xs font-extrabold text-emerald-300 tabular-nums" id="timeDisplay">00:00</div>
           </div>
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl px-3 py-2 flex items-center justify-between gap-1.5">
-            <div>
-              <div class="text-[11px] text-slate-400 font-medium">게임 시간</div>
-              <div class="text-xs sm:text-sm font-extrabold text-emerald-300 mt-0.5" id="timeDisplay">00:00</div>
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <button id="rankOpenBtn" type="button" class="px-2.5 py-1.5 rounded-xl text-[11px] font-black bg-slate-800 hover:bg-slate-700 border border-cyan-400/50 text-cyan-300 shadow active:scale-95 transition cursor-pointer whitespace-nowrap">
-                🏆 RANK
-              </button>
-              <button id="fullscreenBtn" type="button" class="px-2.5 py-1.5 rounded-xl text-[11px] font-black bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow active:scale-95 transition cursor-pointer whitespace-nowrap">
-                ⛶ 전체화면
-              </button>
-            </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button id="rankOpenBtn" type="button" class="px-2 py-1 rounded-lg text-[11px] font-black bg-slate-800 hover:bg-slate-700 border border-cyan-400/50 text-cyan-300 shadow active:scale-95 transition cursor-pointer whitespace-nowrap">
+              🏆 RANK
+            </button>
+            <button id="fullscreenBtn" type="button" class="px-2 py-1 rounded-lg text-[11px] font-black bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow active:scale-95 transition cursor-pointer whitespace-nowrap">
+              ⛶ 전체화면
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 중간 게임 화면 (벽돌깨기 아레나 캔버스) -->
-    <section id="gameStageSection" class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
-      <div id="canvasWrapper" class="relative w-full h-[420px] sm:h-[480px] cursor-pointer bg-slate-950 flex items-center justify-center">
+    <!-- 중간 게임 화면 (바닥에서 위로 꽉 차게 확장) -->
+    <section id="gameStageSection" class="flex-1 min-h-0 flex flex-col relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
+      <div id="canvasWrapper" class="relative flex-1 min-h-0 w-full cursor-pointer bg-slate-950 flex items-center justify-center">
         <canvas id="gameCanvas" class="block w-full h-full"></canvas>
         <button id="fsExitBtn" type="button" class="hidden absolute top-2.5 right-2.5 z-30 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-600 text-slate-100 text-xs font-black shadow-lg cursor-pointer">
           ✕ 축소
@@ -170,7 +159,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
+  <div id="toastBox" class="pointer-events-none fixed top-3 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 -translate-y-2">
     <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-cyan-500/50 text-xs sm:text-sm font-bold text-cyan-200 shadow-2xl">
       알림 메시지
     </div>
@@ -581,8 +570,22 @@
           const prevH = canvasHeight;
           resizeCanvas();
           if (prevW && prevH && (prevW !== canvasWidth || prevH !== canvasHeight)) {
+            const sx = canvasWidth / prevW;
+            const sy = canvasHeight / prevH;
             paddle.y = canvasHeight - 30;
-            paddle.x = Math.max(0, Math.min(canvasWidth - paddle.width, paddle.x * (canvasWidth / prevW)));
+            paddle.x = Math.max(0, Math.min(canvasWidth - paddle.width, paddle.x * sx));
+            bricks.forEach(b => {
+              b.x *= sx; b.y *= sy; b.w *= sx; b.h *= sy;
+            });
+            balls.forEach(bl => {
+              bl.x *= sx; bl.y *= sy;
+            });
+            items.forEach(it => {
+              it.x *= sx; it.y *= sy;
+            });
+            missiles.forEach(m => {
+              m.x *= sx; m.y *= sy;
+            });
           }
         }).observe(canvasWrapper);
       }
@@ -789,20 +792,24 @@
 
       function applyItem(type) {
         if (type === 'multi') {
-          // 현재 활성 공을 기준으로 최대 2개까지 복제 (총 공 수 제한)
           const activeBalls = balls.filter(b => b.active);
-          if (activeBalls.length === 0 || balls.length >= 5) {
-            showToast('⚡ 공 복제! (이미 최대)');
+          if (activeBalls.length === 0) return;
+          const MAX_BALLS = 24;
+          if (balls.length >= MAX_BALLS) {
+            showToast(`⚡ 모든 공 복제! (최대 ${MAX_BALLS}개)`);
             return;
           }
-          const src = activeBalls[Math.floor(Math.random() * activeBalls.length)];
-          const angleOff = 0.35;
-          balls.push(createBall(src.x, src.y, src.vx * Math.cos(angleOff) - src.vy * Math.sin(angleOff), src.vx * Math.sin(angleOff) + src.vy * Math.cos(angleOff), true));
-          if (balls.length < 5 && Math.random() < 0.4) {
-            balls.push(createBall(src.x, src.y, src.vx * Math.cos(-angleOff) - src.vy * Math.sin(-angleOff), src.vx * Math.sin(-angleOff) + src.vy * Math.cos(-angleOff), true));
+          const angleOff = 0.32;
+          for (const srcBall of activeBalls) {
+            if (balls.length >= MAX_BALLS) break;
+            const sign = Math.random() < 0.5 ? 1 : -1;
+            const a = angleOff * sign;
+            const nvx = srcBall.vx * Math.cos(a) - srcBall.vy * Math.sin(a);
+            const nvy = srcBall.vx * Math.sin(a) + srcBall.vy * Math.cos(a);
+            balls.push(createBall(srcBall.x, srcBall.y, nvx, nvy, true));
           }
           playSound('score');
-          showToast('⚡ 공이 복제되었습니다!');
+          showToast(`⚡ 모든 공 복제! (${balls.length}개)`);
         } else if (type === 'widen') {
           paddleWidenTimer = PADDLE_WIDEN_DURATION;
           applyPaddleWidth();
@@ -1506,16 +1513,18 @@
         updateAuthHeaderUI();
       }
 
+      let toastTimer = null;
       function showToast(message) {
         const box = document.getElementById('toastBox');
         const msg = document.getElementById('toastMsg');
         msg.textContent = message;
-        box.classList.remove('opacity-0', 'translate-y-2');
+        box.classList.remove('opacity-0', '-translate-y-2');
         box.classList.add('opacity-100', 'translate-y-0');
-        setTimeout(() => {
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
           box.classList.remove('opacity-100', 'translate-y-0');
-          box.classList.add('opacity-0', 'translate-y-2');
-        }, 2200);
+          box.classList.add('opacity-0', '-translate-y-2');
+        }, 1800);
       }
 
       window.onload = async () => {
