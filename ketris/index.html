@@ -1422,22 +1422,49 @@
         }
       });
 
-      document.getElementById('btnLeft').addEventListener('click', () => {
+      function bindHoldAction(btnId, actionFn, delayMs = 150, repeatMs = 65) {
+        const el = document.getElementById(btnId);
+        if (!el) return;
+        let holdTimeout = null;
+        let holdInterval = null;
+
+        const stopHold = () => {
+          if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
+          if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+        };
+
+        el.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          stopHold();
+          actionFn();
+          holdTimeout = setTimeout(() => {
+            holdInterval = setInterval(actionFn, repeatMs);
+          }, delayMs);
+        });
+        el.addEventListener('pointerup', stopHold);
+        el.addEventListener('pointercancel', stopHold);
+        el.addEventListener('pointerleave', stopHold);
+        window.addEventListener('blur', stopHold);
+      }
+
+      bindHoldAction('btnLeft', () => {
         if (gameOver || !currentPiece) return;
         currentPiece.col--;
-        if (checkCollision()) currentPiece.col++;
+        if (checkCollision()) currentPiece.col++; else playSfx('move');
         render();
-      });
-      document.getElementById('btnRight').addEventListener('click', () => {
+      }, 150, 65);
+
+      bindHoldAction('btnRight', () => {
         if (gameOver || !currentPiece) return;
         currentPiece.col++;
-        if (checkCollision()) currentPiece.col--;
+        if (checkCollision()) currentPiece.col--; else playSfx('move');
         render();
-      });
-      document.getElementById('btnDown').addEventListener('click', () => {
+      }, 150, 65);
+
+      bindHoldAction('btnDown', () => {
         if (gameOver || !currentPiece) return;
         moveDown();
-      });
+      }, 130, 55);
       document.getElementById('btnRotate').addEventListener('click', () => {
         if (gameOver || !currentPiece) return;
         rotatePiece();
