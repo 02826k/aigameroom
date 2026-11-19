@@ -101,15 +101,15 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/50">2번 · 👑 VIP</span>
 <span id="bike2LockBadge" class="text-[10px] font-black text-amber-300">🔒 VIP 전용</span>
 </div>
-<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">⚡ 팬텀 GT</div>
-<div class="text-[10px] text-slate-400 leading-tight">VIP 전용 머신</div>
+<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">🏎️ 람보르기니 오픈카</div>
+<div class="text-[10px] text-slate-400 leading-tight">VIP 전용 오픈카</div>
 </button>
 </div>
 
 <div id="vipColorPanel" class="w-full rounded-xl border border-purple-500/40 bg-slate-950/85 backdrop-blur-sm p-2 flex flex-col gap-1.5 shadow-lg">
 <div class="flex items-center justify-between gap-1">
 <div class="flex items-center gap-1">
-<button type="button" data-part="bikeColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-fuchsia-600 text-white cursor-pointer">🏍️ 오토바이</button>
+<button type="button" data-part="bikeColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-fuchsia-600 text-white cursor-pointer">🏎️ 차량</button>
 <button type="button" data-part="helmetColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-slate-800 text-slate-300 cursor-pointer">🪖 헬멧</button>
 <button type="button" data-part="suitColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-slate-800 text-slate-300 cursor-pointer">🧥 몸색깔</button>
 </div>
@@ -217,6 +217,16 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 </div>
 
+<!-- VIP 차량 안내 모달 -->
+<div id="vipAlertModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div class="bg-slate-900 border-2 border-amber-400/60 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
+<div class="text-2xl mb-1.5">👑</div>
+<h3 class="text-sm font-black text-amber-300 mb-1">VIP 차량입니다</h3>
+<p class="text-xs text-slate-300 mb-4">람보르기니 오픈카 및 커스텀 색상은 VIP 회원 전용입니다.<br/>로비에서 VIP 가입 후 이용할 수 있습니다.</p>
+<button id="vipAlertConfirmBtn" type="button" class="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 shadow cursor-pointer">확인</button>
+</div>
+</div>
+
 <!-- 로그아웃 확인 모달 -->
 <div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
 <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
@@ -312,10 +322,10 @@ function sanitize(p) {
     soundEnabled: typeof p.soundEnabled === 'boolean' ? p.soundEnabled : true,
     bgmEnabled: typeof p.bgmEnabled === 'boolean' ? p.bgmEnabled : true,
     isVip,
-    selectedBike: isVip ? rawBike : 1,
-    bikeColor: isVip && COLOR_IDS.has(p.bikeColor) ? p.bikeColor : 'default',
-    helmetColor: isVip && COLOR_IDS.has(p.helmetColor) ? p.helmetColor : 'default',
-    suitColor: isVip && COLOR_IDS.has(p.suitColor) ? p.suitColor : 'default',
+    selectedBike: rawBike,
+    bikeColor: COLOR_IDS.has(p.bikeColor) ? p.bikeColor : 'default',
+    helmetColor: COLOR_IDS.has(p.helmetColor) ? p.helmetColor : 'default',
+    suitColor: COLOR_IDS.has(p.suitColor) ? p.suitColor : 'default',
     bestTimeSec: typeof p.bestTimeSec === 'number' && p.bestTimeSec > 0 ? Math.round(p.bestTimeSec * 10) / 10 : null,
     maxSpeedKmh: typeof p.maxSpeedKmh === 'number' && p.maxSpeedKmh >= 0 ? Math.floor(p.maxSpeedKmh) : 0,
     bestRunGold: typeof p.bestRunGold === 'number' && p.bestRunGold >= 0 ? Math.floor(p.bestRunGold) : 0,
@@ -351,6 +361,7 @@ async function loadServer() {
     const d = await res.json();
     if (res.ok && d.saveData) {
       state = sanitize({ ...d.saveData, isVip: !!(d.isVip || d.saveData?.isVip) });
+      saveSharedAuth(authToken, currentUsername, state.isVip);
       localStorage.setItem(STORAGE, JSON.stringify(state));
       applySelectedBikeMesh();
       updateUI();
@@ -475,13 +486,53 @@ function makeRoadSeg(z) {
   road.receiveShadow = true;
   g.add(road);
   const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 1 });
-  [-1, 1].forEach(side => {
-    const s = new THREE.Mesh(new THREE.PlaneGeometry(8, ROAD_LEN), shoulderMat);
-    s.rotation.x = -Math.PI / 2;
-    s.position.set(side * 10, -0.01, 0);
-    s.receiveShadow = true;
-    g.add(s);
-  });
+  const rightShoulder = new THREE.Mesh(new THREE.PlaneGeometry(10, ROAD_LEN), shoulderMat);
+  rightShoulder.rotation.x = -Math.PI / 2;
+  rightShoulder.position.set(11, -0.01, 0);
+  rightShoulder.receiveShadow = true;
+  g.add(rightShoulder);
+
+  const leftShoulder = new THREE.Mesh(new THREE.PlaneGeometry(8, ROAD_LEN), shoulderMat);
+  leftShoulder.rotation.x = -Math.PI / 2;
+  leftShoulder.position.set(-22, -0.01, 0);
+  leftShoulder.receiveShadow = true;
+  g.add(leftShoulder);
+
+  // 왼쪽 중앙분리대 가드레일 + 반대편 차선 도로(시각용)
+  const oppRoad = new THREE.Mesh(
+    new THREE.PlaneGeometry(10.5, ROAD_LEN),
+    new THREE.MeshStandardMaterial({ color: 0x172030, roughness: 0.92, metalness: 0.08 })
+  );
+  oppRoad.rotation.x = -Math.PI / 2;
+  oppRoad.position.set(-12.5, -0.005, 0);
+  oppRoad.receiveShadow = true;
+  g.add(oppRoad);
+
+  const oppDashMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
+  for (let d = -ROAD_LEN / 2 + 1; d < ROAD_LEN / 2; d += 4) {
+    const dl = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.2), oppDashMat);
+    dl.rotation.x = -Math.PI / 2;
+    dl.position.set(-12.5, 0.015, d);
+    g.add(dl);
+  }
+  const oppOuterEdge = new THREE.Mesh(new THREE.PlaneGeometry(0.16, ROAD_LEN), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+  oppOuterEdge.rotation.x = -Math.PI / 2;
+  oppOuterEdge.position.set(-17.6, 0.02, 0);
+  g.add(oppOuterEdge);
+
+  const railMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.75, roughness: 0.35 });
+  const postMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.5, roughness: 0.6 });
+  const railBeam = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.24, ROAD_LEN), railMat);
+  railBeam.position.set(-6.5, 0.55, 0);
+  g.add(railBeam);
+  const railStripe = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, ROAD_LEN), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
+  railStripe.position.set(-6.5, 0.55, 0);
+  g.add(railStripe);
+  for (let pz = -ROAD_LEN / 2 + 2; pz < ROAD_LEN / 2; pz += 5) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.7, 0.14), postMat);
+    post.position.set(-6.5, 0.35, pz);
+    g.add(post);
+  }
   const lineMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
   for (let i = -1; i <= 1; i += 2) {
     for (let d = -ROAD_LEN / 2 + 1; d < ROAD_LEN / 2; d += 4) {
@@ -828,14 +879,185 @@ function createBike(variant = 1) {
 }
 
 const bike1Mesh = createBike(1);
-const bike2Mesh = createBike(2);
+function createVipLamborghini() {
+  const root = new THREE.Group();
+  const paintMat = new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.72, roughness: 0.22 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.35, roughness: 0.65 });
+  const alloyMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.22 });
+  const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.92, metalness: 0.05 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.45, metalness: 0.85, roughness: 0.12 });
+
+  // Lower chassis / front splitter / side skirts
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.76, 0.22, 3.65), darkMat);
+  chassis.position.set(0, 0.24, 0);
+  chassis.castShadow = true;
+  root.add(chassis);
+
+  // Wedge front hood (sloped low nose)
+  const hood = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.28, 1.35), paintMat);
+  hood.position.set(0, 0.44, -1.05);
+  hood.rotation.x = 0.16;
+  hood.castShadow = true;
+  root.add(hood);
+
+  // Front aggressive air intake & splitter
+  const frontIntake = new THREE.Mesh(new THREE.BoxGeometry(1.56, 0.18, 0.22), darkMat);
+  frontIntake.position.set(0, 0.28, -1.78);
+  root.add(frontIntake);
+
+  // Side body panels & doors
+  [-0.78, 0.78].forEach(x => {
+    const side = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.42, 2.2), paintMat);
+    side.position.set(x, 0.48, 0.05);
+    side.castShadow = true;
+    root.add(side);
+
+    const intake = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.24, 0.55), darkMat);
+    intake.position.set(x * 1.12, 0.50, 0.42);
+    root.add(intake);
+
+    // Side mirrors
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.09, 0.12), paintMat);
+    mirror.position.set(x * 1.24, 0.72, -0.45);
+    root.add(mirror);
+  });
+
+  // Rear engine deck & Spyder twin buttresses
+  const rearDeck = new THREE.Mesh(new THREE.BoxGeometry(1.70, 0.36, 1.25), paintMat);
+  rearDeck.position.set(0, 0.54, 1.12);
+  rearDeck.castShadow = true;
+  root.add(rearDeck);
+
+  const engineLouvers = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.06, 0.85), darkMat);
+  engineLouvers.position.set(0, 0.73, 1.18);
+  root.add(engineLouvers);
+
+  [-0.56, 0.56].forEach(x => {
+    const buttress = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.72), paintMat);
+    buttress.position.set(x, 0.78, 0.72);
+    buttress.rotation.x = -0.25;
+    root.add(buttress);
+  });
+
+  // Raked Spyder windshield & frame
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.46, 0.05), glassMat);
+  windshield.position.set(0, 0.82, -0.45);
+  windshield.rotation.x = -0.78;
+  root.add(windshield);
+  [-0.75, 0.75].forEach(x => {
+    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.48, 0.07), darkMat);
+    pillar.position.set(x, 0.82, -0.45);
+    pillar.rotation.x = -0.78;
+    root.add(pillar);
+  });
+
+  // Open-top cockpit interior + 2 sport seats
+  const cockpitFloor = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.12, 1.15), darkMat);
+  cockpitFloor.position.set(0, 0.34, 0.05);
+  root.add(cockpitFloor);
+
+  [-0.36, 0.36].forEach(x => {
+    const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.46, 0.14), darkMat);
+    seatBack.position.set(x, 0.62, 0.34);
+    seatBack.rotation.x = -0.2;
+    root.add(seatBack);
+  });
+
+  // Driver inside left seat (helmet + racing suit)
+  const suitMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.2 });
+  const jacketMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.55, metalness: 0.25 });
+  const helmetMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.65, roughness: 0.2 });
+  const driverTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.24, 4, 8), jacketMat);
+  driverTorso.position.set(-0.36, 0.64, 0.20);
+  driverTorso.rotation.x = 0.25;
+  root.add(driverTorso);
+  const driverHelmet = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), helmetMat);
+  driverHelmet.position.set(-0.36, 0.90, 0.16);
+  root.add(driverHelmet);
+  const driverVisor = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.07, 0.10), new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.9, roughness: 0.1 }));
+  driverVisor.position.set(-0.36, 0.90, 0.06);
+  root.add(driverVisor);
+
+  // 4 Sport Wheels
+  [[-0.86, 0.30, -1.12], [0.86, 0.30, -1.12], [-0.88, 0.32, 1.10], [0.88, 0.32, 1.10]].forEach(p => {
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(p[1], p[1], 0.24, 16), tireMat);
+    tire.rotation.z = Math.PI / 2;
+    tire.position.set(...p);
+    tire.castShadow = true;
+    root.add(tire);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(p[1] * 0.66, p[1] * 0.66, 0.25, 10), alloyMat);
+    rim.rotation.z = Math.PI / 2;
+    rim.position.set(...p);
+    root.add(rim);
+  });
+
+  // Front LED headlights + night spot beam
+  const headlightMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
+  [-0.58, 0.58].forEach(x => {
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.08), headlightMat);
+    hl.position.set(x, 0.44, -1.76);
+    root.add(hl);
+  });
+  const bikeSpot = new THREE.SpotLight(0xe0f2fe, 0, 42, Math.PI / 5, 0.45, 1.2);
+  bikeSpot.position.set(0, 0.5, -1.8);
+  bikeSpot.target.position.set(0, 0.1, -20);
+  root.add(bikeSpot);
+  root.add(bikeSpot.target);
+
+  const headBeam = new THREE.Mesh(
+    new THREE.ConeGeometry(1.6, 9.5, 14, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false })
+  );
+  headBeam.rotation.x = Math.PI / 2;
+  headBeam.position.set(0, 0.45, -6.5);
+  headBeam.visible = false;
+  root.add(headBeam);
+
+  // Rear Y-shaped LED taillights & twin exhaust flames
+  const tailMat = new THREE.MeshBasicMaterial({ color: 0xff2244 });
+  [-0.58, 0.58].forEach(x => {
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), tailMat);
+    tl.position.set(x, 0.56, 1.78);
+    root.add(tl);
+  });
+  const rearDiffuser = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.18, 0.14), darkMat);
+  rearDiffuser.position.set(0, 0.28, 1.76);
+  root.add(rearDiffuser);
+
+  const flames = [];
+  [-0.32, 0.32].forEach(x => {
+    const flame = new THREE.Mesh(
+      new THREE.ConeGeometry(0.11, 0.6, 8),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 })
+    );
+    flame.rotation.x = Math.PI / 2;
+    flame.position.set(x, 0.30, 2.05);
+    flame.visible = false;
+    root.add(flame);
+    flames.push(flame);
+  });
+
+  root.userData.isVipBike = true;
+  root.userData.isSupercar = true;
+  root.userData.paintMat = paintMat;
+  root.userData.helmetMat = helmetMat;
+  root.userData.jacketMat = jacketMat;
+  root.userData.suitMat = suitMat;
+  root.userData.headlightMat = headlightMat;
+  root.userData.bikeSpot = bikeSpot;
+  root.userData.headBeam = headBeam;
+  root.userData.flames = flames;
+  return root;
+}
+
+const bike2Mesh = createVipLamborghini();
 let player = state.selectedBike === 2 && state.isVip ? bike2Mesh : bike1Mesh;
 player.position.set(0, 0, 0);
 scene.add(player);
 
 function applyColorToMat(mat, colorId, defaultHex, defaultMetal, defaultRough) {
   if (!mat) return;
-  if (!state.isVip || !colorId || colorId === 'default') {
+  if (!colorId || colorId === 'default') {
     mat.color.setHex(defaultHex);
     mat.metalness = defaultMetal;
     mat.roughness = defaultRough;
@@ -851,7 +1073,7 @@ function applyColorToMat(mat, colorId, defaultHex, defaultMetal, defaultRough) {
 function applyBikeCustomColors() {
   [bike1Mesh, bike2Mesh].forEach(bk => {
     const vipB = !!bk.userData.isVipBike;
-    applyColorToMat(bk.userData.paintMat, state.bikeColor, vipB ? 0x6d28d9 : 0xf97316, vipB ? 0.72 : 0.55, vipB ? 0.22 : 0.32);
+    applyColorToMat(bk.userData.paintMat, state.bikeColor, bk.userData.isSupercar ? 0xeab308 : (vipB ? 0x6d28d9 : 0xf97316), vipB ? 0.72 : 0.55, vipB ? 0.22 : 0.32);
     applyColorToMat(bk.userData.helmetMat, state.helmetColor, vipB ? 0x0f172a : 0x0ea5e9, 0.65, 0.22);
     applyColorToMat(bk.userData.jacketMat, state.suitColor, vipB ? 0x4c1d95 : 0x334155, 0.25, 0.55);
     applyColorToMat(bk.userData.suitMat, state.suitColor, vipB ? 0x1e1b4b : 0x1e293b, 0.2, 0.65);
@@ -859,7 +1081,7 @@ function applyBikeCustomColors() {
 }
 
 function applySelectedBikeMesh() {
-  const want = state.selectedBike === 2 && state.isVip ? bike2Mesh : bike1Mesh;
+  const want = state.selectedBike === 2 ? bike2Mesh : bike1Mesh;
   if (player !== want) {
     want.position.copy(player.position);
     want.rotation.copy(player.rotation);
@@ -902,9 +1124,12 @@ function createCar(color) {
   glass.position.set(0, 0.85, 0.5); g.add(glass);
   const lightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
   g.userData.headlightMat = lightMat;
+  const tailMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
   [-0.5, 0.5].forEach(x => {
     const l = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.12, 0.08), lightMat);
     l.position.set(x, 0.4, 1.62); g.add(l);
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.12, 0.08), tailMat);
+    tl.position.set(x, 0.44, -1.62); g.add(tl);
   });
   [[-0.55, 0.22, 1.1], [0.55, 0.22, 1.1], [-0.55, 0.22, -1.1], [0.55, 0.22, -1.1]].forEach(p => {
     const w = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.18, 10), new THREE.MeshStandardMaterial({ color: 0x111 }));
@@ -1090,7 +1315,25 @@ document.addEventListener('fullscreenchange', () => {
   setTimeout(resize, 300);
 });
 
+const vipAlertModal = document.getElementById('vipAlertModal');
+document.getElementById('vipAlertConfirmBtn').onclick = () => {
+  vipAlertModal.classList.add('hidden');
+  vipAlertModal.classList.remove('flex');
+};
+vipAlertModal.onclick = (e) => {
+  if (e.target === vipAlertModal) {
+    vipAlertModal.classList.add('hidden');
+    vipAlertModal.classList.remove('flex');
+  }
+};
+
 function startGame() {
+  const usingVipPerk = (state.selectedBike === 2) || (state.bikeColor !== 'default') || (state.helmetColor !== 'default') || (state.suitColor !== 'default');
+  if (!state.isVip && usingVipPerk) {
+    vipAlertModal.classList.remove('hidden');
+    vipAlertModal.classList.add('flex');
+    return;
+  }
   applySelectedBikeMesh();
   distance = 0; lives = state.isVip ? 3 : 1; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false;
   speed = 12; boostT = 0; invuln = 0; nearMissCd = 0; crashFlash = 0;
@@ -1188,12 +1431,12 @@ function spawnCar() {
 
   mesh.visible = true;
   mesh.position.set(LANES[li], 0, spawnZ);
-  mesh.rotation.y = 0;
+  mesh.rotation.y = Math.PI;
   activeCars.push({
     mesh,
     lane: li,
     z: spawnZ,
-    speed: (isBus ? 6 : 8) + Math.random() * 6 + Math.min(1, elapsedTime / FINISH_TIME_SEC) * 8,
+    speed: (isBus ? 7 : 9) + Math.random() * 5 + Math.min(1, elapsedTime / FINISH_TIME_SEC) * 4,
     halfLen: isBus ? 3.25 : 1.85,
     halfWidth: isBus ? 1.25 : 1.15
   });
@@ -1216,13 +1459,6 @@ function spawnFuel() {
 }
 
 function selectBike(num) {
-  if (num === 2 && !state.isVip) {
-    showToast('👑 2번 오토바이는 VIP 전용입니다!');
-    vipM.classList.remove('hidden');
-    vipM.classList.add('flex');
-    initToss();
-    return;
-  }
   state.selectedBike = num === 2 ? 2 : 1;
   applySelectedBikeMesh();
   saveState(true);
@@ -1257,19 +1493,12 @@ function renderColorPalette() {
   COLOR_OPTIONS.forEach(c => {
     const b = document.createElement('button');
     b.type = 'button';
-    const sel = state.isVip && curVal === c.id;
+    const sel = curVal === c.id;
     b.className = (c.id === 'rainbow' ? 'col-span-2 ' : '') + 'w-full flex items-center justify-center gap-1 px-1 py-1 rounded-lg border text-[10px] font-bold cursor-pointer transition active:scale-95 ' + (
       sel ? 'border-white bg-slate-800 text-white ring-1 ring-amber-300' : 'border-slate-700 bg-slate-900/90 text-slate-300 hover:border-slate-500'
     );
     b.innerHTML = `<span class="w-3 h-3 rounded-full border border-white/40 shrink-0" style="background:${c.css}"></span><span>${c.label}</span>`;
     b.onclick = () => {
-      if (!state.isVip) {
-        showToast('👑 색상 변경은 VIP 전용입니다!');
-        vipM.classList.remove('hidden');
-        vipM.classList.add('flex');
-        initToss();
-        return;
-      }
       state[activeColorPart] = c.id;
       applyBikeCustomColors();
       saveState(true);
@@ -1285,7 +1514,7 @@ function updateBikeSelectUI() {
   const c2 = document.getElementById('bikeCard2');
   const b1 = document.getElementById('bike1SelectedBadge');
   const b2 = document.getElementById('bike2LockBadge');
-  const sel = state.isVip ? state.selectedBike : 1;
+  const sel = state.selectedBike === 2 ? 2 : 1;
 
   if (sel === 1) {
     c1.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-orange-400 bg-slate-900/95 hover:bg-slate-800/95 transition cursor-pointer relative shadow-lg ring-2 ring-orange-400/30 min-w-0';
@@ -1297,25 +1526,21 @@ function updateBikeSelectUI() {
     b1.className = 'text-[10px] font-bold text-slate-400';
   }
 
-  if (!state.isVip) {
-    c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-slate-700/80 bg-slate-900/75 hover:border-purple-500/60 transition cursor-pointer relative shadow-lg opacity-90 min-w-0';
-    b2.textContent = '🔒 VIP 전용';
-    b2.className = 'text-[10px] font-black text-amber-300';
-  } else if (sel === 2) {
+  if (sel === 2) {
     c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-fuchsia-400 bg-slate-900/95 hover:bg-slate-800/95 transition cursor-pointer relative shadow-lg ring-2 ring-fuchsia-400/35 min-w-0';
-    b2.textContent = '✔ 선택됨';
-    b2.className = 'text-[10px] font-black text-emerald-300';
+    b2.textContent = state.isVip ? '✔ 선택됨' : '✔ 미리보기 (VIP)';
+    b2.className = state.isVip ? 'text-[10px] font-black text-emerald-300' : 'text-[10px] font-black text-amber-300';
   } else {
     c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-slate-700 bg-slate-900/85 hover:border-fuchsia-400/60 transition cursor-pointer relative shadow-lg min-w-0';
-    b2.textContent = '👑 선택 가능';
-    b2.className = 'text-[10px] font-bold text-fuchsia-300';
+    b2.textContent = state.isVip ? '👑 선택 가능' : '🔒 VIP 전용';
+    b2.className = state.isVip ? 'text-[10px] font-bold text-fuchsia-300' : 'text-[10px] font-black text-amber-300';
   }
 }
 
 const motoRankModal = document.getElementById('motoRankModal');
 const logoutConfirmModal = document.getElementById('logoutConfirmModal');
 function isModalOpen() {
-  return !authM.classList.contains('hidden') || !vipM.classList.contains('hidden') || !motoRankModal.classList.contains('hidden') || !logoutConfirmModal.classList.contains('hidden');
+  return !authM.classList.contains('hidden') || !vipM.classList.contains('hidden') || !motoRankModal.classList.contains('hidden') || !logoutConfirmModal.classList.contains('hidden') || !vipAlertModal.classList.contains('hidden');
 }
 window.addEventListener('keydown', e => {
   if (isModalOpen()) return;
@@ -1502,8 +1727,8 @@ function animate() {
 
     for (let i = activeCars.length - 1; i >= 0; i--) {
       const c = activeCars[i];
-      c.z += (speed + c.speed) * dt * 0.35;
-      if (c.z > 2) c.z += speed * dt * 0.8;
+      c.z += (speed - c.speed) * dt * 0.72;
+      if (c.z < -95) { c.mesh.visible = false; activeCars.splice(i, 1); continue; }
       c.mesh.position.z = c.z;
       c.mesh.position.x = LANES[c.lane];
       if (c.z > 22) { c.mesh.visible = false; activeCars.splice(i, 1); continue; }
@@ -1603,7 +1828,7 @@ function animate() {
     });
   }
 
-  if (state.isVip) {
+  {
     const hue = (clock.elapsedTime * 0.35) % 1;
     if (state.bikeColor === 'rainbow' && player.userData.paintMat) player.userData.paintMat.color.setHSL(hue, 0.9, 0.55);
     if (state.helmetColor === 'rainbow' && player.userData.helmetMat) player.userData.helmetMat.color.setHSL((hue + 0.33) % 1, 0.9, 0.55);
@@ -1930,7 +2155,7 @@ document.getElementById('headerExitLobbyBtn').onclick = () => {
 ['pageshow', 'focus', 'storage'].forEach(evt => {
   window.addEventListener(evt, () => {
     loadSharedAuth();
-    if (localStorage.getItem(VIP_KEY) === 'true') state.isVip = true;
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
     applySelectedBikeMesh();
     updateUI();
   });
@@ -1938,7 +2163,7 @@ document.getElementById('headerExitLobbyBtn').onclick = () => {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
     loadSharedAuth();
-    if (localStorage.getItem(VIP_KEY) === 'true') state.isVip = true;
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
     applySelectedBikeMesh();
     updateUI();
   }
