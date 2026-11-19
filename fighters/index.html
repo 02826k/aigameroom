@@ -179,36 +179,29 @@
         <div id="waitingListBox" class="flex flex-wrap gap-1.5 text-[11px]"></div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div class="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col items-center gap-2.5 text-center">
-          <div class="text-xs font-extrabold text-blue-300">[ 1P 블루 코너 ]</div>
-          <div id="leftPlayerName" class="text-sm font-black text-blue-400">빈 자리 (입장 대기중)</div>
-          <div class="w-full flex items-center gap-1.5">
-            <button id="joinLeftBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow cursor-pointer">1P 참가하기</button>
-            <button id="cancelLeftBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white cursor-pointer">대기취소</button>
+      <div class="flex items-stretch gap-2 sm:gap-3">
+        <div class="flex-1 min-w-0 bg-slate-950/80 border border-blue-500/30 rounded-xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center">
+          <div class="text-[11px] sm:text-xs font-extrabold text-blue-300">[ 1P 블루 코너 ]</div>
+          <div id="leftPlayerName" class="text-xs sm:text-sm font-black text-blue-400 truncate w-full">빈 자리 (대기중)</div>
+          <div class="w-full flex items-center gap-1">
+            <button id="joinLeftBtn" type="button" class="flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow cursor-pointer truncate">1P 참가</button>
+            <button id="cancelLeftBtn" type="button" class="hidden shrink-0 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 text-white cursor-pointer">취소</button>
           </div>
         </div>
-        <div class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-3.5 flex flex-col items-center gap-2.5 text-center">
-          <div class="text-xs font-extrabold text-rose-300">[ 2P 레드 코너 ]</div>
-          <div id="rightPlayerName" class="text-sm font-black text-rose-400">빈 자리 (입장 대기중)</div>
-          <div class="w-full flex items-center gap-1.5">
-            <button id="joinRightBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer">2P 참가하기</button>
-            <button id="cancelRightBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white cursor-pointer">대기취소</button>
+
+        <button id="pvpStartMatchBtn" type="button" class="hidden shrink-0 px-3 sm:px-4 rounded-xl bg-gradient-to-b from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm shadow-lg border border-amber-200/80 cursor-pointer flex-col items-center justify-center gap-0.5 animate-pulse">
+          <span>⚔️</span>
+          <span>대전시작</span>
+        </button>
+
+        <div class="flex-1 min-w-0 bg-slate-950/80 border border-rose-500/30 rounded-xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center">
+          <div class="text-[11px] sm:text-xs font-extrabold text-rose-300">[ 2P 레드 코너 ]</div>
+          <div id="rightPlayerName" class="text-xs sm:text-sm font-black text-rose-400 truncate w-full">빈 자리 (대기중)</div>
+          <div class="w-full flex items-center gap-1">
+            <button id="joinRightBtn" type="button" class="flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer truncate">2P 참가</button>
+            <button id="cancelRightBtn" type="button" class="hidden shrink-0 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 text-white cursor-pointer">취소</button>
           </div>
         </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800 gap-2 flex-wrap">
-        <div class="text-[11px] text-slate-400" id="pvpNoticeText">양쪽 참가자가 모두 입장하면 대결이 시작됩니다.</div>
-        <button id="pvpStartMatchBtn" type="button" disabled class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm cursor-not-allowed">⚔️ 대전 시작하기</button>
-      </div>
-
-      <div class="pt-2 border-t border-slate-800 bg-slate-950/90 border rounded-xl p-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-extrabold text-amber-300">🏆 나이트파이터 랭킹 TOP 10</span>
-          <button id="pvpRankingRefreshBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer">🔄 새로고침</button>
-        </div>
-        <div id="pvpRankingList" class="flex flex-col gap-1 max-h-36 overflow-y-auto text-[11px]"></div>
       </div>
     </section>
 
@@ -295,27 +288,16 @@
         </div>
       </section>
 
-      <!-- 캐릭터 얼굴 선택창 (게임화면 바로 아래 컴팩트 나열) -->
+      <!-- 캐릭터 얼굴 선택창 (사진 + 이름만 컴팩트 나열) -->
       <section id="charSelectPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
           <h2 class="text-xs font-black text-amber-300">🎭 파이터 선택</h2>
-          <div id="pvpPickTargetGroup" class="hidden items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
-            <button id="pickTargetP1Btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-black bg-sky-600 text-white cursor-pointer">1P</button>
-            <button id="pickTargetP2Btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-black text-slate-400 hover:text-white cursor-pointer">2P</button>
-          </div>
         </div>
 
         <div id="facePortraitGrid" class="grid grid-cols-6 gap-1.5 sm:gap-2"></div>
 
-        <div id="charSelectFooter" class="pt-1.5 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
-          <div class="flex items-center gap-1.5 text-[11px] font-bold flex-wrap">
-            <span id="p1ReadyChip" class="px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300">1P: 아키라</span>
-            <span id="p2ReadyWrap" class="hidden items-center gap-1.5">
-              <span class="text-slate-500 font-black">VS</span>
-              <span id="p2ReadyChip" class="px-2 py-0.5 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300">2P: 파이</span>
-            </span>
-          </div>
-          <button id="startFightBtn" type="button" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 transition cursor-pointer">
+        <div id="charSelectFooter" class="pt-1.5 border-t border-slate-800 flex items-center justify-end">
+          <button id="startFightBtn" type="button" class="w-full sm:w-auto px-6 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 transition cursor-pointer">
             🥊 STAGE 1 도전 시작!
           </button>
         </div>
@@ -727,13 +709,11 @@
 
         const startBtn = document.getElementById('pvpStartMatchBtn');
         if (count === 2) {
-          startBtn.disabled = false;
-          startBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg cursor-pointer animate-bounce';
-          document.getElementById('pvpNoticeText').textContent = '✨ 양쪽 모두 준비 완료! [대전 시작하기]를 누르세요.';
+          startBtn.classList.remove('hidden');
+          startBtn.classList.add('flex');
         } else {
-          startBtn.disabled = true;
-          startBtn.className = 'px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm cursor-not-allowed';
-          document.getElementById('pvpNoticeText').textContent = '양쪽 참가자가 모두 입장해야 시작할 수 있습니다.';
+          startBtn.classList.add('hidden');
+          startBtn.classList.remove('flex');
         }
       }
 
@@ -856,7 +836,7 @@
         grid.innerHTML = '';
         Object.values(FIGHTERS).forEach(f => {
           const isP1 = state.p1Id === f.id;
-          const isP2 = (currentMode === 'pvp') && (state.p2Id === f.id);
+          const isP2 = false;
           const isArmSkill = f.skill.button === 'punch';
 
           const baseBgClass = isArmSkill
@@ -885,17 +865,9 @@
           btn.addEventListener('click', () => {
             getAudioContext();
             playSfx('select');
-            if (currentMode === 'practice' || pickTarget === 'p1') {
-              state.p1Id = f.id;
-              f1 = createFighter(f.id, 1);
-              f1.poseTimer = 1.2;
-            } else {
-              state.p2Id = f.id;
-              if (phase !== 'select') {
-                f2 = createFighter(f.id, -1);
-                f2.poseTimer = 1.2;
-              }
-            }
+            state.p1Id = f.id;
+            f1 = createFighter(f.id, 1);
+            f1.poseTimer = 1.2;
             saveState(false);
             updateSelectUi();
           });
@@ -924,23 +896,7 @@
         const c2 = FIGHTERS[state.p2Id];
         const isPvp = currentMode === 'pvp';
 
-        const pvpPickGroup = document.getElementById('pvpPickTargetGroup');
-        const p2ReadyWrap = document.getElementById('p2ReadyWrap');
-        if (isPvp) {
-          pvpPickGroup.classList.remove('hidden');
-          pvpPickGroup.classList.add('flex');
-          p2ReadyWrap.classList.remove('hidden');
-          p2ReadyWrap.classList.add('flex');
-        } else {
-          pickTarget = 'p1';
-          pvpPickGroup.classList.add('hidden');
-          pvpPickGroup.classList.remove('flex');
-          p2ReadyWrap.classList.add('hidden');
-          p2ReadyWrap.classList.remove('flex');
-        }
 
-        document.getElementById('p1ReadyChip').textContent = `1P: ${c1.name} (←↓→+${c1.skill.buttonLabel}: ${c1.skill.name})`;
-        document.getElementById('p2ReadyChip').textContent = `2P: ${c2.name} (←↓→+${c2.skill.buttonLabel}: ${c2.skill.name})`;
         document.getElementById('hudP1Name').textContent = `1P ${c1.name}`;
 
         if (phase === 'select') {
@@ -2214,16 +2170,7 @@
       // ==========================================
       // 8. 이벤트 연결
       // ==========================================
-      document.getElementById('pickTargetP1Btn').addEventListener('click', () => {
-        pickTarget = 'p1';
-        document.getElementById('pickTargetP1Btn').className = 'px-3 py-1 rounded-lg text-xs font-black bg-sky-600 text-white cursor-pointer';
-        document.getElementById('pickTargetP2Btn').className = 'px-3 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-white cursor-pointer';
-      });
-      document.getElementById('pickTargetP2Btn').addEventListener('click', () => {
-        pickTarget = 'p2';
-        document.getElementById('pickTargetP2Btn').className = 'px-3 py-1 rounded-lg text-xs font-black bg-rose-600 text-white cursor-pointer';
-        document.getElementById('pickTargetP1Btn').className = 'px-3 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-white cursor-pointer';
-      });
+
 
       document.getElementById('startFightBtn').addEventListener('click', () => {
         getAudioContext();
@@ -2320,6 +2267,7 @@
         document.getElementById('fullscreenStage').classList.remove('hidden');
         document.getElementById('gameAreaSection').classList.remove('hidden');
         document.getElementById('arcadeControlsPanel').classList.remove('hidden');
+        document.getElementById('charSelectFooter').classList.remove('hidden');
         document.getElementById('startFightBtn').classList.remove('hidden');
         document.getElementById('startFightBtn').textContent = '🥊 STAGE 1 도전 시작!';
         // '1P 파이터를 고른 뒤 <b>나무 샌드백</b>으로 스킬을 연습하고, [STAGE 1 도전 시작]을 누르면 나머지 파이터들과 랜덤 연전을 펼칩니다!';
@@ -2335,6 +2283,7 @@
         document.getElementById('pvpLobbySection').classList.remove('hidden');
         document.getElementById('pvpLobbySection').classList.add('flex');
         document.getElementById('charSelectPanel').classList.remove('hidden');
+        document.getElementById('charSelectFooter').classList.add('hidden');
         document.getElementById('startFightBtn').classList.add('hidden');
         // '대전 모드에서는 1P와 2P 캐릭터를 각각 선택하거나 실시간 대기실 슬롯에 참가할 수 있습니다.';
         updateSelectUi();
