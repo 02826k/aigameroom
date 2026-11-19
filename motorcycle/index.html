@@ -481,10 +481,8 @@ const ROAD_LEN = 40;
 const ROAD_SEGS = 8;
 const lampPoleMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.35 });
 const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
-const gantrySignMat = new THREE.MeshStandardMaterial({ color: 0x15803d, emissive: 0x14532d, emissiveIntensity: 0.45, roughness: 0.4 });
-const gantryTextStripeMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
 
-function makeRoadSeg(z, segIdx = 0) {
+function makeRoadSeg(z) {
   const g = new THREE.Group();
   const road = new THREE.Mesh(
     new THREE.PlaneGeometry(12, ROAD_LEN, 1, 8),
@@ -583,30 +581,12 @@ function makeRoadSeg(z, segIdx = 0) {
     });
   });
 
-  // 80m 간격 고속도로 녹색 이정표 아치 (갠트리)
-  if (segIdx % 2 === 0) {
-    [-6.5, 6.5].forEach(gx => {
-      const gPost = new THREE.Mesh(new THREE.BoxGeometry(0.24, 6.2, 0.24), lampPoleMat);
-      gPost.position.set(gx, 3.1, 0);
-      g.add(gPost);
-    });
-    const gBeam = new THREE.Mesh(new THREE.BoxGeometry(13.4, 0.28, 0.28), lampPoleMat);
-    gBeam.position.set(0, 6.1, 0);
-    g.add(gBeam);
-    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.5, 0.16), gantrySignMat);
-    signBoard.position.set(0, 6.1, 0.12);
-    g.add(signBoard);
-    const signBorder = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.1, 0.18), gantryTextStripeMat);
-    signBorder.position.set(0, 5.55, 0.13);
-    g.add(signBorder);
-  }
-
   g.position.z = z;
   return g;
 }
 const roadSegs = [];
 for (let i = 0; i < ROAD_SEGS; i++) {
-  const seg = makeRoadSeg(-i * ROAD_LEN, i);
+  const seg = makeRoadSeg(-i * ROAD_LEN);
   roadGroup.add(seg);
   roadSegs.push(seg);
 }
@@ -882,14 +862,17 @@ function createBike(variant = 1) {
   headlight.position.set(0, 0.70, -0.71);
   root.add(headlight);
 
-  const bikeSpot = new THREE.SpotLight(isVipBike ? 0xe0f2fe : 0xfef9c3, 0, 52, Math.PI / 5.5, 0.45, 1.1);
+  const bikeSpot = new THREE.SpotLight(isVipBike ? 0xe0f2fe : 0xfef9c3, 0, 60, Math.PI / 5.5, 0.45, 1.1);
   bikeSpot.position.set(0, 0.72, -0.74);
-  bikeSpot.target.position.set(0, 0.1, -28);
+  bikeSpot.target.position.set(0, 0.55, -34);
   root.add(bikeSpot);
   root.add(bikeSpot.target);
 
+  const headBeamGeo = new THREE.ConeGeometry(1.5, 11.5, 14, 1, true);
+  headBeamGeo.rotateX(Math.PI / 2);
+  headBeamGeo.translate(0, 0, -5.75);
   const headBeam = new THREE.Mesh(
-    new THREE.ConeGeometry(1.5, 11.5, 14, 1, true),
+    headBeamGeo,
     new THREE.MeshBasicMaterial({
       color: isVipBike ? 0xbae6fd : 0xfef08a,
       transparent: true,
@@ -898,8 +881,7 @@ function createBike(variant = 1) {
       depthWrite: false
     })
   );
-  headBeam.rotation.x = Math.PI / 2;
-  headBeam.position.set(0, 0.55, -6.5);
+  headBeam.position.set(0, 0.70, -0.75);
   headBeam.visible = false;
   root.add(headBeam);
 
@@ -1191,15 +1173,18 @@ function createVipLamborghini() {
     hl.position.set(x, 0.44, -1.76);
     root.add(hl);
 
-    const spot = new THREE.SpotLight(0xe0f2fe, 0, 85, Math.PI / 5.5, 0.4, 1.0);
+    const spot = new THREE.SpotLight(0xe0f2fe, 0, 95, Math.PI / 5.5, 0.4, 1.0);
     spot.position.set(x, 0.52, -1.8);
-    spot.target.position.set(x * 1.15, 0.05, -48);
+    spot.target.position.set(x * 1.15, 0.65, -52);
     root.add(spot);
     root.add(spot.target);
     bikeSpots.push(spot);
 
+    const beamGeo = new THREE.ConeGeometry(1.35, 18.5, 16, 1, true);
+    beamGeo.rotateX(Math.PI / 2);
+    beamGeo.translate(0, 0, -9.25);
     const beam = new THREE.Mesh(
-      new THREE.ConeGeometry(1.35, 18.5, 16, 1, true),
+      beamGeo,
       new THREE.MeshBasicMaterial({
         color: 0xbae6fd,
         transparent: true,
@@ -1208,8 +1193,7 @@ function createVipLamborghini() {
         depthWrite: false
       })
     );
-    beam.rotation.x = Math.PI / 2;
-    beam.position.set(x, 0.42, -11.0);
+    beam.position.set(x, 0.44, -1.8);
     beam.visible = false;
     root.add(beam);
     headBeams.push(beam);
@@ -1927,6 +1911,22 @@ function animate() {
     player.position.x = laneX;
     player.rotation.z = (targetLaneX - laneX) * -0.08;
     player.rotation.x = -speed * 0.002;
+
+    // 가속/부스터 시 차체 노즈 다이브(-rotation.x)를 상쇄하고 고속일수록 라이트가 전방 원거리를 비추도록 자동 보정
+    const lightPitchComp = -player.rotation.x + Math.min(0.06, speed * 0.0008);
+    if (player.userData.headBeam) player.userData.headBeam.rotation.x = lightPitchComp;
+    if (player.userData.bikeSpot) {
+      player.userData.bikeSpot.target.position.y = 0.72 + Math.sin(lightPitchComp) * 34;
+    }
+    if (player.userData.headBeams) {
+      player.userData.headBeams.forEach(bm => { bm.rotation.x = lightPitchComp; });
+    }
+    if (player.userData.bikeSpots) {
+      player.userData.bikeSpots.forEach(sp => {
+        sp.target.position.y = 0.52 + Math.sin(lightPitchComp) * 52;
+      });
+    }
+
     if (player.userData.flames) {
       player.userData.flames.forEach(fl => {
         fl.visible = boostT > 0;
@@ -2040,6 +2040,12 @@ function animate() {
   } else {
     dayPhase = (dayPhase + dt / 120) % 1;
     updateDayNight(dayPhase);
+    player.rotation.x = 0;
+    if (player.userData.headBeam) player.userData.headBeam.rotation.x = 0;
+    if (player.userData.bikeSpot) player.userData.bikeSpot.target.position.y = 0.55;
+    if (player.userData.headBeams) player.userData.headBeams.forEach(bm => { bm.rotation.x = 0; });
+    if (player.userData.bikeSpots) player.userData.bikeSpots.forEach(sp => { sp.target.position.y = 0.65; });
+
     const portraitIdle = camera.aspect < 1 ? (1 - camera.aspect) * 1.6 : 0;
     camera.position.x = Math.sin(clock.elapsedTime * 0.45) * (camera.aspect < 1 ? 1.5 : 2.1);
     camera.position.y = 1.95 + portraitIdle * 0.15;
