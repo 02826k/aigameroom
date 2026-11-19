@@ -394,15 +394,13 @@
               </div>
               <div class="min-w-0">
                 <div class="text-[11px] sm:text-sm font-black text-white truncate">${pl.name}</div>
-                <div class="text-[9px] sm:text-[11px] font-bold ${isSel ? 'text-sky-300' : locked ? 'text-purple-300' : 'text-slate-400'}">${isSel ? '✔ 선택됨' : locked ? '👑 잠금' : '선택 가능'}</div>
+                <div class="text-[9px] sm:text-[11px] font-bold ${isSel ? 'text-sky-300' : locked ? 'text-purple-300' : 'text-slate-400'}">${isSel ? '✔ 선택됨' : locked ? '👑 VIP가입후 선택하세요' : '선택 가능'}</div>
               </div>
             </div>
           `;
           card.addEventListener('click', () => {
             if (locked) {
-              showToast('👑 VIP 전용 기체입니다! VIP 혜택을 확인하세요.');
-              document.getElementById('vipModal').classList.remove('hidden');
-              document.getElementById('vipModal').classList.add('flex');
+              showToast('👑 VIP가입후 선택하세요');
               return;
             }
             state.selectedPlane = pl.id;
