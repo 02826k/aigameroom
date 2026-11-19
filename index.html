@@ -828,6 +828,39 @@
         } catch (e) {}
       }
 
+      function refreshLobbyAuthFromStorage() {
+        let t = null;
+        let u = null;
+        let v = false;
+        try {
+          for (const k of ALL_TOKEN_KEYS) {
+            const val = localStorage.getItem(k);
+            if (val) { t = val; break; }
+          }
+          for (const k of ALL_USER_KEYS) {
+            const val = localStorage.getItem(k);
+            if (val) { u = val; break; }
+          }
+          v = localStorage.getItem(VIP_KEY) === 'true';
+        } catch (e) {}
+
+        if (t !== authToken || u !== currentUsername || v !== isVipUser) {
+          authToken = t;
+          currentUsername = u;
+          isVipUser = Boolean(t && v);
+          updateHeaderAuthBtn();
+          syncVipModalState();
+          if (authToken) checkLoginVipStatus();
+        }
+      }
+
+      window.addEventListener('pageshow', refreshLobbyAuthFromStorage);
+      window.addEventListener('focus', refreshLobbyAuthFromStorage);
+      window.addEventListener('storage', refreshLobbyAuthFromStorage);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') refreshLobbyAuthFromStorage();
+      });
+
       // 초기 렌더링
       updateHeaderAuthBtn();
       renderList('');
