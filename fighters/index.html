@@ -54,7 +54,13 @@
     #fullscreenStage { display: contents; }
 
     /* 전체화면 모드: 게이지바는 최상단 유지, 전체화면 버튼은 중앙 배지 바로 아래 통합 */
-    #fullscreenStage:fullscreen {
+    body.pvp-fs-fight header,
+    body.pvp-fs-fight #modeToggleBar,
+    body.pvp-fs-fight #pvpLobbySection {
+      display: none !important;
+    }
+    #fullscreenStage:fullscreen,
+    body.pvp-fs-fight #fullscreenStage {
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
@@ -63,81 +69,94 @@
       position: fixed !important;
       inset: 0 !important;
       background: #020617 !important;
-      padding: 4px !important;
-      gap: 4px !important;
+      padding: 0 !important;
+      gap: 2px !important;
       overflow: hidden !important;
+      z-index: 40 !important;
     }
-    #fullscreenStage:fullscreen #charSelectPanel {
+    #fullscreenStage:fullscreen #charSelectPanel,
+    #fullscreenStage:fullscreen #startFightBtn,
+    body.pvp-fs-fight #charSelectPanel,
+    body.pvp-fs-fight #startFightBtn {
       display: none !important;
     }
-    #fullscreenStage:fullscreen #gameAreaSection {
+    #fullscreenStage:fullscreen #gameAreaSection,
+    body.pvp-fs-fight #gameAreaSection {
       flex: 1 1 0% !important;
       min-height: 0 !important;
-      border-radius: 10px !important;
-      border-width: 1px !important;
+      border-radius: 0 !important;
+      border-width: 0 !important;
     }
-    #fullscreenStage:fullscreen #canvasWrapper {
+    #fullscreenStage:fullscreen #canvasWrapper,
+    body.pvp-fs-fight #canvasWrapper {
       width: 100% !important;
       height: 100% !important;
       aspect-ratio: auto !important;
       min-height: 0 !important;
     }
-    #fullscreenStage:fullscreen #fsCenterQuickBar {
+    #fullscreenStage:fullscreen #fsCenterQuickBar,
+    body.pvp-fs-fight #fsCenterQuickBar {
       display: flex !important;
     }
-    #fullscreenStage:fullscreen #arcadeControlsPanel {
+    #fullscreenStage:fullscreen #arcadeControlsPanel,
+    body.pvp-fs-fight #arcadeControlsPanel {
       flex-shrink: 0 !important;
-      padding: 5px 12px !important;
-      border-radius: 12px !important;
+      padding: 3px 10px !important;
+      border-radius: 10px !important;
     }
-    #fullscreenStage:fullscreen #stickBase {
-      width: 86px !important;
-      height: 86px !important;
+    #fullscreenStage:fullscreen #stickBase,
+    body.pvp-fs-fight #stickBase {
+      width: 76px !important;
+      height: 76px !important;
       border-width: 3px !important;
     }
-    #fullscreenStage:fullscreen #stickKnob {
-      width: 34px !important;
-      height: 34px !important;
-      margin: -17px 0 0 -17px !important;
+    #fullscreenStage:fullscreen #stickKnob,
+    body.pvp-fs-fight #stickKnob {
+      width: 30px !important;
+      height: 30px !important;
+      margin: -15px 0 0 -15px !important;
     }
-    #fullscreenStage:fullscreen .gp-btn {
-      width: 44px !important;
-      height: 44px !important;
+    #fullscreenStage:fullscreen .gp-btn,
+    body.pvp-fs-fight .gp-btn {
+      width: 40px !important;
+      height: 40px !important;
     }
-    #fullscreenStage:fullscreen .gp-btn span:first-child {
-      font-size: 0.9rem !important;
+    #fullscreenStage:fullscreen .gp-btn span:first-child,
+    body.pvp-fs-fight .gp-btn span:first-child {
+      font-size: 0.85rem !important;
     }
-    #fullscreenStage:fullscreen .gp-btn span:last-child {
-      font-size: 8px !important;
+    #fullscreenStage:fullscreen .gp-btn span:last-child,
+    body.pvp-fs-fight .gp-btn span:last-child {
+      font-size: 7.5px !important;
     }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/25">
-    <div class="max-w-4xl mx-auto flex flex-col gap-2">
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-3 py-1.5 sticky top-0 z-30 shadow-lg shadow-black/25">
+    <div class="max-w-4xl mx-auto flex flex-col gap-1">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/25 to-rose-600/25 text-amber-400 font-extrabold text-sm border border-amber-500/40 shadow-inner shrink-0">🥋</span>
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-amber-500/25 to-rose-600/25 text-amber-400 font-extrabold text-sm border border-amber-500/40 shadow-inner shrink-0">🥋</span>
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">나이트파이터</h1>
         </div>
-        <button id="authHeaderBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+        <button id="authHeaderBtn" type="button" class="px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
           로그인
         </button>
       </div>
 
-      <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
-        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
-        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
-        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
+      <div class="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-800/70">
+        <button id="bgmToggleBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+        <button id="soundToggleBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
       </div>
     </div>
   </header>
 
   <!-- Main -->
-  <main class="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-3.5">
+  <main class="flex-1 max-w-4xl w-full mx-auto px-2.5 sm:px-4 py-1.5 sm:py-2 flex flex-col gap-1.5 sm:gap-2">
     <!-- 모드 전환 바 -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-xl flex items-center justify-between gap-2 flex-wrap">
+    <section id="modeToggleBar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 shadow-xl flex items-center justify-between gap-1.5 flex-wrap">
       <div class="flex items-center gap-2">
         <button id="modePracticeTab" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-amber-500 text-slate-950 shadow transition cursor-pointer">
           🥋 일반 게임 (STAGE 1~5)
@@ -210,7 +229,7 @@
       <!-- 위쪽 게임 화면 (게이지바 최상단 고정 + 넓은 전장 뷰) -->
       <!-- ========================================== -->
       <section id="gameAreaSection" class="relative bg-slate-900 border-2 border-amber-500/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
-        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-auto sm:h-[430px] min-h-[250px] bg-slate-950">
+        <div id="canvasWrapper" class="relative w-full h-[clamp(195px,35dvh,350px)] sm:h-[340px] bg-slate-950">
           <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
 
           <!-- 상단 체력바 & 라운드 타이머 (최상단 밀착 배치) -->
@@ -285,30 +304,29 @@
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- 캐릭터 얼굴 선택창 (사진 + 이름만 컴팩트 나열) -->
-      <section id="charSelectPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col gap-2">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="text-xs font-black text-amber-300">🎭 파이터 선택</h2>
-        </div>
-
-        <div id="facePortraitGrid" class="grid grid-cols-6 gap-1.5 sm:gap-2"></div>
-
-        <div id="charSelectFooter" class="pt-1.5 border-t border-slate-800 flex items-center justify-end">
-          <button id="startFightBtn" type="button" class="w-full sm:w-auto px-6 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 transition cursor-pointer">
+          <!-- STAGE 1 도전 버튼: 게임 화면 하단 빈 공간에 배치 -->
+          <button id="startFightBtn" type="button" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-xs shadow-lg border border-amber-200/80 active:scale-95 transition cursor-pointer whitespace-nowrap">
             🥊 STAGE 1 도전 시작!
           </button>
         </div>
       </section>
 
+      <!-- 캐릭터 얼굴 선택창 (사진 + 이름만 컴팩트 나열) -->
+      <section id="charSelectPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-1.5 sm:p-2 shadow-xl flex flex-col gap-1">
+        <div class="flex items-center justify-between gap-2 px-0.5">
+          <h2 class="text-[11px] font-black text-amber-300">🎭 파이터 선택</h2>
+        </div>
+
+        <div id="facePortraitGrid" class="grid grid-cols-6 gap-1 sm:gap-1.5"></div>
+      </section>
+
       <!-- ========================================== -->
       <!-- 아래쪽 1: 아케이드 조작 패드 -->
       <!-- ========================================== -->
-      <section id="arcadeControlsPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3.5 shadow-xl flex flex-col gap-3">
-        <div class="flex items-center justify-between gap-3">
-          <div id="stickBase" class="relative w-32 h-32 shrink-0 rounded-full border-4 border-slate-700 shadow-[inset_0_6px_18px_rgba(0,0,0,.9),0_4px_12px_rgba(0,0,0,.6)]" style="touch-action:none;background:radial-gradient(circle at 50% 40%,#1e293b,#020617 75%)">
+      <section id="arcadeControlsPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2 sm:p-3 shadow-xl flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-2 sm:gap-3">
+          <div id="stickBase" class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 rounded-full border-4 border-slate-700 shadow-[inset_0_6px_18px_rgba(0,0,0,.9),0_4px_12px_rgba(0,0,0,.6)]" style="touch-action:none;background:radial-gradient(circle at 50% 40%,#1e293b,#020617 75%)">
             <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-600 text-xs">◀</span>
             <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 text-xs">▶</span>
             <span class="absolute top-1.5 left-1/2 -translate-x-1/2 text-slate-600 text-xs">▲</span>
@@ -330,11 +348,11 @@
               </button>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-x-3 gap-y-2.5 shrink-0" style="transform:rotate(-6deg)">
-            <button id="btn1" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#7dd3fc,#2563eb 60%,#1e3a8a)"><span class="text-lg leading-none">1</span><span class="text-[10px]">왼손</span></button>
-            <button id="btn2" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#a5b4fc,#4f46e5 60%,#312e81)"><span class="text-lg leading-none">2</span><span class="text-[10px]">오른손</span></button>
-            <button id="btn3" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fdba74,#ea580c 60%,#7c2d12)"><span class="text-lg leading-none">3</span><span class="text-[10px]">왼발</span></button>
-            <button id="btn4" type="button" class="gp-btn w-[60px] h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fca5a5,#dc2626 60%,#7f1d1d)"><span class="text-lg leading-none">4</span><span class="text-[10px]">오른발</span></button>
+          <div class="grid grid-cols-2 gap-x-2.5 gap-y-2 shrink-0" style="transform:rotate(-6deg)">
+            <button id="btn1" type="button" class="gp-btn w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#7dd3fc,#2563eb 60%,#1e3a8a)"><span class="text-base sm:text-lg leading-none">1</span><span class="text-[9px] sm:text-[10px]">왼손</span></button>
+            <button id="btn2" type="button" class="gp-btn w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#a5b4fc,#4f46e5 60%,#312e81)"><span class="text-base sm:text-lg leading-none">2</span><span class="text-[9px] sm:text-[10px]">오른손</span></button>
+            <button id="btn3" type="button" class="gp-btn w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fdba74,#ea580c 60%,#7c2d12)"><span class="text-base sm:text-lg leading-none">3</span><span class="text-[9px] sm:text-[10px]">왼발</span></button>
+            <button id="btn4" type="button" class="gp-btn w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] rounded-full text-white font-black flex flex-col items-center justify-center cursor-pointer" style="background:radial-gradient(circle at 35% 28%,#fca5a5,#dc2626 60%,#7f1d1d)"><span class="text-base sm:text-lg leading-none">4</span><span class="text-[9px] sm:text-[10px]">오른발</span></button>
           </div>
         </div>
       </section>
@@ -859,7 +877,7 @@
             <circle cx="59" cy="52" r="2.4" fill="#fde047" stroke="${ol}" stroke-width=".8"/>` : '';
         const lips = (f.id === 'pai' || f.id === 'sarah') ? '#e11d48' : '#7c2d12';
         return `
-          <svg viewBox="0 0 80 96" class="w-full max-w-[48px] sm:max-w-[64px] h-auto mx-auto drop-shadow-lg" style="overflow:visible">
+          <svg viewBox="0 0 80 96" class="w-full max-w-[38px] sm:max-w-[54px] h-auto mx-auto drop-shadow-lg" style="overflow:visible">
             <defs>
               <linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${jSh(f.aura,-30)}"/><stop offset="1" stop-color="#0b1020"/></linearGradient>
               <radialGradient id="${id}g" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="${f.aura}" stop-opacity=".85"/><stop offset="1" stop-color="${f.aura}" stop-opacity="0"/></radialGradient>
@@ -1010,14 +1028,22 @@
 
       function resizeCanvas() {
         const rect = canvasWrapper.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        viewW = Math.max(320, rect.width || 900);
-        viewH = Math.max(220, rect.height || 430);
+        viewW = Math.max(300, rect.width);
+        viewH = Math.max(160, rect.height);
         canvas.width = Math.floor(viewW * dpr);
         canvas.height = Math.floor(viewH * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
       window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(resizeCanvas, 120);
+        setTimeout(resizeCanvas, 350);
+      });
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(() => resizeCanvas()).observe(canvasWrapper);
+      }
 
       const fullscreenStage = document.getElementById('fullscreenStage');
       const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -1029,7 +1055,10 @@
       fullscreenBtn.addEventListener('click', async () => {
         try {
           if (!document.fullscreenElement) {
-            await fullscreenStage.requestFullscreen();
+            const targetEl = (currentMode === 'pvp' && phase === 'select')
+              ? document.documentElement
+              : fullscreenStage;
+            await targetEl.requestFullscreen();
             fullscreenBtn.textContent = '✕ 축소';
             lockOrientationMode('landscape');
           } else {
@@ -1041,12 +1070,17 @@
           showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
         }
         setTimeout(resizeCanvas, 100);
+        setTimeout(resizeCanvas, 350);
       });
       document.addEventListener('fullscreenchange', () => {
         const isFs = Boolean(document.fullscreenElement);
         fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
+        if (!isFs) {
+          document.body.classList.remove('pvp-fs-fight');
+        }
         lockOrientationMode(isFs ? 'landscape' : 'portrait');
         setTimeout(resizeCanvas, 100);
+        setTimeout(resizeCanvas, 350);
       });
 
       document.getElementById('fsShrinkBtn').addEventListener('click', async () => {
@@ -1583,20 +1617,38 @@
         ctx.restore();
       }
 
-      function drawArena() {
+      function drawArena(extLeft = 0, extTop = 0, extRight = ARENA_W, extBottom = ARENA_H) {
         const themeIdx = phase === 'select' ? 1 : Math.min(5, Math.max(1, arcadeStage));
         const th = STAGE_THEMES[themeIdx] || STAGE_THEMES[1];
 
-        const sky = ctx.createLinearGradient(0, 0, 0, FLOOR_Y);
+        const sky = ctx.createLinearGradient(0, extTop, 0, FLOOR_Y);
         sky.addColorStop(0, th.skyTop);
         sky.addColorStop(0.55, th.skyMid);
         sky.addColorStop(1, th.skyBot);
         ctx.fillStyle = sky;
-        ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+        ctx.fillRect(extLeft, extTop, extRight - extLeft, FLOOR_Y - extTop);
+
+        const abyss = ctx.createLinearGradient(0, FLOOR_Y - 36, 0, extBottom);
+        abyss.addColorStop(0, th.deckTop);
+        abyss.addColorStop(0.45, th.deckMid);
+        abyss.addColorStop(1, th.deckBot);
+        ctx.fillStyle = abyss;
+        ctx.fillRect(extLeft, FLOOR_Y - 36, extRight - extLeft, extBottom - (FLOOR_Y - 36));
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1.5;
+        for (let gx = Math.floor((extLeft - 60) / 75) * 75; gx < extRight + 60; gx += 75) {
+          if (gx >= RING_LEFT + 50 && gx <= RING_RIGHT - 40) continue;
+          ctx.beginPath();
+          ctx.moveTo(gx, FLOOR_Y - 36);
+          ctx.lineTo(gx + (gx - ARENA_W / 2) * 0.14, extBottom);
+          ctx.stroke();
+        }
 
         ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
-        for (let bx = 20; bx < ARENA_W; bx += 75) {
-          const bh = 65 + ((bx * 37) % 85);
+        const startBx = Math.floor((extLeft - 20) / 75) * 75 + 20;
+        for (let bx = startBx; bx < extRight; bx += 75) {
+          const bh = 65 + ((Math.abs(bx) * 37) % 85);
           ctx.fillRect(bx, FLOOR_Y - 35 - bh, 52, bh + 35);
         }
 
@@ -1840,8 +1892,13 @@
           state.p2Id = arcadeQueue[arcadeStage - 1] || 'pai';
         }
 
+        if (document.fullscreenElement === document.documentElement) {
+          document.body.classList.add('pvp-fs-fight');
+        }
         document.getElementById('charSelectPanel').classList.add('hidden');
+        document.getElementById('startFightBtn').classList.add('hidden');
         document.getElementById('abortFightBtn').classList.remove('hidden');
+        setTimeout(resizeCanvas, 50);
         document.getElementById('matchResultBanner').classList.add('hidden');
         document.getElementById('matchResultBanner').classList.remove('flex');
         if (state.bgmEnabled) startBGM(true);
@@ -2194,16 +2251,25 @@
         }
 
         ctx.clearRect(0, 0, viewW, viewH);
-        const scale = Math.min(viewW / ARENA_W, viewH / ARENA_H);
+        const isWideFs = (viewW / viewH) > 2.2;
+        const scale = isWideFs
+          ? Math.min(viewW / ARENA_W, viewH / 355)
+          : Math.min(viewW / ARENA_W, viewH / ARENA_H);
         const ox = (viewW - ARENA_W * scale) / 2;
-        const oy = (viewH - ARENA_H * scale) / 2;
+        const oy = isWideFs
+          ? (viewH - 365 * scale)
+          : (viewH - ARENA_H * scale) / 2;
+        const extLeft = -ox / scale - 6;
+        const extTop = -oy / scale - 6;
+        const extRight = (viewW - ox) / scale + 6;
+        const extBottom = (viewH - oy) / scale + 6;
         ctx.save();
         if (screenShake > 0) {
           ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
         }
         ctx.translate(ox, oy);
         ctx.scale(scale, scale);
-        drawArena();
+        drawArena(extLeft, extTop, extRight, extBottom);
         drawPolygonFighter(f1);
         drawPolygonFighter(f2);
 
@@ -2263,6 +2329,7 @@
 
       function returnToSelect() {
         phase = 'select';
+        document.body.classList.remove('pvp-fs-fight');
         arcadeStage = 1;
         stopBGM();
         f1 = createFighter(state.p1Id, 1);
@@ -2271,6 +2338,7 @@
         document.getElementById('matchResultBanner').classList.remove('flex');
         document.getElementById('abortFightBtn').classList.add('hidden');
         document.getElementById('charSelectPanel').classList.remove('hidden');
+        if (currentMode === 'practice') document.getElementById('startFightBtn').classList.remove('hidden');
         updateSelectUi();
       }
 
@@ -2351,7 +2419,6 @@
         document.getElementById('fullscreenStage').classList.remove('hidden');
         document.getElementById('gameAreaSection').classList.remove('hidden');
         document.getElementById('arcadeControlsPanel').classList.remove('hidden');
-        document.getElementById('charSelectFooter').classList.remove('hidden');
         document.getElementById('startFightBtn').classList.remove('hidden');
         document.getElementById('startFightBtn').textContent = '🥊 STAGE 1 도전 시작!';
         // '1P 파이터를 고른 뒤 <b>나무 샌드백</b>으로 스킬을 연습하고, [STAGE 1 도전 시작]을 누르면 나머지 파이터들과 랜덤 연전을 펼칩니다!';
@@ -2367,7 +2434,6 @@
         document.getElementById('pvpLobbySection').classList.remove('hidden');
         document.getElementById('pvpLobbySection').classList.add('flex');
         document.getElementById('charSelectPanel').classList.remove('hidden');
-        document.getElementById('charSelectFooter').classList.add('hidden');
         document.getElementById('startFightBtn').classList.add('hidden');
         // '대전 모드에서는 1P와 2P 캐릭터를 각각 선택하거나 실시간 대기실 슬롯에 참가할 수 있습니다.';
         updateSelectUi();
