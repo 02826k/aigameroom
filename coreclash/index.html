@@ -274,7 +274,6 @@
         </div>
       </div>
       <div class="text-[11px] text-slate-400 text-center" id="pvpNoticeText">챔피언을 선택한 뒤 블루팀/레드팀 자리에 참가하세요.</div>
-
     </section>
 
     <!-- ============================================================== -->
@@ -1654,6 +1653,15 @@
         document.getElementById('matchWinnerTitle').textContent = iWon ? '🏆 칼바람 승리!' : '💀 패배...';
         document.getElementById('matchWinnerTitle').className = 'text-2xl sm:text-3xl font-black ' + (iWon ? 'text-amber-300' : 'text-rose-400');
         document.getElementById('matchResultSub').textContent = subMsg || (iWon ? '적 넥서스를 파괴했습니다!' : '아군 넥서스가 파괴되었습니다.');
+        const rematchBtn = document.getElementById('rematchBtn');
+        const resultLobbyBtn = document.getElementById('resultLobbyBtn');
+        if (gameModeActive === 'pvp') {
+          if (rematchBtn) rematchBtn.classList.add('hidden');
+          if (resultLobbyBtn) resultLobbyBtn.textContent = '🪵 대기실로';
+        } else {
+          if (rematchBtn) rematchBtn.classList.remove('hidden');
+          if (resultLobbyBtn) resultLobbyBtn.textContent = '↩ 챔피언 선택';
+        }
         const mb = document.getElementById('matchResultBanner');
         mb.classList.remove('hidden');
         mb.classList.add('flex');
