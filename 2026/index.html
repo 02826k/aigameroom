@@ -108,6 +108,9 @@
             <div id="selectedPlaneInfo" class="text-xs sm:text-sm font-black text-white">선택 기체: F-26 팔콘 (일반)</div>
             <div id="selectedPlaneDesc" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">일반 밸런스형 · 안정적인 트윈 플라즈마 포</div>
           </div>
+          <div id="launchWarningMsg" class="hidden px-3 py-1.5 rounded-lg bg-purple-950/95 border border-amber-400/80 text-amber-300 text-xs font-black text-center shadow-lg">
+            👑 VIP가입후 출격하세요
+          </div>
           <button id="launchMissionBtn" type="button" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-sky-500/25 active:scale-95 transition cursor-pointer">
             🚀 출격하기 (STAGE 1)
           </button>
@@ -300,6 +303,7 @@
         if (raw) state = { ...state, ...JSON.parse(raw) };
       } catch (e) {}
       if (!PLANES[state.selectedPlane]) state.selectedPlane = 'falcon';
+      if (!authToken) state.isVip = false;
 
       function saveState(sync = false) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -394,16 +398,13 @@
               </div>
               <div class="min-w-0">
                 <div class="text-[11px] sm:text-sm font-black text-white truncate">${pl.name}</div>
-                <div class="text-[9px] sm:text-[11px] font-bold ${isSel ? 'text-sky-300' : locked ? 'text-purple-300' : 'text-slate-400'}">${isSel ? '✔ 선택됨' : locked ? '👑 VIP가입후 선택하세요' : '선택 가능'}</div>
+                <div class="text-[9px] sm:text-[11px] font-bold ${isSel ? 'text-sky-300' : locked ? 'text-purple-300' : 'text-slate-400'}">${isSel ? '✔ 선택됨' : locked ? '👑 VIP 전용' : '선택 가능'}</div>
               </div>
             </div>
           `;
           card.addEventListener('click', () => {
-            if (locked) {
-              showToast('👑 VIP가입후 선택하세요');
-              return;
-            }
             state.selectedPlane = pl.id;
+            document.getElementById('launchWarningMsg')?.classList.add('hidden');
             saveState(false);
             renderHangar();
           });
@@ -491,6 +492,15 @@
 
       function startMission() {
         const tpl = PLANES[state.selectedPlane] || PLANES.falcon;
+        if (tpl.vipOnly && !state.isVip) {
+          const wEl = document.getElementById('launchWarningMsg');
+          if (wEl) {
+            wEl.classList.remove('hidden');
+            clearTimeout(window._launchWarnTimer);
+            window._launchWarnTimer = setTimeout(() => wEl.classList.add('hidden'), 2800);
+          }
+          return;
+        }
         window.scrollTo(0, 0);
         enterPortraitFullscreen();
         document.body.classList.add('in-game');
