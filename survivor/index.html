@@ -8,208 +8,209 @@
   <link rel="manifest" href="./manifest.json" />
   <title>좀비 서바이벌 — AI게임장</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Inter', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overflow-y: auto; background: #020617; min-height: 100vh; min-height: 100dvh; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; max-width: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background: #020617;
+      color: #f1f5f9;
+      height: 100dvh;
+    }
     canvas { touch-action: none; }
     .hidden { display: none !important; }
+    #fullscreenMain:fullscreen {
+      max-width: 100% !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      background: #020617 !important;
+      padding: 8px !important;
+      gap: 6px !important;
+      overflow: hidden !important;
+    }
+    #fullscreenMain:fullscreen #arenaWrap {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+    }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col items-center pb-4 gap-3 select-none">
+<body class="flex flex-col h-[100dvh] select-none">
 
-  <!-- 첫 화면 전체(100dvh)를 채우는 게임 플레이 영역 -->
-  <div class="w-full max-w-md h-[100dvh] flex flex-col justify-between p-2 shrink-0">
-  <!-- 최상단 계정 / VIP 바 -->
-  <div class="w-full max-w-md flex items-center justify-between px-1 mb-1 z-20">
-    <div class="flex items-center gap-1.5">
-      <span class="text-xs font-black tracking-wider text-rose-500">☣️ ZOMBIE SURVIVAL</span>
-      <span id="vipBadge" class="hidden px-1.5 py-0.5 text-[10px] font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 rounded">VIP</span>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <button id="autoDodgeBtn" class="hidden px-2 py-1 rounded-lg bg-emerald-600 border border-emerald-400 text-white text-[11px] font-black shadow transition cursor-pointer">
-        🛡️ 자동회피: ON
-      </button>
-      <button id="vipBtn" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[11px] font-bold hover:bg-amber-500/30 transition cursor-pointer">
-        👑 VIP 상점
-      </button>
-      <button id="loginBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-bold hover:bg-slate-700 transition cursor-pointer">
-        👤 로그인
-      </button>
-    </div>
-  </div>
-
-  <!-- 게임 상태바 -->
-  <header class="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-2 flex items-center justify-between shadow-xl z-20">
-    <div>
-      <div class="text-[11px] font-bold text-slate-400">Lv.<span id="levelVal" class="text-amber-400 text-sm font-black">1</span></div>
-      <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden mt-1">
-        <div id="expBar" class="h-full bg-amber-400 transition-all duration-200" style="width: 0%"></div>
+  <!-- 상단 통합 헤더 -->
+  <header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 sm:px-4 py-1.5 shrink-0 z-30">
+    <div class="max-w-md mx-auto flex flex-col gap-1">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="w-7 h-7 rounded-xl bg-gradient-to-br from-rose-500/30 to-orange-600/30 border border-rose-400/40 flex items-center justify-center text-sm shrink-0">☣️</span>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">좀비 서바이벌</h1>
+          <button id="autoDodgeBtn" type="button" class="hidden px-2 py-0.5 rounded-lg bg-emerald-600 border border-emerald-400 text-white text-[10px] font-black shadow transition active:scale-95 cursor-pointer shrink-0">
+            🛡️ 자동회피: ON
+          </button>
+        </div>
+        <button id="authHeaderBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+          로그인
+        </button>
       </div>
-    </div>
-    <div class="text-center">
-      <div class="text-[10px] font-bold text-rose-400">STAGE <span id="stageVal" class="text-sm font-black text-white">1</span></div>
-      <div id="stageGoalVal" class="text-[11px] font-bold text-emerald-400">처치: 0 / 15</div>
-    </div>
-    <div class="text-right">
-      <div class="text-[11px] font-bold text-slate-400">점수</div>
-      <div id="scoreVal" class="text-sm font-black text-purple-400">0</div>
+      <div class="flex items-center justify-end gap-1.5 text-[11px] border-t border-slate-800/60 pt-1">
+        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">
+          🎵 배경음 ON
+        </button>
+        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">
+          🔊 효과음 ON
+        </button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">
+          나가기
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- 게임 캔버스 아레나 -->
-  <div class="relative w-full flex-1 min-h-0 my-1.5 bg-slate-950 border-2 border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
-    <canvas id="gameCanvas" class="w-full h-full block"></canvas>
-
-    <!-- 보스 경고 배너 -->
-    <div id="bossAlert" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-rose-600/95 border border-rose-300 px-4 py-1.5 rounded-full text-xs font-black text-white shadow-lg animate-bounce z-20">
-      ⚠️ STAGE BOSS 출현!
-    </div>
-
-    <!-- 스테이지 클리어 배너 -->
-    <div id="stageClearAlert" class="hidden absolute inset-0 bg-emerald-950/75 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-      <div class="text-2xl font-black text-emerald-300">STAGE CLEAR!</div>
-      <div id="nextStageText" class="text-xs text-slate-200 mt-1">다음 스테이지로 이동합니다...</div>
-    </div>
-
-    <!-- 시작 / 게임오버 오버레이 -->
-    <div id="overlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 p-6 text-center z-30">
-      <div class="text-4xl">🔫🧟‍♀️</div>
-      <h1 id="overlayTitle" class="text-2xl font-black text-rose-500">좀비 서바이벌</h1>
-      <p id="overlayDesc" class="text-xs text-slate-300 leading-relaxed">
-        몰려오는 좀비 웨이브를 뚫고<br/>스테이지 보스를 처치하여 다음 구역으로 돌파하세요!
-      </p>
-      <button id="startBtn" class="px-8 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-orange-500 text-white font-black text-sm shadow-lg shadow-rose-500/30 transition active:scale-95 cursor-pointer">
-        전투 시작
-      </button>
-    </div>
-
-    <!-- 레벨업 업그레이드 선택 팝업 -->
-    <div id="upgradeModal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 text-center z-40 hidden">
-      <h2 class="text-lg font-black text-amber-300">🎉 레벨 업! 무기 및 능력 강화</h2>
-      <div id="upgradeOptions" class="flex flex-col gap-2.5 w-full max-w-xs mt-2"></div>
-    </div>
-
-    <!-- 용사 키우기 동일 DB 연동 로그인 / 회원가입 모달 -->
-    <div id="loginModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50">
-      <div class="w-full max-w-xs bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-5 shadow-2xl text-center">
-        <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-2xl">
-          🔐
-        </div>
-        <h3 class="text-lg font-black text-amber-300">AI게임장 통합 계정</h3>
-<div class="mb-3"></div>
-
-        <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
-          <button type="button" id="modeLoginBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">
-            기존 계정 로그인
-          </button>
-          <button type="button" id="modeRegisterBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
-            간편 회원가입
-          </button>
-        </div>
-
-        <div class="space-y-2.5 text-left">
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 ml-1">휴대폰 번호 (010 제외 8자리)</label>
-            <div class="flex items-center gap-1.5 mt-1">
-              <span class="px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black text-amber-400">010-</span>
-              <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-amber-400" />
-            </div>
-          </div>
-
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 ml-1">비밀번호 (숫자 4자리)</label>
-            <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full mt-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-amber-400" />
-          </div>
-        </div>
-
-        <div id="loginMsg" class="text-[11px] font-bold text-rose-400 mt-3 hidden"></div>
-
-        <div class="flex gap-2 mt-4">
-          <button type="button" id="closeLoginBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">
-            닫기
-          </button>
-          <button type="button" id="confirmLoginBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-black text-slate-950 shadow-lg shadow-amber-500/20 transition active:scale-95 cursor-pointer">
-            로그인
-          </button>
+  <!-- 메인 게임 플레이 영역 -->
+  <main id="fullscreenMain" class="flex-1 min-h-0 max-w-md w-full mx-auto px-2.5 py-1.5 flex flex-col gap-1.5">
+    <!-- 게임 상태바 + RANK / 전체화면 버튼 -->
+    <section class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-3 py-1.5 flex items-center justify-between gap-2 shadow-xl shrink-0 z-20">
+      <div class="shrink-0">
+        <div class="text-[10px] font-bold text-slate-400">Lv.<span id="levelVal" class="text-amber-400 text-xs sm:text-sm font-black">1</span></div>
+        <div class="w-16 sm:w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
+          <div id="expBar" class="h-full bg-amber-400 transition-all duration-200" style="width: 0%"></div>
         </div>
       </div>
-    </div>
 
-    <!-- AI게임장 바로가기 안내 모달 -->
-    <div id="shortcutModal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-5 z-50">
-      <div class="w-full max-w-xs bg-slate-900 border border-amber-500/50 rounded-2xl p-5 text-center shadow-2xl">
-        <div class="text-2xl mb-1">📲</div>
-        <h3 class="text-base font-black text-amber-300 mb-1">AI게임장 바로가기</h3>
-        <p id="shortcutGuideText" class="text-[11px] text-slate-300 leading-relaxed mb-4"></p>
-        <div class="flex flex-col gap-2">
-          <a href="https://link.inpock.co.kr/aigame" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-xs font-black text-slate-950 shadow-lg text-center">
-            🎮 AI게임장 열기
-          </a>
-          <button type="button" id="closeShortcutBtn" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">
-            닫기
-          </button>
-        </div>
+      <div class="text-center min-w-0">
+        <div class="text-[10px] font-bold text-rose-400">STAGE <span id="stageVal" class="text-xs sm:text-sm font-black text-white">1</span></div>
+        <div id="stageGoalVal" class="text-[10px] sm:text-[11px] font-bold text-emerald-400 truncate">처치: 0 / 15</div>
+      </div>
+
+      <div class="text-right shrink-0">
+        <div class="text-[10px] font-bold text-slate-400">점수</div>
+        <div id="scoreVal" class="text-xs sm:text-sm font-black text-purple-400 tabular-nums">0</div>
+      </div>
+
+      <div class="flex items-center gap-1 shrink-0">
+        <button id="rankOpenBtn" type="button" class="px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black bg-slate-800 hover:bg-slate-700 border border-rose-400/50 text-rose-300 cursor-pointer active:scale-95 transition">
+          🏆 RANK
+        </button>
+        <button id="fullscreenBtn" type="button" class="px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black bg-gradient-to-r from-rose-500 to-orange-500 text-white cursor-pointer active:scale-95 transition">
+          ⛶ 전체화면
+        </button>
+      </div>
+    </section>
+
+    <!-- 게임 캔버스 아레나 -->
+    <div id="arenaWrap" class="relative w-full flex-1 min-h-0 bg-slate-950 border-2 border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
+      <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+      <!-- 보스 경고 배너 -->
+      <div id="bossAlert" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-rose-600/95 border border-rose-300 px-4 py-1.5 rounded-full text-xs font-black text-white shadow-lg animate-bounce z-20">
+        ⚠️ STAGE BOSS 출현!
+      </div>
+
+      <!-- 스테이지 클리어 배너 -->
+      <div id="stageClearAlert" class="hidden absolute inset-0 bg-emerald-950/75 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+        <div class="text-2xl font-black text-emerald-300">STAGE CLEAR!</div>
+        <div id="nextStageText" class="text-xs text-slate-200 mt-1">다음 스테이지로 이동합니다...</div>
+      </div>
+
+      <!-- 시작 / 게임오버 오버레이 -->
+      <div id="overlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 p-6 text-center z-30">
+        <div class="text-4xl">🔫🧟‍♀️</div>
+        <h2 id="overlayTitle" class="text-2xl font-black text-rose-500">좀비 서바이벌</h2>
+        <p id="overlayDesc" class="text-xs text-slate-300 leading-relaxed">
+          몰려오는 좀비 웨이브를 뚫고<br/>스테이지 보스를 처치하여 다음 구역으로 돌파하세요!
+        </p>
+        <button id="startBtn" type="button" class="px-8 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-orange-500 text-white font-black text-sm shadow-lg shadow-rose-500/30 transition active:scale-95 cursor-pointer">
+          전투 시작
+        </button>
+      </div>
+
+      <!-- 레벨업 업그레이드 선택 팝업 -->
+      <div id="upgradeModal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 text-center z-40 hidden">
+        <h2 class="text-lg font-black text-amber-300">🎉 레벨 업! 무기 및 능력 강화</h2>
+        <div id="upgradeOptions" class="flex flex-col gap-2.5 w-full max-w-xs mt-2"></div>
       </div>
     </div>
+  </main>
 
-    <!-- VIP 결제 상점 모달 -->
-    <div id="vipModal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-5 z-50">
-      <div class="w-full max-w-xs bg-slate-900 border border-amber-500/50 rounded-2xl p-5 text-center">
-        <div class="text-2xl mb-1">👑</div>
-        <h3 class="text-base font-black text-amber-300 mb-1">VIP 서바이버 패스</h3>
-        <p class="text-[11px] text-amber-200/90 font-semibold mb-3">1회 결제 시 AI게임장 모든 게임에 VIP 혜택이 적용됩니다!</p>
-        <ul class="text-[11px] text-slate-200 text-left space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 mb-4">
-          <li>🛡️ <b>자동 피하기(Auto-Dodge) AI</b> 기능 개방</li>
-          <li>🔫 <b>더블 샷(2연발)</b> 기본 장착 & 공격력 +30%</li>
-          <li>💖 최대 체력 +50 및 황금 오라 이펙트</li>
-        </ul>
-        <div id="vipStatusArea" class="mb-1">
-          <div class="text-sm font-black text-amber-400 mb-2">결제 금액: 7,000원</div>
-          <div class="flex gap-2">
-            <button id="closeVipBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 cursor-pointer">닫기</button>
-            <button id="payVipBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-xs font-black text-slate-950 shadow-lg cursor-pointer">
-              💳 토스 결제하기
-            </button>
+  <!-- 상단 토스트 알림 -->
+  <div id="toastBox" class="pointer-events-none fixed top-3 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 -translate-y-2">
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-rose-500/50 text-xs font-bold text-rose-200 shadow-xl">알림</div>
+  </div>
+
+  <!-- TOP 10 랭킹 모달 -->
+  <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-rose-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-sm sm:text-base font-black text-rose-400">🏆 좀비 서바이벌 TOP 10</h2>
+          <p class="text-[10px] text-slate-400">최고 점수 기준 · 전화번호 중간자리 보호</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="refreshRankingBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄 새로고침</button>
+          <button id="rankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
+        </div>
+      </div>
+      <div class="rounded-xl bg-slate-950/90 border border-rose-500/30 px-3 py-2 flex items-center justify-between text-xs">
+        <span class="text-slate-300 font-semibold">내 순위</span>
+        <span id="myRankDetailText" class="font-black text-rose-300">로그인 후 플레이 시 등록</span>
+      </div>
+      <div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto text-xs text-slate-400">기록을 불러오는 중...</div>
+    </div>
+  </div>
+
+  <!-- 통합 DB 연동 로그인 / 회원가입 모달 -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="w-full max-w-xs bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-5 shadow-2xl text-center">
+      <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-2xl">🔐</div>
+      <h3 class="text-lg font-black text-amber-300 mb-3">AI게임장 통합 계정</h3>
+
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
+        <button type="button" id="modeLoginBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">
+          기존 계정 로그인
+        </button>
+        <button type="button" id="modeRegisterBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
+          간편 회원가입
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-left">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 ml-1">휴대폰 번호 (010 제외 8자리)</label>
+          <div class="flex items-center gap-1.5 mt-1">
+            <span class="px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black text-amber-400">010-</span>
+            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-amber-400" />
           </div>
         </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 ml-1">비밀번호 (숫자 4자리)</label>
+          <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full mt-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-amber-400" />
+        </div>
+      </div>
+
+      <div id="loginMsg" class="text-[11px] font-bold text-rose-400 mt-3 hidden"></div>
+
+      <div class="flex gap-2 mt-4">
+        <button type="button" id="closeLoginBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">닫기</button>
+        <button type="button" id="confirmLoginBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-black text-slate-950 shadow-lg shadow-amber-500/20 transition active:scale-95 cursor-pointer">로그인</button>
       </div>
     </div>
   </div>
-  </div><!-- /첫 화면 100dvh 게임 영역 끝 -->
 
-  <!-- 스크롤 아래 실시간 랭킹 (전화번호 중간자리 마스킹) -->
-  <section class="w-[calc(100%-1rem)] max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2 shadow-xl z-20">
-    <div class="flex items-center justify-between gap-2">
-      <div>
-        <div class="text-xs font-black text-rose-400">🏆 좀비 서바이벌 명예의 전당</div>
-        <div class="text-[10px] text-slate-400">최고 점수 기준 · 전화번호 중간자리 보호</div>
+  <!-- 로그아웃 확인 모달 -->
+  <div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
+      <h3 class="text-sm font-black text-slate-100 mb-1.5">로그아웃</h3>
+      <p class="text-xs text-slate-400 mb-4">로그아웃 하시겠습니까?</p>
+      <div class="flex gap-2">
+        <button id="logoutCancelBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">취소</button>
+        <button id="logoutConfirmBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white cursor-pointer">로그아웃</button>
       </div>
-      <button id="refreshRankingBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄 새로고침</button>
     </div>
-    <div class="rounded-lg border border-rose-500/25 px-3 py-1.5 flex justify-between items-center text-[11px] bg-slate-950/80">
-      <span class="text-slate-400">내 순위</span>
-      <span id="myRankDetailText" class="font-bold text-rose-300">로그인 후 플레이 시 등록</span>
-    </div>
-    <div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto"></div>
-  </section>
-
-  <!-- 하단 안드로이드 바로가기 아이콘 카드 (PWA 원클릭 설치 + 바로가기 폴백) -->
-  <section class="w-[calc(100%-1rem)] max-w-md bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/35 rounded-2xl p-3 shadow-xl z-20">
-    <div class="flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5 text-left min-w-0">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-xl shrink-0 overflow-hidden">
-          <img src="./icon.png" alt="AI게임장" class="w-full h-full object-cover" onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg='1';this.src='./icon.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='inline';}" />
-          <span style="display:none">📲</span>
-        </div>
-        <div class="min-w-0">
-          <div class="text-xs font-black text-amber-300 truncate">AI게임장 바로가기</div>
-        </div>
-      </div>
-      <button type="button" id="androidInstallBtn" class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition active:scale-95 shrink-0 text-center cursor-pointer">
-        <span id="androidInstallBtnText">아이콘 만들기</span>
-      </button>
-    </div>
-  </section>
+  </div>
 
   <script>
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -238,8 +239,13 @@
       }
       throw lastErr || new Error('서버 연결 실패');
     }
+
     const GAME_ID = 'zombie_survival';
-    const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+    const TOKEN_KEYS = ['hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'gongdaegong_jwt_token', 'aigameroom_jwt_token', 'moto_racing_3d_jwt'];
+    const USER_KEYS = ['hero_clicker_username', 'gongdaegong_username', 'aigameroom_username', 'moto_racing_3d_user'];
+    const VIP_KEY = 'hero_clicker_is_vip';
+    const AUDIO_PREF_KEY = 'zombie_survival_audio_v1';
+    const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
 
     function maskPhoneMiddle(name) {
       const str = String(name || '');
@@ -247,26 +253,202 @@
       if (m) return `${m[1]}-****-${m[3]}`;
       return str.replace(/(01[016789])[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, '$1-****-$3');
     }
-    const ADMIN_VIP_PHONES = []; // VIP 여부는 서버 DB에서 관리
-    const TOKEN_KEY = 'hero_clicker_jwt_token';
-    const USER_KEY = 'hero_clicker_username';
+
+    let audioPrefs = (() => {
+      try {
+        const raw = JSON.parse(localStorage.getItem(AUDIO_PREF_KEY) || '{}');
+        return { bgm: raw.bgm !== false, sfx: raw.sfx !== false };
+      } catch {
+        return { bgm: true, sfx: true };
+      }
+    })();
 
     let userState = {
       loggedIn: false,
       phone: '',
       pin: '',
-      token: localStorage.getItem(TOKEN_KEY) || null,
-      username: localStorage.getItem(USER_KEY) || null,
-      isVip: false,
+      token: null,
+      username: null,
+      isVip: localStorage.getItem(VIP_KEY) === 'true',
       autoDodge: true,
       serverSaveData: null
     };
     let isRegisterMode = false;
 
-    function isAdminAccount(username) {
-      return Boolean(username && ADMIN_VIP_PHONES.includes(username.trim()));
+    function loadSharedAuth() {
+      let tok = null;
+      let usr = null;
+      try {
+        for (const k of TOKEN_KEYS) {
+          const v = localStorage.getItem(k);
+          if (v) { tok = v; break; }
+        }
+        for (const k of USER_KEYS) {
+          const v = localStorage.getItem(k);
+          if (v) { usr = v; break; }
+        }
+      } catch {}
+      userState.token = tok;
+      userState.username = usr;
+      userState.loggedIn = Boolean(tok || usr);
+      if (usr) userState.phone = usr.replace(/\D/g, '');
+      userState.isVip = localStorage.getItem(VIP_KEY) === 'true';
     }
 
+    function saveSharedAuth(token, username, isVip) {
+      try {
+        if (token) {
+          TOKEN_KEYS.forEach(k => localStorage.setItem(k, token));
+          if (username) USER_KEYS.forEach(k => localStorage.setItem(k, username));
+          if (isVip) localStorage.setItem(VIP_KEY, 'true');
+        } else {
+          TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
+          USER_KEYS.forEach(k => localStorage.removeItem(k));
+          localStorage.removeItem(VIP_KEY);
+        }
+      } catch {}
+    }
+
+    loadSharedAuth();
+
+    // ==========================================
+    // Web Audio 효과음 & 배경음
+    // ==========================================
+    let audioCtx = null;
+    let bgmTimer = null;
+    let bgmStep = 0;
+    const bgmNotes = [146.83, 174.61, 220.00, 196.00, 164.81, 146.83, 130.81, 146.83];
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      return audioCtx;
+    }
+
+    function startBGM() {
+      stopBGM();
+      if (!audioPrefs.bgm) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      bgmStep = 0;
+      bgmTimer = setInterval(() => {
+        if (!audioPrefs.bgm || !audioCtx) return;
+        try {
+          const now = audioCtx.currentTime;
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(bgmNotes[bgmStep++ % bgmNotes.length], now);
+          g.gain.setValueAtTime(0.03, now);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.start(now);
+          o.stop(now + 0.26);
+        } catch {}
+      }, 300);
+    }
+
+    function stopBGM() {
+      if (bgmTimer) {
+        clearInterval(bgmTimer);
+        bgmTimer = null;
+      }
+    }
+
+    function playSound(type) {
+      if (!audioPrefs.sfx) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g);
+      g.connect(ctx.destination);
+      if (type === 'shoot') {
+        o.type = 'square';
+        o.frequency.setValueAtTime(620, now);
+        o.frequency.exponentialRampToValueAtTime(180, now + 0.045);
+        g.gain.setValueAtTime(0.045, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        o.start(now);
+        o.stop(now + 0.055);
+      } else if (type === 'kill') {
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(280, now);
+        o.frequency.exponentialRampToValueAtTime(95, now + 0.09);
+        g.gain.setValueAtTime(0.09, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        o.start(now);
+        o.stop(now + 0.11);
+      } else if (type === 'levelup') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          gain.gain.setValueAtTime(0.08, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.16);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.17);
+        });
+      }
+    }
+
+    function updateAudioButtonsUI() {
+      const bgmBtn = document.getElementById('bgmToggleBtn');
+      const sfxBtn = document.getElementById('soundToggleBtn');
+      bgmBtn.textContent = audioPrefs.bgm ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+      bgmBtn.className = audioPrefs.bgm
+        ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+        : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+      sfxBtn.textContent = audioPrefs.sfx ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+      sfxBtn.className = audioPrefs.sfx
+        ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+        : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+    }
+
+    document.getElementById('bgmToggleBtn').onclick = () => {
+      audioPrefs.bgm = !audioPrefs.bgm;
+      localStorage.setItem(AUDIO_PREF_KEY, JSON.stringify(audioPrefs));
+      updateAudioButtonsUI();
+      if (audioPrefs.bgm && gameState === 'PLAY') startBGM();
+      else stopBGM();
+      showToast(audioPrefs.bgm ? '🎵 배경음 ON' : '🔇 배경음 OFF');
+    };
+
+    document.getElementById('soundToggleBtn').onclick = () => {
+      audioPrefs.sfx = !audioPrefs.sfx;
+      localStorage.setItem(AUDIO_PREF_KEY, JSON.stringify(audioPrefs));
+      updateAudioButtonsUI();
+      showToast(audioPrefs.sfx ? '🔊 효과음 ON' : '🔇 효과음 OFF');
+    };
+
+    document.getElementById('headerExitLobbyBtn').onclick = () => {
+      stopBGM();
+      window.location.href = LOBBY_URL;
+    };
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      box.classList.remove('opacity-0', '-translate-y-2');
+      box.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        box.classList.remove('opacity-100', 'translate-y-0');
+        box.classList.add('opacity-0', '-translate-y-2');
+      }, 2100);
+    }
+
+    // ==========================================
+    // 캔버스 & 세로모드 전체화면
+    // ==========================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -276,18 +458,56 @@
       const w = parent.clientWidth;
       const h = parent.clientHeight;
       if (w > 0 && h > 0) {
+        const prevW = canvas.width || w;
+        const prevH = canvas.height || h;
         canvas.width = w;
         canvas.height = h;
+        if (typeof player !== 'undefined' && prevW > 0 && prevH > 0) {
+          player.x = Math.max(player.radius, Math.min(w - player.radius, (player.x / prevW) * w));
+          player.y = Math.max(player.radius, Math.min(h - player.radius, (player.y / prevH) * h));
+        }
       }
     }
     window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('DOMContentLoaded', resizeCanvas);
-    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 120); setTimeout(resizeCanvas, 320); });
     if (typeof ResizeObserver !== 'undefined' && canvas.parentElement) {
       new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
     }
     resizeCanvas();
 
+    const fullscreenMain = document.getElementById('fullscreenMain');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    function lockPortrait() {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {});
+      }
+    }
+    fullscreenBtn.onclick = async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await fullscreenMain.requestFullscreen();
+          lockPortrait();
+        } else {
+          lockPortrait();
+          await document.exitFullscreen();
+        }
+      } catch {
+        showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
+      }
+      setTimeout(resizeCanvas, 100);
+      setTimeout(resizeCanvas, 300);
+    };
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = Boolean(document.fullscreenElement);
+      fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
+      lockPortrait();
+      setTimeout(resizeCanvas, 100);
+      setTimeout(resizeCanvas, 300);
+    });
+
+    // ==========================================
+    // 게임 상태 변수
+    // ==========================================
     let gameState = 'STOP';
     let score = 0;
     let stage = 1;
@@ -320,38 +540,38 @@
     let particles = [];
 
     // ==========================================
-    // 1. 용사 키우기 통합 DB 로그인 / 저장 로직
+    // 1. 통합 계정 & VIP 동기화
     // ==========================================
     function applyVipUI() {
       if (userState.isVip) {
-        document.getElementById('vipBadge').classList.remove('hidden');
         document.getElementById('autoDodgeBtn').classList.remove('hidden');
-        document.getElementById('vipBtn').textContent = '👑 VIP 보유중';
-        document.getElementById('vipStatusArea').innerHTML = `
-          <div class="text-xs font-black text-emerald-400 mb-2">✅ VIP 패스가 활성화되어 있습니다!</div>
-          <button onclick="document.getElementById('vipModal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-200 cursor-pointer">닫기</button>
-        `;
         if (gameState === 'PLAY') {
           player.maxHp = Math.max(player.maxHp, 150);
           player.multiShot = Math.max(2, player.multiShot);
         }
       } else {
-        document.getElementById('vipBadge').classList.add('hidden');
         document.getElementById('autoDodgeBtn').classList.add('hidden');
-        document.getElementById('vipBtn').textContent = '👑 VIP 상점';
+      }
+      updateAuthHeaderUI();
+    }
+
+    function updateAuthHeaderUI() {
+      const btn = document.getElementById('authHeaderBtn');
+      if (userState.loggedIn && (userState.token || userState.username)) {
+        btn.textContent = userState.isVip ? '👑 VIP 로그아웃' : '로그아웃';
+        btn.className = userState.isVip
+          ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-amber-500 hover:brightness-110 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
+          : 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+      } else {
+        btn.textContent = '로그인';
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
       }
     }
 
-    function updateLoginButtonUI() {
-      const loginBtn = document.getElementById('loginBtn');
-      if (userState.loggedIn && userState.username) {
-        const parts = userState.username.split('-');
-        const shortLabel = parts.length === 3 ? `****-${parts[2]}` : maskPhoneMiddle(userState.username);
-        loginBtn.textContent = `👤 ${shortLabel}`;
-      } else {
-        loginBtn.textContent = '👤 로그인';
-      }
-    }
+    window.addEventListener('storage', () => {
+      loadSharedAuth();
+      applyVipUI();
+    });
 
     async function syncUserToServer() {
       if (!userState.loggedIn || !userState.token) return;
@@ -378,44 +598,47 @@
         });
         if (res.ok) fetchAndRenderRanking();
         if (res.status === 401 || res.status === 403) {
-          userState.loggedIn = false;
-          userState.token = null;
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(USER_KEY);
-          updateLoginButtonUI();
+          handleLogout();
         }
-      } catch (e) {
-        console.warn('서버 저장 통신 지연:', e);
-      }
+      } catch {}
     }
 
     async function restoreSessionFromToken() {
+      loadSharedAuth();
+      applyVipUI();
       if (!userState.token || !userState.username) return;
       try {
         const res = await apiFetch('/api/load', {
           headers: { 'Authorization': `Bearer ${userState.token}` }
         });
         if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
-            userState.token = null;
-            userState.username = null;
-            localStorage.removeItem(TOKEN_KEY);
-            localStorage.removeItem(USER_KEY);
-          }
+          if (res.status === 401 || res.status === 403) handleLogout();
           return;
         }
         const data = await res.json();
         userState.loggedIn = true;
         userState.phone = userState.username.replace(/\D/g, '');
         userState.serverSaveData = data.saveData || {};
-        userState.isVip = Boolean(data.isVip || userState.serverSaveData.isVip || isAdminAccount(userState.username));
-        updateLoginButtonUI();
+        userState.isVip = Boolean(data.isVip || userState.serverSaveData.isVip || localStorage.getItem(VIP_KEY) === 'true');
+        saveSharedAuth(userState.token, userState.username, userState.isVip);
         applyVipUI();
-      } catch (e) {
-        console.warn('세션 복원 대기:', e);
-      }
+      } catch {}
     }
 
+    function handleLogout() {
+      userState.loggedIn = false;
+      userState.token = null;
+      userState.username = null;
+      userState.phone = '';
+      userState.isVip = false;
+      saveSharedAuth(null, null, false);
+      applyVipUI();
+      fetchAndRenderRanking();
+      showToast('로그아웃되었습니다.');
+    }
+
+    const loginModal = document.getElementById('loginModal');
+    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
     const phoneInputEl = document.getElementById('phoneInput');
     const pinInputEl = document.getElementById('pinInput');
     const modeLoginBtn = document.getElementById('modeLoginBtn');
@@ -447,12 +670,30 @@
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
 
-    document.getElementById('loginBtn').onclick = () => {
-      setAuthMode(false);
-      document.getElementById('loginModal').classList.remove('hidden');
-      setTimeout(() => phoneInputEl.focus(), 50);
+    document.getElementById('authHeaderBtn').onclick = () => {
+      if (userState.loggedIn && (userState.token || userState.username)) {
+        logoutConfirmModal.classList.remove('hidden');
+        logoutConfirmModal.classList.add('flex');
+      } else {
+        setAuthMode(false);
+        loginModal.classList.remove('hidden');
+        loginModal.classList.add('flex');
+        setTimeout(() => phoneInputEl.focus(), 50);
+      }
     };
-    document.getElementById('closeLoginBtn').onclick = () => document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('closeLoginBtn').onclick = () => {
+      loginModal.classList.add('hidden');
+      loginModal.classList.remove('flex');
+    };
+    document.getElementById('logoutCancelBtn').onclick = () => {
+      logoutConfirmModal.classList.add('hidden');
+      logoutConfirmModal.classList.remove('flex');
+    };
+    document.getElementById('logoutConfirmBtn').onclick = () => {
+      logoutConfirmModal.classList.add('hidden');
+      logoutConfirmModal.classList.remove('flex');
+      handleLogout();
+    };
 
     confirmLoginBtn.onclick = async () => {
       const rawDigits = phoneInputEl.value.replace(/\D/g, '');
@@ -487,7 +728,7 @@
         currentRegionId: 'village',
         soundEnabled: true,
         bgmEnabled: true,
-        isVip: isAdminAccount(fullPhoneId),
+        isVip: false,
         autoClickEnabled: false,
         zombieSurvival: { score, stage }
       };
@@ -516,23 +757,16 @@
         userState.phone = '010' + rawDigits;
         userState.pin = pin;
         userState.serverSaveData = result.saveData || initialSave;
-        userState.isVip = Boolean(
-          result.isVip || userState.serverSaveData.isVip || isAdminAccount(userState.username)
-        );
+        userState.isVip = Boolean(result.isVip || userState.serverSaveData.isVip);
 
-        localStorage.setItem(TOKEN_KEY, userState.token);
-        localStorage.setItem(USER_KEY, userState.username);
-
-        if (userState.isVip && !userState.serverSaveData.isVip) {
-          await syncUserToServer();
-        }
-
-        updateLoginButtonUI();
-        document.getElementById('loginModal').classList.add('hidden');
+        saveSharedAuth(userState.token, userState.username, userState.isVip);
+        loginModal.classList.add('hidden');
+        loginModal.classList.remove('flex');
         pinInputEl.value = '';
         applyVipUI();
-      } catch (err) {
-        // 모든 원격 서버 연결 불가 시 로컬 통합 계정으로 안전하게 로그인/가입 처리
+        fetchAndRenderRanking();
+        showToast(`🟨 [${maskPhoneMiddle(userState.username)}] 로그인 완료!`);
+      } catch {
         const localAccounts = JSON.parse(localStorage.getItem('aigame_shared_accounts') || '{}');
         if (!isRegisterMode && localAccounts[fullPhoneId]) {
           if (localAccounts[fullPhoneId].pin !== pin) {
@@ -540,143 +774,30 @@
             msgEl.classList.remove('hidden');
             return;
           }
-          userState.isVip = Boolean(localAccounts[fullPhoneId].isVip || isAdminAccount(fullPhoneId));
+          userState.isVip = Boolean(localAccounts[fullPhoneId].isVip);
         } else {
-          const existingVip = Boolean(localAccounts[fullPhoneId]?.isVip || isAdminAccount(fullPhoneId));
+          const existingVip = Boolean(localAccounts[fullPhoneId]?.isVip);
           localAccounts[fullPhoneId] = { pin, isVip: existingVip };
           localStorage.setItem('aigame_shared_accounts', JSON.stringify(localAccounts));
           userState.isVip = existingVip;
         }
 
-        // 동일 도메인 내 용사 키우기 저장 데이터에도 VIP 동기화
-        try {
-          const heroRaw = localStorage.getItem('hero_clicker_rpg_save_v1');
-          if (heroRaw) {
-            const heroSave = JSON.parse(heroRaw);
-            if (heroSave.isVip) userState.isVip = true;
-            else if (userState.isVip) {
-              heroSave.isVip = true;
-              localStorage.setItem('hero_clicker_rpg_save_v1', JSON.stringify(heroSave));
-            }
-          }
-        } catch (e) {}
-
         userState.loggedIn = true;
         userState.username = fullPhoneId;
         userState.phone = '010' + rawDigits;
         userState.pin = pin;
-        localStorage.setItem(USER_KEY, userState.username);
+        saveSharedAuth(userState.token, userState.username, userState.isVip);
 
-        updateLoginButtonUI();
-        document.getElementById('loginModal').classList.add('hidden');
+        loginModal.classList.add('hidden');
+        loginModal.classList.remove('flex');
         pinInputEl.value = '';
         applyVipUI();
+        showToast(`🟨 [${maskPhoneMiddle(userState.username)}] 로그인 완료!`);
       } finally {
         confirmLoginBtn.disabled = false;
         confirmLoginBtn.textContent = isRegisterMode ? '회원가입' : '로그인';
       }
     };
-
-    // ==========================================
-    // 2. 토스페이먼츠 VIP 유료 결제 및 승인 검증
-    // ==========================================
-    document.getElementById('vipBtn').onclick = () => document.getElementById('vipModal').classList.remove('hidden');
-    document.getElementById('closeVipBtn').onclick = () => document.getElementById('vipModal').classList.add('hidden');
-
-    document.getElementById('payVipBtn').onclick = async () => {
-      if (!userState.loggedIn) {
-        document.getElementById('vipModal').classList.add('hidden');
-        document.getElementById('loginMsg').textContent = 'VIP 결제를 위해 먼저 로그인해주세요!';
-        document.getElementById('loginMsg').classList.remove('hidden');
-        document.getElementById('loginModal').classList.remove('hidden');
-        return;
-      }
-
-      try {
-        const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-        const payment = tossPayments.payment({ customerKey: `USER_${userState.phone}` });
-        const orderId = `ZVIP_${userState.phone}_${Date.now()}`;
-
-        sessionStorage.setItem('pending_vip_user', JSON.stringify({
-          phone: userState.phone,
-          pin: userState.pin
-        }));
-
-        await payment.requestPayment({
-          method: 'CARD',
-          amount: { currency: 'KRW', value: 7000 },
-          orderId: orderId,
-          orderName: '좀비 서바이벌 VIP 패스 (자동회피+더블샷)',
-          successUrl: window.location.origin + window.location.pathname,
-          failUrl: window.location.origin + window.location.pathname + '?payFail=1',
-          customerName: `플레이어_${userState.phone.slice(-4)}`
-        });
-      } catch (err) {
-        alert('결제창 호출 중 오류가 발생했습니다: ' + (err.message || err));
-      }
-    };
-
-    async function handlePaymentRedirect() {
-      const params = new URLSearchParams(window.location.search);
-      const paymentKey = params.get('paymentKey');
-      const orderId = params.get('orderId');
-      const amount = params.get('amount');
-
-      if (paymentKey && orderId && Number(amount) === 7000) {
-        const pendingUser = JSON.parse(sessionStorage.getItem('pending_vip_user') || 'null');
-        if (pendingUser && pendingUser.phone) {
-          userState.loggedIn = true;
-          userState.phone = pendingUser.phone;
-          userState.pin = pendingUser.pin;
-          document.getElementById('loginBtn').textContent = `👤 ${pendingUser.phone.slice(3, 7)}****`;
-        }
-
-        try {
-          const res = await apiFetch('/api/payments/confirm', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              paymentKey,
-              orderId,
-              amount: Number(amount),
-              phone: userState.phone
-            })
-          });
-          const confirmData = await res.json().catch(() => ({}));
-
-          if (res.ok && confirmData.success !== false) {
-            userState.isVip = true;
-            if (userState.username || userState.phone) {
-              const key = userState.username || userState.phone;
-              const localAccounts = JSON.parse(localStorage.getItem('aigame_shared_accounts') || '{}');
-              localAccounts[key] = { ...(localAccounts[key] || {}), isVip: true };
-              localStorage.setItem('aigame_shared_accounts', JSON.stringify(localAccounts));
-              try {
-                const heroRaw = localStorage.getItem('hero_clicker_rpg_save_v1');
-                if (heroRaw) {
-                  const heroSave = JSON.parse(heroRaw);
-                  heroSave.isVip = true;
-                  localStorage.setItem('hero_clicker_rpg_save_v1', JSON.stringify(heroSave));
-                }
-              } catch (e) {}
-              await syncUserToServer();
-            }
-            alert('🎉 VIP 결제가 최종 승인되었습니다! [자동 회피] 기능이 개방됩니다.');
-          } else {
-            alert('❌ 결제 승인 검증에 실패했습니다: ' + (confirmData.message || '서버 확인 필요'));
-          }
-        } catch (e) {
-          alert('❌ 결제 승인 서버와 연결할 수 없어 VIP가 적용되지 않았습니다.');
-        }
-
-        sessionStorage.removeItem('pending_vip_user');
-        applyVipUI();
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (params.get('payFail')) {
-        alert('결제가 취소되었거나 실패했습니다.');
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
 
     const autoDodgeBtn = document.getElementById('autoDodgeBtn');
     autoDodgeBtn.onclick = () => {
@@ -684,15 +805,15 @@
       userState.autoDodge = !userState.autoDodge;
       if (userState.autoDodge) {
         autoDodgeBtn.textContent = '🛡️ 자동회피: ON';
-        autoDodgeBtn.className = 'px-2 py-1 rounded-lg bg-emerald-600 border border-emerald-400 text-white text-[11px] font-black shadow transition cursor-pointer';
+        autoDodgeBtn.className = 'px-2 py-0.5 rounded-lg bg-emerald-600 border border-emerald-400 text-white text-[10px] font-black shadow transition active:scale-95 cursor-pointer shrink-0';
       } else {
         autoDodgeBtn.textContent = '🛡️ 자동회피: OFF';
-        autoDodgeBtn.className = 'px-2 py-1 rounded-lg bg-slate-800 border border-slate-600 text-slate-400 text-[11px] font-bold transition cursor-pointer';
+        autoDodgeBtn.className = 'px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-400 text-[10px] font-bold transition active:scale-95 cursor-pointer shrink-0';
       }
     };
 
     // ==========================================
-    // 3. 조작 및 게임 루프
+    // 2. 조작 및 게임 루프
     // ==========================================
     let touchControl = { active: false, startX: 0, startY: 0, moveX: 0, moveY: 0 };
     canvas.addEventListener('pointerdown', (e) => {
@@ -716,8 +837,8 @@
     canvas.addEventListener('pointercancel', resetTouch);
 
     let keys = {};
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
     function updateStageUI() {
       document.getElementById('stageVal').textContent = stage;
@@ -758,6 +879,7 @@
       document.getElementById('bossAlert').classList.add('hidden');
       updateStageUI();
 
+      if (audioPrefs.bgm) startBGM();
       startSpawner();
     }
 
@@ -886,7 +1008,7 @@
       let nearest = null;
       let minDist = player.range;
       zombies.forEach(z => {
-        let dist = Math.hypot(z.x - player.x, z.y - player.y);
+        const dist = Math.hypot(z.x - player.x, z.y - player.y);
         if (dist < minDist) { minDist = dist; nearest = z; }
       });
 
@@ -894,8 +1016,8 @@
         player.facingAngle = Math.atan2(nearest.y - player.y, nearest.x - player.x);
         if (player.attackCooldown <= 0) {
           for (let i = 0; i < player.multiShot; i++) {
-            let spread = (i - (player.multiShot - 1) / 2) * 0.14;
-            let angle = player.facingAngle + spread;
+            const spread = (i - (player.multiShot - 1) / 2) * 0.14;
+            const angle = player.facingAngle + spread;
             bullets.push({
               x: player.x + Math.cos(angle) * 18,
               y: player.y + Math.sin(angle) * 18,
@@ -905,6 +1027,7 @@
               radius: 4
             });
           }
+          playSound('shoot');
           player.attackCooldown = player.attackSpeed;
         }
       } else if (vx !== 0 || vy !== 0) {
@@ -912,7 +1035,7 @@
       }
 
       for (let i = bullets.length - 1; i >= 0; i--) {
-        let b = bullets[i];
+        const b = bullets[i];
         b.x += b.vx;
         b.y += b.vy;
         if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
@@ -921,8 +1044,8 @@
       }
 
       for (let zIdx = zombies.length - 1; zIdx >= 0; zIdx--) {
-        let z = zombies[zIdx];
-        let angle = Math.atan2(player.y - z.y, player.x - z.x);
+        const z = zombies[zIdx];
+        const angle = Math.atan2(player.y - z.y, player.x - z.x);
         z.x += Math.cos(angle) * z.speed;
         z.y += Math.sin(angle) * z.speed;
 
@@ -935,7 +1058,7 @@
         }
 
         for (let bIdx = bullets.length - 1; bIdx >= 0; bIdx--) {
-          let b = bullets[bIdx];
+          const b = bullets[bIdx];
           if (Math.hypot(b.x - z.x, b.y - z.y) < b.radius + z.radius) {
             z.hp -= b.damage;
             bullets.splice(bIdx, 1);
@@ -951,8 +1074,9 @@
             }
 
             if (z.hp <= 0) {
+              playSound('kill');
               score += z.isBoss ? 500 : 15;
-              document.getElementById('scoreVal').textContent = score;
+              document.getElementById('scoreVal').textContent = score.toLocaleString();
               gems.push({ x: z.x, y: z.y, val: z.expVal, radius: z.isBoss ? 10 : 6 });
               zombies.splice(zIdx, 1);
 
@@ -973,10 +1097,10 @@
       }
 
       for (let gIdx = gems.length - 1; gIdx >= 0; gIdx--) {
-        let g = gems[gIdx];
-        let dist = Math.hypot(player.x - g.x, player.y - g.y);
+        const g = gems[gIdx];
+        const dist = Math.hypot(player.x - g.x, player.y - g.y);
         if (dist < 85) {
-          let angle = Math.atan2(player.y - g.y, player.x - g.x);
+          const angle = Math.atan2(player.y - g.y, player.x - g.x);
           g.x += Math.cos(angle) * 5.5;
           g.y += Math.sin(angle) * 5.5;
         }
@@ -997,6 +1121,7 @@
     }
 
     function levelUp() {
+      playSound('levelup');
       player.level++;
       player.exp = 0;
       player.maxExp = Math.floor(player.maxExp * 1.35);
@@ -1016,7 +1141,7 @@
       ];
 
       options.sort(() => 0.5 - Math.random()).slice(0, 3).forEach(opt => {
-        let btn = document.createElement('button');
+        const btn = document.createElement('button');
         btn.className = 'w-full p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-left transition cursor-pointer';
         btn.innerHTML = `<div class="text-xs font-black text-amber-300">${opt.title}</div><div class="text-[10px] text-slate-400 mt-0.5">${opt.desc}</div>`;
         btn.onclick = () => {
@@ -1032,10 +1157,11 @@
     function gameOver() {
       gameState = 'GAMEOVER';
       clearInterval(spawnTimer);
+      stopBGM();
       syncUserToServer();
-      document.getElementById('overlayTitle').textContent = "생존 실패!";
-      document.getElementById('overlayDesc').textContent = `도달 스테이지: STAGE ${stage} | 최종 점수: ${score}점`;
-      document.getElementById('startBtn').textContent = "다시 도전하기";
+      document.getElementById('overlayTitle').textContent = '생존 실패!';
+      document.getElementById('overlayDesc').textContent = `도달 스테이지: STAGE ${stage} | 최종 점수: ${score.toLocaleString()}점`;
+      document.getElementById('startBtn').textContent = '다시 도전하기';
       document.getElementById('overlay').classList.remove('hidden');
     }
 
@@ -1084,7 +1210,7 @@
     function drawZombie(z) {
       ctx.save();
       ctx.translate(z.x, z.y);
-      let angle = Math.atan2(player.y - z.y, player.x - z.x);
+      const angle = Math.atan2(player.y - z.y, player.x - z.x);
       ctx.rotate(angle);
 
       ctx.fillStyle = z.isBoss ? '#7f1d1d' : '#4d7c0f';
@@ -1158,63 +1284,25 @@
       requestAnimationFrame(loop);
     }
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-
-    let deferredInstallPrompt = null;
-    const androidInstallBtn = document.getElementById('androidInstallBtn');
-    const androidInstallBtnText = document.getElementById('androidInstallBtnText');
-
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      androidInstallBtnText.textContent = '바탕화면 아이콘 설치 완료됨';
-      androidInstallBtn.disabled = true;
-      androidInstallBtn.className = 'px-3 py-2.5 bg-slate-800 text-slate-400 text-[11px] font-bold rounded-xl border border-slate-700 shrink-0 cursor-default';
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      androidInstallBtnText.textContent = '아이콘 만들기 (설치 가능)';
-    });
-
-    window.addEventListener('appinstalled', () => {
-      deferredInstallPrompt = null;
-      androidInstallBtnText.textContent = '아이콘 설치 완료!';
-    });
-
-    androidInstallBtn.addEventListener('click', async () => {
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        await deferredInstallPrompt.userChoice;
-        deferredInstallPrompt = null;
-        return;
+    // ==========================================
+    // 3. TOP 10 랭킹 모달
+    // ==========================================
+    const rankModal = document.getElementById('rankModal');
+    document.getElementById('rankOpenBtn').onclick = () => {
+      rankModal.classList.remove('hidden');
+      rankModal.classList.add('flex');
+      fetchAndRenderRanking();
+    };
+    document.getElementById('rankCloseBtn').onclick = () => {
+      rankModal.classList.add('hidden');
+      rankModal.classList.remove('flex');
+    };
+    rankModal.onclick = (e) => {
+      if (e.target === rankModal) {
+        rankModal.classList.add('hidden');
+        rankModal.classList.remove('flex');
       }
-
-      const targetUrl = 'https://link.inpock.co.kr/aigame';
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const guideEl = document.getElementById('shortcutGuideText');
-
-      if (!isMobile) {
-        const urlContent = '[InternetShortcut]\r\nURL=' + targetUrl + '\r\n';
-        const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'AI게임장_바로가기.url';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-        guideEl.innerHTML = '바탕화면용 <b>AI게임장_바로가기.url</b> 파일이 다운로드되었습니다.<br/>실행하면 <b>AI게임장</b> 사이트가 바로 열립니다.';
-      } else {
-        guideEl.innerHTML = 'Chrome 우측 상단 메뉴(<b>⋮</b> 또는 <b>공유</b>) → <b>홈 화면에 추가</b>를 누르면 바탕화면에 <b>AI게임장</b> 아이콘이 설치됩니다.';
-      }
-      document.getElementById('shortcutModal').classList.remove('hidden');
-    });
-
-    document.getElementById('closeShortcutBtn').addEventListener('click', () => {
-      document.getElementById('shortcutModal').classList.add('hidden');
-    });
+    };
 
     async function fetchAndRenderRanking() {
       const box = document.getElementById('rankingListContainer');
@@ -1225,7 +1313,7 @@
         const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}`, { headers });
         const data = await res.json();
         if (!res.ok) throw new Error();
-        const rankings = data.rankings || [];
+        const rankings = (data.rankings || []).slice(0, 10);
         if (data.myRank) {
           myEl.textContent = `${data.totalPlayers || rankings.length}명 중 ${data.myRank.rank}위 · ${(data.myRank.score || 0).toLocaleString()}점`;
         } else if (userState.loggedIn) {
@@ -1235,12 +1323,12 @@
         }
         box.innerHTML = '';
         if (rankings.length === 0) {
-          box.innerHTML = '<div class="text-center text-[11px] text-slate-500 py-3">아직 등록된 랭킹이 없습니다.</div>';
+          box.innerHTML = '<div class="text-center text-[11px] text-slate-500 py-4">아직 등록된 랭킹이 없습니다.</div>';
           return;
         }
         rankings.forEach(it => {
           const row = document.createElement('div');
-          row.className = 'rounded-lg px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-[11px]' + (it.isMe ? ' ring-1 ring-rose-400' : '');
+          row.className = 'rounded-xl px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-[11px]' + (it.isMe ? ' ring-1 ring-rose-400' : '');
           row.innerHTML =
             '<div class="min-w-0 font-bold text-slate-100 truncate">' +
               it.rank + '. ' + maskPhoneMiddle(it.maskedName) +
@@ -1249,15 +1337,20 @@
             '<span class="font-black text-rose-400 shrink-0">' + (it.score || 0).toLocaleString() + ' 점</span>';
           box.appendChild(row);
         });
-      } catch (e) {
-        box.innerHTML = '<div class="text-center text-[11px] text-slate-500 py-3">랭킹 서버 연결 대기 중</div>';
+      } catch {
+        box.innerHTML = '<div class="text-center text-[11px] text-slate-500 py-4">랭킹 서버 연결 대기 중</div>';
       }
     }
     document.getElementById('refreshRankingBtn').addEventListener('click', fetchAndRenderRanking);
 
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
     document.getElementById('startBtn').addEventListener('click', startGame);
+    updateAudioButtonsUI();
+    updateAuthHeaderUI();
     restoreSessionFromToken().then(fetchAndRenderRanking);
-    handlePaymentRedirect();
     loop();
   </script>
 </body>
