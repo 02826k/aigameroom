@@ -155,6 +155,12 @@
     .touch-btn {
       touch-action: manipulation;
     }
+    .hold-btn {
+      touch-action: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
     .vip-btn-glow {
       animation: vp 2.2s infinite ease-in-out;
     }
@@ -262,9 +268,9 @@
 
       <!-- 하단 조작 버튼 (모바일·PC 공용) -->
       <div class="grid grid-cols-5 gap-1.5 sm:gap-2 w-full max-w-[345px] sm:max-w-[465px]">
-        <button id="btnLeft" type="button" class="touch-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">◀</button>
-        <button id="btnDown" type="button" class="touch-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">▼</button>
-        <button id="btnRight" type="button" class="touch-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">▶</button>
+        <button id="btnLeft" type="button" class="touch-btn hold-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">◀</button>
+        <button id="btnDown" type="button" class="touch-btn hold-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">▼</button>
+        <button id="btnRight" type="button" class="touch-btn hold-btn py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-700 border border-slate-700 rounded-xl font-black text-base shadow cursor-pointer">▶</button>
         <button id="btnRotate" type="button" class="touch-btn py-2.5 sm:py-3 bg-indigo-900/90 hover:bg-indigo-800/90 active:bg-indigo-800 border border-indigo-700 rounded-xl font-black text-base shadow cursor-pointer">🔄</button>
         <button id="btnDrop" type="button" class="touch-btn py-2.5 sm:py-3 bg-amber-500 hover:bg-amber-400 active:bg-amber-400 text-slate-950 rounded-xl font-black text-xs shadow cursor-pointer">⚡낙하</button>
       </div>
@@ -1427,23 +1433,40 @@
         if (!el) return;
         let holdTimeout = null;
         let holdInterval = null;
+        let lastTouchTime = 0;
 
         const stopHold = () => {
           if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
           if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
         };
 
-        el.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
+        const startHold = () => {
           stopHold();
           actionFn();
           holdTimeout = setTimeout(() => {
             holdInterval = setInterval(actionFn, repeatMs);
           }, delayMs);
+        };
+
+        el.addEventListener('contextmenu', (e) => e.preventDefault());
+        el.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          lastTouchTime = Date.now();
+          startHold();
+        }, { passive: false });
+        el.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          stopHold();
+        }, { passive: false });
+        el.addEventListener('touchcancel', stopHold);
+
+        el.addEventListener('mousedown', (e) => {
+          if (Date.now() - lastTouchTime < 500) return;
+          e.preventDefault();
+          startHold();
         });
-        el.addEventListener('pointerup', stopHold);
-        el.addEventListener('pointercancel', stopHold);
-        el.addEventListener('pointerleave', stopHold);
+        el.addEventListener('mouseup', stopHold);
+        el.addEventListener('mouseleave', stopHold);
         window.addEventListener('blur', stopHold);
       }
 
