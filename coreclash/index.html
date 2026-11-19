@@ -237,47 +237,40 @@
         <div id="pvpChampSelectGrid" class="grid grid-cols-3 gap-2"></div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div id="slotLeft" class="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col items-center justify-center gap-3 text-center">
-          <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-xl">🔵</div>
-          <div>
-            <div class="text-xs font-extrabold text-blue-300">[ 블루팀 (왼쪽 넥서스) ]</div>
-            <div id="leftPlayerName" class="text-sm font-black text-blue-400 mt-1">빈 자리 (입장 대기중)</div>
-          </div>
-          <div class="w-full flex items-center gap-1.5">
-            <button id="joinLeftBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow transition cursor-pointer">
-              블루팀 참가하기
+      <div class="flex items-stretch gap-2 sm:gap-3">
+        <div id="slotLeft" class="flex-1 min-w-0 bg-slate-950/80 border border-blue-500/30 rounded-xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center">
+          <div class="text-[11px] sm:text-xs font-extrabold text-blue-300">🔵 [ 블루팀 ]</div>
+          <div id="leftPlayerName" class="text-xs sm:text-sm font-black text-blue-400 truncate w-full">빈 자리 (대기중)</div>
+          <div class="w-full flex items-center gap-1">
+            <button id="joinLeftBtn" type="button" class="flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow transition cursor-pointer truncate">
+              블루 참가
             </button>
-            <button id="cancelLeftBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
-              대기취소
+            <button id="cancelLeftBtn" type="button" class="hidden shrink-0 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
+              취소
             </button>
           </div>
         </div>
 
-        <div id="slotRight" class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-3.5 flex flex-col items-center justify-center gap-3 text-center">
-          <div class="w-12 h-12 rounded-2xl bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-xl">🔴</div>
-          <div>
-            <div class="text-xs font-extrabold text-rose-300">[ 레드팀 (오른쪽 넥서스) ]</div>
-            <div id="rightPlayerName" class="text-sm font-black text-rose-400 mt-1">빈 자리 (입장 대기중)</div>
-          </div>
-          <div class="w-full flex items-center gap-1.5">
-            <button id="joinRightBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
-              레드팀 참가하기
-            </button>
-            <button id="cancelRightBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
-              대기취소
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800 gap-2 flex-wrap">
-        <div class="text-[11px] text-slate-400" id="pvpNoticeText">챔피언을 선택한 뒤 블루팀/레드팀 자리에 참가하세요.</div>
         <button id="pvpStartMatchBtn" type="button" disabled
-          class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm transition cursor-not-allowed">
-          ⚔️ 대전 시작하기
+          class="hidden shrink-0 px-3 sm:px-4 rounded-xl bg-gradient-to-b from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm shadow-lg border border-amber-200/80 cursor-pointer flex-col items-center justify-center gap-0.5 animate-pulse">
+          <span>⚔️</span>
+          <span>대전시작</span>
         </button>
+
+        <div id="slotRight" class="flex-1 min-w-0 bg-slate-950/80 border border-rose-500/30 rounded-xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between gap-2 text-center">
+          <div class="text-[11px] sm:text-xs font-extrabold text-rose-300">🔴 [ 레드팀 ]</div>
+          <div id="rightPlayerName" class="text-xs sm:text-sm font-black text-rose-400 truncate w-full">빈 자리 (대기중)</div>
+          <div class="w-full flex items-center gap-1">
+            <button id="joinRightBtn" type="button" class="flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer truncate">
+              레드 참가
+            </button>
+            <button id="cancelRightBtn" type="button" class="hidden shrink-0 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
+              취소
+            </button>
+          </div>
+        </div>
       </div>
+      <div class="text-[11px] text-slate-400 text-center" id="pvpNoticeText">챔피언을 선택한 뒤 블루팀/레드팀 자리에 참가하세요.</div>
 
       <div class="pt-2 border-t border-slate-800">
         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
@@ -1137,58 +1130,60 @@
         if (leftP) {
           const isMeL = leftP.socketId === socket.id;
           const cName = CHAMPIONS[leftP.skinId]?.name || CHAMPIONS[state.selectedChamp].name;
-          leftNameEl.textContent = `${leftP.username} [${cName}] · 참가 대기중`;
+          leftNameEl.textContent = `${leftP.username} [${cName}]`;
           if (isMeL) {
-            joinLeftBtn.textContent = `⏳ 대기중 (${cName})`;
+            joinLeftBtn.textContent = `⏳ 대기중`;
             joinLeftBtn.disabled = true;
-            joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default';
+            joinLeftBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default truncate';
             cancelLeftBtn.classList.remove('hidden');
           } else {
-            joinLeftBtn.textContent = '다른 유저 선점됨';
+            joinLeftBtn.textContent = '선점됨';
             joinLeftBtn.disabled = true;
-            joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed';
+            joinLeftBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed truncate';
             cancelLeftBtn.classList.add('hidden');
           }
         } else {
-          leftNameEl.textContent = '빈 자리 (입장 대기중)';
-          joinLeftBtn.textContent = '블루팀 참가하기';
+          leftNameEl.textContent = '빈 자리 (대기중)';
+          joinLeftBtn.textContent = '블루 참가';
           joinLeftBtn.disabled = false;
-          joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow cursor-pointer';
+          joinLeftBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow cursor-pointer truncate';
           cancelLeftBtn.classList.add('hidden');
         }
 
         if (rightP) {
           const isMeR = rightP.socketId === socket.id;
           const cName = CHAMPIONS[rightP.skinId]?.name || CHAMPIONS[state.selectedChamp].name;
-          rightNameEl.textContent = `${rightP.username} [${cName}] · 참가 대기중`;
+          rightNameEl.textContent = `${rightP.username} [${cName}]`;
           if (isMeR) {
-            joinRightBtn.textContent = `⏳ 대기중 (${cName})`;
+            joinRightBtn.textContent = `⏳ 대기중`;
             joinRightBtn.disabled = true;
-            joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default';
+            joinRightBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default truncate';
             cancelRightBtn.classList.remove('hidden');
           } else {
-            joinRightBtn.textContent = '다른 유저 선점됨';
+            joinRightBtn.textContent = '선점됨';
             joinRightBtn.disabled = true;
-            joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed';
+            joinRightBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed truncate';
             cancelRightBtn.classList.add('hidden');
           }
         } else {
-          rightNameEl.textContent = '빈 자리 (입장 대기중)';
-          joinRightBtn.textContent = '레드팀 참가하기';
+          rightNameEl.textContent = '빈 자리 (대기중)';
+          joinRightBtn.textContent = '레드 참가';
           joinRightBtn.disabled = false;
-          joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer';
+          joinRightBtn.className = 'flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer truncate';
           cancelRightBtn.classList.add('hidden');
         }
 
         const startBtn = document.getElementById('pvpStartMatchBtn');
-        if (count === 2) {
+        if (leftP && rightP) {
           startBtn.disabled = false;
-          startBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer animate-bounce';
-          document.getElementById('pvpNoticeText').textContent = '✨ 양 팀이 모두 준비되었습니다! [대전 시작하기]를 누르세요.';
+          startBtn.classList.remove('hidden');
+          startBtn.classList.add('flex');
+          document.getElementById('pvpNoticeText').textContent = '✨ 양 팀이 모두 준비되었습니다! 가운데 [대전시작]을 누르세요.';
         } else {
           startBtn.disabled = true;
-          startBtn.className = 'px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm cursor-not-allowed';
-          document.getElementById('pvpNoticeText').textContent = '양쪽 참가자가 모두 입장해야 시작할 수 있습니다.';
+          startBtn.classList.add('hidden');
+          startBtn.classList.remove('flex');
+          document.getElementById('pvpNoticeText').textContent = '양쪽 참가자가 모두 입장하면 가운데에 [대전시작] 버튼이 나타납니다.';
         }
       }
 
