@@ -73,10 +73,21 @@
       width: 100vw !important;
       min-height: 100dvh !important;
       height: 100dvh !important;
-      padding: 0.5rem !important;
+      padding: 0.75rem 0.75rem 0.5rem !important;
       margin: 0 !important;
       overflow-y: auto !important;
       background: #020617;
+    }
+    body.arena-fullscreen #gameAreaSection {
+      flex: 1 1 0% !important;
+      min-height: 300px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    body.arena-fullscreen #canvasWrapper {
+      flex: 1 1 0% !important;
+      height: auto !important;
+      min-height: 260px !important;
     }
   </style>
 </head>
@@ -225,8 +236,35 @@
     </section>
 
     <!-- 중간 게임 화면 (연습 모드 및 매치 진행 시 표시) -->
-    <section id="gameAreaSection" class="relative bg-slate-900/95 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl">
-      <div id="canvasWrapper" class="relative w-full aspect-[16/10] sm:aspect-auto sm:h-[420px] min-h-[260px] cursor-pointer bg-slate-950">
+    <section id="gameAreaSection" class="relative bg-slate-900/95 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <!-- 상단 풀와이드 에너지바 + 중앙 스코어판 (게임 캔버스 위쪽 분리 배치) -->
+      <div class="px-2.5 pt-2.5 pb-2 bg-slate-900/95 border-b border-slate-800/80 flex items-center gap-2 shrink-0">
+        <div id="playerUiBox" class="flex-1 min-w-0 bg-slate-950/90 border border-sky-500/80 px-2.5 py-1.5 rounded-xl flex flex-col gap-1 transition-all duration-300">
+          <div class="flex justify-between text-[10px] sm:text-[11px] font-bold text-sky-300 gap-1" id="playerLabelContainer">
+            <span id="playerLabelName" class="truncate">🔵 아군 공</span>
+            <span id="playerHpText" class="shrink-0 tabular-nums">1000 / 1000</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="playerHpBar" class="h-full bg-sky-500 transition-all duration-75" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div id="matchScoreBadge" class="shrink-0 px-2.5 py-2 rounded-xl bg-slate-950/95 border border-amber-400/70 text-[11px] sm:text-xs font-black text-amber-300 shadow-lg tabular-nums">
+          <span id="matchScoreText">0 : 0</span>
+        </div>
+
+        <div id="enemyUiBox" class="flex-1 min-w-0 bg-slate-950/90 border border-rose-500/80 px-2.5 py-1.5 rounded-xl flex flex-col gap-1 transition-all duration-300">
+          <div class="flex justify-between text-[10px] sm:text-[11px] font-bold text-rose-300 gap-1" id="enemyLabelContainer">
+            <span id="enemyLabelName" class="truncate">🔴 적 공 (AI)</span>
+            <span id="enemyHpText" class="shrink-0 tabular-nums">1000 / 1000</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="enemyHpBar" class="h-full bg-rose-500 transition-all duration-75" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="canvasWrapper" class="relative w-full aspect-[16/10] sm:aspect-auto sm:h-[460px] min-h-[260px] cursor-pointer bg-slate-950">
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
 
         <!-- 게임화면 중간 안내 배너 -->
@@ -260,33 +298,6 @@
             <div id="matchWinnerId" class="text-lg sm:text-xl font-black text-amber-300">번호(1234)</div>
             <div id="matchResultLabel" class="text-2xl sm:text-3xl font-black text-white mt-1">🏆 승리!</div>
             <div id="matchResultHint" class="text-xs text-sky-300 font-bold mt-3 animate-pulse">👆 화면을 클릭하여 계속하기</div>
-          </div>
-        </div>
-
-        <!-- 상단 풀와이드 에너지바 + 중앙 스코어판 -->
-        <div class="absolute top-2.5 inset-x-2.5 flex items-center gap-2 pointer-events-none z-10">
-          <div id="playerUiBox" class="flex-1 min-w-0 bg-slate-950/90 border border-sky-500/80 px-2.5 py-1.5 rounded-xl backdrop-blur-sm flex flex-col gap-1 transition-all duration-300">
-            <div class="flex justify-between text-[10px] sm:text-[11px] font-bold text-sky-300 gap-1" id="playerLabelContainer">
-              <span id="playerLabelName" class="truncate">🔵 아군 공</span>
-              <span id="playerHpText" class="shrink-0 tabular-nums">1000 / 1000</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-              <div id="playerHpBar" class="h-full bg-sky-500 transition-all duration-75" style="width: 100%;"></div>
-            </div>
-          </div>
-
-          <div id="matchScoreBadge" class="shrink-0 px-2.5 py-2 rounded-xl bg-slate-950/95 border border-amber-400/70 text-[11px] sm:text-xs font-black text-amber-300 shadow-lg tabular-nums">
-            <span id="matchScoreText">0 : 0</span>
-          </div>
-
-          <div id="enemyUiBox" class="flex-1 min-w-0 bg-slate-950/90 border border-rose-500/80 px-2.5 py-1.5 rounded-xl backdrop-blur-sm flex flex-col gap-1 transition-all duration-300">
-            <div class="flex justify-between text-[10px] sm:text-[11px] font-bold text-rose-300 gap-1" id="enemyLabelContainer">
-              <span id="enemyLabelName" class="truncate">🔴 적 공 (AI)</span>
-              <span id="enemyHpText" class="shrink-0 tabular-nums">1000 / 1000</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-              <div id="enemyHpBar" class="h-full bg-rose-500 transition-all duration-75" style="width: 100%;"></div>
-            </div>
           </div>
         </div>
       </div>
