@@ -69,7 +69,6 @@ body{font-family:'Noto Sans KR',sans-serif;user-select:none;-webkit-tap-highligh
 </div>
 <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5 flex flex-col justify-center min-w-[54px]"><div class="text-[9px] text-slate-400 leading-tight">체력</div><div id="livesDisplay" class="text-xs font-bold text-rose-400 leading-tight">❤️❤️</div></div>
 <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5 flex flex-col justify-center min-w-[50px]"><div class="text-[9px] text-slate-400 leading-tight">좀비</div><div id="speedDisplay" class="text-xs font-extrabold text-cyan-300 tabular-nums leading-tight">대기</div></div>
-<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5 flex flex-col justify-center min-w-[56px]"><div class="text-[9px] text-slate-400 leading-tight">최고</div><div id="highScoreDisplay" class="text-xs font-bold text-amber-300 tabular-nums leading-tight">0 킬</div></div>
 <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2 py-1.5 flex flex-col justify-center min-w-[54px]"><div class="text-[9px] text-slate-400 leading-tight">골드</div><div id="goldDisplay" class="text-xs font-black text-amber-400 tabular-nums leading-tight">0</div></div>
 </div>
 <div class="flex items-center gap-1 shrink-0 ml-auto">
@@ -119,7 +118,7 @@ body{font-family:'Noto Sans KR',sans-serif;user-select:none;-webkit-tap-highligh
 </div>
 
 <!-- VIP Grenade Quick Use Button -->
-<button id="grenadeUseBtn" type="button" class="absolute right-2 bottom-8 sm:right-2.5 sm:bottom-9 z-10 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white border border-amber-300/80 shadow-lg text-[11px] sm:text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 transition">
+<button id="grenadeUseBtn" type="button" class="absolute left-2 top-2 sm:left-2.5 sm:top-2.5 z-10 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white border border-amber-300/80 shadow-lg text-[11px] sm:text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 transition">
 <span>💣</span>
 <span id="grenadeBtnLabel">수류탄 (0)</span>
 <kbd class="px-1 py-0.5 rounded bg-black/35 text-[9px]">G</kbd>
@@ -327,7 +326,7 @@ function sanitize(p) {
   return {
     highScore: typeof p.highScore === 'number' && p.highScore >= 0 ? Math.floor(p.highScore) : 0,
     bestWave: typeof p.bestWave === 'number' && p.bestWave >= 1 ? Math.floor(p.bestWave) : 1,
-    gold: typeof p.gold === 'number' && p.gold >= 0 ? Math.floor(p.gold) : 0,
+    gold: 0,
     soundEnabled: typeof p.soundEnabled === 'boolean' ? p.soundEnabled : true,
     bgmEnabled: typeof p.bgmEnabled === 'boolean' ? p.bgmEnabled : true,
     isVip: isVipVal,
@@ -772,6 +771,7 @@ function clearActors() {
 
 function startGame() {
   clearActors();
+  state.gold = 0;
   distance = 0; stage = 1; lives = state.isVip ? 3 : 2; waveTime = 0;
   spawnT = 0.25; shootT = 0.15; damageFlash = 0; lastSaveAt = 0;
   player.position.set(0, 0, 2); player.rotation.y = 0;
@@ -913,14 +913,17 @@ window.addEventListener('keyup', e => {
 });
 
 let pointerDown = false;
+let pointerType = 'mouse';
 renderer.domElement.addEventListener('pointerdown', e => {
   pointerDown = true;
+  pointerType = e.pointerType || 'mouse';
   renderer.domElement.setPointerCapture?.(e.pointerId);
   steerPointer(e);
   if (!running) startGame();
 });
-renderer.domElement.addEventListener('pointermove', e => { if (pointerDown) steerPointer(e); });
+renderer.domElement.addEventListener('pointermove', e => { if (pointerDown) { pointerType = e.pointerType || pointerType; steerPointer(e); } });
 renderer.domElement.addEventListener('pointerup', () => { pointerDown = false; });
+renderer.domElement.addEventListener('pointercancel', () => { pointerDown = false; });
 function steerPointer(e) {
   const r = renderer.domElement.getBoundingClientRect();
   const nx = (e.clientX - r.left) / r.width * 2 - 1;
@@ -949,9 +952,17 @@ function animate() {
 
     movePlayer(dt);
     if (pointerDown) {
-      player.position.x += (move.x - player.position.x) * Math.min(1, dt * 5);
-      player.position.z += (move.z - player.position.z) * Math.min(1, dt * 5);
-      for (const obs of obstacles) resolveCircleBox(player.position, 0.55, obs);
+      const pdx = move.x - player.position.x;
+      const pdz = move.z - player.position.z;
+      const pdist = Math.hypot(pdx, pdz);
+      if (pdist > 0.12) {
+        const pointerSpeed = pointerType === 'touch' ? 4.8 : 6.0;
+        const step = Math.min(pdist, pointerSpeed * dt);
+        player.position.x = THREE.MathUtils.clamp(player.position.x + (pdx / pdist) * step, -19.5, 19.5);
+        player.position.z = THREE.MathUtils.clamp(player.position.z + (pdz / pdist) * step, -19.5, 19.5);
+        player.rotation.y = Math.atan2(pdx, -pdz);
+        for (const obs of obstacles) resolveCircleBox(player.position, 0.55, obs);
+      }
     }
 
     if (rescueNpc) {
@@ -1205,7 +1216,6 @@ function renderWeaponShop() {
 }
 
 function updateUI() {
-  document.getElementById('highScoreDisplay').textContent = state.highScore.toLocaleString() + ' 킬';
 
   const sfxBtn = document.getElementById('soundToggleBtn');
   sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
