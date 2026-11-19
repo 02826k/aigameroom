@@ -471,6 +471,7 @@ neonR.position.set(6, 2, -5);
 scene.add(neonR);
 
 let dayPhase = 0.35;
+let headlightMode = 'auto'; // 'auto' | 'on' | 'off'
 const hemi = new THREE.HemisphereLight(0x87ceeb, 0x1a1a2e, 0.35);
 scene.add(hemi);
 
@@ -881,14 +882,14 @@ function createBike(variant = 1) {
   headlight.position.set(0, 0.70, -0.71);
   root.add(headlight);
 
-  const bikeSpot = new THREE.SpotLight(isVipBike ? 0xe0f2fe : 0xfef9c3, 0, 38, Math.PI / 5.5, 0.45, 1.2);
+  const bikeSpot = new THREE.SpotLight(isVipBike ? 0xe0f2fe : 0xfef9c3, 0, 52, Math.PI / 5.5, 0.45, 1.1);
   bikeSpot.position.set(0, 0.72, -0.74);
-  bikeSpot.target.position.set(0, 0.1, -18);
+  bikeSpot.target.position.set(0, 0.1, -28);
   root.add(bikeSpot);
   root.add(bikeSpot.target);
 
   const headBeam = new THREE.Mesh(
-    new THREE.ConeGeometry(1.4, 8.5, 14, 1, true),
+    new THREE.ConeGeometry(1.5, 11.5, 14, 1, true),
     new THREE.MeshBasicMaterial({
       color: isVipBike ? 0xbae6fd : 0xfef08a,
       transparent: true,
@@ -898,7 +899,7 @@ function createBike(variant = 1) {
     })
   );
   headBeam.rotation.x = Math.PI / 2;
-  headBeam.position.set(0, 0.55, -5.0);
+  headBeam.position.set(0, 0.55, -6.5);
   headBeam.visible = false;
   root.add(headBeam);
 
@@ -1169,31 +1170,6 @@ function createVipLamborghini() {
   driverVisor.position.set(-0.36, 0.90, 0.06);
   root.add(driverVisor);
 
-  // Passenger inside right seat (long-haired lady, 캄보르기니 전용)
-  const ladyDressMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.55, metalness: 0.2 });
-  const skinMat = new THREE.MeshStandardMaterial({ color: 0xfde68a, roughness: 0.65 });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x271914, roughness: 0.55, metalness: 0.15 });
-  const ladyTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.125, 0.22, 4, 8), ladyDressMat);
-  ladyTorso.position.set(0.36, 0.62, 0.21);
-  ladyTorso.rotation.x = 0.22;
-  root.add(ladyTorso);
-  const ladyHead = new THREE.Mesh(new THREE.SphereGeometry(0.125, 12, 12), skinMat);
-  ladyHead.position.set(0.36, 0.87, 0.17);
-  root.add(ladyHead);
-  const hairTop = new THREE.Mesh(new THREE.SphereGeometry(0.132, 12, 12), hairMat);
-  hairTop.position.set(0.36, 0.89, 0.18);
-  root.add(hairTop);
-  const longHairBack = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.34, 0.08), hairMat);
-  longHairBack.position.set(0.36, 0.72, 0.27);
-  longHairBack.rotation.x = 0.12;
-  root.add(longHairBack);
-  [-0.10, 0.10].forEach(hx => {
-    const sideHair = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.28, 0.07), hairMat);
-    sideHair.position.set(0.36 + hx, 0.75, 0.21);
-    root.add(sideHair);
-  });
-
-  // 4 Sport Wheels
   [[-0.86, 0.30, -1.12], [0.86, 0.30, -1.12], [-0.88, 0.32, 1.10], [0.88, 0.32, 1.10]].forEach(p => {
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(p[1], p[1], 0.24, 16), tireMat);
     tire.rotation.z = Math.PI / 2;
@@ -1206,33 +1182,40 @@ function createVipLamborghini() {
     root.add(rim);
   });
 
-  // Front LED headlights + night spot beam
+  // 양쪽 헤드라이트 + 원거리 동기화 듀얼 빔 (좌우 간격 ±0.72 확장)
   const headlightMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
-  [-0.68, 0.68].forEach(x => {
-    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.08), headlightMat);
+  const bikeSpots = [];
+  const headBeams = [];
+  [-0.72, 0.72].forEach(x => {
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.08, 0.08), headlightMat);
     hl.position.set(x, 0.44, -1.76);
     root.add(hl);
-  });
-  const bikeSpot = new THREE.SpotLight(0xe0f2fe, 0, 42, Math.PI / 5, 0.45, 1.2);
-  bikeSpot.position.set(0, 0.5, -1.8);
-  bikeSpot.target.position.set(0, 0.1, -20);
-  root.add(bikeSpot);
-  root.add(bikeSpot.target);
 
-  const headBeams = [];
-  [-0.68, 0.68].forEach(x => {
+    const spot = new THREE.SpotLight(0xe0f2fe, 0, 85, Math.PI / 5.5, 0.4, 1.0);
+    spot.position.set(x, 0.52, -1.8);
+    spot.target.position.set(x * 1.15, 0.05, -48);
+    root.add(spot);
+    root.add(spot.target);
+    bikeSpots.push(spot);
+
     const beam = new THREE.Mesh(
-      new THREE.ConeGeometry(0.95, 9.2, 14, 1, true),
-      new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false })
+      new THREE.ConeGeometry(1.35, 18.5, 16, 1, true),
+      new THREE.MeshBasicMaterial({
+        color: 0xbae6fd,
+        transparent: true,
+        opacity: 0.16,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      })
     );
     beam.rotation.x = Math.PI / 2;
-    beam.position.set(x, 0.42, -6.35);
+    beam.position.set(x, 0.42, -11.0);
     beam.visible = false;
     root.add(beam);
     headBeams.push(beam);
   });
 
-  // Rear Y-shaped LED taillights & twin exhaust flames
+  // 브레이크등 (평소 어두운 적색 -> 브레이크 시 밝은 적색 점등)
   const tailMat = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
   [-0.58, 0.58].forEach(x => {
     const tl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), tailMat);
@@ -1263,7 +1246,7 @@ function createVipLamborghini() {
   root.userData.jacketMat = jacketMat;
   root.userData.suitMat = suitMat;
   root.userData.headlightMat = headlightMat;
-  root.userData.bikeSpot = bikeSpot;
+  root.userData.bikeSpots = bikeSpots;
   root.userData.headBeams = headBeams;
   root.userData.taillightMat = tailMat;
   root.userData.flames = flames;
@@ -1487,8 +1470,6 @@ let roadScroll = 0;
 let fuel = 100;
 let lowFuelWarned = false;
 let throttle = 0;
-let manualLightOverride = null; // null: 자동(밤에 점등), true: 수동 ON, false: 수동 OFF
-let prevAutoNight = null;
 let keysUD = { up: false, down: false };
 const FUEL_MAX = 100;
 const activeCars = [];
@@ -1569,7 +1550,6 @@ function startGame() {
   distance = 0; lives = state.isVip ? 3 : 1; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false;
   speed = 12; boostT = 0; invuln = 0; nearMissCd = 0; crashFlash = 0;
   fuel = FUEL_MAX; lowFuelWarned = false; throttle = 0; keysUD.up = false; keysUD.down = false;
-  manualLightOverride = null; prevAutoNight = null;
   laneIdx = 1; laneX = 0; targetLaneX = 0;
   dayPhase = 0.28;
   player.position.set(0, 0, 0); player.rotation.set(0, 0, 0);
@@ -1778,6 +1758,14 @@ function isModalOpen() {
 }
 window.addEventListener('keydown', e => {
   if (isModalOpen()) return;
+  if (e.code === 'KeyR' && !e.repeat) {
+    e.preventDefault();
+    headlightMode = headlightMode === 'auto' ? 'on' : headlightMode === 'on' ? 'off' : 'auto';
+    updateDayNight(dayPhase);
+    const label = headlightMode === 'on' ? '💡 라이트 강제 ON' : headlightMode === 'off' ? '🌑 라이트 강제 OFF' : '🌗 라이트 자동(주야간)';
+    showToast(label);
+    return;
+  }
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { changeLane(-1); e.preventDefault(); }
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { changeLane(1); e.preventDefault(); }
   if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
@@ -1785,10 +1773,6 @@ window.addEventListener('keydown', e => {
     if (!running && !isCleared && Date.now() >= overlayLockUntil) startGame();
   }
   if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { keysUD.down = true; e.preventDefault(); }
-  if (e.key === 'r' || e.key === 'R' || e.code === 'KeyR') {
-    const curOn = manualLightOverride !== null ? manualLightOverride : Boolean(prevAutoNight);
-    manualLightOverride = !curOn;
-  }
   if (e.code === 'Space') {
     e.preventDefault();
     if (!running) {
@@ -2150,29 +2134,278 @@ function updateDayNight(phase) {
   sun.color.set(night > 0.3 ? 0x8899cc : 0xffe0c0);
 
   const isNightNow = elev < 0.08;
-  if (prevAutoNight === null) {
-    prevAutoNight = isNightNow;
-  } else if (prevAutoNight !== isNightNow) {
-    prevAutoNight = isNightNow;
-    manualLightOverride = null;
-  }
-  const lightsOn = manualLightOverride !== null ? manualLightOverride : isNightNow;
+  const lightOn = headlightMode === 'on' ? true : headlightMode === 'off' ? false : isNightNow;
   const isBraking = running && keysUD.down;
   [bike1Mesh, bike2Mesh].forEach(bk => {
-    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = lightsOn ? 3.5 : 0;
-    if (bk.userData.headBeam) bk.userData.headBeam.visible = lightsOn;
-    if (bk.userData.headBeams) bk.userData.headBeams.forEach(bm => { bm.visible = lightsOn; });
+    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = lightOn ? 3.5 : 0;
+    if (bk.userData.bikeSpots) {
+      bk.userData.bikeSpots.forEach(sp => { sp.intensity = lightOn ? 3.2 : 0; });
+    }
+    if (bk.userData.headBeam) bk.userData.headBeam.visible = lightOn;
+    if (bk.userData.headBeams) bk.userData.headBeams.forEach(bm => { bm.visible = lightOn; });
     if (bk.userData.headlightMat) {
       bk.userData.headlightMat.color.setHex(
-        lightsOn ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
+        lightOn ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
       );
     }
     if (bk.userData.taillightMat) {
       bk.userData.taillightMat.color.setHex(
-        isBraking ? 0xff1122 : (lightsOn ? 0x991b1b : 0x450a0a)
+        isBraking ? 0xff1122 : (lightOn ? 0x991b1b : 0x450a0a)
       );
     }
   });
   carPool.forEach(c => { if (c.userData.headlightMat) c.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
   busPool.forEach(b => { if (b.userData.headlightMat) b.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
 }
+
+function updateUI() {
+  const sfxBtn = document.getElementById('soundToggleBtn');
+  sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+  sfxBtn.className = state.soundEnabled
+    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+  const bgmBtn = document.getElementById('bgmToggleBtn');
+  bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+  bgmBtn.className = state.bgmEnabled
+    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+  updateBikeSelectUI();
+  renderColorPalette();
+  updateUILive();
+
+  const authBtn = document.getElementById('authHeaderBtn');
+  if (authBtn) {
+    if (authToken) {
+      authBtn.textContent = state.isVip ? '👑 VIP 로그아웃' : '로그아웃';
+      authBtn.className = state.isVip
+        ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
+        : 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+    } else {
+      authBtn.textContent = '로그인';
+      authBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+    }
+  }
+}
+
+let toastTimer = null;
+function showToast(m) {
+  const box = document.getElementById('toastBox');
+  document.getElementById('toastMsg').textContent = m;
+  box.classList.remove('opacity-0', '-translate-y-2');
+  box.classList.add('opacity-100', 'translate-y-0');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    box.classList.add('opacity-0', '-translate-y-2');
+    box.classList.remove('opacity-100', 'translate-y-0');
+  }, 1900);
+}
+
+document.getElementById('soundToggleBtn').onclick = () => { state.soundEnabled = !state.soundEnabled; saveState(true); updateUI(); };
+document.getElementById('bgmToggleBtn').onclick = () => {
+  state.bgmEnabled = !state.bgmEnabled; saveState(true); updateUI();
+  if (state.bgmEnabled) startBGM(); else stopBGM();
+};
+
+document.getElementById('rankOpenBtn').onclick = () => {
+  fetchRank();
+  motoRankModal.classList.remove('hidden');
+  motoRankModal.classList.add('flex');
+};
+document.getElementById('motoRankCloseBtn').onclick = () => {
+  motoRankModal.classList.add('hidden');
+  motoRankModal.classList.remove('flex');
+};
+motoRankModal.onclick = (e) => {
+  if (e.target === motoRankModal) {
+    motoRankModal.classList.add('hidden');
+    motoRankModal.classList.remove('flex');
+  }
+};
+
+async function fetchRank() {
+  const box = document.getElementById('rankingListContainer'), my = document.getElementById('myRankDetailText');
+  if (my) my.textContent = `${(state.bestTotalScore || 0).toLocaleString()} 점`;
+  try {
+    const h = authToken ? { Authorization: 'Bearer ' + authToken } : {};
+    const res = await fetch(API + '/api/ranking?gameId=' + GAME_ID + '&_t=' + Date.now(), { headers: h });
+    const d = await res.json();
+    if (!res.ok) throw 0;
+    if (d.myRank && my) {
+      my.textContent = `${(d.myRank.score || state.bestTotalScore || 0).toLocaleString()} 점 (${d.myRank.rank}위)`;
+    }
+    const list = (d.rankings || []).slice(0, 10);
+    if (list.length === 0) {
+      box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">아직 등록된 순위가 없습니다.</div>';
+      return;
+    }
+    box.innerHTML = '';
+    list.forEach(it => {
+      const dist = it.highScore ?? it.saveData?.highScore ?? (it.isMe ? state.highScore : 0);
+      const maxSpd = it.maxSpeedKmh ?? it.saveData?.maxSpeedKmh ?? (it.isMe ? state.maxSpeedKmh : 0);
+      const rGold = it.bestRunGold ?? it.saveData?.bestRunGold ?? (it.isMe ? state.bestRunGold : 0);
+      const parts = [];
+      if (dist > 0) parts.push('📏 ' + dist.toLocaleString() + 'm');
+      if (maxSpd > 0) parts.push('🚀 ' + maxSpd + 'km/h');
+      if (rGold > 0) parts.push('🪙 ' + rGold.toLocaleString() + 'G');
+      const r = document.createElement('div');
+      r.className = 'rounded-xl px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-xs' + (it.isMe ? ' border-orange-400/60' : '');
+      r.innerHTML =
+        '<div class="min-w-0">' +
+          '<div class="font-bold text-slate-100 truncate">' + it.rank + '위 ' + maskPhoneMiddle(it.maskedName) + (it.isMe ? ' <span class="text-orange-300 text-[10px]">(나)</span>' : '') + '</div>' +
+          (parts.length ? '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + parts.join(' · ') + '</div>' : '') +
+        '</div>' +
+        '<span class="font-black text-orange-400 shrink-0">' + (it.score || 0).toLocaleString() + ' 점</span>';
+      box.appendChild(r);
+    });
+  } catch { box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">랭킹 대기 중</div>'; }
+}
+
+const vipM = document.getElementById('vipModal');
+document.getElementById('vipCloseBtn').onclick = () => { vipM.classList.add('hidden'); vipM.classList.remove('flex'); };
+async function initToss() {
+  if (typeof TossPayments === 'undefined') return;
+  try {
+    const tp = TossPayments(TOSS_KEY);
+    const w = tp.widgets({ customerKey: TossPayments.ANONYMOUS });
+    await w.setAmount({ currency: 'KRW', value: VIP_PRICE });
+    await Promise.all([
+      w.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
+      w.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' })
+    ]);
+    document.getElementById('tossWidgetLoading').classList.add('hidden');
+    document.getElementById('vipPaySubmitBtn').disabled = false;
+  } catch {}
+}
+
+const authM = document.getElementById('authModal');
+const phone = document.getElementById('authPhoneDigits'), pin = document.getElementById('authPinCode');
+function setAuthMode(register) {
+  isRegisterMode = register;
+  document.getElementById('authErrorMsg').classList.add('hidden');
+  const ml = document.getElementById('modeLoginBtn');
+  const mr = document.getElementById('modeRegisterBtn');
+  const sb = document.getElementById('authSubmitBtn');
+  if (register) {
+    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
+    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
+    sb.textContent = '가입하고 현재 데이터 서버저장';
+  } else {
+    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
+    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
+    sb.textContent = '로그인 및 서버저장 연동';
+  }
+}
+document.getElementById('authHeaderBtn').onclick = () => {
+  if (authToken) {
+    logoutConfirmModal.classList.remove('hidden');
+    logoutConfirmModal.classList.add('flex');
+  } else {
+    setAuthMode(false);
+    authM.classList.remove('hidden'); authM.classList.add('flex');
+    setTimeout(() => phone.focus(), 50);
+  }
+};
+document.getElementById('logoutCancelBtn').onclick = () => {
+  logoutConfirmModal.classList.add('hidden');
+  logoutConfirmModal.classList.remove('flex');
+};
+document.getElementById('logoutConfirmBtn').onclick = () => {
+  logoutConfirmModal.classList.add('hidden');
+  logoutConfirmModal.classList.remove('flex');
+  handleLogout(false);
+};
+document.getElementById('authCloseBtn').onclick = () => { authM.classList.add('hidden'); authM.classList.remove('flex'); };
+document.getElementById('modeLoginBtn').onclick = () => setAuthMode(false);
+document.getElementById('modeRegisterBtn').onclick = () => setAuthMode(true);
+phone.oninput = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = d.length > 4 ? d.slice(0, 4) + '-' + d.slice(4) : d; };
+pin.oninput = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); };
+document.getElementById('authForm').onsubmit = async e => {
+  e.preventDefault();
+  const errEl = document.getElementById('authErrorMsg');
+  errEl.classList.add('hidden');
+  const raw = phone.value.replace(/\D/g, '');
+  const pinVal = pin.value.trim();
+  if (raw.length !== 8) {
+    errEl.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
+    errEl.classList.remove('hidden'); phone.focus(); return;
+  }
+  if (!/^\d{4}$/.test(pinVal)) {
+    errEl.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
+    errEl.classList.remove('hidden'); pin.focus(); return;
+  }
+  const id = '010-' + raw.slice(0, 4) + '-' + raw.slice(4);
+  const payload = isRegisterMode
+    ? { username: id, password: pinVal, initialSaveData: state, gameId: GAME_ID }
+    : { username: id, password: pinVal, gameId: GAME_ID };
+  try {
+    const res = await fetch(API + (isRegisterMode ? '/api/register' : '/api/login'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      errEl.textContent = d.error || '로그인/가입 처리 중 오류가 발생했습니다.';
+      errEl.classList.remove('hidden'); return;
+    }
+    authToken = d.token; currentUsername = d.username;
+    if (!isRegisterMode) {
+      if (d.saveData) {
+        state = sanitize({ ...(d.saveData || {}), isVip: Boolean(d.isVip || d.saveData?.isVip) });
+        if (state.isVip) await syncSave(false);
+      } else {
+        if (d.isVip) state.isVip = true;
+        state = sanitize(state);
+        await syncSave(false);
+      }
+    } else {
+      if (d.isVip) state.isVip = true;
+      state = sanitize(state);
+    }
+    saveSharedAuth(authToken, currentUsername, state.isVip);
+    localStorage.setItem(STORAGE, JSON.stringify(state));
+    applySelectedBikeMesh();
+    authM.classList.add('hidden'); authM.classList.remove('flex');
+    pin.value = '';
+    updateUI();
+    fetchRank();
+    showToast(isRegisterMode ? `🟨 [${maskPhoneMiddle(currentUsername)}] 가입 완료!` : `🟨 [${maskPhoneMiddle(currentUsername)}] 로그인 완료!`);
+  } catch {
+    errEl.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
+    errEl.classList.remove('hidden');
+  }
+};
+function handleLogout(exp) {
+  authToken = null; currentUsername = null;
+  saveSharedAuth(null, null, false);
+  state.isVip = false; state.selectedBike = 1; applySelectedBikeMesh(); updateUI(); fetchRank();
+  showToast(exp ? '만료' : '로그아웃되었습니다.');
+}
+
+document.getElementById('headerExitLobbyBtn').onclick = () => {
+  window.location.href = LOBBY_URL;
+};
+
+['pageshow', 'focus', 'storage'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    loadSharedAuth();
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
+    applySelectedBikeMesh();
+    updateUI();
+  });
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    loadSharedAuth();
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
+    applySelectedBikeMesh();
+    updateUI();
+  }
+});
+
+updateUI();
+if (authToken) loadServer();
+fetchRank();
+</script>
+</body>
+</html>
