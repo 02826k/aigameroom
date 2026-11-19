@@ -770,6 +770,11 @@
             });
             socket.on('update_game_state', (data) => {
               if (!data || data.room !== pvpRoomName || data.role === pvpRole) return;
+              lastOpponentMsgAt = performance.now();
+              if (data.pvpEvent === 'forfeit') {
+                declarePvpForfeitWin();
+                return;
+              }
               if (data.pvpEvent && pvpRole === 'right') {
                 if (data.pvpEvent === 'round_start') {
                   document.getElementById('matchResultBanner').classList.add('hidden');
@@ -1052,6 +1057,23 @@
           screen.orientation.lock(mode).catch(() => {});
         }
       }
+      async function exitToPortraitFullscreen() {
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('portrait').catch(() => {});
+          }
+          if (document.fullscreenElement) {
+            await document.exitFullscreen().catch(() => {});
+          }
+          if (screen.orientation && screen.orientation.unlock) {
+            try { screen.orientation.unlock(); } catch (e) {}
+          }
+        } catch (e) {}
+        fullscreenBtn.textContent = '⛶ 전체화면';
+        setTimeout(resizeCanvas, 120);
+        setTimeout(resizeCanvas, 350);
+      }
+
       fullscreenBtn.addEventListener('click', async () => {
         try {
           if (!document.fullscreenElement) {
@@ -1062,9 +1084,7 @@
             fullscreenBtn.textContent = '✕ 축소';
             lockOrientationMode('landscape');
           } else {
-            await document.exitFullscreen();
-            fullscreenBtn.textContent = '⛶ 전체화면';
-            lockOrientationMode('portrait');
+            await exitToPortraitFullscreen();
           }
         } catch (e) {
           showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
@@ -1077,16 +1097,19 @@
         fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
         if (!isFs) {
           document.body.classList.remove('pvp-fs-fight');
+          lockOrientationMode('portrait');
+          if (screen.orientation && screen.orientation.unlock) {
+            try { screen.orientation.unlock(); } catch (e) {}
+          }
+        } else {
+          lockOrientationMode('landscape');
         }
-        lockOrientationMode(isFs ? 'landscape' : 'portrait');
         setTimeout(resizeCanvas, 100);
         setTimeout(resizeCanvas, 350);
       });
 
-      document.getElementById('fsShrinkBtn').addEventListener('click', async () => {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen().catch(() => {});
-        }
+      document.getElementById('fsShrinkBtn').addEventListener('click', () => {
+        exitToPortraitFullscreen();
       });
       document.getElementById('fsStartFightBtn').addEventListener('click', () => {
         getAudioContext();
@@ -1098,6 +1121,44 @@
       });
 
       let phase = 'select';
+      let lastOpponentMsgAt = 0;
+      let lastHeartbeatSentAt = 0;
+
+      function notifyPvpForfeit() {
+        if (currentMode === 'pvp' && pvpRoomName && socket && (phase === 'countdown' || phase === 'fight' || phase === 'roundEnd')) {
+          socket.emit('sync_game_state', {
+            room: pvpRoomName,
+            role: pvpRole,
+            pvpEvent: 'forfeit',
+            loserRole: pvpRole
+          });
+          pvpRoomName = '';
+        }
+      }
+
+      function declarePvpForfeitWin() {
+        if (currentMode !== 'pvp' || phase === 'select' || phase === 'matchEnd') return;
+        phase = 'matchEnd';
+        stopBGM();
+        playSfx('champion');
+        state.wins++;
+        saveState(true);
+        updateSelectUi();
+        const myNum = pvpRole === 'left' ? 1 : 2;
+        const myId = myNum === 1 ? state.p1Id : state.p2Id;
+        const rematchBtn = document.getElementById('rematchBtn');
+        const backBtn = document.getElementById('backSelectBtn');
+        document.getElementById('matchWinnerTitle').textContent = `🏆 ${myNum}P ${FIGHTERS[myId].name} 부전승!`;
+        document.getElementById('matchResultSub').textContent = '상대방이 대전을 이탈하거나 연결이 끊겨 승리했습니다!';
+        rematchBtn.classList.add('hidden');
+        backBtn.textContent = '🪵 대기실로';
+        document.getElementById('matchResultBanner').classList.remove('hidden');
+        document.getElementById('matchResultBanner').classList.add('flex');
+        pvpRoomName = '';
+      }
+
+      window.addEventListener('pagehide', notifyPvpForfeit);
+      window.addEventListener('beforeunload', notifyPvpForfeit);
       let roundTimer = 60;
       let p1Rounds = 0, p2Rounds = 0;
       let animTime = 0;
@@ -1892,6 +1953,8 @@
           state.p2Id = arcadeQueue[arcadeStage - 1] || 'pai';
         }
 
+        lastOpponentMsgAt = performance.now();
+        document.getElementById('rematchBtn').classList.remove('hidden');
         if (document.fullscreenElement === document.documentElement) {
           document.body.classList.add('pvp-fs-fight');
         }
@@ -2250,6 +2313,16 @@
           }
         }
 
+        if (currentMode === 'pvp' && pvpRoomName && (phase === 'countdown' || phase === 'fight' || phase === 'roundEnd')) {
+          const nowMs = performance.now();
+          if (nowMs - lastHeartbeatSentAt > 900 && socket) {
+            lastHeartbeatSentAt = nowMs;
+            socket.emit('sync_game_state', { room: pvpRoomName, role: pvpRole, heartbeat: true });
+          }
+          if (lastOpponentMsgAt > 0 && (nowMs - lastOpponentMsgAt) > 4500) {
+            declarePvpForfeitWin();
+          }
+        }
         ctx.clearRect(0, 0, viewW, viewH);
         const isWideFs = (viewW / viewH) > 2.2;
         const scale = isWideFs
@@ -2328,6 +2401,7 @@
       });
 
       function returnToSelect() {
+        notifyPvpForfeit();
         phase = 'select';
         document.body.classList.remove('pvp-fs-fight');
         arcadeStage = 1;
@@ -2595,6 +2669,7 @@
       updateAudioButtons();
 
       document.getElementById('headerExitLobbyBtn').addEventListener('click', () => {
+        notifyPvpForfeit();
         window.location.href = 'https://02826k.github.io/aigameroom/';
       });
       document.getElementById('bgmToggleBtn').addEventListener('click', () => {
