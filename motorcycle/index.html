@@ -183,7 +183,7 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
 <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-5 max-h-[90dvh] overflow-y-auto">
 <div class="flex justify-between mb-3"><h2 class="font-black text-amber-300">👑 VIP 7,000원</h2><button id="vipCloseBtn" type="button" class="cursor-pointer text-slate-400">✕</button></div>
-<ul class="text-xs text-slate-300 space-y-1 mb-3"><li>❤️ 목숨 3개</li><li>🪙 점수·골드 3배</li><li>⚡ 부스터 강화 &amp; 2번 VIP 오토바이 해금</li></ul>
+<ul class="text-xs text-slate-300 space-y-1 mb-3"><li>❤️ 목숨 3개</li><li>🪙 점수·골드 3배</li><li>⚡ 부스터 강화 &amp; 2번 VIP 캄보르기니 해금</li></ul>
 <div id="tossWidgetLoading" class="text-xs text-center text-slate-500 py-3">결제 로딩...</div>
 <div id="toss-payment-method"></div><div id="toss-agreement"></div>
 <button id="vipPaySubmitBtn" type="button" disabled class="w-full mt-3 py-3 rounded-xl bg-amber-400 text-slate-950 font-black disabled:bg-slate-700 cursor-pointer">결제</button>
@@ -478,7 +478,12 @@ const roadGroup = new THREE.Group();
 scene.add(roadGroup);
 const ROAD_LEN = 40;
 const ROAD_SEGS = 8;
-function makeRoadSeg(z) {
+const lampPoleMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.35 });
+const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+const gantrySignMat = new THREE.MeshStandardMaterial({ color: 0x15803d, emissive: 0x14532d, emissiveIntensity: 0.45, roughness: 0.4 });
+const gantryTextStripeMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+
+function makeRoadSeg(z, segIdx = 0) {
   const g = new THREE.Group();
   const road = new THREE.Mesh(
     new THREE.PlaneGeometry(12, ROAD_LEN, 1, 8),
@@ -551,28 +556,219 @@ function makeRoadSeg(z) {
     e.position.set(x, 0.025, 0);
     g.add(e);
   });
+
+  // 도로 양쪽 가로등 (20m 간격)
+  [-10, 10].forEach(lz => {
+    const rPole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 5.4, 8), lampPoleMat);
+    rPole.position.set(6.5, 2.7, lz);
+    g.add(rPole);
+    const rArm = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 0.1), lampPoleMat);
+    rArm.position.set(5.8, 5.35, lz);
+    g.add(rArm);
+    const rLamp = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 0.28), lampGlowMat);
+    rLamp.position.set(5.2, 5.28, lz);
+    g.add(rLamp);
+
+    const cPole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 5.6, 8), lampPoleMat);
+    cPole.position.set(-6.5, 2.8, lz);
+    g.add(cPole);
+    const cArm = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.1, 0.1), lampPoleMat);
+    cArm.position.set(-6.5, 5.55, lz);
+    g.add(cArm);
+    [-5.35, -7.65].forEach(lx => {
+      const cLamp = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.28), lampGlowMat);
+      cLamp.position.set(lx, 5.48, lz);
+      g.add(cLamp);
+    });
+  });
+
+  // 80m 간격 고속도로 녹색 이정표 아치 (갠트리)
+  if (segIdx % 2 === 0) {
+    [-6.5, 6.5].forEach(gx => {
+      const gPost = new THREE.Mesh(new THREE.BoxGeometry(0.24, 6.2, 0.24), lampPoleMat);
+      gPost.position.set(gx, 3.1, 0);
+      g.add(gPost);
+    });
+    const gBeam = new THREE.Mesh(new THREE.BoxGeometry(13.4, 0.28, 0.28), lampPoleMat);
+    gBeam.position.set(0, 6.1, 0);
+    g.add(gBeam);
+    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.5, 0.16), gantrySignMat);
+    signBoard.position.set(0, 6.1, 0.12);
+    g.add(signBoard);
+    const signBorder = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.1, 0.18), gantryTextStripeMat);
+    signBorder.position.set(0, 5.55, 0.13);
+    g.add(signBorder);
+  }
+
   g.position.z = z;
   return g;
 }
 const roadSegs = [];
 for (let i = 0; i < ROAD_SEGS; i++) {
-  const seg = makeRoadSeg(-i * ROAD_LEN);
+  const seg = makeRoadSeg(-i * ROAD_LEN, i);
   roadGroup.add(seg);
   roadSegs.push(seg);
 }
 
 const cityGroup = new THREE.Group();
 scene.add(cityGroup);
-for (let i = 0; i < 40; i++) {
-  const h = 4 + Math.random() * 14;
+const neonColors = [0x38bdf8, 0xfbbf24, 0xf472b6, 0x34d399];
+for (let i = 0; i < 36; i++) {
+  const w = 2.4 + Math.random() * 2.8;
+  const h = 5 + Math.random() * 15;
+  const d = 2.4 + Math.random() * 2.8;
+  const bGroup = new THREE.Group();
   const box = new THREE.Mesh(
-    new THREE.BoxGeometry(2 + Math.random() * 3, h, 2 + Math.random() * 3),
-    new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x0ea5e9, emissiveIntensity: Math.random() * 0.15 })
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.75, metalness: 0.2 })
   );
+  box.position.y = h / 2;
+  bGroup.add(box);
+
+  const nCol = neonColors[i % neonColors.length];
+  const winMat = new THREE.MeshBasicMaterial({ color: nCol });
+  for (let wy = 2.0; wy < h - 1.2; wy += 2.2) {
+    const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.06, 0.35, d + 0.06), winMat);
+    band.position.y = wy;
+    bGroup.add(band);
+  }
+  const roofTrim = new THREE.Mesh(new THREE.BoxGeometry(w + 0.12, 0.22, d + 0.12), winMat);
+  roofTrim.position.y = h + 0.05;
+  bGroup.add(roofTrim);
+
   const side = Math.random() < 0.5 ? -1 : 1;
-  box.position.set(side * (14 + Math.random() * 18), h / 2, -Math.random() * 180);
-  cityGroup.add(box);
+  const xPos = side === -1 ? -(22.5 + Math.random() * 15) : (11.5 + Math.random() * 15);
+  bGroup.position.set(xPos, 0, -Math.random() * 180);
+  cityGroup.add(bGroup);
 }
+
+// 맥도날드 노랑 M자 간판 건물
+function createMcdonaldsBuilding(side) {
+  const g = new THREE.Group();
+  const storeMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+  const redRoofMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.45, emissive: 0x7f1d1d, emissiveIntensity: 0.25 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfde047, emissiveIntensity: 0.35, roughness: 0.2 });
+  const mGoldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xeab308, emissiveIntensity: 0.75, metalness: 0.3, roughness: 0.25 });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.2, 4.6), storeMat);
+  body.position.y = 1.6;
+  g.add(body);
+
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.55, 5.0), redRoofMat);
+  roof.position.y = 3.45;
+  g.add(roof);
+
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.5, 3.4), glassMat);
+  win.position.set(side === -1 ? 2.12 : -2.12, 1.25, 0);
+  g.add(win);
+
+  const signGroup = new THREE.Group();
+  [-0.55, 0.55].forEach(az => {
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.14, 10, 20, Math.PI), mGoldMat);
+    arch.rotation.y = Math.PI / 2;
+    arch.position.set(0, 0, az);
+    signGroup.add(arch);
+  });
+  signGroup.position.set(side === -1 ? 1.4 : -1.4, 3.8, 0);
+  g.add(signGroup);
+  return g;
+}
+
+// 편의점
+function createConvenienceStore(side) {
+  const g = new THREE.Group();
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.65 });
+  const signMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.7 });
+  const mintMat = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.6 });
+  const winMat = new THREE.MeshStandardMaterial({ color: 0xe0f2fe, emissive: 0xbae6fd, emissiveIntensity: 0.45 });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.0, 2.8, 5.2), wallMat);
+  body.position.y = 1.4;
+  g.add(body);
+
+  const topSign = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.65, 5.4), signMat);
+  topSign.position.y = 3.1;
+  g.add(topSign);
+
+  const mintBand = new THREE.Mesh(new THREE.BoxGeometry(4.35, 0.22, 5.45), mintMat);
+  mintBand.position.y = 2.68;
+  g.add(mintBand);
+
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.5, 4.0), winMat);
+  win.position.set(side === -1 ? 2.02 : -2.02, 1.15, 0);
+  g.add(win);
+  return g;
+}
+
+// 주유소
+function createGasStation(side) {
+  const g = new THREE.Group();
+  const canopyMat = new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xc2410c, emissiveIntensity: 0.45, roughness: 0.4 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x06b6d4, emissiveIntensity: 0.75 });
+  const pillarMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.4, roughness: 0.4 });
+  const pumpMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 });
+
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.55, 6.2), canopyMat);
+  canopy.position.y = 3.5;
+  g.add(canopy);
+
+  const trim = new THREE.Mesh(new THREE.BoxGeometry(4.88, 0.16, 6.28), trimMat);
+  trim.position.y = 3.32;
+  g.add(trim);
+
+  [-1.8, 1.8].forEach(pz => {
+    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.35, 3.3, 0.35), pillarMat);
+    pillar.position.set(0, 1.65, pz);
+    g.add(pillar);
+
+    const pump = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.25, 0.55), pumpMat);
+    pump.position.set(side === -1 ? 1.1 : -1.1, 0.62, pz);
+    g.add(pump);
+  });
+  return g;
+}
+
+// 카페
+function createCafeBuilding(side) {
+  const g = new THREE.Group();
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x3f2e21, roughness: 0.75 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+  const logoMat = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.8 });
+  const warmWinMat = new THREE.MeshStandardMaterial({ color: 0xfde68a, emissive: 0xf59e0b, emissiveIntensity: 0.4 });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.6, 4.6), wallMat);
+  body.position.y = 1.8;
+  g.add(body);
+
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.4, 4.9), roofMat);
+  roof.position.y = 3.8;
+  g.add(roof);
+
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 3.4), warmWinMat);
+  win.position.set(side === -1 ? 2.12 : -2.12, 1.3, 0);
+  g.add(win);
+
+  const logo = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.16, 20), logoMat);
+  logo.rotation.z = Math.PI / 2;
+  logo.position.set(side === -1 ? 2.18 : -2.18, 2.95, 0);
+  g.add(logo);
+  return g;
+}
+
+const landmarkFactories = [
+  createMcdonaldsBuilding,
+  createConvenienceStore,
+  createGasStation,
+  createCafeBuilding
+];
+
+landmarkFactories.forEach((factory, idx) => {
+  const side = idx % 2 === 0 ? -1 : 1;
+  const bld = factory(side);
+  const baseZ = -(22 + idx * 42 + Math.random() * 14);
+  bld.position.set(side === -1 ? -22.5 : 11.5, 0, baseZ);
+  cityGroup.add(bld);
+});
 
 const starGeo = new THREE.BufferGeometry();
 const starPos = new Float32Array(600);
@@ -754,12 +950,14 @@ function createBike(variant = 1) {
   tail.rotation.x = -0.22;
   root.add(tail);
 
+  const taillightMat = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
   const taillight = new THREE.Mesh(
     new THREE.BoxGeometry(0.20, 0.06, 0.05),
-    new THREE.MeshBasicMaterial({ color: 0xff2244 })
+    taillightMat
   );
   taillight.position.set(0, 0.75, 0.66);
   root.add(taillight);
+  root.userData.taillightMat = taillightMat;
 
   const flames = [];
   [-0.17, 0.17].forEach(x => {
@@ -812,44 +1010,43 @@ function createBike(variant = 1) {
     roughness: 0.1
   });
 
-  const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.15, 0.24), suitMat);
+  const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.22), suitMat);
   pelvis.position.set(0, 0.78, 0.16);
   pelvis.castShadow = true;
   rider.add(pelvis);
 
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.28, 4, 10), jacketMat);
-  torso.position.set(0, 1.00, 0.02);
-  torso.rotation.x = 0.62;
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.38, 0.18), jacketMat);
+  torso.position.set(0, 1.01, 0.13);
+  torso.rotation.x = 0.10;
   torso.castShadow = true;
   rider.add(torso);
 
-  const backHump = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.12), accentMat);
-  backHump.position.set(0, 1.06, 0.12);
-  backHump.rotation.x = 0.62;
-  rider.add(backHump);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.10, 10), suitMat);
+  neck.position.set(0, 1.22, 0.10);
+  rider.add(neck);
 
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.155, 14, 14), helmetMat);
-  helmet.position.set(0, 1.24, -0.14);
-  helmet.scale.set(0.95, 1.0, 1.12);
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.145, 14, 14), helmetMat);
+  helmet.position.set(0, 1.34, 0.08);
+  helmet.scale.set(0.95, 1.0, 1.08);
   helmet.castShadow = true;
   rider.add(helmet);
 
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.085, 0.12), visorMat);
-  visor.position.set(0, 1.23, -0.25);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.08, 0.12), visorMat);
+  visor.position.set(0, 1.33, -0.03);
   rider.add(visor);
 
   [-1, 1].forEach(side => {
-    const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.18, 4, 8), jacketMat);
-    upperArm.position.set(side * 0.21, 1.02, -0.14);
-    upperArm.rotation.x = 0.85;
-    upperArm.rotation.z = side * -0.18;
+    const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.052, 0.19, 4, 8), jacketMat);
+    upperArm.position.set(side * 0.20, 1.05, -0.06);
+    upperArm.rotation.x = 0.95;
+    upperArm.rotation.z = side * -0.15;
     upperArm.castShadow = true;
     rider.add(upperArm);
 
-    const forearm = new THREE.Mesh(new THREE.CapsuleGeometry(0.045, 0.19, 4, 8), jacketMat);
-    forearm.position.set(side * 0.26, 0.89, -0.28);
-    forearm.rotation.x = 1.25;
-    forearm.rotation.z = side * -0.22;
+    const forearm = new THREE.Mesh(new THREE.CapsuleGeometry(0.044, 0.20, 4, 8), jacketMat);
+    forearm.position.set(side * 0.25, 0.91, -0.24);
+    forearm.rotation.x = 1.32;
+    forearm.rotation.z = side * -0.18;
     rider.add(forearm);
 
     const glove = new THREE.Mesh(new THREE.SphereGeometry(0.048, 8, 8), bootMat);
@@ -889,25 +1086,21 @@ function createVipLamborghini() {
   const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.92, metalness: 0.05 });
   const glassMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.45, metalness: 0.85, roughness: 0.12 });
 
-  // Lower chassis / front splitter / side skirts
   const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.76, 0.22, 3.65), darkMat);
   chassis.position.set(0, 0.24, 0);
   chassis.castShadow = true;
   root.add(chassis);
 
-  // Wedge front hood (sloped low nose)
   const hood = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.28, 1.35), paintMat);
   hood.position.set(0, 0.44, -1.05);
   hood.rotation.x = 0.16;
   hood.castShadow = true;
   root.add(hood);
 
-  // Front aggressive air intake & splitter
   const frontIntake = new THREE.Mesh(new THREE.BoxGeometry(1.56, 0.18, 0.22), darkMat);
   frontIntake.position.set(0, 0.28, -1.78);
   root.add(frontIntake);
 
-  // Side body panels & doors
   [-0.78, 0.78].forEach(x => {
     const side = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.42, 2.2), paintMat);
     side.position.set(x, 0.48, 0.05);
@@ -918,13 +1111,11 @@ function createVipLamborghini() {
     intake.position.set(x * 1.12, 0.50, 0.42);
     root.add(intake);
 
-    // Side mirrors
     const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.09, 0.12), paintMat);
     mirror.position.set(x * 1.24, 0.72, -0.45);
     root.add(mirror);
   });
 
-  // Rear engine deck & Spyder twin buttresses
   const rearDeck = new THREE.Mesh(new THREE.BoxGeometry(1.70, 0.36, 1.25), paintMat);
   rearDeck.position.set(0, 0.54, 1.12);
   rearDeck.castShadow = true;
@@ -941,19 +1132,18 @@ function createVipLamborghini() {
     root.add(buttress);
   });
 
-  // Raked Spyder windshield & frame
+  // 앞유리창 정방향 각도
   const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.46, 0.05), glassMat);
-  windshield.position.set(0, 0.82, -0.45);
-  windshield.rotation.x = -0.78;
+  windshield.position.set(0, 0.80, -0.45);
+  windshield.rotation.x = 0.78;
   root.add(windshield);
   [-0.75, 0.75].forEach(x => {
     const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.48, 0.07), darkMat);
-    pillar.position.set(x, 0.82, -0.45);
-    pillar.rotation.x = -0.78;
+    pillar.position.set(x, 0.80, -0.45);
+    pillar.rotation.x = 0.78;
     root.add(pillar);
   });
 
-  // Open-top cockpit interior + 2 sport seats
   const cockpitFloor = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.12, 1.15), darkMat);
   cockpitFloor.position.set(0, 0.34, 0.05);
   root.add(cockpitFloor);
@@ -965,7 +1155,6 @@ function createVipLamborghini() {
     root.add(seatBack);
   });
 
-  // Driver inside left seat (helmet + racing suit)
   const suitMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.2 });
   const jacketMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.55, metalness: 0.25 });
   const helmetMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.65, roughness: 0.2 });
@@ -980,6 +1169,30 @@ function createVipLamborghini() {
   driverVisor.position.set(-0.36, 0.90, 0.06);
   root.add(driverVisor);
 
+  // Passenger inside right seat (long-haired lady, 캄보르기니 전용)
+  const ladyDressMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.55, metalness: 0.2 });
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xfde68a, roughness: 0.65 });
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x271914, roughness: 0.55, metalness: 0.15 });
+  const ladyTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.125, 0.22, 4, 8), ladyDressMat);
+  ladyTorso.position.set(0.36, 0.62, 0.21);
+  ladyTorso.rotation.x = 0.22;
+  root.add(ladyTorso);
+  const ladyHead = new THREE.Mesh(new THREE.SphereGeometry(0.125, 12, 12), skinMat);
+  ladyHead.position.set(0.36, 0.87, 0.17);
+  root.add(ladyHead);
+  const hairTop = new THREE.Mesh(new THREE.SphereGeometry(0.132, 12, 12), hairMat);
+  hairTop.position.set(0.36, 0.89, 0.18);
+  root.add(hairTop);
+  const longHairBack = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.34, 0.08), hairMat);
+  longHairBack.position.set(0.36, 0.72, 0.27);
+  longHairBack.rotation.x = 0.12;
+  root.add(longHairBack);
+  [-0.10, 0.10].forEach(hx => {
+    const sideHair = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.28, 0.07), hairMat);
+    sideHair.position.set(0.36 + hx, 0.75, 0.21);
+    root.add(sideHair);
+  });
+
   // 4 Sport Wheels
   [[-0.86, 0.30, -1.12], [0.86, 0.30, -1.12], [-0.88, 0.32, 1.10], [0.88, 0.32, 1.10]].forEach(p => {
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(p[1], p[1], 0.24, 16), tireMat);
@@ -993,9 +1206,9 @@ function createVipLamborghini() {
     root.add(rim);
   });
 
-  // Front LED headlights + night spot beam
+  // 양쪽 헤드라이트 + 야간 양쪽 빔 (좌우로 살짝 벌림)
   const headlightMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
-  [-0.58, 0.58].forEach(x => {
+  [-0.68, 0.68].forEach(x => {
     const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.08), headlightMat);
     hl.position.set(x, 0.44, -1.76);
     root.add(hl);
@@ -1006,17 +1219,21 @@ function createVipLamborghini() {
   root.add(bikeSpot);
   root.add(bikeSpot.target);
 
-  const headBeam = new THREE.Mesh(
-    new THREE.ConeGeometry(1.6, 9.5, 14, 1, true),
-    new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false })
-  );
-  headBeam.rotation.x = Math.PI / 2;
-  headBeam.position.set(0, 0.45, -6.5);
-  headBeam.visible = false;
-  root.add(headBeam);
+  const headBeams = [];
+  [-0.68, 0.68].forEach(x => {
+    const beam = new THREE.Mesh(
+      new THREE.ConeGeometry(0.95, 9.2, 14, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false })
+    );
+    beam.rotation.x = Math.PI / 2;
+    beam.position.set(x, 0.42, -6.35);
+    beam.visible = false;
+    root.add(beam);
+    headBeams.push(beam);
+  });
 
-  // Rear Y-shaped LED taillights & twin exhaust flames
-  const tailMat = new THREE.MeshBasicMaterial({ color: 0xff2244 });
+  // 브레이크등 (평소 어두운 적색 -> 브레이크 시 밝은 적색 점등)
+  const tailMat = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
   [-0.58, 0.58].forEach(x => {
     const tl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), tailMat);
     tl.position.set(x, 0.56, 1.78);
@@ -1047,7 +1264,8 @@ function createVipLamborghini() {
   root.userData.suitMat = suitMat;
   root.userData.headlightMat = headlightMat;
   root.userData.bikeSpot = bikeSpot;
-  root.userData.headBeam = headBeam;
+  root.userData.headBeams = headBeams;
+  root.userData.taillightMat = tailMat;
   root.userData.flames = flames;
   return root;
 }
@@ -1269,6 +1487,8 @@ let roadScroll = 0;
 let fuel = 100;
 let lowFuelWarned = false;
 let throttle = 0;
+let manualLightOverride = null; // null: 자동(밤에 점등), true: 수동 ON, false: 수동 OFF
+let prevAutoNight = null;
 let keysUD = { up: false, down: false };
 const FUEL_MAX = 100;
 const activeCars = [];
@@ -1349,6 +1569,7 @@ function startGame() {
   distance = 0; lives = state.isVip ? 3 : 1; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false;
   speed = 12; boostT = 0; invuln = 0; nearMissCd = 0; crashFlash = 0;
   fuel = FUEL_MAX; lowFuelWarned = false; throttle = 0; keysUD.up = false; keysUD.down = false;
+  manualLightOverride = null; prevAutoNight = null;
   laneIdx = 1; laneX = 0; targetLaneX = 0;
   dayPhase = 0.28;
   player.position.set(0, 0, 0); player.rotation.set(0, 0, 0);
@@ -1564,6 +1785,10 @@ window.addEventListener('keydown', e => {
     if (!running && !isCleared && Date.now() >= overlayLockUntil) startGame();
   }
   if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { keysUD.down = true; e.preventDefault(); }
+  if (e.key === 'r' || e.key === 'R' || e.code === 'KeyR') {
+    const curOn = manualLightOverride !== null ? manualLightOverride : Boolean(prevAutoNight);
+    manualLightOverride = !curOn;
+  }
   if (e.code === 'Space') {
     e.preventDefault();
     if (!running) {
@@ -1925,267 +2150,29 @@ function updateDayNight(phase) {
   sun.color.set(night > 0.3 ? 0x8899cc : 0xffe0c0);
 
   const isNightNow = elev < 0.08;
+  if (prevAutoNight === null) {
+    prevAutoNight = isNightNow;
+  } else if (prevAutoNight !== isNightNow) {
+    prevAutoNight = isNightNow;
+    manualLightOverride = null;
+  }
+  const lightsOn = manualLightOverride !== null ? manualLightOverride : isNightNow;
+  const isBraking = running && keysUD.down;
   [bike1Mesh, bike2Mesh].forEach(bk => {
-    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = isNightNow ? 3.5 : 0;
-    if (bk.userData.headBeam) bk.userData.headBeam.visible = isNightNow;
+    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = lightsOn ? 3.5 : 0;
+    if (bk.userData.headBeam) bk.userData.headBeam.visible = lightsOn;
+    if (bk.userData.headBeams) bk.userData.headBeams.forEach(bm => { bm.visible = lightsOn; });
     if (bk.userData.headlightMat) {
       bk.userData.headlightMat.color.setHex(
-        isNightNow ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
+        lightsOn ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
+      );
+    }
+    if (bk.userData.taillightMat) {
+      bk.userData.taillightMat.color.setHex(
+        isBraking ? 0xff1122 : (lightsOn ? 0x991b1b : 0x450a0a)
       );
     }
   });
   carPool.forEach(c => { if (c.userData.headlightMat) c.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
   busPool.forEach(b => { if (b.userData.headlightMat) b.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
 }
-
-function updateUI() {
-  const sfxBtn = document.getElementById('soundToggleBtn');
-  sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
-  sfxBtn.className = state.soundEnabled
-    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
-    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
-
-  const bgmBtn = document.getElementById('bgmToggleBtn');
-  bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
-  bgmBtn.className = state.bgmEnabled
-    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
-    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
-
-  updateBikeSelectUI();
-  renderColorPalette();
-  updateUILive();
-
-  const authBtn = document.getElementById('authHeaderBtn');
-  if (authBtn) {
-    if (authToken) {
-      authBtn.textContent = state.isVip ? '👑 VIP 로그아웃' : '로그아웃';
-      authBtn.className = state.isVip
-        ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
-        : 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
-    } else {
-      authBtn.textContent = '로그인';
-      authBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
-    }
-  }
-}
-
-let toastTimer = null;
-function showToast(m) {
-  const box = document.getElementById('toastBox');
-  document.getElementById('toastMsg').textContent = m;
-  box.classList.remove('opacity-0', '-translate-y-2');
-  box.classList.add('opacity-100', 'translate-y-0');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    box.classList.add('opacity-0', '-translate-y-2');
-    box.classList.remove('opacity-100', 'translate-y-0');
-  }, 1900);
-}
-
-document.getElementById('soundToggleBtn').onclick = () => { state.soundEnabled = !state.soundEnabled; saveState(true); updateUI(); };
-document.getElementById('bgmToggleBtn').onclick = () => {
-  state.bgmEnabled = !state.bgmEnabled; saveState(true); updateUI();
-  if (state.bgmEnabled) startBGM(); else stopBGM();
-};
-
-document.getElementById('rankOpenBtn').onclick = () => {
-  fetchRank();
-  motoRankModal.classList.remove('hidden');
-  motoRankModal.classList.add('flex');
-};
-document.getElementById('motoRankCloseBtn').onclick = () => {
-  motoRankModal.classList.add('hidden');
-  motoRankModal.classList.remove('flex');
-};
-motoRankModal.onclick = (e) => {
-  if (e.target === motoRankModal) {
-    motoRankModal.classList.add('hidden');
-    motoRankModal.classList.remove('flex');
-  }
-};
-
-async function fetchRank() {
-  const box = document.getElementById('rankingListContainer'), my = document.getElementById('myRankDetailText');
-  if (my) my.textContent = `${(state.bestTotalScore || 0).toLocaleString()} 점`;
-  try {
-    const h = authToken ? { Authorization: 'Bearer ' + authToken } : {};
-    const res = await fetch(API + '/api/ranking?gameId=' + GAME_ID + '&_t=' + Date.now(), { headers: h });
-    const d = await res.json();
-    if (!res.ok) throw 0;
-    if (d.myRank && my) {
-      my.textContent = `${(d.myRank.score || state.bestTotalScore || 0).toLocaleString()} 점 (${d.myRank.rank}위)`;
-    }
-    const list = (d.rankings || []).slice(0, 10);
-    if (list.length === 0) {
-      box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">아직 등록된 순위가 없습니다.</div>';
-      return;
-    }
-    box.innerHTML = '';
-    list.forEach(it => {
-      const dist = it.highScore ?? it.saveData?.highScore ?? (it.isMe ? state.highScore : 0);
-      const maxSpd = it.maxSpeedKmh ?? it.saveData?.maxSpeedKmh ?? (it.isMe ? state.maxSpeedKmh : 0);
-      const rGold = it.bestRunGold ?? it.saveData?.bestRunGold ?? (it.isMe ? state.bestRunGold : 0);
-      const parts = [];
-      if (dist > 0) parts.push('📏 ' + dist.toLocaleString() + 'm');
-      if (maxSpd > 0) parts.push('🚀 ' + maxSpd + 'km/h');
-      if (rGold > 0) parts.push('🪙 ' + rGold.toLocaleString() + 'G');
-      const r = document.createElement('div');
-      r.className = 'rounded-xl px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-xs' + (it.isMe ? ' border-orange-400/60' : '');
-      r.innerHTML =
-        '<div class="min-w-0">' +
-          '<div class="font-bold text-slate-100 truncate">' + it.rank + '위 ' + maskPhoneMiddle(it.maskedName) + (it.isMe ? ' <span class="text-orange-300 text-[10px]">(나)</span>' : '') + '</div>' +
-          (parts.length ? '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + parts.join(' · ') + '</div>' : '') +
-        '</div>' +
-        '<span class="font-black text-orange-400 shrink-0">' + (it.score || 0).toLocaleString() + ' 점</span>';
-      box.appendChild(r);
-    });
-  } catch { box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">랭킹 대기 중</div>'; }
-}
-
-const vipM = document.getElementById('vipModal');
-document.getElementById('vipCloseBtn').onclick = () => { vipM.classList.add('hidden'); vipM.classList.remove('flex'); };
-async function initToss() {
-  if (typeof TossPayments === 'undefined') return;
-  try {
-    const tp = TossPayments(TOSS_KEY);
-    const w = tp.widgets({ customerKey: TossPayments.ANONYMOUS });
-    await w.setAmount({ currency: 'KRW', value: VIP_PRICE });
-    await Promise.all([
-      w.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
-      w.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' })
-    ]);
-    document.getElementById('tossWidgetLoading').classList.add('hidden');
-    document.getElementById('vipPaySubmitBtn').disabled = false;
-  } catch {}
-}
-
-const authM = document.getElementById('authModal');
-const phone = document.getElementById('authPhoneDigits'), pin = document.getElementById('authPinCode');
-function setAuthMode(register) {
-  isRegisterMode = register;
-  document.getElementById('authErrorMsg').classList.add('hidden');
-  const ml = document.getElementById('modeLoginBtn');
-  const mr = document.getElementById('modeRegisterBtn');
-  const sb = document.getElementById('authSubmitBtn');
-  if (register) {
-    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-    sb.textContent = '가입하고 현재 데이터 서버저장';
-  } else {
-    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-    sb.textContent = '로그인 및 서버저장 연동';
-  }
-}
-document.getElementById('authHeaderBtn').onclick = () => {
-  if (authToken) {
-    logoutConfirmModal.classList.remove('hidden');
-    logoutConfirmModal.classList.add('flex');
-  } else {
-    setAuthMode(false);
-    authM.classList.remove('hidden'); authM.classList.add('flex');
-    setTimeout(() => phone.focus(), 50);
-  }
-};
-document.getElementById('logoutCancelBtn').onclick = () => {
-  logoutConfirmModal.classList.add('hidden');
-  logoutConfirmModal.classList.remove('flex');
-};
-document.getElementById('logoutConfirmBtn').onclick = () => {
-  logoutConfirmModal.classList.add('hidden');
-  logoutConfirmModal.classList.remove('flex');
-  handleLogout(false);
-};
-document.getElementById('authCloseBtn').onclick = () => { authM.classList.add('hidden'); authM.classList.remove('flex'); };
-document.getElementById('modeLoginBtn').onclick = () => setAuthMode(false);
-document.getElementById('modeRegisterBtn').onclick = () => setAuthMode(true);
-phone.oninput = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = d.length > 4 ? d.slice(0, 4) + '-' + d.slice(4) : d; };
-pin.oninput = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); };
-document.getElementById('authForm').onsubmit = async e => {
-  e.preventDefault();
-  const errEl = document.getElementById('authErrorMsg');
-  errEl.classList.add('hidden');
-  const raw = phone.value.replace(/\D/g, '');
-  const pinVal = pin.value.trim();
-  if (raw.length !== 8) {
-    errEl.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
-    errEl.classList.remove('hidden'); phone.focus(); return;
-  }
-  if (!/^\d{4}$/.test(pinVal)) {
-    errEl.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
-    errEl.classList.remove('hidden'); pin.focus(); return;
-  }
-  const id = '010-' + raw.slice(0, 4) + '-' + raw.slice(4);
-  const payload = isRegisterMode
-    ? { username: id, password: pinVal, initialSaveData: state, gameId: GAME_ID }
-    : { username: id, password: pinVal, gameId: GAME_ID };
-  try {
-    const res = await fetch(API + (isRegisterMode ? '/api/register' : '/api/login'), {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    });
-    const d = await res.json();
-    if (!res.ok) {
-      errEl.textContent = d.error || '로그인/가입 처리 중 오류가 발생했습니다.';
-      errEl.classList.remove('hidden'); return;
-    }
-    authToken = d.token; currentUsername = d.username;
-    if (!isRegisterMode) {
-      if (d.saveData) {
-        state = sanitize({ ...(d.saveData || {}), isVip: Boolean(d.isVip || d.saveData?.isVip) });
-        if (state.isVip) await syncSave(false);
-      } else {
-        if (d.isVip) state.isVip = true;
-        state = sanitize(state);
-        await syncSave(false);
-      }
-    } else {
-      if (d.isVip) state.isVip = true;
-      state = sanitize(state);
-    }
-    saveSharedAuth(authToken, currentUsername, state.isVip);
-    localStorage.setItem(STORAGE, JSON.stringify(state));
-    applySelectedBikeMesh();
-    authM.classList.add('hidden'); authM.classList.remove('flex');
-    pin.value = '';
-    updateUI();
-    fetchRank();
-    showToast(isRegisterMode ? `🟨 [${maskPhoneMiddle(currentUsername)}] 가입 완료!` : `🟨 [${maskPhoneMiddle(currentUsername)}] 로그인 완료!`);
-  } catch {
-    errEl.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
-    errEl.classList.remove('hidden');
-  }
-};
-function handleLogout(exp) {
-  authToken = null; currentUsername = null;
-  saveSharedAuth(null, null, false);
-  state.isVip = false; state.selectedBike = 1; applySelectedBikeMesh(); updateUI(); fetchRank();
-  showToast(exp ? '만료' : '로그아웃되었습니다.');
-}
-
-document.getElementById('headerExitLobbyBtn').onclick = () => {
-  window.location.href = LOBBY_URL;
-};
-
-['pageshow', 'focus', 'storage'].forEach(evt => {
-  window.addEventListener(evt, () => {
-    loadSharedAuth();
-    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
-    applySelectedBikeMesh();
-    updateUI();
-  });
-});
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    loadSharedAuth();
-    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
-    applySelectedBikeMesh();
-    updateUI();
-  }
-});
-
-updateUI();
-if (authToken) loadServer();
-fetchRank();
-</script>
-</body>
-</html>
