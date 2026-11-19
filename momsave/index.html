@@ -418,8 +418,26 @@
       const TOKEN_KEY = 'abuse_jwt_token';
       const USER_KEY = 'abuse_username';
 
-      let authToken = localStorage.getItem(TOKEN_KEY) || null;
-      let currentUsername = localStorage.getItem(USER_KEY) || null;
+      const ALL_TOKEN_KEYS = [TOKEN_KEY, 'hero_clicker_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
+      const ALL_USER_KEYS = [USER_KEY, 'hero_clicker_username', 'sky2026_username', 'aigameroom_username'];
+      function readSharedAuth() {
+        let t = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('aigameroom_jwt_token') || null;
+        let u = localStorage.getItem(USER_KEY) || localStorage.getItem('aigameroom_username') || null;
+        return { t, u };
+      }
+      function syncSharedAuth(t, u) {
+        try {
+          if (t && u) {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, t));
+            ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, u));
+          } else {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            localStorage.removeItem('hero_clicker_is_vip');
+          }
+        } catch (e) {}
+      }
+      let { t: authToken, u: currentUsername } = readSharedAuth();
       let isRegisterMode = false;
 
       let state = {
@@ -2661,12 +2679,29 @@
       function handleLogout(expired = false) {
         authToken = null;
         currentUsername = null;
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
+        state.isVip = false;
+        syncSharedAuth(null, null);
         updateHeaderUI();
         fetchRanking();
         showToast(expired ? '로그인이 만료되었습니다.' : '로그아웃되었습니다.');
       }
+
+      function syncAuthFromStorage() {
+        const { t, u } = readSharedAuth();
+        if (t !== authToken || u !== currentUsername) {
+          authToken = t;
+          currentUsername = u;
+          if (!authToken) state.isVip = false;
+          updateHeaderUI();
+          if (authToken) loadFromServer();
+          fetchRanking();
+        }
+      }
+      window.addEventListener('pageshow', syncAuthFromStorage);
+      window.addEventListener('storage', syncAuthFromStorage);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncAuthFromStorage();
+      });
 
       document.getElementById('overlayStartBtn').addEventListener('click', startGame);
       document.getElementById('overlayLobbyBtn').addEventListener('click', () => {
@@ -2737,8 +2772,7 @@
           }
           authToken = data.token;
           currentUsername = data.username;
-          localStorage.setItem(TOKEN_KEY, authToken);
-          localStorage.setItem(USER_KEY, currentUsername);
+          syncSharedAuth(authToken, currentUsername);
           if (data.isVip) state.isVip = true;
           await loadFromServer();
           await syncSaveToServer(false);
