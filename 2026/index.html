@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./icon.png" />
+  <link rel="apple-touch-icon" href="./icon.png" />
+  <title>2026 — 종스크롤 비행기 슈팅</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overscroll-behavior: none;
+    }
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body.in-game {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: none;
+    }
+    body.in-game main {
+      flex: 1 1 0%;
+      min-height: 0;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+    }
+    canvas, #canvasWrapper { touch-action: none; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
+    @keyframes goldShine {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.45)); }
+      50% { filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.85)); }
+    }
+    .gold-bar-glow { animation: goldShine 2.4s infinite ease-in-out; }
+    @keyframes vipPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(168, 85, 247, 0.45); }
+      50% { box-shadow: 0 0 15px rgba(232, 121, 249, 0.8); }
+    }
+    .vip-btn-glow { animation: vipPulse 2.2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-[100dvh] flex flex-col">
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-2.5 sm:px-4 py-1.5 sticky top-0 z-30 shadow-lg shadow-black/25 shrink-0">
+    <div class="max-w-3xl mx-auto flex flex-col gap-1">
+      <div class="flex items-center justify-between gap-1.5">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gradient-to-br from-sky-400/25 to-indigo-600/25 text-sky-300 font-extrabold text-xs border border-sky-400/40 shrink-0">✈️</span>
+          <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-50 truncate">2026 스카이</h1>
+          <span id="userBadge" class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0 whitespace-nowrap">👤 게스트</span>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="vipOpenBtn" type="button" class="vip-btn-glow px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 transition active:scale-95 flex items-center gap-0.5 cursor-pointer whitespace-nowrap">
+            <span>👑</span>
+            <span id="vipHeaderBtnLabel">VIP</span>
+          </button>
+          <!-- 용사키우기 방식 참고: 통합 로그인/로그아웃 토글 버튼 -->
+          <button id="authToggleBtn" type="button" class="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-gradient-to-b from-amber-300 to-amber-500 text-slate-950 border border-yellow-200/80 shadow transition active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap">
+            <span id="authToggleBtnLabel">로그인</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-1.5 pt-1 border-t border-slate-800/70">
+        <p id="syncStatusText" class="hidden sm:block text-[11px] text-slate-400 truncate">1~7 스테이지 최종보스를 격파하세요!</p>
+        <div class="flex items-center gap-1 w-full sm:w-auto justify-end">
+          <button id="bgmToggleBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-indigo-950/80 border border-indigo-700/60 text-indigo-200 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+          <button id="soundToggleBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-slate-800 border border-slate-700 text-slate-200 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+          <button id="resetOpenBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer whitespace-nowrap">로비로</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-2 sm:px-4 py-2 sm:py-3 flex flex-col gap-2.5">
+    <section id="hangarSection" class="bg-slate-900/95 border-2 border-sky-500/40 rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-col gap-2.5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2 gap-2">
+        <h2 class="text-sm sm:text-base font-black text-sky-300">✈️ 출격 기체 선택</h2>
+        <span id="hangarBombBadge" class="px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[11px] font-black">💣 시작 폭탄: 1개</span>
+      </div>
+
+      <div>
+        <div class="text-[11px] font-extrabold text-sky-300 mb-1.5">🛩️ 일반 전투기</div>
+        <div id="normalPlaneGrid" class="grid grid-cols-2 gap-2"></div>
+      </div>
+
+      <div>
+        <div class="text-[11px] font-extrabold text-fuchsia-300 mb-1.5">👑 VIP 전용 전투기</div>
+        <div id="vipPlaneGrid" class="grid grid-cols-2 gap-2"></div>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-950/90 p-2.5 flex flex-col sm:flex-row items-center gap-2.5">
+        <div class="relative w-full sm:w-52 h-24 sm:h-32 rounded-xl overflow-hidden border border-sky-500/30 bg-slate-950 shrink-0">
+          <canvas id="previewCanvas" class="w-full h-full block"></canvas>
+          <div class="absolute top-1 left-1.5 px-1.5 py-0.5 rounded bg-black/60 text-[9px] font-bold text-sky-300 pointer-events-none">LIVE 미리보기</div>
+        </div>
+        <div class="flex-1 w-full flex flex-col justify-between gap-2 text-center sm:text-left">
+          <div>
+            <div id="selectedPlaneInfo" class="text-xs sm:text-sm font-black text-white">선택 기체: F-26 팔콘 (일반)</div>
+            <div id="selectedPlaneDesc" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">일반 밸런스형 · 안정적인 트윈 플라즈마 포</div>
+          </div>
+          <button id="launchMissionBtn" type="button" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-sky-500/25 active:scale-95 transition cursor-pointer">
+            🚀 출격하기 (STAGE 1)
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold text-amber-300">🏆 2026 스카이 파이터 랭킹 TOP 10 (최고 점수)</span>
+          <button id="skyRankRefreshBtn" type="button" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-700 cursor-pointer">🔄 새로고침</button>
+        </div>
+        <div id="skyRankList" class="flex flex-col gap-1 max-h-32 overflow-y-auto text-[11px] text-slate-400">기록을 불러오는 중...</div>
+      </div>
+    </section>
+
+    <section id="gameSection" class="hidden flex-col gap-1.5 flex-1 min-h-0">
+      <div class="shrink-0 bg-slate-900/95 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1.5 flex-wrap shadow">
+        <div class="flex items-center gap-2.5 text-xs font-black">
+          <span id="hudStage" class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300">STAGE 1 / 7</span>
+          <span id="hudLives" class="text-rose-400">❤️❤️❤️</span>
+          <span id="hudBombs" class="text-amber-300">💣 x1</span>
+          <span id="hudShield" class="hidden px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-[10px]">🛡️ 쉴드</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-black">
+          <span id="hudPower" class="text-emerald-300">⚡ LV.1</span>
+          <span id="hudScore" class="text-amber-300 tabular-nums">0 PTS</span>
+        </div>
+      </div>
+
+      <div class="relative flex-1 min-h-0 flex flex-col bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl">
+        <div id="canvasWrapper" class="relative w-full flex-1 min-h-[340px] bg-slate-950">
+          <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+          <div id="stageBanner" class="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center">
+            <div id="stageBannerText" class="px-6 py-3 rounded-2xl bg-slate-950/85 border-2 border-rose-500 text-xl sm:text-3xl font-black text-rose-400 tracking-wider shadow-2xl text-center">
+              ⚠️ WARNING: BOSS
+            </div>
+          </div>
+          <div id="resultOverlay" class="absolute inset-0 z-20 hidden items-center justify-center bg-black/75 backdrop-blur-sm">
+            <div class="bg-slate-900/95 border-2 border-amber-400 rounded-2xl px-7 py-6 text-center shadow-2xl max-w-xs w-[90%]">
+              <div id="resultTitle" class="text-2xl font-black text-amber-300">MISSION CLEAR!</div>
+              <div id="resultSub" class="text-xs font-bold text-slate-200 mt-1.5">최종 점수: 0 PTS</div>
+              <div class="mt-4 flex gap-2 justify-center">
+                <button id="retryBtn" type="button" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black cursor-pointer">🔄 다시 출격</button>
+                <button id="resultHangarBtn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-black border border-slate-700 cursor-pointer">↩ 기체 선택</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shrink-0 bg-slate-900/95 border border-slate-800 rounded-2xl px-2.5 py-2 shadow-xl flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1">
+          <button id="padLeft" type="button" class="w-11 h-11 rounded-xl bg-slate-950 active:bg-sky-600 border border-slate-700 text-base font-black cursor-pointer">◀</button>
+          <div class="flex flex-col gap-1">
+            <button id="padUp" type="button" class="w-11 h-6 rounded-lg bg-slate-950 active:bg-sky-600 border border-slate-700 text-xs font-black cursor-pointer">▲</button>
+            <button id="padDown" type="button" class="w-11 h-6 rounded-lg bg-slate-950 active:bg-sky-600 border border-slate-700 text-xs font-black cursor-pointer">▼</button>
+          </div>
+          <button id="padRight" type="button" class="w-11 h-11 rounded-xl bg-slate-950 active:bg-sky-600 border border-slate-700 text-base font-black cursor-pointer">▶</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="holdFireBtn" type="button" class="px-4 sm:px-6 h-14 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border-2 border-sky-200 cursor-pointer flex items-center gap-1.5">
+            <span>🚀</span>
+            <span>미사일 (누르기)</span>
+          </button>
+          <button id="bombBtn" type="button" class="px-4 h-14 rounded-2xl bg-gradient-to-b from-rose-500 to-red-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border-2 border-rose-200 cursor-pointer flex items-center gap-1">
+            <span>💣</span>
+            <span id="bombBtnCount">폭탄(1)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="shortcutCard" class="bg-gradient-to-br from-slate-900 to-sky-950/25 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl mb-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-lg shrink-0">✈️</div>
+          <div class="text-sm font-black text-sky-300 truncate">2026 스카이 파이터 바로가기</div>
+        </div>
+        <button id="androidInstallBtn" type="button" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs sm:text-sm shadow-md shrink-0 cursor-pointer">아이콘 만들기</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs sm:text-sm font-bold text-sky-200 shadow-2xl">알림</div>
+  </div>
+
+  <!-- VIP 모달 -->
+  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3">
+    <div class="bg-slate-900 border-2 border-purple-500/60 rounded-2xl max-w-md w-full p-5 shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-base font-black text-amber-300">👑 2026 스카이 파이터 VIP 패키지</h2>
+        <button id="vipCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
+      </div>
+      <ul class="text-xs text-slate-300 space-y-1.5 mb-4">
+        <li>✈️ <strong>VIP 전용 기체 2종</strong> (골든 피닉스 / 다크 세라핌) 즉시 해금</li>
+        <li>💣 매 판 <strong>폭탄 3개</strong>로 시작 (일반 유저 1개)</li>
+        <li>⚡ 기본 화력 +25% 보너스 적용</li>
+      </ul>
+      <button id="vipConfirmBtn" type="button" class="w-full py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs cursor-pointer">확인 (7,000원)</button>
+    </div>
+  </div>
+
+  <!-- 용사키우기 방식 참고: 간편 휴대폰(8자리) & PIN(4자리) 로그인/회원가입 모달 -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-sky-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-base font-extrabold text-sky-300">🟨 서버 저장 계정</h2>
+        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-3">
+        휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 간편하게 서버에 기록을 영구 저장하세요.
+      </p>
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
+        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white cursor-pointer">로그인</button>
+        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer">회원가입</button>
+      </div>
+      <form id="authForm" class="flex flex-col gap-3">
+        <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
+          <span class="px-3 py-2 bg-slate-900 text-sky-300 font-extrabold text-sm border-r border-slate-800">010 -</span>
+          <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="w-full px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
+        </div>
+        <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 비밀번호" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none" />
+        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold"></div>
+        <button type="submit" id="authSubmitBtn" class="w-full py-2.5 rounded-xl text-xs font-black bg-sky-600 text-white cursor-pointer">로그인 및 저장 연동</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const PLANES = {
+        falcon: { id: 'falcon', name: 'F-26 팔콘', vipOnly: false, color: '#38bdf8', accent: '#bae6fd', speed: 270, dmg: 16, fireRate: 0.13, desc: '일반 밸런스형 · 안정적인 트윈 플라즈마 포' },
+        striker: { id: 'striker', name: 'X-26 스트라이커', vipOnly: false, color: '#34d399', accent: '#a7f3d0', speed: 305, dmg: 13, fireRate: 0.12, desc: '일반 속사형 · 빠른 기동 & 3방향 확산샷' },
+        phoenix: { id: 'phoenix', name: 'VIP 골든 피닉스', vipOnly: true, color: '#fbbf24', accent: '#fef08a', speed: 315, dmg: 22, fireRate: 0.10, desc: 'VIP 전용 · 황금 5연장 광자포 + 폭탄 3개 시작' },
+        seraphim: { id: 'seraphim', name: 'VIP 다크 세라핌', vipOnly: true, color: '#c084fc', accent: '#f0abfc', speed: 300, dmg: 25, fireRate: 0.11, desc: 'VIP 전용 · 트윈 레일건 & 유도 미사일 + 폭탄 3개' }
+      };
+
+      const BOSSES = [
+        { stage: 1, name: 'STAGE 1 BOSS: 아이언 호크', hp: 7000, color: '#94a3b8', accent: '#fb923c', shape: 'bomber', sky: ['#0f172a', '#1e293b'] },
+        { stage: 2, name: 'STAGE 2 BOSS: 크라켄 드론', hp: 10500, color: '#2dd4bf', accent: '#0ea5e9', shape: 'kraken', sky: ['#042f2e', '#0c4a6e'] },
+        { stage: 3, name: 'STAGE 3 BOSS: 인페르노 윙', hp: 14500, color: '#ef4444', accent: '#facc15', shape: 'stealth', sky: ['#2a0808', '#7f1d1d'] },
+        { stage: 4, name: 'STAGE 4 BOSS: 프로스트 아크', hp: 19000, color: '#38bdf8', accent: '#e0f2fe', shape: 'crystal', sky: ['#082f49', '#0369a1'] },
+        { stage: 5, name: 'STAGE 5 BOSS: 네오 바하무트', hp: 24000, color: '#a855f7', accent: '#f472b6', shape: 'dragon', sky: ['#1e1b4b', '#581c87'] },
+        { stage: 6, name: 'STAGE 6 BOSS: 오메가 제로', hp: 32000, color: '#fbbf24', accent: '#ef4444', shape: 'omega', sky: ['#020617', '#450a0a'] },
+        { stage: 7, name: 'FINAL BOSS: 아포칼립스 세라핌', hp: 58000, color: '#dc2626', accent: '#fef08a', shape: 'seraph', sky: ['#05020d', '#3b0764'] }
+      ];
+
+      const GAME_ID = 'sky2026_v1';
+      const CLOUD_API_URL = 'https://02826k.duckdns.org';
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+      const STORAGE_KEY = 'sky2026_save_v1';
+      const TOKEN_KEY = 'sky2026_jwt_token';
+      const USER_KEY = 'sky2026_username';
+
+      let authToken = localStorage.getItem(TOKEN_KEY) || null;
+      let currentUsername = localStorage.getItem(USER_KEY) || null;
+
+      let state = {
+        bestScore: 0,
+        selectedPlane: 'falcon',
+        soundEnabled: true,
+        bgmEnabled: true,
+        isVip: false
+      };
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) state = { ...state, ...JSON.parse(raw) };
+      } catch (e) {}
+      if (!PLANES[state.selectedPlane]) state.selectedPlane = 'falcon';
+
+      function saveState(sync = false) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+        if (sync && authToken) syncSaveToServer(false);
+      }
+
+      let audioCtx = null, bgmTimer = null, bgmStep = 0;
+      function getAudioContext() {
+        if (!state.soundEnabled && !state.bgmEnabled) return null;
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        return audioCtx;
+      }
+
+      function playSfx(type) {
+        if (!state.soundEnabled) return;
+        const c = getAudioContext();
+        if (!c) return;
+        const now = c.currentTime;
+        const o = c.createOscillator();
+        const g = c.createGain();
+        if (type === 'shoot') {
+          o.type = 'triangle'; o.frequency.setValueAtTime(640, now); o.frequency.exponentialRampToValueAtTime(180, now + 0.06);
+          g.gain.setValueAtTime(0.05, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          o.connect(g); g.connect(c.destination); o.start(now); o.stop(now + 0.075);
+        } else if (type === 'boom') {
+          o.type = 'sawtooth'; o.frequency.setValueAtTime(140, now); o.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+          g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          o.connect(g); g.connect(c.destination); o.start(now); o.stop(now + 0.38);
+        } else if (type === 'item') {
+          o.type = 'sine'; o.frequency.setValueAtTime(523, now); o.frequency.setValueAtTime(880, now + 0.07);
+          g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          o.connect(g); g.connect(c.destination); o.start(now); o.stop(now + 0.22);
+        }
+      }
+
+      function startBGM() {
+        stopBGM();
+        if (!state.bgmEnabled) return;
+        const c = getAudioContext();
+        if (!c) return;
+        const notes = [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 392];
+        bgmTimer = setInterval(() => {
+          if (!state.bgmEnabled || !audioCtx) return;
+          try {
+            const now = audioCtx.currentTime;
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(notes[bgmStep % notes.length], now);
+            g.gain.setValueAtTime(0.03, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+            o.connect(g); g.connect(audioCtx.destination); o.start(now); o.stop(now + 0.23);
+            bgmStep++;
+          } catch (e) {}
+        }, 240);
+      }
+      function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
+
+      function getPlaneSvg(pl) {
+        if (pl.id === 'striker') {
+          return `<svg viewBox="0 0 64 64" class="w-10 h-10 drop-shadow-[0_0_6px_rgba(52,211,153,0.65)]"><polygon points="32,6 40,26 60,18 54,42 40,40 44,54 32,48 20,54 24,40 10,42 4,18 24,26" fill="${pl.color}" stroke="${pl.accent}" stroke-width="2.2" stroke-linejoin="round"/><ellipse cx="32" cy="24" rx="4" ry="8" fill="#0ea5e9"/><polygon points="25,52 29,52 27,60" fill="#fbbf24"/><polygon points="35,52 39,52 37,60" fill="#fbbf24"/></svg>`;
+        }
+        if (pl.id === 'phoenix') {
+          return `<svg viewBox="0 0 64 64" class="w-10 h-10 drop-shadow-[0_0_8px_rgba(251,191,36,0.75)]"><polygon points="32,4 41,22 61,36 52,46 40,42 46,56 32,50 18,56 24,42 12,46 3,36 23,22" fill="${pl.color}" stroke="${pl.accent}" stroke-width="2.2" stroke-linejoin="round"/><polygon points="32,12 38,30 32,44 26,30" fill="#fef08a" opacity="0.85"/><ellipse cx="32" cy="23" rx="4.2" ry="8" fill="#ef4444"/><polygon points="24,53 29,53 26.5,61" fill="#fde047"/><polygon points="35,53 40,53 37.5,61" fill="#fde047"/></svg>`;
+        }
+        if (pl.id === 'seraphim') {
+          return `<svg viewBox="0 0 64 64" class="w-10 h-10 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"><polygon points="32,5 39,20 58,28 56,44 43,38 48,55 32,47 16,55 21,38 8,44 6,28 25,20" fill="#3b0764" stroke="${pl.accent}" stroke-width="2.2" stroke-linejoin="round"/><polygon points="32,10 37,28 32,45 27,28" fill="${pl.color}"/><rect x="14" y="18" width="3" height="14" rx="1.5" fill="#f0abfc"/><rect x="47" y="18" width="3" height="14" rx="1.5" fill="#f0abfc"/><ellipse cx="32" cy="24" rx="3.8" ry="7.5" fill="#38bdf8"/><polygon points="25,52 29,52 27,60" fill="#e879f9"/><polygon points="35,52 39,52 37,60" fill="#e879f9"/></svg>`;
+        }
+        return `<svg viewBox="0 0 64 64" class="w-10 h-10 drop-shadow-[0_0_6px_rgba(56,189,248,0.65)]"><polygon points="32,6 40,26 58,40 53,48 39,43 44,55 32,50 20,55 25,43 11,48 6,40 24,26" fill="${pl.color}" stroke="${pl.accent}" stroke-width="2.2" stroke-linejoin="round"/><ellipse cx="32" cy="24" rx="4" ry="8.5" fill="#e0f2fe"/><polygon points="25,52 29,52 27,60" fill="#fbbf24"/><polygon points="35,52 39,52 37,60" fill="#fbbf24"/></svg>`;
+      }
+
+      function renderHangar() {
+        const nGrid = document.getElementById('normalPlaneGrid');
+        const vGrid = document.getElementById('vipPlaneGrid');
+        nGrid.innerHTML = '';
+        vGrid.innerHTML = '';
+
+        Object.values(PLANES).forEach(pl => {
+          const isSel = state.selectedPlane === pl.id;
+          const locked = pl.vipOnly && !state.isVip;
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = `p-2 sm:p-3 rounded-xl border-2 text-left transition cursor-pointer flex items-center justify-between gap-1.5 ${
+            isSel ? 'bg-sky-950/50 border-sky-400 shadow-lg ring-1 ring-sky-400/40' : locked ? 'bg-slate-950/60 border-purple-900/50 opacity-85 hover:border-purple-500' : 'bg-slate-950/85 border-slate-800 hover:border-slate-600'
+          }`;
+          card.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center border shrink-0 bg-slate-900/90" style="background:radial-gradient(circle, ${pl.color}28, #0f172a); border-color:${pl.color}88">
+                ${getPlaneSvg(pl)}
+              </div>
+              <div class="min-w-0">
+                <div class="text-[11px] sm:text-sm font-black text-white truncate">${pl.name}</div>
+                <div class="text-[9px] sm:text-[11px] font-bold ${isSel ? 'text-sky-300' : locked ? 'text-purple-300' : 'text-slate-400'}">${isSel ? '✔ 선택됨' : locked ? '👑 잠금' : '선택 가능'}</div>
+              </div>
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            if (locked) {
+              showToast('👑 VIP 전용 기체입니다! VIP 혜택을 확인하세요.');
+              document.getElementById('vipModal').classList.remove('hidden');
+              document.getElementById('vipModal').classList.add('flex');
+              return;
+            }
+            state.selectedPlane = pl.id;
+            saveState(false);
+            renderHangar();
+          });
+          (pl.vipOnly ? vGrid : nGrid).appendChild(card);
+        });
+
+        const cur = PLANES[state.selectedPlane];
+        document.getElementById('selectedPlaneInfo').textContent = `선택 기체: ${cur.name} (${cur.vipOnly ? 'VIP 전용' : '일반'})`;
+        const descEl = document.getElementById('selectedPlaneDesc');
+        if (descEl) descEl.textContent = cur.desc;
+        document.getElementById('hangarBombBadge').textContent = `💣 시작 폭탄: ${state.isVip ? 3 : 1}개`;
+      }
+
+      const ARENA_W = 540;
+      const ARENA_H = 820;
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasWrapper = document.getElementById('canvasWrapper');
+      let viewW = 540, viewH = 460;
+
+      function resizeCanvas() {
+        const rect = canvasWrapper.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        viewW = Math.max(300, rect.width || 540);
+        viewH = Math.max(260, rect.height || 460);
+        canvas.width = Math.floor(viewW * dpr);
+        canvas.height = Math.floor(viewH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      let running = false;
+      let stageIdx = 0;
+      let stageTime = 0;
+      let score = 0;
+      let scrollY = 0;
+      let player = null;
+      let pBullets = [];
+      let eBullets = [];
+      let enemies = [];
+      let items = [];
+      let particles = [];
+      let boss = null;
+      let enemySpawnTimer = 0;
+      let keys = {};
+      let fireHeld = false;
+      let canvasHeld = false;
+      let dragActive = false;
+      let lastDrag = { x: 0, y: 0 };
+
+      function showStageBanner(txt, ms = 1800) {
+        const b = document.getElementById('stageBanner');
+        document.getElementById('stageBannerText').textContent = txt;
+        b.classList.remove('hidden'); b.classList.add('flex');
+        setTimeout(() => { b.classList.add('hidden'); b.classList.remove('flex'); }, ms);
+      }
+
+      function startMission() {
+        const tpl = PLANES[state.selectedPlane] || PLANES.falcon;
+        window.scrollTo(0, 0);
+        document.body.classList.add('in-game');
+        document.getElementById('shortcutCard')?.classList.add('hidden');
+        document.getElementById('hangarSection').classList.add('hidden');
+        document.getElementById('gameSection').classList.remove('hidden');
+        document.getElementById('gameSection').classList.add('flex');
+        document.getElementById('resultOverlay').classList.add('hidden');
+        document.getElementById('resultOverlay').classList.remove('flex');
+        resizeCanvas();
+
+        stageIdx = 0; stageTime = 0; score = 0;
+        pBullets = []; eBullets = []; enemies = []; items = []; particles = [];
+        boss = null; enemySpawnTimer = 0.8;
+
+        player = {
+          x: ARENA_W / 2, y: ARENA_H - 80, radius: 18,
+          lives: 3, bombs: state.isVip ? 3 : 1,
+          shield: false, power: 1, invuln: 1.5, fireTimer: 0, tpl
+        };
+
+        running = true;
+        if (state.bgmEnabled) startBGM();
+        showStageBanner(`STAGE 1 START!`, 1400);
+        updateGameHud();
+        lastTs = 0;
+        requestAnimationFrame(loop);
+      }
+
+      function spawnBoss(idx) {
+        const bTpl = BOSSES[idx];
+        boss = {
+          ...bTpl,
+          x: ARENA_W / 2, y: -100, targetY: 118,
+          vx: 110 + idx * 18, maxHp: bTpl.hp,
+          radius: bTpl.stage === 7 ? 70 : 56,
+          shootTimer: 1.1, phaseAngle: 0, patternTick: 0
+        };
+        showStageBanner(`⚠️ WARNING!\n${bTpl.name}`, 2100);
+      }
+
+      function spawnItem(x, y) {
+        const r = Math.random();
+        let type = 'gold';
+        if (r < 0.25) type = 'power';
+        else if (r < 0.48) type = 'shield';
+        else if (r < 0.65) type = 'bomb';
+        else if (r < 0.78) type = 'life';
+        items.push({ x, y, vy: 115, radius: 14, type });
+      }
+
+      function firePlayerBullets() {
+        const p = player;
+        const dmg = p.tpl.dmg * (state.isVip ? 1.25 : 1) * (1 + (p.power - 1) * 0.22);
+        const col = p.tpl.accent;
+        playSfx('shoot');
+
+        const addB = (ox, oy, vx, vy) => pBullets.push({ x: p.x + ox, y: p.y + oy, vx, vy, dmg, color: col, radius: 4.5 });
+        if (p.tpl.id === 'phoenix') {
+          addB(0, -18, 0, -680);
+          addB(-14, -12, -80, -660); addB(14, -12, 80, -660);
+          addB(-24, -4, -170, -640); addB(24, -4, 170, -640);
+        } else if (p.tpl.id === 'seraphim') {
+          addB(-10, -20, 0, -720); addB(10, -20, 0, -720);
+          pBullets.push({ x: p.x - 20, y: p.y - 4, vx: -130, vy: -520, dmg: dmg * 0.9, color: '#e879f9', radius: 5.5, homing: true });
+          pBullets.push({ x: p.x + 20, y: p.y - 4, vx: 130, vy: -520, dmg: dmg * 0.9, color: '#e879f9', radius: 5.5, homing: true });
+        } else if (p.tpl.id === 'striker' || p.power >= 3) {
+          addB(0, -18, 0, -650);
+          addB(-12, -12, -110, -630); addB(12, -12, 110, -630);
+          if (p.power >= 4) { addB(-20, -6, -210, -600); addB(20, -6, 210, -600); }
+        } else {
+          addB(-9, -16, 0, -650); addB(9, -16, 0, -650);
+          if (p.power >= 2) addB(0, -22, 0, -670);
+        }
+      }
+
+      function triggerBomb() {
+        if (!running || !player || player.bombs <= 0) return;
+        player.bombs--;
+        playSfx('boom');
+        eBullets = [];
+        for (let i = 0; i < 36; i++) {
+          const a = (Math.PI * 2 * i) / 36;
+          particles.push({ x: player.x, y: player.y, vx: Math.cos(a) * 320, vy: Math.sin(a) * 320, color: '#fbbf24', r: 5, life: 0.65 });
+        }
+        enemies.forEach(en => { en.hp -= 350; });
+        if (boss) boss.hp -= 450;
+        showToast('💣 필살 폭탄 발동! 적 탄막 제거!');
+        updateGameHud();
+      }
+
+      function damagePlayer() {
+        if (!player || player.invuln > 0) return;
+        if (player.shield) {
+          player.shield = false;
+          player.invuln = 1.4;
+          playSfx('item');
+          showToast('🛡️ 1차 보호막이 공격을 막아냈습니다!');
+          updateGameHud();
+          return;
+        }
+        player.lives--;
+        player.invuln = 2.0;
+        player.power = Math.max(1, player.power - 1);
+        playSfx('boom');
+        if (player.lives <= 0) finishGame(false);
+        updateGameHud();
+      }
+
+      function finishGame(victory) {
+        running = false;
+        if (score > state.bestScore) {
+          state.bestScore = score;
+          saveState(true);
+          setTimeout(loadSkyRanking, 400);
+        }
+        document.getElementById('resultTitle').textContent = victory ? '🏆 ALL STAGE CLEAR!' : '💥 MISSION FAILED';
+        document.getElementById('resultTitle').className = 'text-2xl font-black ' + (victory ? 'text-amber-300' : 'text-rose-400');
+        document.getElementById('resultSub').textContent = `최종 점수: ${score.toLocaleString('ko-KR')} PTS (최고 ${state.bestScore.toLocaleString('ko-KR')})`;
+        document.getElementById('resultOverlay').classList.remove('hidden');
+        document.getElementById('resultOverlay').classList.add('flex');
+        renderHangar();
+      }
+
+      function updateBoss(dt) {
+        if (!boss) return;
+        if (boss.y < boss.targetY) { boss.y += 90 * dt; return; }
+        boss.x += boss.vx * dt;
+        if (boss.x < 75 || boss.x > ARENA_W - 75) boss.vx *= -1;
+        boss.phaseAngle += dt * 1.8;
+
+        boss.shootTimer -= dt;
+        if (boss.shootTimer <= 0) {
+          const st = boss.stage;
+          boss.shootTimer = Math.max(0.45, 1.15 - st * 0.11);
+          const addEB = (vx, vy, col = '#fb7185', r = 6) => eBullets.push({ x: boss.x, y: boss.y + 30, vx, vy, color: col, radius: r });
+
+          if (st === 1) {
+            for (let i = -1; i <= 1; i++) addEB(i * 75, 220);
+          } else if (st === 2) {
+            for (let i = 0; i < 6; i++) {
+              const a = boss.phaseAngle + (Math.PI * 2 * i) / 6;
+              addEB(Math.cos(a) * 190, Math.sin(a) * 190, '#2dd4bf');
+            }
+          } else if (st === 3) {
+            for (let i = -2; i <= 2; i++) addEB(i * 65, 250, '#fbbf24');
+          } else if (st === 4) {
+            for (let i = 0; i < 10; i++) {
+              const a = boss.phaseAngle + (Math.PI * 2 * i) / 10;
+              addEB(Math.cos(a) * 200, Math.sin(a) * 200, '#7dd3fc');
+            }
+          } else if (st === 5) {
+            for (let i = 0; i < 8; i++) {
+              const a = boss.phaseAngle + (Math.PI * 2 * i) / 8;
+              addEB(Math.cos(a) * 215, Math.sin(a) * 215, '#e879f9');
+            }
+            const ang = Math.atan2(player.y - boss.y, player.x - boss.x);
+            addEB(Math.cos(ang) * 270, Math.sin(ang) * 270, '#fde047', 7);
+          } else if (st === 6) {
+            for (let i = 0; i < 14; i++) {
+              const a = boss.phaseAngle + (Math.PI * 2 * i) / 14;
+              addEB(Math.cos(a) * 210, Math.sin(a) * 210, '#f43f5e');
+            }
+            const ang = Math.atan2(player.y - boss.y, player.x - boss.x);
+            for (let k = -1; k <= 1; k++) addEB(Math.cos(ang + k * 0.18) * 280, Math.sin(ang + k * 0.18) * 280, '#fde047', 7);
+          } else {
+            boss.shootTimer = 0.28;
+            boss.patternTick = (boss.patternTick || 0) + 1;
+            const mode = Math.floor(boss.patternTick / 10) % 4;
+            if (mode === 0) {
+              for (let i = 0; i < 20; i++) {
+                const a = boss.phaseAngle * 1.4 + (Math.PI * 2 * i) / 20;
+                addEB(Math.cos(a) * 205, Math.sin(a) * 205, i % 2 === 0 ? '#f43f5e' : '#fde047', 6);
+              }
+            } else if (mode === 1) {
+              for (let col = -3; col <= 3; col++) {
+                eBullets.push({ x: boss.x + col * 36, y: boss.y + 38, vx: col * 24, vy: 285, color: '#fb923c', radius: 6.5 });
+              }
+              addEB(-190, 190, '#e879f9', 7); addEB(190, 190, '#e879f9', 7);
+            } else if (mode === 2) {
+              const ang = Math.atan2(player.y - boss.y, player.x - boss.x);
+              for (let k = -2; k <= 2; k++) {
+                addEB(Math.cos(ang + k * 0.16) * 305, Math.sin(ang + k * 0.16) * 305, '#38bdf8', 7);
+              }
+            } else {
+              for (let i = 0; i < 8; i++) {
+                const a1 = boss.phaseAngle * 1.8 + (Math.PI * 2 * i) / 8;
+                const a2 = -boss.phaseAngle * 1.8 + (Math.PI * 2 * i) / 8;
+                addEB(Math.cos(a1) * 230, Math.sin(a1) * 230, '#e879f9', 6);
+                addEB(Math.cos(a2) * 180, Math.sin(a2) * 180, '#fde047', 5);
+              }
+            }
+          }
+        }
+
+        if (boss.hp <= 0) {
+          playSfx('boom');
+          score += 1500 * boss.stage;
+          for (let i = 0; i < 32; i++) {
+            const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 240;
+            particles.push({ x: boss.x, y: boss.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, color: boss.accent, r: 5, life: 0.8 });
+          }
+          spawnItem(boss.x - 25, boss.y);
+          spawnItem(boss.x + 25, boss.y);
+          boss = null;
+
+          if (stageIdx >= 6) finishGame(true);
+          else {
+            stageIdx++;
+            stageTime = 0;
+            showStageBanner(`STAGE ${stageIdx + 1} START!`, 1500);
+          }
+        }
+      }
+
+      function drawBoss(b) {
+        const t = performance.now() * 0.004;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.shadowColor = b.accent; ctx.shadowBlur = 22;
+        const bodyGrad = ctx.createLinearGradient(0, -50, 0, 55);
+        bodyGrad.addColorStop(0, b.color);
+        bodyGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bodyGrad;
+        ctx.strokeStyle = b.accent;
+        ctx.lineWidth = 2.8;
+
+        ctx.beginPath(); ctx.moveTo(0, 64); ctx.lineTo(-104, 10); ctx.lineTo(-82, -44); ctx.lineTo(-28, -32); ctx.lineTo(28, -32); ctx.lineTo(82, -44); ctx.lineTo(104, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(-74, -66, 148, 11);
+        ctx.fillStyle = b.accent; ctx.fillRect(-74, -66, 148 * Math.max(0, b.hp / b.maxHp), 11);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(-74, -66, 148, 11);
+        ctx.restore();
+      }
+
+      function drawPlayerPlane(p) {
+        if (p.invuln > 0 && Math.floor(p.invuln * 12) % 2 === 0) return;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (p.shield) {
+          ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 3;
+          ctx.shadowColor = '#22d3ee'; ctx.shadowBlur = 12;
+          ctx.beginPath(); ctx.arc(0, 0, 31, 0, Math.PI * 2); ctx.stroke();
+        }
+        const jetGrad = ctx.createLinearGradient(0, -28, 0, 22);
+        jetGrad.addColorStop(0, '#ffffff'); jetGrad.addColorStop(0.4, p.tpl.color); jetGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = jetGrad; ctx.strokeStyle = p.tpl.accent; ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(0, -28); ctx.lineTo(8, -6); ctx.lineTo(26, 10); ctx.lineTo(22, 17); ctx.lineTo(7, 12); ctx.lineTo(12, 22); ctx.lineTo(0, 18); ctx.lineTo(-12, 22); ctx.lineTo(-7, 12); ctx.lineTo(-22, 17); ctx.lineTo(-26, 10); ctx.lineTo(-8, -6);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0ea5e9';
+        ctx.beginPath(); ctx.ellipse(0, -7, 4, 9, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function updateGameHud() {
+        if (!player) return;
+        document.getElementById('hudStage').textContent = `STAGE ${stageIdx + 1} / 7`;
+        document.getElementById('hudLives').textContent = '❤️'.repeat(Math.max(0, player.lives));
+        document.getElementById('hudBombs').textContent = `💣 x${player.bombs}`;
+        document.getElementById('bombBtnCount').textContent = `폭탄(${player.bombs})`;
+        document.getElementById('hudShield').classList.toggle('hidden', !player.shield);
+        document.getElementById('hudPower').textContent = `⚡ LV.${player.power}`;
+        document.getElementById('hudScore').textContent = `${score.toLocaleString('ko-KR')} PTS`;
+      }
+
+      let lastTs = 0;
+      function loop(ts) {
+        if (!running) return;
+        const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0.016;
+        lastTs = ts;
+        scrollY = (scrollY + 120 * dt) % 80;
+        stageTime += dt;
+        if (player.invuln > 0) player.invuln -= dt;
+
+        const mx = (keys['ArrowRight'] || keys['KeyD'] ? 1 : 0) - (keys['ArrowLeft'] || keys['KeyA'] ? 1 : 0);
+        const my = (keys['ArrowDown'] || keys['KeyS'] ? 1 : 0) - (keys['ArrowUp'] || keys['KeyW'] ? 1 : 0);
+        if (mx || my) {
+          const len = Math.hypot(mx, my) || 1;
+          player.x = Math.max(24, Math.min(ARENA_W - 24, player.x + (mx / len) * player.tpl.speed * dt));
+          player.y = Math.max(40, Math.min(ARENA_H - 28, player.y + (my / len) * player.tpl.speed * dt));
+        }
+
+        player.fireTimer -= dt;
+        if ((fireHeld || canvasHeld || keys['Space'] || keys['KeyZ']) && player.fireTimer <= 0) {
+          player.fireTimer = player.tpl.fireRate;
+          firePlayerBullets();
+        }
+
+        if (!boss && stageTime >= 18) spawnBoss(stageIdx);
+
+        if (!boss) {
+          enemySpawnTimer -= dt;
+          if (enemySpawnTimer <= 0) {
+            enemySpawnTimer = Math.max(0.21, 0.525 - stageIdx * 0.05);
+            const isHeavy = Math.random() < 0.14;
+            if (isHeavy) {
+              const heavyHp = 480 + stageIdx * 320;
+              enemies.push({ heavy: true, x: 60 + Math.random() * (ARENA_W - 120), y: -36, vy: 68 + stageIdx * 10, vx: (Math.random() < 0.5 ? -1 : 1) * 55, hp: heavyHp, maxHp: heavyHp, radius: 28, shootCd: 0.45 });
+            } else {
+              enemies.push({ heavy: false, x: 35 + Math.random() * (ARENA_W - 70), y: -25, vy: 130 + stageIdx * 22, vx: (Math.random() - 0.5) * 90, hp: 35 + stageIdx * 22, maxHp: 35 + stageIdx * 22, radius: 18, shootCd: 1.1 });
+            }
+          }
+        }
+
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const en = enemies[i];
+          en.x += en.vx * dt; en.y += en.vy * dt;
+          if (en.x < (en.heavy ? 36 : 24) || en.x > ARENA_W - (en.heavy ? 36 : 24)) en.vx *= -1;
+          en.shootCd -= dt;
+          if (en.shootCd <= 0 && en.y < ARENA_H * 0.72) {
+            en.shootCd = en.heavy ? 0.24 : 1.6;
+            const ang = Math.atan2(player.y - en.y, player.x - en.x);
+            eBullets.push({ x: en.x, y: en.y + 12, vx: Math.cos(ang) * 210, vy: Math.sin(ang) * 210, color: '#fb7185', radius: 5 });
+          }
+          if (Math.hypot(en.x - player.x, en.y - player.y) < en.radius + player.radius) damagePlayer();
+          if (en.hp <= 0) {
+            score += en.heavy ? 450 : 100;
+            if (en.heavy || Math.random() < 0.24) spawnItem(en.x, en.y);
+            enemies.splice(i, 1);
+            updateGameHud();
+          } else if (en.y > ARENA_H + 40) enemies.splice(i, 1);
+        }
+
+        updateBoss(dt);
+
+        for (let i = pBullets.length - 1; i >= 0; i--) {
+          const b = pBullets[i];
+          b.x += b.vx * dt; b.y += b.vy * dt;
+          if (b.y < -20) { pBullets.splice(i, 1); continue; }
+          let hit = false;
+          for (const en of enemies) {
+            if (Math.hypot(en.x - b.x, en.y - b.y) < en.radius + b.radius) { en.hp -= b.dmg; hit = true; break; }
+          }
+          if (!hit && boss && Math.hypot(boss.x - b.x, boss.y - b.y) < boss.radius + b.radius) {
+            boss.hp -= b.dmg; score += 10; hit = true;
+          }
+          if (hit) pBullets.splice(i, 1);
+        }
+
+        for (let i = eBullets.length - 1; i >= 0; i--) {
+          const eb = eBullets[i];
+          eb.x += eb.vx * dt; eb.y += eb.vy * dt;
+          if (eb.y > ARENA_H + 20) { eBullets.splice(i, 1); continue; }
+          if (Math.hypot(eb.x - player.x, eb.y - player.y) < eb.radius + player.radius * 0.65) {
+            eBullets.splice(i, 1); damagePlayer();
+          }
+        }
+
+        for (let i = items.length - 1; i >= 0; i--) {
+          const it = items[i];
+          it.y += it.vy * dt;
+          if (Math.hypot(it.x - player.x, it.y - player.y) < it.radius + player.radius + 6) {
+            playSfx('item');
+            if (it.type === 'shield') player.shield = true;
+            else if (it.type === 'life') player.lives = Math.min(5, player.lives + 1);
+            else if (it.type === 'bomb') player.bombs = Math.min(5, player.bombs + 1);
+            else if (it.type === 'power') player.power = Math.min(4, player.power + 1);
+            else score += 300;
+            items.splice(i, 1);
+            updateGameHud();
+          } else if (it.y > ARENA_H + 30) items.splice(i, 1);
+        }
+
+        const bTpl = BOSSES[stageIdx];
+        const bg = ctx.createLinearGradient(0, 0, 0, viewH);
+        bg.addColorStop(0, bTpl.sky[0]); bg.addColorStop(1, bTpl.sky[1]);
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, viewW, viewH);
+
+        const scale = Math.min(viewW / ARENA_W, viewH / ARENA_H);
+        const ox = (viewW - ARENA_W * scale) / 2;
+        const oy = (viewH - ARENA_H * scale) / 2;
+        ctx.save(); ctx.translate(ox, oy); ctx.scale(scale, scale);
+
+        pBullets.forEach(b => { ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill(); });
+        eBullets.forEach(eb => { ctx.fillStyle = eb.color; ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.radius, 0, Math.PI * 2); ctx.fill(); });
+        enemies.forEach(en => {
+          ctx.fillStyle = en.heavy ? '#dc2626' : '#fb7185';
+          ctx.beginPath(); ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2); ctx.fill();
+        });
+        if (boss) drawBoss(boss);
+        drawPlayerPlane(player);
+        ctx.restore();
+
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener('keydown', (e) => {
+        keys[e.code] = true;
+        if (!running) return;
+        if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+        if (e.code === 'KeyX' || e.code === 'KeyB') triggerBomb();
+      });
+      window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!running) return;
+        e.preventDefault();
+        getAudioContext();
+        dragActive = true; canvasHeld = true;
+        lastDrag = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('pointermove', (e) => {
+        if (!dragActive || !running || !player) return;
+        const dx = e.clientX - lastDrag.x, dy = e.clientY - lastDrag.y;
+        lastDrag = { x: e.clientX, y: e.clientY };
+        const dragScale = Math.min(viewW / ARENA_W, viewH / ARENA_H) || 1;
+        player.x = Math.max(24, Math.min(ARENA_W - 24, player.x + dx / dragScale));
+        player.y = Math.max(40, Math.min(ARENA_H - 28, player.y + dy / dragScale));
+      });
+      function releaseCanvasHold() { dragActive = false; canvasHeld = false; }
+      window.addEventListener('pointerup', releaseCanvasHold);
+      window.addEventListener('pointercancel', releaseCanvasHold);
+
+      function bindHoldKey(id, code) {
+        const el = document.getElementById(id);
+        el.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[code] = true; });
+        el.addEventListener('pointerup', () => { keys[code] = false; });
+        el.addEventListener('pointerleave', () => { keys[code] = false; });
+      }
+      bindHoldKey('padLeft', 'ArrowLeft'); bindHoldKey('padRight', 'ArrowRight');
+      bindHoldKey('padUp', 'ArrowUp'); bindHoldKey('padDown', 'ArrowDown');
+
+      const holdFireBtn = document.getElementById('holdFireBtn');
+      holdFireBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); getAudioContext(); fireHeld = true; });
+      holdFireBtn.addEventListener('pointerup', () => { fireHeld = false; });
+      holdFireBtn.addEventListener('pointercancel', () => { fireHeld = false; });
+      holdFireBtn.addEventListener('pointerleave', () => { fireHeld = false; });
+      document.getElementById('bombBtn').addEventListener('click', triggerBomb);
+
+      document.getElementById('launchMissionBtn').addEventListener('click', () => { getAudioContext(); startMission(); });
+      document.getElementById('retryBtn').addEventListener('click', startMission);
+      function returnHangar() {
+        running = false;
+        document.body.classList.remove('in-game');
+        document.getElementById('shortcutCard')?.classList.remove('hidden');
+        document.getElementById('gameSection').classList.add('hidden');
+        document.getElementById('gameSection').classList.remove('flex');
+        document.getElementById('hangarSection').classList.remove('hidden');
+        renderHangar();
+      }
+      document.getElementById('resultHangarBtn').addEventListener('click', returnHangar);
+
+      let toastTimer = null;
+      function showToast(msg) {
+        const b = document.getElementById('toastBox');
+        document.getElementById('toastMsg').textContent = msg;
+        b.classList.remove('opacity-0', 'translate-y-2'); b.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { b.classList.remove('opacity-100', 'translate-y-0'); b.classList.add('opacity-0', 'translate-y-2'); }, 2200);
+      }
+
+      async function syncSaveToServer(notify) {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ gameId: GAME_ID, saveData: state, score: state.bestScore })
+          });
+          if (res.status === 401 || res.status === 403) {
+            handleLogout();
+            return;
+          }
+          if (res.ok && notify) showToast('🟨 서버에 최고 기록이 저장되었습니다!');
+        } catch (e) {}
+      }
+
+      function maskPrivacyInfo(value) {
+        if (value === null || value === undefined) return '익명';
+        let s = String(value).trim();
+        if (!s) return '익명';
+        s = s.replace(/(01\d|0\d{1,2})[-.\s]?([\d*]{3,4})[-.\s]?(\d{4})/g, (_, p1, p2, p3) => `${p1}-${'*'.repeat(p2.length)}-${p3}`);
+        return s;
+      }
+
+      function updateAuthUI() {
+        const b = document.getElementById('userBadge');
+        const authToggleBtnLabel = document.getElementById('authToggleBtnLabel');
+        if (authToken && currentUsername) {
+          b.textContent = `📱 ${maskPrivacyInfo(currentUsername)}`;
+          authToggleBtnLabel.textContent = '로그아웃';
+        } else {
+          b.textContent = '👤 게스트';
+          authToggleBtnLabel.textContent = '로그인';
+        }
+        document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP중' : 'VIP';
+      }
+
+      function handleLogout() {
+        authToken = null; currentUsername = null;
+        state.isVip = false;
+        if (PLANES[state.selectedPlane]?.vipOnly) state.selectedPlane = 'falcon';
+        saveState(false);
+        try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); } catch (e) {}
+        updateAuthUI(); renderHangar();
+        showToast('로그아웃되었습니다.');
+      }
+
+      const authModal = document.getElementById('authModal');
+      const phoneInput = document.getElementById('authPhoneDigits');
+      const pinInput = document.getElementById('authPinCode');
+      let isRegisterMode = false;
+
+      document.getElementById('authToggleBtn').addEventListener('click', () => {
+        if (authToken) {
+          handleLogout();
+        } else {
+          authModal.classList.remove('hidden');
+          authModal.classList.add('flex');
+          setTimeout(() => phoneInput.focus(), 50);
+        }
+      });
+      document.getElementById('authCloseBtn').addEventListener('click', () => { authModal.classList.add('hidden'); authModal.classList.remove('flex'); });
+
+      document.getElementById('modeLoginBtn').addEventListener('click', () => {
+        isRegisterMode = false;
+        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white cursor-pointer';
+        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+        document.getElementById('authSubmitBtn').textContent = '로그인 및 저장 연동';
+      });
+      document.getElementById('modeRegisterBtn').addEventListener('click', () => {
+        isRegisterMode = true;
+        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white cursor-pointer';
+        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+        document.getElementById('authSubmitBtn').textContent = '가입하고 서버 저장';
+      });
+
+      phoneInput.addEventListener('input', (e) => {
+        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+        e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+      });
+      pinInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+
+      document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const digits = phoneInput.value.replace(/\D/g, '');
+        const pin = pinInput.value.trim();
+        if (digits.length !== 8 || pin.length !== 4) {
+          document.getElementById('authErrorMsg').textContent = '번호 8자리와 PIN 4자리를 정확히 입력해주세요.';
+          document.getElementById('authErrorMsg').classList.remove('hidden');
+          return;
+        }
+        const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+        const endpoint = isRegisterMode ? '/api/register' : '/api/login';
+        try {
+          const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fullId, password: pin, gameId: GAME_ID, initialSaveData: state })
+          });
+          const data = await res.json();
+          if (res.ok && data.token) {
+            authToken = data.token; currentUsername = data.username || fullId;
+            try { localStorage.setItem(TOKEN_KEY, authToken); localStorage.setItem(USER_KEY, currentUsername); } catch (e) {}
+            if (data.isVip || data.saveData?.isVip) state.isVip = true;
+            if (typeof data.saveData?.bestScore === 'number') state.bestScore = Math.max(state.bestScore, data.saveData.bestScore);
+            saveState(false); updateAuthUI(); renderHangar();
+            authModal.classList.add('hidden'); authModal.classList.remove('flex');
+            showToast(`🟨 [${currentUsername}] 로그인 완료!`);
+            loadSkyRanking();
+          } else {
+            document.getElementById('authErrorMsg').textContent = data.error || '로그인 실패';
+            document.getElementById('authErrorMsg').classList.remove('hidden');
+          }
+        } catch (err) {
+          document.getElementById('authErrorMsg').textContent = '서버 연결 실패';
+          document.getElementById('authErrorMsg').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('vipOpenBtn').addEventListener('click', () => { document.getElementById('vipModal').classList.remove('hidden'); document.getElementById('vipModal').classList.add('flex'); });
+      document.getElementById('vipCloseBtn').addEventListener('click', () => { document.getElementById('vipModal').classList.add('hidden'); document.getElementById('vipModal').classList.remove('flex'); });
+      document.getElementById('vipConfirmBtn').addEventListener('click', () => {
+        state.isVip = true; saveState(true); updateAuthUI(); renderHangar();
+        document.getElementById('vipModal').classList.add('hidden'); document.getElementById('vipModal').classList.remove('flex');
+        showToast('👑 VIP 패키지가 적용되었습니다!');
+      });
+
+      document.getElementById('resetOpenBtn').addEventListener('click', returnHangar);
+      document.getElementById('bgmToggleBtn').addEventListener('click', () => { state.bgmEnabled = !state.bgmEnabled; saveState(false); document.getElementById('bgmToggleBtn').textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF'; if (state.bgmEnabled) startBGM(); else stopBGM(); });
+      document.getElementById('soundToggleBtn').addEventListener('click', () => { state.soundEnabled = !state.soundEnabled; saveState(false); document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF'; });
+
+      async function loadSkyRanking() {
+        const listEl = document.getElementById('skyRankList');
+        if (!listEl) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}`);
+          if (res.ok) {
+            const data = await res.json();
+            const arr = (data.rankings || []).slice(0, 10);
+            if (arr.length > 0) {
+              listEl.innerHTML = arr.map((r, i) => `
+                <div class="flex justify-between px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800">
+                  <span class="text-slate-200 font-bold">${i + 1}위 ${maskPrivacyInfo(r.maskedName || r.username || "익명")}</span>
+                  <span class="text-amber-300 font-black">${(r.score || 0).toLocaleString('ko-KR')} PTS</span>
+                </div>
+              `).join('');
+              return;
+            }
+          }
+        } catch (e) {}
+        listEl.innerHTML = '<div class="text-slate-500 text-center py-1">아직 등록된 기록이 없습니다.</div>';
+      }
+
+      async function loadServerProfile() {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/load?gameId=${GAME_ID}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (res.status === 401 || res.status === 403) { handleLogout(); return; }
+          if (!res.ok) return;
+          const data = await res.json();
+          const rawSave = data?.saveData ?? data?.save_data;
+          if (rawSave) {
+            if (rawSave.isVip) state.isVip = true;
+            if (typeof rawSave.bestScore === 'number') state.bestScore = Math.max(state.bestScore, rawSave.bestScore);
+          }
+          updateAuthUI(); renderHangar();
+        } catch (e) {}
+      }
+
+      document.getElementById('skyRankRefreshBtn').addEventListener('click', loadSkyRanking);
+      window.addEventListener('load', () => { updateAuthUI(); renderHangar(); loadServerProfile(); loadSkyRanking(); });
+    })();
+  </script>
+</body>
+</html>
