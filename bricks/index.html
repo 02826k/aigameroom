@@ -47,23 +47,24 @@
     .vip-btn-glow {
       animation: vipPulse 2.2s infinite ease-in-out;
     }
-    #gameStageSection:fullscreen {
+    #fullscreenMain:fullscreen {
+      max-width: 100% !important;
       width: 100vw !important;
       height: 100dvh !important;
       background: #020617 !important;
-      border-radius: 0 !important;
-      border-width: 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
+      padding: 6px !important;
+      gap: 6px !important;
+      overflow: hidden !important;
     }
-    #gameStageSection:fullscreen #canvasWrapper {
+    #fullscreenMain:fullscreen #gameStageSection {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+    }
+    #fullscreenMain:fullscreen #canvasWrapper {
       flex: 1 1 0% !important;
       width: 100% !important;
       height: 100% !important;
       min-height: 0 !important;
-    }
-    #gameStageSection:fullscreen #fsExitBtn {
-      display: inline-flex !important;
     }
   </style>
 </head>
@@ -90,7 +91,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 min-h-0 max-w-4xl w-full mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col gap-1.5">
+  <main id="fullscreenMain" class="flex-1 min-h-0 max-w-4xl w-full mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col gap-1.5">
     <!-- Top Status Card (컴팩트) -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl shadow-black/30 shrink-0">
       <div class="flex flex-col sm:flex-row sm:items-center gap-1.5">
@@ -127,9 +128,6 @@
     <section id="gameStageSection" class="flex-1 min-h-0 flex flex-col relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
       <div id="canvasWrapper" class="relative flex-1 min-h-0 w-full cursor-pointer bg-slate-950 flex items-center justify-center">
         <canvas id="gameCanvas" class="block w-full h-full"></canvas>
-        <button id="fsExitBtn" type="button" class="hidden absolute top-2.5 right-2.5 z-30 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-600 text-slate-100 text-xs font-black shadow-lg cursor-pointer">
-          ✕ 축소
-        </button>
 
         <!-- 게임 오버 / 스테이지 클리어 오버레이 -->
         <div id="gameOverlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity duration-200">
@@ -547,17 +545,23 @@
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
       const canvasWrapper = document.getElementById('canvasWrapper');
-      let canvasWidth = 800;
-      let canvasHeight = 440;
+      const canvasWidth = 440;
+      const canvasHeight = 580;
 
       function resizeCanvas() {
         const rect = canvasWrapper.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvasWidth = Math.max(300, rect.width || canvasWrapper.clientWidth || 800);
-        canvasHeight = Math.max(260, rect.height || canvasWrapper.clientHeight || 440);
-        canvas.width = Math.floor(canvasWidth * dpr);
-        canvas.height = Math.floor(canvasHeight * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        ctx.setTransform(
+          dpr * (rect.width / canvasWidth),
+          0,
+          0,
+          dpr * (rect.height / canvasHeight),
+          0,
+          0
+        );
       }
       window.addEventListener('resize', resizeCanvas);
       window.addEventListener('orientationchange', () => {
@@ -565,34 +569,11 @@
         setTimeout(resizeCanvas, 350);
       });
       if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(() => {
-          const prevW = canvasWidth;
-          const prevH = canvasHeight;
-          resizeCanvas();
-          if (prevW && prevH && (prevW !== canvasWidth || prevH !== canvasHeight)) {
-            const sx = canvasWidth / prevW;
-            const sy = canvasHeight / prevH;
-            paddle.y = canvasHeight - 30;
-            paddle.x = Math.max(0, Math.min(canvasWidth - paddle.width, paddle.x * sx));
-            bricks.forEach(b => {
-              b.x *= sx; b.y *= sy; b.w *= sx; b.h *= sy;
-            });
-            balls.forEach(bl => {
-              bl.x *= sx; bl.y *= sy;
-            });
-            items.forEach(it => {
-              it.x *= sx; it.y *= sy;
-            });
-            missiles.forEach(m => {
-              m.x *= sx; m.y *= sy;
-            });
-          }
-        }).observe(canvasWrapper);
+        new ResizeObserver(() => resizeCanvas()).observe(canvasWrapper);
       }
 
-      const gameStageSection = document.getElementById('gameStageSection');
+      const fullscreenMain = document.getElementById('fullscreenMain');
       const fullscreenBtn = document.getElementById('fullscreenBtn');
-      const fsExitBtn = document.getElementById('fsExitBtn');
       function lockPortrait() {
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock('portrait').catch(() => {});
@@ -601,7 +582,7 @@
       async function toggleFullscreen() {
         try {
           if (!document.fullscreenElement) {
-            await gameStageSection.requestFullscreen();
+            await fullscreenMain.requestFullscreen();
             lockPortrait();
           } else {
             lockPortrait();
@@ -614,7 +595,6 @@
         setTimeout(resizeCanvas, 300);
       }
       fullscreenBtn.addEventListener('click', toggleFullscreen);
-      fsExitBtn.addEventListener('click', toggleFullscreen);
       document.addEventListener('fullscreenchange', () => {
         const isFs = Boolean(document.fullscreenElement);
         fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
@@ -866,7 +846,7 @@
 
       canvasWrapper.addEventListener('pointermove', (e) => {
         const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
+        const mouseX = (e.clientX - rect.left) * (canvasWidth / (rect.width || canvasWidth));
         paddle.x = Math.max(0, Math.min(canvasWidth - paddle.width, mouseX - paddle.width / 2));
         if (gameRunning) {
           balls.forEach(b => {
