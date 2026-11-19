@@ -22,13 +22,13 @@
       overflow-x: hidden;
     }
     @keyframes marqueeScroll {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-50%); }
+      0% { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
     }
     .marquee-track {
-      display: flex;
+      display: inline-block;
       width: max-content;
-      animation: marqueeScroll 18s linear infinite;
+      animation: marqueeScroll 7s linear infinite;
     }
     .marquee-wrap:hover .marquee-track {
       animation-play-state: paused;
