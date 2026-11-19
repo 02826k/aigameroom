@@ -753,7 +753,7 @@
             socket.on('connect', () => {
               badge.textContent = '🟢 실시간 연결됨';
               badge.className = 'text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/40';
-              if (currentMode === 'pvp') socket.emit('enter_pvp_lobby', { username: getDisplayName() });
+              if (currentMode === 'pvp') socket.emit('enter_pvp_lobby', { gameId: GAME_ID, username: getDisplayName() });
             });
             socket.on('disconnect', () => { badge.textContent = '🔴 연결 끊김'; });
             socket.on('update_waiting_list', renderWaitingList);
@@ -761,8 +761,16 @@
             socket.on('match_started', (data) => {
               pvpRoomName = data.room;
               pvpRole = (data.leftPlayer.socketId === socket.id) ? 'left' : 'right';
-              state.p1Id = FIGHTERS[data.leftPlayer.skinId] ? data.leftPlayer.skinId : 'akira';
-              state.p2Id = FIGHTERS[data.rightPlayer.skinId] ? data.rightPlayer.skinId : 'pai';
+              const findFighterByTag = (uName, fallbackId) => {
+                const m = String(uName || '').match(/\[([^\]]+)\]/);
+                if (m) {
+                  const found = Object.values(FIGHTERS).find(ft => ft.name === m[1]);
+                  if (found) return found.id;
+                }
+                return fallbackId;
+              };
+              state.p1Id = FIGHTERS[data.leftPlayer.skinId]?.id || findFighterByTag(data.leftPlayer.username, 'akira');
+              state.p2Id = FIGHTERS[data.rightPlayer.skinId]?.id || findFighterByTag(data.rightPlayer.username, 'pai');
               document.getElementById('pvpLobbySection').classList.add('hidden');
               document.getElementById('pvpLobbySection').classList.remove('flex');
               document.getElementById('fullscreenStage').classList.remove('hidden');
@@ -2002,7 +2010,7 @@
       }
       function sendPvpClientAction(actionName, strongFlag) {
         if (currentMode === 'pvp' && pvpRole === 'right' && pvpRoomName) {
-          socket.emit('update_game_state', {
+          socket.emit('sync_game_state', {
             room: pvpRoomName, role: 'right', clientInput: true,
             action: actionName, strong: strongFlag,
             moveDir: f2.moveDir, guarding: f2.guarding, crouching: f2.crouching
@@ -2044,7 +2052,7 @@
               const wantJump = up && f2.y >= FLOOR_Y && f2.action === 'idle';
               if (pvpRoomName && (wantJump || prevMove !== f2.moveDir || prevGuard !== f2.guarding || prevCrouch !== f2.crouching || ts - lastPvpSyncAt > 45)) {
                 lastPvpSyncAt = ts;
-                socket.emit('update_game_state', {
+                socket.emit('sync_game_state', {
                   room: pvpRoomName, role: 'right', clientInput: true,
                   moveDir: f2.moveDir, guarding: f2.guarding, crouching: f2.crouching, jump: wantJump
                 });
@@ -2075,7 +2083,7 @@
 
               if (currentMode === 'pvp' && pvpRole === 'left' && pvpRoomName && ts - lastPvpSyncAt > 45) {
                 lastPvpSyncAt = ts;
-                socket.emit('update_game_state', {
+                socket.emit('sync_game_state', {
                   room: pvpRoomName, role: 'left', hostState: true,
                   f1: pickSyncFighter(f1), f2: pickSyncFighter(f2),
                   roundTimer, p1Rounds, p2Rounds, phase
@@ -2281,25 +2289,25 @@
         // '대전 모드에서는 1P와 2P 캐릭터를 각각 선택하거나 실시간 대기실 슬롯에 참가할 수 있습니다.';
         updateSelectUi();
         renderWaitingList([{ username: getDisplayName(), socketId: socket.id }]);
-        socket.emit('enter_pvp_lobby', { username: getDisplayName() });
+        socket.emit('enter_pvp_lobby', { gameId: GAME_ID, username: getDisplayName() });
       });
 
       document.getElementById('joinLeftBtn').addEventListener('click', () => {
         const fn = FIGHTERS[state.p1Id].name;
         const tagged = `${getDisplayName()} [${fn}]`;
         renderLobbySlots([...lastLobbyPlayers.filter(p => p.socketId !== socket.id), { socketId: socket.id, username: tagged, slot: 'left', skinId: state.p1Id }]);
-        socket.emit('join_pvp_lobby', { username: tagged, slot: 'left', skinId: state.p1Id });
+        socket.emit('join_pvp_lobby', { gameId: GAME_ID, username: tagged, slot: 'left', skinId: state.p1Id });
       });
       document.getElementById('joinRightBtn').addEventListener('click', () => {
         const fn = FIGHTERS[state.p1Id].name;
         const tagged = `${getDisplayName()} [${fn}]`;
         renderLobbySlots([...lastLobbyPlayers.filter(p => p.socketId !== socket.id), { socketId: socket.id, username: tagged, slot: 'right', skinId: state.p1Id }]);
-        socket.emit('join_pvp_lobby', { username: tagged, slot: 'right', skinId: state.p1Id });
+        socket.emit('join_pvp_lobby', { gameId: GAME_ID, username: tagged, slot: 'right', skinId: state.p1Id });
       });
-      const cancelWait = () => { socket.emit('leave_pvp_lobby'); renderLobbySlots(lastLobbyPlayers.filter(p => p.socketId !== socket.id)); };
+      const cancelWait = () => { socket.emit('leave_pvp_lobby', { gameId: GAME_ID }); renderLobbySlots(lastLobbyPlayers.filter(p => p.socketId !== socket.id)); };
       document.getElementById('cancelLeftBtn').addEventListener('click', cancelWait);
       document.getElementById('cancelRightBtn').addEventListener('click', cancelWait);
-      document.getElementById('pvpStartMatchBtn').addEventListener('click', () => socket.emit('start_pvp_match'));
+      document.getElementById('pvpStartMatchBtn').addEventListener('click', () => socket.emit('start_pvp_match', { gameId: GAME_ID }));
 
       let toastTimer = null;
       function showToast(msg) {
