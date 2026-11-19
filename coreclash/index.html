@@ -355,7 +355,7 @@
           </div>
 
           <!-- 상점 팝업 -->
-          <div id="shopOverlay" class="hidden absolute inset-0 z-20 items-center justify-center bg-black/70 backdrop-blur-sm p-3">
+          <div id="shopOverlay" class="hidden absolute inset-0 z-20 items-center justify-center bg-black/35 p-2 sm:p-3">
             <div class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl max-w-md w-full p-4 shadow-2xl">
               <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
                 <div class="flex items-center gap-2">
@@ -2670,6 +2670,11 @@
         document.getElementById('hudMpBar').style.width = `${Math.max(0, (myHero.mp / myHero.maxMp) * 100)}%`;
 
         document.getElementById('hudGoldText').textContent = `🪙 ${Math.floor(myHero.gold)} G`;
+        const shopEl = document.getElementById('shopOverlay');
+        if (shopEl && !shopEl.classList.contains('hidden')) {
+          const sg = document.getElementById('shopGoldText');
+          if (sg) sg.textContent = `${Math.floor(myHero.gold)} G`;
+        }
         document.getElementById('hudStatsText').textContent = `공격 ${myHero.ad} · 이속 ${Math.round(myHero.speed)}`;
 
         ['Q', 'W', 'E', 'R', 'D'].forEach(k => {
@@ -2941,6 +2946,9 @@
       }
       document.getElementById('shopOpenBtn').addEventListener('click', toggleShop);
       document.getElementById('shopCloseBtn').addEventListener('click', toggleShop);
+      document.getElementById('shopOverlay').addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'shopOverlay') toggleShop();
+      });
 
       function exitFullscreenIfActive() {
         if (isFocusFullscreen) {
