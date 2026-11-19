@@ -62,12 +62,18 @@
         </svg>
       </button>
 
-      <button id="noticeBtn" type="button" aria-label="공지 및 안내"
-        class="w-10 h-10 rounded-full bg-[#d6ccc5]/80 hover:bg-[#c8bdb5] active:scale-95 text-white flex items-center justify-center transition cursor-pointer shadow-sm relative">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </button>
+      <div class="flex items-center gap-2">
+        <button id="authHeaderBtn" type="button"
+          class="h-10 px-3.5 rounded-full bg-white hover:bg-slate-50 active:scale-95 text-slate-800 text-xs font-extrabold flex items-center justify-center transition cursor-pointer shadow-sm border border-black/10 whitespace-nowrap">
+          로그인
+        </button>
+        <button id="noticeBtn" type="button" aria-label="공지 및 안내"
+          class="w-10 h-10 rounded-full bg-[#d6ccc5]/80 hover:bg-[#c8bdb5] active:scale-95 text-white flex items-center justify-center transition cursor-pointer shadow-sm relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- 중앙 프로필 로고 & 인사말 -->
@@ -145,10 +151,10 @@
             <div>
               <label for="authPhoneDigits" class="block text-[11px] font-bold text-slate-300 mb-1">아이디 (휴대폰 번호 뒷 8자리)</label>
               <div class="flex items-center rounded-xl bg-slate-900 border border-slate-700 focus-within:border-amber-400 overflow-hidden">
-                <span class="px-3 py-2 bg-slate-950 text-amber-300 font-extrabold text-xs border-r border-slate-800 select-none">010 -</span>
+                <span class="px-3 py-2 bg-slate-950 text-amber-300 font-extrabold text-xs border-r border-slate-800 select-none whitespace-nowrap shrink-0">010 -</span>
                 <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9"
                   placeholder="1234-5678"
-                  class="w-full px-3 py-2 bg-transparent text-xs font-bold tracking-wider text-slate-100 focus:outline-none" />
+                  class="min-w-0 flex-1 px-3 py-2 bg-transparent text-xs font-bold tracking-wider text-slate-100 focus:outline-none" />
               </div>
             </div>
 
@@ -204,6 +210,45 @@
         class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
         닫기
       </button>
+    </div>
+  </div>
+
+  <!-- 로그인 / 회원가입 모달 -->
+  <div id="authModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="w-full max-w-sm bg-slate-900 border border-amber-500/40 rounded-2xl p-5 shadow-2xl text-slate-100">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-base font-extrabold text-amber-300">🟨 AI게임장 로그인</h2>
+        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하세요.</p>
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
+        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer">로그인</button>
+        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer">회원가입</button>
+      </div>
+      <form id="authForm" class="flex flex-col gap-3">
+        <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
+          <span class="px-3 py-2 bg-slate-900 text-amber-300 font-extrabold text-xs border-r border-slate-800 select-none whitespace-nowrap shrink-0">010 -</span>
+          <input id="loginPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678"
+            class="min-w-0 flex-1 px-3 py-2 bg-transparent text-xs font-bold tracking-wider text-slate-100 focus:outline-none" />
+        </div>
+        <input id="loginPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 비밀번호"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold tracking-[0.35em] placeholder:tracking-normal text-slate-100 focus:outline-none" />
+        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold"></div>
+        <button type="submit" id="authSubmitBtn" class="w-full py-2.5 rounded-xl text-xs font-black bg-amber-400 hover:bg-amber-300 text-slate-950 cursor-pointer">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 로그아웃 확인 모달 -->
+  <div id="logoutConfirmModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="w-full max-w-xs bg-white rounded-2xl shadow-2xl p-5 text-slate-800 border border-black/10 text-center">
+      <div class="text-2xl mb-2">👋</div>
+      <h3 class="text-sm font-black text-slate-900 mb-1">로그아웃 하시겠습니까?</h3>
+      <p class="text-xs text-slate-500 mb-4">로그아웃 시 게스트 상태로 전환됩니다.</p>
+      <div class="flex gap-2">
+        <button id="logoutCancelBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer">취소</button>
+        <button id="logoutConfirmBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-black cursor-pointer">로그아웃</button>
+      </div>
     </div>
   </div>
 
@@ -333,12 +378,56 @@
         }
       ];
 
+      const VIP_KEY = 'hero_clicker_is_vip';
+      const ALL_TOKEN_KEYS = [TOKEN_KEY, 'abuse_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
+      const ALL_USER_KEYS = [USER_KEY, 'abuse_username', 'sky2026_username', 'aigameroom_username'];
+
       let authToken = null;
       let currentUsername = null;
+      let isVipUser = false;
       try {
-        authToken = localStorage.getItem(TOKEN_KEY) || null;
-        currentUsername = localStorage.getItem(USER_KEY) || null;
+        for (const k of ALL_TOKEN_KEYS) {
+          const v = localStorage.getItem(k);
+          if (v) { authToken = v; break; }
+        }
+        for (const k of ALL_USER_KEYS) {
+          const v = localStorage.getItem(k);
+          if (v) { currentUsername = v; break; }
+        }
+        isVipUser = localStorage.getItem(VIP_KEY) === 'true';
       } catch (e) {}
+
+      function syncAuthStorage(token, username, vip) {
+        try {
+          if (token && username) {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, token));
+            ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, username));
+            localStorage.setItem(VIP_KEY, String(Boolean(vip)));
+          } else {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            localStorage.removeItem(VIP_KEY);
+          }
+        } catch (e) {}
+      }
+      if (authToken && currentUsername) syncAuthStorage(authToken, currentUsername, isVipUser);
+
+      const authHeaderBtn = document.getElementById('authHeaderBtn');
+      function updateHeaderAuthBtn() {
+        if (!authHeaderBtn) return;
+        if (authToken && currentUsername) {
+          if (isVipUser) {
+            authHeaderBtn.textContent = '👑 VIP 로그아웃';
+            authHeaderBtn.className = 'h-10 px-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 active:scale-95 text-amber-200 text-xs font-black flex items-center justify-center transition cursor-pointer shadow-sm border border-amber-300/60 whitespace-nowrap';
+          } else {
+            authHeaderBtn.textContent = '로그아웃';
+            authHeaderBtn.className = 'h-10 px-3.5 rounded-full bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-xs font-extrabold flex items-center justify-center transition cursor-pointer shadow-sm border border-slate-700 whitespace-nowrap';
+          }
+        } else {
+          authHeaderBtn.textContent = '로그인';
+          authHeaderBtn.className = 'h-10 px-3.5 rounded-full bg-white hover:bg-slate-50 active:scale-95 text-slate-800 text-xs font-extrabold flex items-center justify-center transition cursor-pointer shadow-sm border border-black/10 whitespace-nowrap';
+        }
+      }
 
       const gameListEl = document.getElementById('gameList');
       const searchInput = document.getElementById('searchInput');
@@ -399,9 +488,6 @@
 
         gameListEl.innerHTML = filtered.map((item) => {
           if (item.type === 'vip') {
-            const subText = (authToken && currentUsername)
-              ? `📱 ${currentUsername} · VIP 활성화 완료`
-              : '';
             return `
               <button type="button" data-vip-trigger="1"
                 class="w-full bg-white rounded-2xl card-shadow px-3.5 py-2.5 flex items-center gap-3 active:scale-[0.99] transition cursor-pointer text-left border border-black/5">
@@ -412,7 +498,6 @@
                 </div>
                 <div class="flex-1 text-center pr-4 min-w-0">
                   <div class="text-[13.5px] sm:text-sm font-bold text-[#2b2623] truncate">${item.title}</div>
-                  ${subText ? `<div class="text-[12px] font-medium text-emerald-700 truncate mt-0.5">${subText}</div>` : ''}
                 </div>
               </button>
             `;
@@ -529,17 +614,111 @@
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
       });
 
-      logoutBtn.addEventListener('click', () => {
+      function performLogout() {
         authToken = null;
         currentUsername = null;
-        try {
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(USER_KEY);
-        } catch (e) {}
+        isVipUser = false;
+        syncAuthStorage(null, null, false);
         syncVipModalState();
+        updateHeaderAuthBtn();
         renderList(searchInput.value);
         vipModal.classList.add('hidden');
         showToast('로그아웃되었습니다.');
+      }
+
+      const logoutConfirmModal = document.getElementById('logoutConfirmModal');
+      document.getElementById('logoutCancelBtn').addEventListener('click', () => logoutConfirmModal.classList.add('hidden'));
+      document.getElementById('logoutConfirmBtn').addEventListener('click', () => {
+        logoutConfirmModal.classList.add('hidden');
+        performLogout();
+      });
+      logoutConfirmModal.addEventListener('click', (e) => {
+        if (e.target === logoutConfirmModal) logoutConfirmModal.classList.add('hidden');
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        logoutConfirmModal.classList.remove('hidden');
+      });
+
+      const authModal = document.getElementById('authModal');
+      const loginPhoneInput = document.getElementById('loginPhoneDigits');
+      const loginPinInput = document.getElementById('loginPinCode');
+      const authErrorMsg = document.getElementById('authErrorMsg');
+      let isRegisterMode = false;
+
+      authHeaderBtn.addEventListener('click', () => {
+        if (authToken && currentUsername) {
+          logoutConfirmModal.classList.remove('hidden');
+        } else {
+          authErrorMsg.classList.add('hidden');
+          authModal.classList.remove('hidden');
+          setTimeout(() => loginPhoneInput.focus(), 50);
+        }
+      });
+
+      document.getElementById('authCloseBtn').addEventListener('click', () => authModal.classList.add('hidden'));
+      authModal.addEventListener('click', (e) => {
+        if (e.target === authModal) authModal.classList.add('hidden');
+      });
+
+      document.getElementById('modeLoginBtn').addEventListener('click', () => {
+        isRegisterMode = false;
+        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
+        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+        document.getElementById('authSubmitBtn').textContent = '로그인';
+      });
+      document.getElementById('modeRegisterBtn').addEventListener('click', () => {
+        isRegisterMode = true;
+        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
+        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+        document.getElementById('authSubmitBtn').textContent = '회원가입';
+      });
+
+      loginPhoneInput.addEventListener('input', (e) => {
+        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+        e.target.value = d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d;
+      });
+      loginPinInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      });
+
+      document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        authErrorMsg.classList.add('hidden');
+        const digits = loginPhoneInput.value.replace(/\D/g, '');
+        const pin = loginPinInput.value.trim();
+        if (digits.length !== 8 || pin.length !== 4) {
+          authErrorMsg.textContent = '휴대폰 번호 8자리와 숫자 비밀번호 4자리를 정확히 입력해 주세요.';
+          authErrorMsg.classList.remove('hidden');
+          return;
+        }
+        const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+        const endpoint = isRegisterMode ? '/api/register' : '/api/login';
+        try {
+          const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fullId, password: pin, gameId: 'hero_clicker_v1' })
+          });
+          const data = await res.json();
+          if (res.ok && data.token) {
+            authToken = data.token;
+            currentUsername = data.username || fullId;
+            isVipUser = Boolean(data.isVip || data.saveData?.isVip);
+            syncAuthStorage(authToken, currentUsername, isVipUser);
+            updateHeaderAuthBtn();
+            syncVipModalState();
+            authModal.classList.add('hidden');
+            loginPinInput.value = '';
+            showToast(isVipUser ? '👑 VIP 계정으로 로그인되었습니다!' : '✅ 로그인되었습니다!');
+          } else {
+            authErrorMsg.textContent = data.error || '로그인에 실패했습니다.';
+            authErrorMsg.classList.remove('hidden');
+          }
+        } catch (err) {
+          authErrorMsg.textContent = '서버 연결에 실패했습니다.';
+          authErrorMsg.classList.remove('hidden');
+        }
       });
 
       vipPaySubmitBtn.addEventListener('click', async () => {
@@ -607,10 +786,9 @@
             await paymentResponse.complete('success');
             authToken = data.token;
             currentUsername = fullPhoneId;
-            try {
-              localStorage.setItem(TOKEN_KEY, authToken);
-              localStorage.setItem(USER_KEY, currentUsername);
-            } catch (e) {}
+            isVipUser = true;
+            syncAuthStorage(authToken, currentUsername, true);
+            updateHeaderAuthBtn();
             syncVipModalState();
             renderList(searchInput.value);
             vipModal.classList.add('hidden');
@@ -631,8 +809,29 @@
         }
       });
 
+      async function checkLoginVipStatus() {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/load?gameId=hero_clicker_v1`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (res.status === 401 || res.status === 403) {
+            performLogout();
+            return;
+          }
+          if (res.ok) {
+            const data = await res.json();
+            isVipUser = Boolean(data.isVip || data.saveData?.isVip || isVipUser);
+            try { localStorage.setItem(VIP_KEY, String(isVipUser)); } catch (e) {}
+            updateHeaderAuthBtn();
+          }
+        } catch (e) {}
+      }
+
       // 초기 렌더링
+      updateHeaderAuthBtn();
       renderList('');
+      checkLoginVipStatus();
     })();
   </script>
 </body>
