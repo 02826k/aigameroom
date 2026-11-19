@@ -207,9 +207,7 @@
 
       <!-- 2단 -->
       <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
-        <p id="syncStatusText" class="text-[11px] text-slate-400 truncate">
-          로그인 시 최고 점수가 랭킹에 자동 등록됩니다
-        </p>
+
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
           <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
             🎵 배경음 ON
@@ -230,10 +228,16 @@
         <div class="text-[10px] text-amber-300/90 font-bold">🛸 외계인 침공 2D 액션</div>
         <div id="waveDisplay" class="text-xs sm:text-sm font-extrabold text-emerald-300 mt-0.5">STAGE 1 · 학교 교실</div>
       </div>
-      <button id="fullscreenBtn" type="button" title="전체화면 전환"
-        class="px-4 py-2 rounded-lg text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 cursor-pointer active:scale-95 transition shadow">
-        ⛶ 전체화면
-      </button>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="rankOpenBtn" type="button" title="TOP 10 랭킹 보기"
+          class="px-3.5 py-2 rounded-lg text-xs font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 cursor-pointer active:scale-95 transition shadow">
+          🏆 RANK
+        </button>
+        <button id="fullscreenBtn" type="button" title="전체화면 전환"
+          class="px-4 py-2 rounded-lg text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 cursor-pointer active:scale-95 transition shadow">
+          ⛶ 전체화면
+        </button>
+      </div>
     </section>
 
     <div id="fullscreenStage">
@@ -249,9 +253,32 @@
           <p id="overlaySub" class="text-xs sm:text-sm text-slate-300 max-w-md mt-2 leading-relaxed">
             학교를 탈출해 외계인에게 납치된 엄마를 구출하라!
           </p>
-          <button id="overlayStartBtn" type="button" class="mt-6 px-9 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 active:scale-95 transition cursor-pointer">
-            ▶ 구출 작전 시작
-          </button>
+          <div class="mt-6 flex items-center justify-center gap-2.5 flex-wrap">
+            <button id="overlayStartBtn" type="button" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 active:scale-95 transition cursor-pointer">
+              ▶ 구출 작전 시작
+            </button>
+            <button id="overlayLobbyBtn" type="button" class="hidden px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 font-black text-sm sm:text-base shadow-lg active:scale-95 transition cursor-pointer">
+              🏠 로비로
+            </button>
+          </div>
+        </div>
+
+        <!-- 게임 화면 내 RANK TOP 10 오버레이 -->
+        <div id="rankOverlay" class="hidden absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-3">
+          <div class="w-full max-w-sm bg-slate-900 border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2 max-h-full">
+            <div class="flex items-center justify-between">
+              <div class="text-xs sm:text-sm font-black text-amber-300">🏆 엄마 구하기 TOP 10</div>
+              <div class="flex items-center gap-1.5">
+                <button id="refreshRankingBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄</button>
+                <button id="rankCloseBtn" type="button" class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">✕</button>
+              </div>
+            </div>
+            <div class="rounded-xl border border-amber-500/25 px-2.5 py-1.5 flex justify-between text-[11px] bg-slate-950/85">
+              <span class="text-slate-400 font-semibold">내 순위</span>
+              <span id="myRankDetailText" class="font-extrabold text-amber-300">불러오는 중...</span>
+            </div>
+            <div id="rankingListContainer" class="flex flex-col gap-1 overflow-y-auto pr-1 max-h-[210px]"></div>
+          </div>
         </div>
       </div>
 
@@ -303,34 +330,7 @@
     </section>
     </div>
 
-    <!-- 명예의 전당 -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-xl">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-xs sm:text-sm font-extrabold text-amber-300">🏆 엄마 구하기 명예의 전당</div>
-          <div class="text-[10px] text-slate-400">최고 구출 점수 기준 통합 순위</div>
-        </div>
-        <button id="refreshRankingBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄 새로고침</button>
-      </div>
-      <div class="rounded-xl border border-amber-500/25 px-3 py-2 flex justify-between text-xs bg-slate-950/85">
-        <span class="text-slate-400 font-semibold">내 현재 순위</span>
-        <span id="myRankDetailText" class="font-extrabold text-amber-300">로그인 시 실시간 순위에 등록됩니다</span>
-      </div>
-      <div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto pr-1"></div>
-    </section>
 
-    <!-- 바로가기 만들기 카드 -->
-    <section class="bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/35 rounded-2xl p-3.5 shadow-xl mb-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-lg shrink-0">🛸</div>
-          <div class="text-sm font-black text-amber-300 truncate">엄마 구하기 바로가기</div>
-        </div>
-        <button id="androidInstallBtn" type="button" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black text-xs sm:text-sm shadow-md transition shrink-0 cursor-pointer">
-          <span id="androidInstallBtnText">아이콘 만들기</span>
-        </button>
-      </div>
-    </section>
   </main>
 
   <!-- Toast -->
@@ -886,6 +886,7 @@
         document.getElementById('overlayTitle').className = 'text-2xl sm:text-3xl font-black text-rose-400 tracking-tight';
         document.getElementById('overlaySub').innerHTML = `최종 점수: <strong class="text-amber-300 text-base">${finalScore.toLocaleString()}점</strong>`;
         document.getElementById('overlayStartBtn').textContent = '🔄 다시 도전하기';
+        document.getElementById('overlayLobbyBtn').classList.remove('hidden');
         document.getElementById('gameOverlay').classList.remove('hidden');
       }
 
@@ -905,6 +906,7 @@
         document.getElementById('overlayTitle').className = 'text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight';
         document.getElementById('overlaySub').innerHTML = `엄마를 무사히 구출했습니다! · 최종 점수: <strong class="text-amber-300 text-base">${finalScore.toLocaleString()}점</strong>`;
         document.getElementById('overlayStartBtn').textContent = '▶ 처음부터 다시하기';
+        document.getElementById('overlayLobbyBtn').classList.remove('hidden');
         document.getElementById('gameOverlay').classList.remove('hidden');
       }
 
@@ -1112,11 +1114,26 @@
 
         if (rescueSequence) {
           rescueTimer += dt;
-          const targetX = player.x + 54;
+          const targetCamX = MAP_W - CAM_W;
+          camera.x += (targetCamX - camera.x) * Math.min(1, dt * 6);
+          camera.y += ((MAP_H - CAM_H) - camera.y) * Math.min(1, dt * 6);
+
+          const sonTargetX = 5992;
+          const momTargetX = 6022;
+          const groundPlayerY = 576 - player.h / 2;
+          if (Math.abs(player.y - groundPlayerY) > 2) {
+            player.y += (groundPlayerY - player.y) * Math.min(1, dt * 10);
+          } else {
+            player.y = groundPlayerY;
+          }
 
           if (rescueTimer < 1.8) {
-            if (Math.abs(mom.x - targetX) > 4) {
-              mom.x += (targetX > mom.x ? 1 : -1) * 230 * dt;
+            if (Math.abs(player.x - sonTargetX) > 4) {
+              player.x += (sonTargetX > player.x ? 1 : -1) * 240 * dt;
+              player.walkCycle += dt * 16;
+            }
+            if (Math.abs(mom.x - momTargetX) > 4) {
+              mom.x += (momTargetX > mom.x ? 1 : -1) * 230 * dt;
               mom.jumpPhase += dt * 20;
             }
           } else if (rescueTimer < 3.6) {
@@ -2601,7 +2618,7 @@
             return;
           }
 
-          listEl.innerHTML = rankings.slice(0, 15).map((item, idx) => {
+          listEl.innerHTML = rankings.slice(0, 10).map((item, idx) => {
             const rank = item.rank ?? (idx + 1);
             return `
               <div class="rounded-xl px-3 py-2 border ${item.isMe ? 'bg-amber-950/30 border-amber-400/60' : 'bg-slate-950/80 border-slate-800'} flex items-center justify-between text-xs">
@@ -2652,6 +2669,9 @@
       }
 
       document.getElementById('overlayStartBtn').addEventListener('click', startGame);
+      document.getElementById('overlayLobbyBtn').addEventListener('click', () => {
+        window.location.href = 'https://02826k.github.io/aigameroom/';
+      });
       document.getElementById('refreshRankingBtn').addEventListener('click', () => { fetchRanking(); showToast('🏆 랭킹을 갱신했습니다.'); });
 
       document.getElementById('bgmToggleBtn').addEventListener('click', () => {
@@ -2764,29 +2784,16 @@
         });
       });
 
-      let deferredInstall = null;
-      window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; });
-      if ('serviceWorker' in navigator && location.protocol === 'https:') {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      }
-      document.getElementById('androidInstallBtn').addEventListener('click', async () => {
-        if (deferredInstall) {
-          deferredInstall.prompt();
-          await deferredInstall.userChoice;
-          deferredInstall = null;
-          document.getElementById('androidInstallBtnText').textContent = '설치 완료';
-          return;
-        }
-        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          showToast('📲 브라우저 메뉴(⋮) → [홈 화면에 추가]를 눌러주세요!');
-        } else {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(new Blob(['[InternetShortcut]\r\nURL=' + location.href + '\r\n'], { type: 'text/plain' }));
-          a.download = '엄마구하기.url';
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(a.href), 1500);
-          document.getElementById('androidInstallBtnText').textContent = '완료';
-        }
+      const rankOverlay = document.getElementById('rankOverlay');
+      document.getElementById('rankOpenBtn').addEventListener('click', () => {
+        fetchRanking();
+        rankOverlay.classList.remove('hidden');
+      });
+      document.getElementById('rankCloseBtn').addEventListener('click', () => {
+        rankOverlay.classList.add('hidden');
+      });
+      rankOverlay.addEventListener('click', (e) => {
+        if (e.target === rankOverlay) rankOverlay.classList.add('hidden');
       });
 
       resizeCanvas();
