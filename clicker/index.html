@@ -207,23 +207,11 @@
       <div id="rankingPanel" class="hidden flex-col gap-3">
 
 
-        <!-- 랭킹 요약 대시보드 -->
-        <div id="serverStatusDashboard" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
-            <div class="text-[10px] text-slate-400 font-semibold">🌍 서버 참전 용사</div>
-            <div id="srvStatTotalPlayers" class="text-sm sm:text-base font-black text-emerald-400 mt-0.5">집계 중...</div>
-          </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
-            <div class="text-[10px] text-slate-400 font-semibold">🥇 현재 왕국 1위</div>
-            <div id="srvStatTopPlayer" class="text-sm sm:text-base font-black text-amber-300 truncate mt-0.5">-</div>
-          </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
-            <div class="text-[10px] text-slate-400 font-semibold">⚡ 파워 종합</div>
-            <div id="srvStatTotalPower" class="text-sm sm:text-base font-black text-sky-300 truncate mt-0.5">0 파워</div>
-          </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
-            <div class="text-[10px] text-slate-400 font-semibold">👑 내 명예</div>
-            <div id="srvStatMaxHonor" class="text-sm sm:text-base font-black text-purple-300 truncate mt-0.5">명예 Lv.0</div>
+        <!-- 랭킹 요약 대시보드 (전체 너비 단일 바) -->
+        <div id="serverStatusDashboard" class="w-full">
+          <div class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-3 flex items-center gap-2">
+            <span class="text-sm sm:text-base font-extrabold text-slate-200">🌍 서버 참전 용사 :</span>
+            <span id="srvStatTotalPlayers" class="text-sm sm:text-base font-black text-emerald-400">집계 중...</span>
           </div>
         </div>
 
@@ -1339,20 +1327,7 @@
 
         // 랭킹 요약 대시보드 업데이트
         const elTotalPlayers = document.getElementById('srvStatTotalPlayers');
-        const elTopPlayer = document.getElementById('srvStatTopPlayer');
-        const elTotalPower = document.getElementById('srvStatTotalPower');
-        const elMaxHonor = document.getElementById('srvStatMaxHonor');
-
         if (elTotalPlayers) elTotalPlayers.textContent = `${totalCount.toLocaleString('ko-KR')}명 참전 중`;
-        if (elTotalPower) elTotalPower.textContent = `${formatNumber(state.power)} 파워`;
-        if (elMaxHonor) elMaxHonor.textContent = `명예 Lv.${state.honorLevel}`;
-
-        if (normalizedRankings.length > 0) {
-          const top1 = normalizedRankings[0];
-          if (elTopPlayer) elTopPlayer.textContent = `${maskPhoneMiddle(top1.maskedName)}`;
-        } else {
-          if (elTopPlayer) elTopPlayer.textContent = '기록 없음';
-        }
 
         updateNextHourlyCountdownUI();
 
