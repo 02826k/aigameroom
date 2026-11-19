@@ -67,6 +67,9 @@
       gap: 4px !important;
       overflow: hidden !important;
     }
+    #fullscreenStage:fullscreen #charSelectPanel {
+      display: none !important;
+    }
     #fullscreenStage:fullscreen #gameAreaSection {
       flex: 1 1 0% !important;
       min-height: 0 !important;
@@ -292,6 +295,32 @@
         </div>
       </section>
 
+      <!-- 캐릭터 얼굴 선택창 (게임화면 바로 아래 컴팩트 나열) -->
+      <section id="charSelectPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-xs font-black text-amber-300">🎭 파이터 선택</h2>
+          <div id="pvpPickTargetGroup" class="hidden items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+            <button id="pickTargetP1Btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-black bg-sky-600 text-white cursor-pointer">1P</button>
+            <button id="pickTargetP2Btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-black text-slate-400 hover:text-white cursor-pointer">2P</button>
+          </div>
+        </div>
+
+        <div id="facePortraitGrid" class="grid grid-cols-6 gap-1.5 sm:gap-2"></div>
+
+        <div id="charSelectFooter" class="pt-1.5 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-1.5 text-[11px] font-bold flex-wrap">
+            <span id="p1ReadyChip" class="px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300">1P: 아키라</span>
+            <span id="p2ReadyWrap" class="hidden items-center gap-1.5">
+              <span class="text-slate-500 font-black">VS</span>
+              <span id="p2ReadyChip" class="px-2 py-0.5 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300">2P: 파이</span>
+            </span>
+          </div>
+          <button id="startFightBtn" type="button" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 transition cursor-pointer">
+            🥊 STAGE 1 도전 시작!
+          </button>
+        </div>
+      </section>
+
       <!-- ========================================== -->
       <!-- 아래쪽 1: 아케이드 조작 패드 -->
       <!-- ========================================== -->
@@ -328,43 +357,6 @@
         </div>
       </section>
     </div>
-
-    <!-- ========================================== -->
-    <!-- 아래쪽 2: 캐릭터 얼굴 선택창 (패드 아래 배치) -->
-    <!-- ========================================== -->
-    <section id="charSelectPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h2 class="text-xs sm:text-sm font-black text-amber-300">🎭 내 파이터 선택 (1P)</h2>
-            <span class="px-2 py-0.5 rounded bg-blue-600/30 border border-blue-400 text-blue-200 text-[10px] font-black">🔵 파랑: 팔 스킬(강손)</span>
-            <span class="px-2 py-0.5 rounded bg-rose-600/30 border border-rose-400 text-rose-200 text-[10px] font-black">🔴 빨강: 발 스킬(강발)</span>
-          </div>
-
-        </div>
-
-        <div id="pvpPickTargetGroup" class="hidden items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-          <button id="pickTargetP1Btn" type="button" class="px-3 py-1 rounded-lg text-xs font-black bg-sky-600 text-white cursor-pointer">1P 선택중</button>
-          <button id="pickTargetP2Btn" type="button" class="px-3 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-white cursor-pointer">2P(상대) 선택</button>
-        </div>
-      </div>
-
-      <div id="facePortraitGrid" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5"></div>
-
-      <div class="pt-2 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2 text-xs font-bold flex-wrap">
-          <span id="p1ReadyChip" class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300">1P: 아키라</span>
-          <span id="p2ReadyWrap" class="hidden items-center gap-2">
-            <span class="text-slate-500 font-black">VS</span>
-            <span id="p2ReadyChip" class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300">2P: 파이</span>
-          </span>
-        </div>
-        <button id="startFightBtn" type="button" class="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/25 active:scale-95 transition cursor-pointer">
-          🥊 STAGE 1 도전 시작!
-        </button>
-      </div>
-    </section>
-
 
   </main>
 
@@ -774,10 +766,46 @@
               document.getElementById('pvpLobbySection').classList.add('hidden');
               document.getElementById('pvpLobbySection').classList.remove('flex');
               document.getElementById('fullscreenStage').classList.remove('hidden');
+              document.getElementById('gameAreaSection').classList.remove('hidden');
+              document.getElementById('arcadeControlsPanel').classList.remove('hidden');
               startFight('pvp');
             });
             socket.on('update_game_state', (data) => {
               if (!data || data.room !== pvpRoomName || data.role === pvpRole) return;
+              if (data.pvpEvent && pvpRole === 'right') {
+                if (data.pvpEvent === 'round_start') {
+                  document.getElementById('matchResultBanner').classList.add('hidden');
+                  document.getElementById('matchResultBanner').classList.remove('flex');
+                  phase = 'countdown';
+                  p1Rounds = data.p1Rounds;
+                  p2Rounds = data.p2Rounds;
+                  showBanner(`ROUND ${data.roundNum}`, 1050);
+                  setTimeout(() => { if (phase === 'countdown') { phase = 'fight'; showBanner('FIGHT!', 700); } }, 1100);
+                } else if (data.pvpEvent === 'round_end') {
+                  phase = 'roundEnd';
+                  p1Rounds = data.p1Rounds;
+                  p2Rounds = data.p2Rounds;
+                  stopBGM();
+                  playSfx('ko');
+                  showBanner(data.reasonText, 1500);
+                } else if (data.pvpEvent === 'match_end') {
+                  phase = 'matchEnd';
+                  stopBGM();
+                  const iWon = (data.winnerNum === 2);
+                  if (iWon) state.wins++; else state.losses++;
+                  saveState(true);
+                  const rematchBtn = document.getElementById('rematchBtn');
+                  const backBtn = document.getElementById('backSelectBtn');
+                  document.getElementById('matchWinnerTitle').textContent = data.winnerNum === 1 ? `💀 1P ${FIGHTERS[state.p1Id].name} WIN!` : `🏆 2P ${FIGHTERS[state.p2Id].name} WIN!`;
+                  document.getElementById('matchResultSub').textContent = data.reasonText === 'RING OUT!' ? '상대를 링 밖으로 날려버렸습니다!' : '압도적인 K.O. 승리입니다!';
+                  rematchBtn.textContent = '⏳ 방장 재대결 대기';
+                  rematchBtn.dataset.nextAction = 'pvp_wait';
+                  backBtn.textContent = '🪵 쉬러가기';
+                  document.getElementById('matchResultBanner').classList.remove('hidden');
+                  document.getElementById('matchResultBanner').classList.add('flex');
+                }
+                return;
+              }
               if (data.hostState && pvpRole === 'right') {
                 Object.assign(f1, data.f1);
                 Object.assign(f2, data.f2);
@@ -810,7 +838,7 @@
         const svgBg = isArmSkill ? '#172554' : '#4c0519';
         const svgStroke = isArmSkill ? '#60a5fa' : '#fb7185';
         return `
-          <svg viewBox="0 0 64 64" class="w-12 h-12 sm:w-14 sm:h-14 mx-auto drop-shadow">
+          <svg viewBox="0 0 64 64" class="w-9 h-9 sm:w-11 sm:h-11 mx-auto drop-shadow">
             <rect x="4" y="4" width="56" height="56" rx="12" fill="${svgBg}" stroke="${svgStroke}" stroke-width="2.5"/>
             <path d="M16 58 C18 44, 46 44, 48 58 Z" fill="${f.top}"/>
             <circle cx="32" cy="30" r="14" fill="${f.skin}"/>
@@ -849,13 +877,10 @@
 
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `relative p-2 rounded-xl border-2 transition cursor-pointer flex flex-col items-center gap-1 ${baseBgClass} ${borderClass}`;
+          btn.className = `relative p-1.5 rounded-xl border-2 transition cursor-pointer flex flex-col items-center gap-1 ${baseBgClass} ${borderClass}`;
           btn.innerHTML = `
-            ${isP1 ? '<span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-sky-400 text-slate-950 text-[9px] font-black shadow">1P</span>' : ''}
-            ${isP2 ? '<span class="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[9px] font-black shadow">2P</span>' : ''}
             ${makeFaceSvg(f)}
-            <div class="text-xs font-black text-white leading-tight">${f.name}</div>
-            <div class="px-1.5 py-0.5 rounded text-[9px] font-extrabold ${badgeClass}">${f.skill.buttonLabel}: ${f.skill.name}</div>
+            <div class="text-[10px] sm:text-xs font-black text-white leading-tight truncate w-full text-center">${f.name}</div>
           `;
           btn.addEventListener('click', () => {
             getAudioContext();
@@ -1789,6 +1814,12 @@
         roundTimer = 60;
         phase = 'countdown';
         updateSelectUi();
+        if (currentMode === 'pvp' && pvpRole === 'left' && pvpRoomName) {
+          socket.emit('sync_game_state', {
+            room: pvpRoomName, role: 'left', pvpEvent: 'round_start',
+            roundNum: num, p1Rounds, p2Rounds
+          });
+        }
         if (state.bgmEnabled && !bgmTimer) startBGM(false);
 
         const stageHeader = currentMode === 'practice'
@@ -1810,6 +1841,12 @@
         playSfx('ko');
         showBanner(reasonText, 1500);
         if (winnerNum === 1) p1Rounds++; else p2Rounds++;
+        if (currentMode === 'pvp' && pvpRole === 'left' && pvpRoomName) {
+          socket.emit('sync_game_state', {
+            room: pvpRoomName, role: 'left', pvpEvent: 'round_end',
+            winnerNum, reasonText, p1Rounds, p2Rounds
+          });
+        }
 
         setTimeout(() => {
           if (p1Rounds >= 2 || p2Rounds >= 2) {
@@ -1861,6 +1898,12 @@
               document.getElementById('matchResultSub').textContent = reasonText === 'RING OUT!' ? '상대를 링 밖으로 날려버렸습니다!' : '압도적인 K.O. 승리입니다!';
               rematchBtn.textContent = '🔄 재대결';
               rematchBtn.dataset.nextAction = 'pvp_rematch';
+              if (pvpRole === 'left' && pvpRoomName) {
+                socket.emit('sync_game_state', {
+                  room: pvpRoomName, role: 'left', pvpEvent: 'match_end',
+                  winnerNum: iWon ? 1 : 2, reasonText
+                });
+              }
             }
 
             document.getElementById('matchResultBanner').classList.remove('hidden');
@@ -2209,6 +2252,8 @@
           startFight('practice', false);
         } else if (act === 'continue_streak' || act === 'restart_arcade') {
           startFight('practice', true);
+        } else if (act === 'pvp_wait') {
+          showToast('1P 방장이 재대결을 누르면 바로 시작됩니다.');
         } else {
           startFight(currentMode, true);
         }
@@ -2273,6 +2318,9 @@
         document.getElementById('pvpLobbySection').classList.add('hidden');
         document.getElementById('pvpLobbySection').classList.remove('flex');
         document.getElementById('fullscreenStage').classList.remove('hidden');
+        document.getElementById('gameAreaSection').classList.remove('hidden');
+        document.getElementById('arcadeControlsPanel').classList.remove('hidden');
+        document.getElementById('startFightBtn').classList.remove('hidden');
         document.getElementById('startFightBtn').textContent = '🥊 STAGE 1 도전 시작!';
         // '1P 파이터를 고른 뒤 <b>나무 샌드백</b>으로 스킬을 연습하고, [STAGE 1 도전 시작]을 누르면 나머지 파이터들과 랜덤 연전을 펼칩니다!';
         returnToSelect();
@@ -2281,11 +2329,13 @@
         currentMode = 'pvp';
         document.getElementById('modePvPTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-blue-600 text-white shadow cursor-pointer';
         document.getElementById('modePracticeTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
-        document.getElementById('fullscreenStage').classList.add('hidden');
+        document.getElementById('fullscreenStage').classList.remove('hidden');
+        document.getElementById('gameAreaSection').classList.add('hidden');
+        document.getElementById('arcadeControlsPanel').classList.add('hidden');
         document.getElementById('pvpLobbySection').classList.remove('hidden');
         document.getElementById('pvpLobbySection').classList.add('flex');
         document.getElementById('charSelectPanel').classList.remove('hidden');
-        document.getElementById('startFightBtn').textContent = '🥊 로컬 1:1 대전 시작';
+        document.getElementById('startFightBtn').classList.add('hidden');
         // '대전 모드에서는 1P와 2P 캐릭터를 각각 선택하거나 실시간 대기실 슬롯에 참가할 수 있습니다.';
         updateSelectUi();
         renderWaitingList([{ username: getDisplayName(), socketId: socket.id }]);
