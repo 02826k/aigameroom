@@ -166,28 +166,24 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- 상단 통합 계정 & 점수 저장 헤더 (전체화면 시 자동 숨김) -->
-  <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-2.5 py-2 sticky top-0 z-30 shadow-lg shadow-black/25">
-    <div class="max-w-3xl mx-auto flex items-center justify-between gap-1.5">
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-500/20 text-amber-400 font-black text-xs sm:text-sm border border-amber-500/40 shrink-0">🧱</span>
-        <h1 class="text-xs sm:text-base font-black tracking-tight text-amber-400 shrink-0">케트리스</h1>
-        <span id="userBadge" class="px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 truncate max-w-[90px] sm:max-w-none">
-          👤 게스트
-        </span>
-        <button id="vipOpenBtn" type="button" class="vip-btn-glow px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-fuchsia-600 to-indigo-600 text-white border border-amber-300/70 cursor-pointer shrink-0">👑 <span id="vipHeaderBtnLabel">VIP</span></button>
+  <!-- 상단 통합 계정 헤더 (전체화면 시 자동 숨김) -->
+  <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/25">
+    <div class="max-w-3xl mx-auto flex flex-col gap-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-black text-sm border border-amber-500/40 shrink-0">🧱</span>
+          <h1 class="text-sm sm:text-base font-black tracking-tight text-amber-400 truncate">케트리스</h1>
+        </div>
+        <button id="authHeaderBtn" type="button"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+          로그인
+        </button>
       </div>
 
-      <div class="flex items-center gap-1 shrink-0">
-        <button id="bgmToggleBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-indigo-950/80 border border-indigo-700/50 text-indigo-200 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
-        <button id="soundToggleBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-slate-800 border border-slate-700 text-slate-200 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
-        <button id="serverSaveGoldBtn" type="button"
-          class="px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap">
-          <span id="serverSaveBtnLabel">로그인</span>
-        </button>
-        <button id="logoutBtn" type="button" class="hidden px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition cursor-pointer whitespace-nowrap">
-          로그아웃
-        </button>
+      <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
+        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
       </div>
     </div>
   </header>
@@ -222,11 +218,17 @@
         <div class="flex flex-col justify-between w-[114px] sm:w-44 gap-2 sm:gap-3">
           
           <div class="flex flex-col gap-2 sm:gap-3">
-            <!-- 우측 상단 빈자리: 전체화면 집중모드 버튼 -->
-            <button id="fullscreenBtn" type="button" class="w-full py-2 px-2 rounded-xl text-[11px] sm:text-xs font-black bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 active:scale-95 text-white border border-sky-300/60 shadow-lg shadow-sky-500/25 flex items-center justify-center gap-1 cursor-pointer transition">
-              <span>⛶</span>
-              <span id="fullscreenBtnLabel">전체화면 보기</span>
-            </button>
+            <!-- 우측 상단: RANK + 전체화면 버튼 -->
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="rankOpenBtn" type="button" class="py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 border border-amber-400/50 shadow flex items-center justify-center gap-1 cursor-pointer transition whitespace-nowrap">
+                <span>🏆</span>
+                <span>RANK</span>
+              </button>
+              <button id="fullscreenBtn" type="button" class="py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 active:scale-95 text-slate-950 border border-amber-200/60 shadow flex items-center justify-center gap-1 cursor-pointer transition whitespace-nowrap">
+                <span>⛶</span>
+                <span id="fullscreenBtnLabel">전체화면</span>
+              </button>
+            </div>
 
             <!-- 점수 (SCORE) / 지운 줄 (LINES) / 다음 블록 (NEXT) 카드 -->
             <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 sm:p-4 flex flex-col gap-2.5 sm:gap-3 shadow-inner">
@@ -274,40 +276,29 @@
       </button>
     </section>
 
-    <!-- ========================================== -->
-    <!-- 2. 케트리스 실시간 랭킹 섹션 (전체화면 시 자동 숨김) -->
-    <!-- ========================================== -->
-    <section id="rankingSection" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl mt-2">
-      <div class="flex items-center justify-between gap-2 mb-3">
-        <div>
-          <h2 class="text-sm sm:text-base font-black text-amber-300 flex items-center gap-1.5">
-            <span>🏆</span>
-            <span>케트리스 명예의 전당 (실시간 랭킹)</span>
-          </h2>
-        </div>
-        <button id="refreshRankingBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer shrink-0">
-          🔄 새로고침
-        </button>
-      </div>
 
-      <!-- 내 현재 순위 요약 바 -->
-      <div class="rounded-xl bg-gradient-to-r from-sky-950/60 via-slate-950 to-slate-950 border border-sky-500/35 px-3.5 py-2 flex items-center justify-between text-xs mb-3">
-        <span class="text-slate-300 font-semibold">내 현재 순위:</span>
-        <span id="myRankDetailText" class="font-extrabold text-sky-300">로그인 후 플레이 시 순위에 자동 등록됩니다</span>
-      </div>
-
-      <!-- 랭킹 리스트 -->
-      <div id="rankingListContainer" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1"></div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- 3. 바로가기 설치 카드 (전체화면 시 자동 숨김) -->
-    <!-- ========================================== -->
-    <section id="installSection" class="w-full bg-gradient-to-r from-slate-900 to-orange-950/20 border border-orange-500/30 rounded-xl p-3 flex justify-between items-center mb-3">
-      <div class="flex items-center gap-2"><span class="text-lg">🧱</span><span class="text-xs font-black text-orange-300">바로가기 설치</span></div>
-      <button id="androidInstallBtn" type="button" class="px-3 py-2 rounded-lg bg-orange-500 text-slate-950 text-xs font-black cursor-pointer"><span id="androidInstallBtnText">설치</span></button>
-    </section>
   </main>
+
+  <!-- 케트리스 TOP 10 랭킹 모달 -->
+  <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm sm:text-base font-black text-amber-300 flex items-center gap-1.5">
+          <span>🏆</span>
+          <span>케트리스 TOP 10 랭킹</span>
+        </h2>
+        <div class="flex items-center gap-1.5">
+          <button id="refreshRankingBtn" type="button" class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer">🔄</button>
+          <button id="rankCloseBtn" type="button" class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">✕</button>
+        </div>
+      </div>
+      <div class="rounded-xl bg-slate-950/90 border border-sky-500/35 px-3 py-2 flex items-center justify-between text-xs">
+        <span class="text-slate-300 font-semibold">내 순위</span>
+        <span id="myRankDetailText" class="font-extrabold text-sky-300">불러오는 중...</span>
+      </div>
+      <div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
 
   <!-- Toast 알림 -->
   <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
@@ -422,10 +413,10 @@
         isFocusFullscreen = active;
         if (active) {
           document.body.classList.add('focus-fullscreen');
-          fullscreenBtnLabel.textContent = '전체화면 종료';
+          fullscreenBtnLabel.textContent = '축소';
         } else {
           document.body.classList.remove('focus-fullscreen');
-          fullscreenBtnLabel.textContent = '전체화면 보기';
+          fullscreenBtnLabel.textContent = '전체화면';
         }
         updateCrispCellSize();
       }
@@ -467,27 +458,7 @@
       let deferred = null;
       window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
 
-      document.getElementById('androidInstallBtn').onclick = async () => {
-        if (deferred) {
-          deferred.prompt();
-          const choiceResult = await deferred.userChoice;
-          if (choiceResult.outcome === 'accepted') {
-            showToast('✨ 홈 화면에 바로가기가 설치되었습니다!');
-          }
-          deferred = null;
-          document.getElementById('androidInstallBtnText').textContent = '완료';
-          return;
-        }
 
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        if (/android/i.test(ua)) {
-          showToast("📌 브라우저 우측 상단 메뉴(⋮)에서 [홈 화면에 추가]를 선택하세요!");
-        } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-          showToast("📌 하단 공유 버튼(📤)을 누른 후 [홈 화면에 추가]를 선택하세요!");
-        } else {
-          showToast("📌 브라우저 메뉴 또는 주소창 우측의 [설치 아이콘]을 눌러주세요!");
-        }
-      };
 
       const BGM_KEY = 'ketris_bgm_enabled_v1';
       const SFX_KEY = 'ketris_sfx_enabled_v1';
@@ -500,10 +471,19 @@
 
       function updateBgmBtn() {
         bgmToggleBtn.textContent = bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+        bgmToggleBtn.className = bgmEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
       }
       function updateSoundBtn() {
         soundToggleBtn.textContent = soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+        soundToggleBtn.className = soundEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
       }
+      document.getElementById('headerExitLobbyBtn').addEventListener('click', () => {
+        window.location.href = 'https://02826k.github.io/aigameroom/';
+      });
       function playSfx(type) {
         if (!soundEnabled) return;
         const ctx = getAC(); if (!ctx) return;
@@ -624,8 +604,27 @@
       const TOSS_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
       const VIP_PRICE = 7000;
 
-      let authToken = localStorage.getItem(TOKEN_KEY) || null;
-      let currentUsername = localStorage.getItem(USER_KEY) || null;
+      const ALL_TOKEN_KEYS = [TOKEN_KEY, 'abuse_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
+      const ALL_USER_KEYS = [USER_KEY, 'abuse_username', 'sky2026_username', 'aigameroom_username'];
+      function readSharedAuth() {
+        let t = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('aigameroom_jwt_token') || null;
+        let u = localStorage.getItem(USER_KEY) || localStorage.getItem('aigameroom_username') || null;
+        return { t, u };
+      }
+      function syncSharedAuth(t, u, vipFlag) {
+        try {
+          if (t && u) {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, t));
+            ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, u));
+            if (typeof vipFlag === 'boolean') localStorage.setItem('hero_clicker_is_vip', String(vipFlag));
+          } else {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            localStorage.removeItem('hero_clicker_is_vip');
+          }
+        } catch (e) {}
+      }
+      let { t: authToken, u: currentUsername } = readSharedAuth();
       let bestScore = Number(localStorage.getItem(LOCAL_BEST_KEY) || 0);
       let bestLines = 0;
       let isVip = (() => { try { return localStorage.getItem(LOCAL_VIP_KEY) === 'true'; } catch { return false; } })();
@@ -653,22 +652,21 @@
       }
 
       function updateAuthHeaderUI() {
-        const userBadge = document.getElementById('userBadge');
-        const loginBtn = document.getElementById('serverSaveGoldBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-
-        document.getElementById('vipHeaderBtnLabel').textContent = isVip ? 'VIP중' : 'VIP';
+        const btn = document.getElementById('authHeaderBtn');
+        const vipActive = isVip || localStorage.getItem('hero_clicker_is_vip') === 'true';
         updateVipSlowBtnUI();
+        if (!btn) return;
         if (authToken && currentUsername) {
-          userBadge.textContent = `📱 ${maskPhoneMiddle(currentUsername)}${isVip ? ' 👑' : ''}`;
-          userBadge.className = 'px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 truncate max-w-[90px] sm:max-w-none';
-          loginBtn.classList.add('hidden');
-          logoutBtn.classList.remove('hidden');
+          if (vipActive) {
+            btn.textContent = '👑 VIP 로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/70 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+          } else {
+            btn.textContent = '로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+          }
         } else {
-          userBadge.textContent = '👤 게스트';
-          userBadge.className = 'px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 truncate max-w-[90px] sm:max-w-none';
-          loginBtn.classList.remove('hidden');
-          logoutBtn.classList.add('hidden');
+          btn.textContent = '로그인';
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
         }
       }
 
@@ -676,13 +674,30 @@
         authToken = null;
         currentUsername = null;
         isVip = false;
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
+        syncSharedAuth(null, null, false);
         localStorage.removeItem(LOCAL_VIP_KEY);
         updateAuthHeaderUI();
         fetchAndRenderRanking(false);
         showToast(expired ? '로그인 정보가 만료되었습니다.' : '로그아웃되었습니다.');
       }
+
+      function syncAuthFromStorage() {
+        const { t, u } = readSharedAuth();
+        const vipStored = localStorage.getItem('hero_clicker_is_vip') === 'true' || localStorage.getItem(LOCAL_VIP_KEY) === 'true';
+        if (t !== authToken || u !== currentUsername || (t && vipStored !== isVip)) {
+          authToken = t;
+          currentUsername = u;
+          isVip = Boolean(t && vipStored);
+          updateAuthHeaderUI();
+          if (authToken) loadFromServer();
+          fetchAndRenderRanking(false);
+        }
+      }
+      window.addEventListener('pageshow', syncAuthFromStorage);
+      window.addEventListener('storage', syncAuthFromStorage);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncAuthFromStorage();
+      });
 
       async function loadFromServer() {
         if (!authToken) return;
@@ -792,7 +807,7 @@
             return;
           }
 
-          rankings.forEach((item) => {
+          rankings.slice(0, 10).forEach((item) => {
             let rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-extrabold text-xs flex items-center justify-center shrink-0">${item.rank}</span>`;
             let cardStyle = 'bg-slate-950/80 border-slate-800';
 
@@ -866,15 +881,30 @@
         }
       }
 
-      document.getElementById('serverSaveGoldBtn').addEventListener('click', () => {
-        if (authToken) {
-          saveScoreToServer(Math.max(score, bestScore), Math.max(lines, bestLines), true);
+      document.getElementById('authHeaderBtn').addEventListener('click', () => {
+        if (authToken && currentUsername) {
+          if (confirm('로그아웃 하시겠습니까?')) handleLogout(false);
         } else {
           openAuthModal();
         }
       });
 
-      document.getElementById('logoutBtn').addEventListener('click', () => handleLogout(false));
+      const rankModal = document.getElementById('rankModal');
+      document.getElementById('rankOpenBtn').addEventListener('click', () => {
+        fetchAndRenderRanking(false);
+        rankModal.classList.remove('hidden');
+        rankModal.classList.add('flex');
+      });
+      document.getElementById('rankCloseBtn').addEventListener('click', () => {
+        rankModal.classList.add('hidden');
+        rankModal.classList.remove('flex');
+      });
+      rankModal.addEventListener('click', (e) => {
+        if (e.target === rankModal) {
+          rankModal.classList.add('hidden');
+          rankModal.classList.remove('flex');
+        }
+      });
       document.getElementById('authCloseBtn').addEventListener('click', () => {
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
@@ -932,8 +962,7 @@
 
           authToken = data.token;
           currentUsername = data.username;
-          localStorage.setItem(TOKEN_KEY, authToken);
-          localStorage.setItem(USER_KEY, currentUsername);
+          syncSharedAuth(authToken, currentUsername, Boolean(data.isVip || data.saveData?.isVip));
 
           if (data.isVip || data.saveData?.isVip) {
             isVip = true;
@@ -980,7 +1009,28 @@
       let lines = 0;
       let gameOver = false;
       let gameInterval = null;
-      let dropInterval = 500;
+      let speedTimer = null;
+      let gameStartTime = 0;
+      let dropInterval = 650;
+
+      function computeDropInterval() {
+        const elapsedSec = gameStartTime ? (Date.now() - gameStartTime) / 1000 : 0;
+        const timeLevel = Math.floor(elapsedSec / 15);
+        const lineLevel = Math.floor(lines / 10);
+        const level = Math.max(timeLevel, lineLevel) + Math.floor(Math.min(timeLevel, lineLevel) / 2);
+        return Math.max(100, Math.round(650 * Math.pow(0.86, level)));
+      }
+
+      function refreshDropSpeed() {
+        const newInterval = computeDropInterval();
+        if (newInterval !== dropInterval) {
+          dropInterval = newInterval;
+          if (!gameOver && currentPiece && !isSlowActive()) {
+            clearInterval(gameInterval);
+            gameInterval = setInterval(moveDown, dropInterval);
+          }
+        }
+      }
       let slowUntil = 0;
       let slowTickTimer = null;
       let slowUsesLeft = 3;
@@ -995,7 +1045,7 @@
         vipModal.classList.add('flex');
         initToss();
       }
-      document.getElementById('vipOpenBtn').addEventListener('click', openVipModal);
+      document.getElementById('vipOpenBtn')?.addEventListener('click', openVipModal);
       document.getElementById('vipCloseBtn').addEventListener('click', () => {
         vipModal.classList.add('hidden');
         vipModal.classList.remove('flex');
@@ -1144,7 +1194,8 @@
         board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         score = 0;
         lines = 0;
-        dropInterval = 500;
+        gameStartTime = Date.now();
+        dropInterval = 650;
         slowUsesLeft = 3;
         stopSlowEffect();
         gameOver = false;
@@ -1155,7 +1206,9 @@
         nextPiece = getRandomPiece();
 
         if (gameInterval) clearInterval(gameInterval);
+        if (speedTimer) clearInterval(speedTimer);
         gameInterval = setInterval(moveDown, dropInterval);
+        speedTimer = setInterval(refreshDropSpeed, 1000);
         if (bgmEnabled) startBGM();
         render();
       }
@@ -1217,14 +1270,7 @@
           score += cleared * 100 * cleared;
           updateScoreDisplays();
 
-          const newInterval = Math.max(150, 500 - Math.floor(lines / 10) * 35);
-          if (newInterval !== dropInterval) {
-            dropInterval = newInterval;
-            if (!isSlowActive()) {
-              clearInterval(gameInterval);
-              gameInterval = setInterval(moveDown, dropInterval);
-            }
-          }
+          refreshDropSpeed();
         }
       }
 
@@ -1284,6 +1330,7 @@
       function endGame() {
         gameOver = true;
         clearInterval(gameInterval);
+        if (speedTimer) { clearInterval(speedTimer); speedTimer = null; }
         stopSlowEffect();
         stopBGM();
         overlayTitle.textContent = '게임 오버!';
