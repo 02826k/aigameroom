@@ -78,14 +78,9 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <!-- 3D viewport -->
 <section id="viewportSection" class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/50 bg-black flex-1 min-h-[260px]">
 <div id="viewport" class="absolute inset-0 cursor-pointer"></div>
-<div id="gameOverlay" class="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/65 via-transparent to-slate-950/90 p-2 sm:p-4 overflow-y-auto pointer-events-auto">
+<div id="gameOverlay" class="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/75 via-transparent to-slate-950/80 p-2 sm:p-3 overflow-y-auto pointer-events-auto">
 <div class="w-full min-h-full flex flex-col items-center justify-between gap-2">
-<div class="text-center pt-0.5">
-<div id="overlayTitle" class="text-lg sm:text-2xl font-black text-orange-400 tracking-tight drop-shadow">오토바이 레이싱</div>
-<p id="overlaySub" class="text-[10px] sm:text-xs text-slate-200/90 text-center px-2 drop-shadow">오토바이를 선택하고 차선을 피하며 질주하세요!</p>
-</div>
-
-<div class="w-full max-w-md flex flex-col items-center gap-2 mt-auto pb-1">
+<div class="w-full max-w-md flex flex-col items-center">
 <div id="bikeSelectGrid" class="grid grid-cols-2 gap-2 w-full">
 <button id="bikeCard1" type="button" class="text-left rounded-xl p-2 sm:p-2.5 border-2 border-orange-400 bg-slate-900/85 hover:bg-slate-800/90 transition cursor-pointer relative shadow-lg min-w-0 backdrop-blur-sm">
 <div class="flex flex-wrap items-center justify-between gap-1 mb-0.5">
@@ -101,10 +96,19 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/50">2번 · 👑 VIP</span>
 <span id="bike2LockBadge" class="text-[10px] font-black text-amber-300">🔒 VIP 전용</span>
 </div>
-<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">🏎️ 람보르기니 오픈카</div>
+<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">🏎️ 캄보르기니</div>
 <div class="text-[10px] text-slate-400 leading-tight">VIP 전용 오픈카</div>
 </button>
 </div>
+</div>
+
+<div id="overlayResultBox" class="hidden text-center bg-slate-950/80 border border-orange-500/40 rounded-xl px-4 py-2 backdrop-blur-sm">
+<div id="overlayTitle" class="text-lg sm:text-2xl font-black text-orange-400 tracking-tight drop-shadow">오토바이 레이싱</div>
+<p id="overlaySub" class="text-[10px] sm:text-xs text-slate-200/90 text-center px-2 drop-shadow"></p>
+</div>
+
+<div class="w-full max-w-md flex flex-col items-center gap-1.5">
+<button id="overlayActionBtn" type="button" class="w-full sm:w-auto px-8 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-rose-500 text-slate-950 font-black text-sm cursor-pointer shadow-lg active:scale-95 transition">레이스 시작</button>
 
 <div id="vipColorPanel" class="w-full rounded-xl border border-purple-500/40 bg-slate-950/85 backdrop-blur-sm p-2 flex flex-col gap-1.5 shadow-lg">
 <div class="flex items-center justify-between gap-1">
@@ -117,8 +121,6 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 <div id="colorPaletteRow" class="grid grid-cols-6 gap-1"></div>
 </div>
-
-<button id="overlayActionBtn" type="button" class="w-full sm:w-auto px-8 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-rose-500 text-slate-950 font-black text-sm cursor-pointer shadow-lg active:scale-95 transition">레이스 시작</button>
 </div>
 </div>
 </div>
@@ -222,7 +224,7 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <div class="bg-slate-900 border-2 border-amber-400/60 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
 <div class="text-2xl mb-1.5">👑</div>
 <h3 class="text-sm font-black text-amber-300 mb-1">VIP 차량입니다</h3>
-<p class="text-xs text-slate-300 mb-4">람보르기니 오픈카 및 커스텀 색상은 VIP 회원 전용입니다.<br/>로비에서 VIP 가입 후 이용할 수 있습니다.</p>
+<p class="text-xs text-slate-300 mb-4">캄보르기니는 VIP 회원 전용 차량입니다.<br/>로비에서 VIP 가입 후 이용할 수 있습니다.</p>
 <button id="vipAlertConfirmBtn" type="button" class="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 shadow cursor-pointer">확인</button>
 </div>
 </div>
@@ -1070,14 +1072,23 @@ function applyColorToMat(mat, colorId, defaultHex, defaultMetal, defaultRough) {
   mat.roughness = opt.rough ?? (opt.id === 'gold' ? 0.16 : 0.25);
 }
 
-function applyBikeCustomColors() {
-  [bike1Mesh, bike2Mesh].forEach(bk => {
-    const vipB = !!bk.userData.isVipBike;
-    applyColorToMat(bk.userData.paintMat, state.bikeColor, bk.userData.isSupercar ? 0xeab308 : (vipB ? 0x6d28d9 : 0xf97316), vipB ? 0.72 : 0.55, vipB ? 0.22 : 0.32);
-    applyColorToMat(bk.userData.helmetMat, state.helmetColor, vipB ? 0x0f172a : 0x0ea5e9, 0.65, 0.22);
-    applyColorToMat(bk.userData.jacketMat, state.suitColor, vipB ? 0x4c1d95 : 0x334155, 0.25, 0.55);
-    applyColorToMat(bk.userData.suitMat, state.suitColor, vipB ? 0x1e1b4b : 0x1e293b, 0.2, 0.65);
-  });
+function applyBikeCustomColors(forceBasicRed = false) {
+  if (forceBasicRed) {
+    applyColorToMat(bike1Mesh.userData.paintMat, 'default', 0xef4444, 0.55, 0.32);
+    applyColorToMat(bike1Mesh.userData.helmetMat, 'default', 0xef4444, 0.65, 0.22);
+    applyColorToMat(bike1Mesh.userData.jacketMat, 'default', 0x334155, 0.25, 0.55);
+    applyColorToMat(bike1Mesh.userData.suitMat, 'default', 0x1e293b, 0.2, 0.65);
+  } else {
+    applyColorToMat(bike1Mesh.userData.paintMat, state.bikeColor, 0xef4444, 0.55, 0.32);
+    applyColorToMat(bike1Mesh.userData.helmetMat, state.helmetColor, 0x0ea5e9, 0.65, 0.22);
+    applyColorToMat(bike1Mesh.userData.jacketMat, state.suitColor, 0x334155, 0.25, 0.55);
+    applyColorToMat(bike1Mesh.userData.suitMat, state.suitColor, 0x1e293b, 0.2, 0.65);
+  }
+
+  applyColorToMat(bike2Mesh.userData.paintMat, state.bikeColor, 0xeab308, 0.72, 0.22);
+  applyColorToMat(bike2Mesh.userData.helmetMat, state.helmetColor, 0xf8fafc, 0.65, 0.22);
+  applyColorToMat(bike2Mesh.userData.jacketMat, state.suitColor, 0x334155, 0.25, 0.55);
+  applyColorToMat(bike2Mesh.userData.suitMat, state.suitColor, 0x1e293b, 0.2, 0.65);
 }
 
 function applySelectedBikeMesh() {
@@ -1328,13 +1339,13 @@ vipAlertModal.onclick = (e) => {
 };
 
 function startGame() {
-  const usingVipPerk = (state.selectedBike === 2) || (state.bikeColor !== 'default') || (state.helmetColor !== 'default') || (state.suitColor !== 'default');
-  if (!state.isVip && usingVipPerk) {
+  if (!state.isVip && state.selectedBike === 2) {
     vipAlertModal.classList.remove('hidden');
     vipAlertModal.classList.add('flex');
     return;
   }
   applySelectedBikeMesh();
+  if (!state.isVip) applyBikeCustomColors(true);
   distance = 0; lives = state.isVip ? 3 : 1; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false;
   speed = 12; boostT = 0; invuln = 0; nearMissCd = 0; crashFlash = 0;
   fuel = FUEL_MAX; lowFuelWarned = false; throttle = 0; keysUD.up = false; keysUD.down = false;
@@ -1350,6 +1361,7 @@ function startGame() {
   spawnT = 1.2; coinSpawnT = 2; fuelSpawnT = 3.5;
   running = true;
   if (state.bgmEnabled) startBGM();
+  document.getElementById('overlayResultBox').classList.add('hidden');
   setOverlayVisible(false);
   updateUI();
 }
@@ -1377,6 +1389,7 @@ function finishGameWithReason(titleText) {
   if (runGold > state.bestRunGold) { state.bestRunGold = runGold; changed = true; }
   if (runTotal > state.bestTotalScore) { state.bestTotalScore = runTotal; changed = true; }
   if (changed) saveState(true);
+  document.getElementById('overlayResultBox').classList.remove('hidden');
   document.getElementById('overlayTitle').textContent = titleText;
   document.getElementById('overlaySub').textContent = `종합 ${runTotal.toLocaleString()}점 (거리 ${d.toLocaleString()}m · 최고 ${runMaxSpeed}km/h · 골드 +${runGold.toLocaleString()}G)`;
   document.getElementById('overlayActionBtn').textContent = '다시 레이스';
@@ -1802,6 +1815,7 @@ function animate() {
       if (runTotal > state.bestTotalScore) state.bestTotalScore = runTotal;
       state.bestTimeSec = FINISH_TIME_SEC;
       saveState(true);
+      document.getElementById('overlayResultBox').classList.remove('hidden');
       document.getElementById('overlayTitle').textContent = '🏆 3분 완주 성공!';
       document.getElementById('overlaySub').textContent = `종합 ${runTotal.toLocaleString()}점 · 거리 ${d.toLocaleString()}m · 최고 ${runMaxSpeed}km/h · 골드 +${runGold.toLocaleString()}G`;
       document.getElementById('overlayActionBtn').textContent = '처음부터';
@@ -1828,7 +1842,7 @@ function animate() {
     });
   }
 
-  {
+  if (!running || state.isVip) {
     const hue = (clock.elapsedTime * 0.35) % 1;
     if (state.bikeColor === 'rainbow' && player.userData.paintMat) player.userData.paintMat.color.setHSL(hue, 0.9, 0.55);
     if (state.helmetColor === 'rainbow' && player.userData.helmetMat) player.userData.helmetMat.color.setHSL((hue + 0.33) % 1, 0.9, 0.55);
