@@ -2,25 +2,33 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0f172a" />
     <link rel="icon" type="image/png" href="./icon.png" />
     <link rel="apple-touch-icon" href="./icon.png" />
     <link rel="manifest" href="./manifest.json" />
     <title>코트리스 — KORTRESS 2D</title>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #020617;
-            color: #f8fafc;
+        html, body {
+            margin: 0;
+            padding: 0;
             overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
+            overscroll-behavior: none;
             height: 100vh;
             height: 100dvh;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
         }
         .title-font {
             font-family: 'Black Han Sans', sans-serif;
@@ -32,6 +40,9 @@
             cursor: crosshair;
         }
         .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
         .arcade-btn {
             background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
             border: 2px solid #93c5fd;
@@ -72,101 +83,97 @@
         }
     </style>
 </head>
-<body class="flex flex-col w-screen overflow-hidden">
+<body class="flex flex-col w-screen overflow-hidden bg-slate-950 text-slate-100">
 
-    <!-- 최상단 통합 계정 바 -->
-    <div class="bg-slate-950 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 z-20 shrink-0">
-        <div class="flex items-center gap-1.5 min-w-0">
-            <span class="text-xs font-black tracking-wide text-amber-400 shrink-0">🎯 코트리스 (KORTRESS)</span>
-            <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 truncate">
-                👤 게스트
-            </span>
-            <span id="vipBadge" class="hidden px-1.5 py-0.5 text-[10px] font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 rounded shrink-0">VIP</span>
-        </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-            <span class="hidden sm:inline text-[10px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded-md">
-                승리 <span id="winCountText">0</span>회
-            </span>
-            <button id="loginOpenBtn" type="button" class="px-2.5 py-1 rounded-lg bg-gradient-to-b from-amber-300 to-amber-500 hover:from-yellow-200 hover:to-amber-400 text-slate-950 text-[11px] font-black shadow transition active:scale-95 cursor-pointer">
-                👤 로그인
-            </button>
-            <button id="logoutBtn" type="button" class="hidden px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-semibold transition cursor-pointer">
-                로그아웃
-            </button>
-        </div>
-    </div>
+    <!-- 디자인 표준 2단 헤더 -->
+    <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 py-2 sticky top-0 z-30 shadow-lg shadow-black/25 shrink-0">
+        <div class="max-w-5xl mx-auto flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400/25 to-indigo-600/25 text-sky-300 font-extrabold text-xs border border-sky-400/40 shrink-0">🎯</span>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">코트리스 (KORTRESS)</h1>
+                    <span id="vipBadge" class="hidden px-1.5 py-0.5 text-[10px] font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 rounded shrink-0">VIP</span>
+                </div>
 
-    <!-- 상단 HUD (플레이어 체력, 턴 표시, 바람 게이지, 사운드 토글) -->
-    <header class="bg-slate-900/90 border-b border-slate-700 px-3 py-1.5 flex items-center justify-between z-10 shrink-0 shadow-lg">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="hidden sm:inline text-[10px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                        승리 <span id="winCountText">0</span>회
+                    </span>
+                    <button id="loginOpenBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+                        로그인
+                    </button>
+                    <button id="logoutBtn" type="button" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+                        로그아웃
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
+                <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+                <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+                <button id="menu-btn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">메뉴</button>
+                <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 상단 HUD (플레이어 체력, 턴 표시, 바람 게이지) -->
+    <div class="bg-slate-900/90 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between z-10 shrink-0 shadow-lg">
         <!-- Player 1 상태 -->
         <div class="flex items-center gap-2 w-1/3">
-            <div class="w-3.5 h-3.5 rounded-full bg-blue-500 border-2 border-white shrink-0"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-sky-500 border-2 border-white shrink-0"></div>
             <div class="w-full max-w-[160px]">
                 <div class="flex justify-between text-[11px] font-bold mb-0.5">
-                    <span class="text-blue-400">PLAYER 1</span>
+                    <span class="text-sky-400">PLAYER 1</span>
                     <span id="p1-hp-text">100</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
-                    <div id="p1-hp-bar" class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-300" style="width: 100%;"></div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div id="p1-hp-bar" class="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-300" style="width: 100%;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 중앙 정보 (턴 & 바람) -->
+        <!-- 중앙 정보 (턴 표시) -->
         <div class="flex flex-col items-center justify-center w-1/3">
-            <div id="turn-indicator" class="text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-blue-600/30 border border-blue-400 text-blue-200 mb-0.5">
+            <div id="turn-indicator" class="text-[11px] sm:text-xs font-black tracking-wider px-3 py-1 rounded-full bg-sky-600/30 border border-sky-400 text-sky-200">
                 P1 TURN
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-600">
-                <span class="text-[9px] text-slate-400 font-bold">WIND</span>
-                <div class="w-14 sm:w-20 h-2 bg-slate-950 rounded-full relative overflow-hidden flex items-center">
-                    <div class="w-0.5 h-full bg-slate-500 mx-auto z-10"></div>
-                    <div id="wind-bar" class="h-full bg-emerald-400 absolute transition-all duration-500" style="left: 50%; width: 0%;"></div>
-                </div>
-                <span id="wind-text" class="text-[10px] font-mono font-bold text-emerald-300 w-6 text-right">0</span>
-            </div>
         </div>
 
-        <!-- Player 2 상태 & 설정 -->
+        <!-- Player 2 상태 -->
         <div class="flex items-center justify-end gap-1.5 w-1/3">
             <div class="w-full max-w-[160px] text-right">
                 <div class="flex justify-between text-[11px] font-bold mb-0.5">
                     <span id="p2-hp-text">100</span>
                     <span id="p2-name" class="text-rose-400">CPU (AI)</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-end">
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700 flex justify-end">
                     <div id="p2-hp-bar" class="h-full bg-gradient-to-l from-rose-600 to-orange-400 transition-all duration-300" style="width: 100%;"></div>
                 </div>
             </div>
             <div class="w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white shrink-0"></div>
-            <button id="sound-toggle" type="button" class="p-1 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-600 text-xs cursor-pointer" title="효과음 켜기/끄기">
-                🔊
-            </button>
-            <button id="menu-btn" type="button" class="p-1 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-600 text-xs font-bold cursor-pointer" title="메인 메뉴">
-                ☰
-            </button>
         </div>
-    </header>
+    </div>
 
     <!-- 메인 게임 캔버스 영역 -->
     <main class="relative flex-1 min-h-0 w-full overflow-hidden bg-slate-950">
         <canvas id="gameCanvas"></canvas>
 
         <!-- 플로팅 알림 메시지 -->
-        <div id="toast-msg" class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border border-amber-400/60 text-amber-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-xl opacity-0 transition-opacity duration-300 z-20 whitespace-nowrap">
+        <div id="toast-msg" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-sky-500/50 text-sky-200 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-2xl opacity-0 transition-opacity duration-200 z-50 whitespace-nowrap">
             알림
         </div>
 
         <!-- 시작 및 모드 선택 모달 -->
         <div id="start-modal" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center z-30 p-4">
-            <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl p-5 sm:p-7 max-w-md w-full text-center shadow-2xl">
+            <div class="bg-slate-900 border-2 border-sky-500/40 rounded-2xl p-5 sm:p-7 max-w-md w-full text-center shadow-2xl">
                 <div class="inline-block px-3 py-1 bg-amber-500/20 border border-amber-400/50 rounded-full text-amber-300 text-xs font-bold mb-2">
                     코트리스 · ARCADE ARTILLERY
                 </div>
                 <h1 class="title-font text-4xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-orange-400 to-red-500 mb-1.5 tracking-wide drop-shadow">
                     KORTRESS
                 </h1>
-                <p class="text-slate-400 text-xs sm:text-sm mb-5">바람과 각도를 계산하여 상대 탱크를 파괴하세요!</p>
+                <p class="text-slate-400 text-xs sm:text-sm mb-5">각도와 파워를 계산하여 상대 탱크를 파괴하세요!</p>
 
                 <div class="space-y-2.5 mb-5">
                     <button type="button" onclick="startGame('ai')" class="arcade-btn w-full py-3 rounded-xl font-black text-base sm:text-lg text-white flex items-center justify-center gap-2 cursor-pointer">
@@ -205,18 +212,18 @@
 
         <!-- 통합 계정 로그인 모달 -->
         <div id="authModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div class="w-full max-w-xs mx-auto bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-5 shadow-2xl text-center">
+            <div class="w-full max-w-xs mx-auto bg-slate-900 border-2 border-sky-500/40 rounded-3xl p-5 shadow-2xl text-center">
                 <div class="w-11 h-11 mx-auto mb-2 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-xl">
                     🔐
                 </div>
                 <h3 class="text-base font-black text-amber-300 mb-3">AI게임장 통합 계정</h3>
 
                 <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
-                    <button type="button" id="modeLoginBtn" class="flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">
-                        기존 계정 로그인
+                    <button type="button" id="modeLoginBtn" class="flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer">
+                        로그인
                     </button>
                     <button type="button" id="modeRegisterBtn" class="flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
-                        간편 회원가입
+                        회원가입
                     </button>
                 </div>
 
@@ -225,12 +232,12 @@
                         <label class="text-[10px] font-bold text-slate-400 ml-1">휴대폰 번호 (010 제외 8자리)</label>
                         <div class="flex items-center gap-1.5 mt-1 w-full">
                             <span class="px-2.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black text-amber-400 shrink-0">010-</span>
-                            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 min-w-0 w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-amber-400" />
+                            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 min-w-0 w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-sky-400" />
                         </div>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 ml-1">비밀번호 (숫자 4자리)</label>
-                        <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full min-w-0 mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-amber-400" />
+                        <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full min-w-0 mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-sky-400" />
                     </div>
                 </div>
 
@@ -240,7 +247,7 @@
                     <button type="button" id="closeLoginBtn" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">
                         닫기
                     </button>
-                    <button type="button" id="confirmLoginBtn" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-black text-slate-950 shadow-lg transition active:scale-95 cursor-pointer">
+                    <button type="button" id="confirmLoginBtn" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-xs font-black text-white shadow-lg transition active:scale-95 cursor-pointer">
                         로그인
                     </button>
                 </div>
@@ -248,8 +255,8 @@
         </div>
     </main>
 
-    <!-- 하단 아케이드 컨트롤 패널 + 통합 바로가기 카드 -->
-    <footer class="bg-slate-900 border-t border-slate-700 px-2 py-2 sm:p-2.5 z-10 shrink-0 flex flex-col gap-2">
+    <!-- 하단 아케이드 컨트롤 패널 -->
+    <footer class="bg-slate-900 border-t border-slate-800 px-2 py-2 sm:p-2.5 z-10 shrink-0">
         <div class="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
             <!-- 좌측: 포탄 선택 & 연료 게이지 -->
             <div class="flex items-center justify-between md:justify-start gap-2 w-full md:w-auto">
@@ -290,11 +297,14 @@
             <div class="w-full md:flex-1 max-w-md flex flex-col gap-0.5">
                 <div class="flex justify-between items-center text-[10px] font-bold px-1 gap-2">
                     <span class="text-slate-400 shrink-0">SHOT POWER</span>
-                    <button id="vip-assist-badge" type="button" title="클릭하면 추천 각도로 자동 정렬됩니다"
+                    <button id="vip-assist-badge" type="button" title="VIP 자동센서 계산 결과"
                         class="hidden px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-[10px] font-black truncate transition cursor-pointer">
-                        👑 VIP 조준: 계산중...
+                        👑 VIP 센서: 계산중...
                     </button>
-                    <span id="power-text" class="font-mono text-amber-400 shrink-0">0%</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span id="vip-target-power-label" class="hidden font-mono text-[10px] font-black text-yellow-300 bg-yellow-400/15 border border-yellow-400/50 px-1.5 py-0.2 rounded">목표 0%</span>
+                        <span id="power-text" class="font-mono text-amber-400">0%</span>
+                    </div>
                 </div>
                 <div id="power-container" class="w-full h-4 bg-slate-950 rounded-full p-0.5 border border-slate-600 relative overflow-hidden">
                     <div id="last-power-marker" class="hidden absolute top-0 bottom-0 w-0.5 bg-white/70 z-10" style="left: 0%;"></div>
@@ -305,13 +315,19 @@
 
             <!-- 우측: 이동/각도 조절 패드 및 발사 버튼 -->
             <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
-                <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
-                    <button id="btn-left" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">◀</button>
-                    <div class="flex flex-col gap-0.5">
-                        <button id="btn-up" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▲</button>
-                        <button id="btn-down" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▼</button>
+                <div class="flex flex-col items-center gap-1">
+                    <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+                        <button id="btn-left" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">◀</button>
+                        <div class="flex flex-col gap-0.5">
+                            <button id="btn-up" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▲</button>
+                            <button id="btn-down" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▼</button>
+                        </div>
+                        <button id="btn-right" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">▶</button>
                     </div>
-                    <button id="btn-right" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">▶</button>
+                    <button id="vip-sensor-btn" type="button"
+                        class="w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800 border-amber-400/50 text-amber-300 hover:bg-slate-700 whitespace-nowrap">
+                        👑 VIP자동센서
+                    </button>
                 </div>
 
                 <button id="btn-fire" type="button" class="fire-btn px-5 py-2.5 rounded-xl font-black text-white text-sm sm:text-base tracking-wider uppercase flex-1 md:flex-none text-center cursor-pointer">
@@ -319,102 +335,20 @@
                 </button>
             </div>
         </div>
-
-        <!-- 최하단 통합 AI게임장 바로가기 카드 -->
-        <div class="max-w-5xl w-full mx-auto bg-gradient-to-br from-slate-950 to-amber-950/30 border border-amber-500/35 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-base shrink-0 overflow-hidden">
-                    <img src="./icon.png" alt="코트리스" class="w-full h-full object-cover" onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg='1';this.src='./icon.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='inline';}" />
-                    <span style="display:none">📲</span>
-                </div>
-                <div class="text-xs sm:text-sm font-black text-amber-300 truncate">코트리스 바로가기</div>
-            </div>
-            <button id="androidInstallBtn" type="button"
-                class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black text-xs shadow-md transition shrink-0 cursor-pointer">
-                <span id="androidInstallBtnText">아이콘 만들기</span>
-            </button>
-        </div>
     </footer>
 
     <script>
-        // ==========================================
-        // 0. 통합 PWA 설치 & 서비스 워커 (Android / Windows 공용)
-        // ==========================================
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
-        let deferredInstallPrompt = null;
-        const installBtn = document.getElementById('androidInstallBtn');
-        const installBtnText = document.getElementById('androidInstallBtnText');
-
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installBtnText.textContent = '바탕화면 아이콘 설치 완료됨';
-            installBtn.disabled = true;
-            installBtn.className = 'px-3 py-2 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs border border-slate-700 shrink-0 cursor-default';
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredInstallPrompt = e;
-            installBtnText.textContent = '아이콘 만들기 (설치 가능)';
-        });
-
-        window.addEventListener('appinstalled', () => {
-            deferredInstallPrompt = null;
-            installBtnText.textContent = '바탕화면 아이콘 생성 완료!';
-            showToast('📲 바탕화면에 [코트리스] 아이콘이 생성되었습니다!');
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredInstallPrompt) {
-                deferredInstallPrompt.prompt();
-                const { outcome } = await deferredInstallPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    showToast('📲 바탕화면 아이콘을 생성하는 중입니다...');
-                }
-                deferredInstallPrompt = null;
-                return;
-            }
-
-            const ua = navigator.userAgent || '';
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-            const isAndroid = /Android/i.test(ua);
-            const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line|wv\)/i.test(ua);
-
-            if (!isMobile) {
-                const targetUrl = location.href;
-                const urlContent = '[InternetShortcut]\r\nURL=' + targetUrl + '\r\n';
-                const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = '코트리스_바로가기.url';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-                showToast('💻 윈도우용 [코트리스_바로가기.url]이 다운로드되었습니다!');
-            } else if (isAndroid && isInApp) {
-                const cleanUrl = window.location.href.split('#')[0].replace(/^https?:\/\//, '');
-                showToast('📲 인앱 브라우저에서는 설치가 제한되어 Chrome으로 이동합니다...');
-                setTimeout(() => {
-                    window.location.href = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.android.chrome;end';
-                }, 300);
-            } else {
-                showToast('⚠️ 이미 설치되었거나 대기 중입니다. 브라우저 메뉴 [⋮] → [홈 화면에 추가]를 눌러주세요.');
-            }
-        });
-
-        // ==========================================
-        // 0-1. 통합 계정 로그인 / 서버 DB 연동
-        // ==========================================
         const GAME_ID = 'kortress';
         const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const API_CANDIDATES = isLocalHost
             ? ['']
             : ['https://02826k.duckdns.org', 'https://partial-catering-vatican-accounting.trycloudflare.com'];
         let API_BASE_URL = API_CANDIDATES[0];
-        const ADMIN_VIP_PHONES = []; // VIP 여부는 서버 DB에서 관리
+        const ADMIN_VIP_PHONES = [];
         const TOKEN_KEY = 'hero_clicker_jwt_token';
         const USER_KEY = 'hero_clicker_username';
         const LOCAL_WIN_KEY = 'kortress_wins_v1';
@@ -451,20 +385,15 @@
         }
 
         function updateAuthUI() {
-            const badge = document.getElementById('userBadge');
             const loginBtn = document.getElementById('loginOpenBtn');
             const logoutBtn = document.getElementById('logoutBtn');
             const vipBadge = document.getElementById('vipBadge');
             document.getElementById('winCountText').textContent = authState.wins;
 
             if (authState.username) {
-                badge.textContent = `📱 ${authState.username}`;
-                badge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 truncate';
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
             } else {
-                badge.textContent = '👤 게스트';
-                badge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 truncate';
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
             }
@@ -525,12 +454,12 @@
             isRegisterMode = reg;
             document.getElementById('loginMsg').classList.add('hidden');
             if (reg) {
-                modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-                modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
+                modeRegisterBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer';
+                modeLoginBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
                 confirmLoginBtn.textContent = '회원가입';
             } else {
-                modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-                modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
+                modeLoginBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer';
+                modeRegisterBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
                 confirmLoginBtn.textContent = '로그인';
             }
         }
@@ -545,6 +474,7 @@
             authState.token = null;
             authState.username = null;
             authState.isVip = false;
+            vipSensorEnabled = false;
             localStorage.removeItem(TOKEN_KEY);
             localStorage.removeItem(USER_KEY);
             updateAuthUI();
@@ -634,24 +564,59 @@
             }
         };
 
-        // ==========================================
-        // 1. 사운드 시스템 (Web Audio API)
-        // ==========================================
         class SoundEffects {
             constructor() {
                 this.ctx = null;
                 this.muted = false;
+                this.bgmEnabled = true;
+                this.bgmTimer = null;
+                this.bgmStep = 0;
             }
             init() {
                 if (!this.ctx) {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioContext();
                 }
-                if (this.ctx.state === 'suspended') this.ctx.resume();
+                if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
             }
             toggleMute() {
                 this.muted = !this.muted;
                 return this.muted;
+            }
+            startBGM() {
+                this.stopBGM();
+                if (!this.bgmEnabled) return;
+                this.init();
+                const notes = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 293.66, 392.0];
+                this.bgmTimer = setInterval(() => {
+                    if (!this.bgmEnabled || !this.ctx) return;
+                    try {
+                        const now = this.ctx.currentTime;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(notes[this.bgmStep % notes.length], now);
+                        gain.gain.setValueAtTime(0.025, now);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.23);
+                        this.bgmStep++;
+                    } catch (e) {}
+                }, 260);
+            }
+            stopBGM() {
+                if (this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
+                }
+            }
+            toggleBGM() {
+                this.bgmEnabled = !this.bgmEnabled;
+                if (this.bgmEnabled) this.startBGM();
+                else this.stopBGM();
+                return this.bgmEnabled;
             }
             playShoot(type = 0) {
                 if (this.muted) return;
@@ -727,9 +692,6 @@
         }
         const sfx = new SoundEffects();
 
-        // ==========================================
-        // 2. 게임 상수 및 전역 상태 (그래픽 업그레이드 포함)
-        // ==========================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const WORLD_WIDTH = 1200;
@@ -749,7 +711,6 @@
             mode: 'ai',
             phase: 'MENU',
             turn: 0,
-            wind: 0,
             terrain: new Float32Array(WORLD_WIDTH),
             craterMarks: [],
             tanks: [],
@@ -767,9 +728,6 @@
             lastTickTime: 0
         };
 
-        // ==========================================
-        // 3. 탱크 클래스 (메탈릭 그래픽 리마스터)
-        // ==========================================
         class Tank {
             constructor(id, name, x, color, darkColor, lightColor, isAI = false) {
                 this.id = id;
@@ -824,7 +782,6 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.slopeAngle);
 
-                // VIP 황금 오오라 (P1이 VIP 로그인 상태일 때)
                 if (this.id === 0 && authState.isVip) {
                     const aura = ctx.createRadialGradient(0, -12, 4, 0, -12, 34);
                     aura.addColorStop(0, 'rgba(250, 204, 21, 0.35)');
@@ -835,13 +792,11 @@
                     ctx.fill();
                 }
 
-                // 바닥 그림자
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
                 ctx.beginPath();
                 ctx.ellipse(0, 1, 22, 5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 포신 (메탈 그라데이션 + 머즐 브레이크)
                 ctx.save();
                 ctx.translate(0, -13);
                 ctx.rotate(-this.slopeAngle);
@@ -865,7 +820,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // 궤도 & 바퀴
                 ctx.fillStyle = '#0f172a';
                 ctx.strokeStyle = '#334155';
                 ctx.lineWidth = 2;
@@ -885,7 +839,6 @@
                     ctx.fill();
                 }
 
-                // 입체 그라데이션 차체 & 포탑
                 const bodyGrad = ctx.createLinearGradient(0, -24, 0, -8);
                 bodyGrad.addColorStop(0, this.lightColor);
                 bodyGrad.addColorStop(0.5, this.color);
@@ -904,7 +857,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // 포탑 하이라이트
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
                 ctx.ellipse(-3, -21, 4, 2, -0.3, 0, Math.PI * 2);
@@ -912,7 +864,6 @@
 
                 ctx.restore();
 
-                // 턴 표시 화살표 & 조준선 가이드
                 if (gameState.phase !== 'GAMEOVER' && gameState.tanks[gameState.turn] === this && !this.isAI) {
                     const bob = Math.sin(Date.now() / 180) * 4;
                     ctx.fillStyle = '#facc15';
@@ -938,14 +889,101 @@
                         ctx.lineTo(startX + Math.cos(rad) * 50, startY + Math.sin(rad) * 50);
                         ctx.stroke();
                         ctx.setLineDash([]);
+
+                        // VIP자동센서 활성 시: 포탄 궤적 예측 점선 포물선 및 착탄 지점 실시간 표시
+                        if (vipSensorEnabled && authState.isVip && this.id === 0) {
+                            const opp = gameState.tanks[(gameState.turn + 1) % 2];
+                            const sensorSol = currentVipSolution || calculatePowerForAngle(this, opp, this.angle);
+                            if (sensorSol) {
+                                const spd = (sensorSol.power / 100) * MAX_POWER;
+                                let px = this.x + Math.cos(rad) * 30;
+                                let py = (this.y - 13) + Math.sin(rad) * 30;
+                                let pvx = Math.cos(rad) * spd;
+                                let pvy = Math.sin(rad) * spd;
+
+                                const pts = [{ x: px, y: py }];
+                                let hitTarget = false;
+                                let impactPt = null;
+
+                                for (let frame = 0; frame < 260; frame++) {
+                                    pvy += GRAVITY;
+                                    let stopped = false;
+                                    for (let s = 0; s < 4; s++) {
+                                        px += pvx / 4;
+                                        py += pvy / 4;
+                                        if (px < 0 || px >= WORLD_WIDTH) {
+                                            stopped = true;
+                                            break;
+                                        }
+                                        if (opp && opp.hp > 0 && Math.hypot(px - opp.x, py - (opp.y - 11)) < 16) {
+                                            hitTarget = true;
+                                            impactPt = { x: px, y: py };
+                                            pts.push(impactPt);
+                                            stopped = true;
+                                            break;
+                                        }
+                                        const ix = Math.floor(px);
+                                        if (ix >= 0 && ix < WORLD_WIDTH && py >= gameState.terrain[ix]) {
+                                            impactPt = { x: px, y: gameState.terrain[ix] };
+                                            pts.push(impactPt);
+                                            stopped = true;
+                                            break;
+                                        }
+                                    }
+                                    if (stopped) break;
+                                    pts.push({ x: px, y: py });
+                                }
+
+                                if (pts.length > 1) {
+                                    ctx.save();
+                                    // 점선 포물선 궤적
+                                    ctx.strokeStyle = hitTarget ? 'rgba(250, 204, 21, 0.92)' : 'rgba(56, 189, 248, 0.85)';
+                                    ctx.lineWidth = 2.4;
+                                    ctx.setLineDash([6, 6]);
+                                    ctx.beginPath();
+                                    ctx.moveTo(pts[0].x, pts[0].y);
+                                    for (let i = 1; i < pts.length; i++) {
+                                        ctx.lineTo(pts[i].x, pts[i].y);
+                                    }
+                                    ctx.stroke();
+                                    ctx.setLineDash([]);
+
+                                    // 일정 간격 점 표시
+                                    let accDist = 0;
+                                    ctx.fillStyle = hitTarget ? '#fde047' : '#7dd3fc';
+                                    for (let i = 1; i < pts.length; i++) {
+                                        accDist += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+                                        if (accDist >= 22) {
+                                            accDist = 0;
+                                            ctx.beginPath();
+                                            ctx.arc(pts[i].x, pts[i].y, 2.8, 0, Math.PI * 2);
+                                            ctx.fill();
+                                        }
+                                    }
+
+                                    // 예상 착탄 지점 마커
+                                    if (impactPt) {
+                                        const pulse = 8 + Math.sin(Date.now() / 160) * 2.5;
+                                        ctx.strokeStyle = hitTarget ? '#ef4444' : '#fde047';
+                                        ctx.lineWidth = 2;
+                                        ctx.beginPath();
+                                        ctx.arc(impactPt.x, impactPt.y, pulse, 0, Math.PI * 2);
+                                        ctx.stroke();
+
+                                        ctx.fillStyle = hitTarget ? 'rgba(239, 68, 68, 0.35)' : 'rgba(250, 204, 21, 0.25)';
+                                        ctx.beginPath();
+                                        ctx.arc(impactPt.x, impactPt.y, 4.5, 0, Math.PI * 2);
+                                        ctx.fill();
+                                    }
+                                    ctx.restore();
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // ==========================================
-        // 4. 포탄 & 이펙트
-        // ==========================================
         class Projectile {
             constructor(x, y, vx, vy, weapon, ownerId) {
                 this.x = x;
@@ -963,7 +1001,6 @@
                 this.trail.push({ x: this.x, y: this.y });
                 if (this.trail.length > 26) this.trail.shift();
 
-                this.vx += gameState.wind * 0.012;
                 this.vy += GRAVITY;
 
                 const steps = 4;
@@ -1068,9 +1105,6 @@
             }
         }
 
-        // ==========================================
-        // 5. 지형 및 배경 생성
-        // ==========================================
         function generateTerrain() {
             const freq1 = (Math.random() * 1.5 + 1.5) * Math.PI / WORLD_WIDTH;
             const freq2 = (Math.random() * 3.0 + 3.0) * Math.PI / WORLD_WIDTH;
@@ -1096,11 +1130,9 @@
             }
         }
 
-        // ==========================================
-        // 6. 게임 흐름 제어
-        // ==========================================
         function startGame(mode) {
             sfx.init();
+            if (sfx.bgmEnabled) sfx.startBGM();
             gameState.mode = mode;
             document.getElementById('start-modal').classList.add('hidden');
             document.getElementById('gameover-modal').classList.add('hidden');
@@ -1139,13 +1171,7 @@
             gameState.turn = 0;
             gameState.power = 0;
 
-            randomizeWind();
             startTurn(0);
-        }
-
-        function randomizeWind() {
-            gameState.wind = Math.floor(Math.random() * 31) - 15;
-            updateHUD();
         }
 
         function startTurn(turnIdx) {
@@ -1163,19 +1189,13 @@
             if (activeTank.isAI) {
                 gameState.phase = 'AI_THINKING';
                 setControlsEnabled(false);
-                if (Math.random() < 0.75) {
-                    randomizeWind();
-                    showToast(`바람이 변경되었습니다! (${gameState.wind > 0 ? '→ ' + gameState.wind : (gameState.wind < 0 ? '← ' + Math.abs(gameState.wind) : '무풍')})`);
-                }
+
                 updateHUD();
                 setTimeout(executeAITurn, 900);
             } else {
                 gameState.phase = 'AIMING';
                 setControlsEnabled(true);
-                if (Math.random() < 0.75) {
-                    randomizeWind();
-                    showToast(`바람이 변경되었습니다! (${gameState.wind > 0 ? '→ ' + gameState.wind : (gameState.wind < 0 ? '← ' + Math.abs(gameState.wind) : '무풍')})`);
-                }
+
                 updateHUD();
             }
         }
@@ -1187,7 +1207,7 @@
             const descEl = document.getElementById('winner-desc');
 
             titleEl.textContent = `${winner.name} 승리!`;
-            titleEl.className = `title-font text-3xl mb-2 ${winner.id === 0 ? 'text-blue-400' : 'text-rose-400'}`;
+            titleEl.className = `title-font text-3xl mb-2 ${winner.id === 0 ? 'text-sky-400' : 'text-rose-400'}`;
             descEl.textContent = winner.id === 0
                 ? '정확한 계산과 포격으로 승리를 거머쥐었습니다!'
                 : (winner.isAI ? 'AI의 정밀 타격에 패배했습니다. 다시 도전해보세요!' : 'PLAYER 2의 완벽한 승리입니다!');
@@ -1240,9 +1260,6 @@
             updateHUD();
         }
 
-        // ==========================================
-        // 8. AI 봇
-        // ==========================================
         function executeAITurn() {
             if (gameState.phase !== 'AI_THINKING') return;
             const ai = gameState.tanks[1];
@@ -1281,7 +1298,6 @@
                     let vy = Math.sin(rad) * speed;
 
                     for (let t = 0; t < 180; t++) {
-                        vx += gameState.wind * 0.012;
                         vy += GRAVITY;
                         simX += vx;
                         simY += vy;
@@ -1314,9 +1330,6 @@
             }, 25);
         }
 
-        // ==========================================
-        // 9. 업그레이드된 렌더링 파이프라인
-        // ==========================================
         function drawBackground() {
             const t = Date.now() * 0.001;
             const skyGrad = ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
@@ -1326,7 +1339,6 @@
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-            // 은은한 오로라/성운 광선
             const aurora = ctx.createLinearGradient(0, 80, WORLD_WIDTH, 260);
             aurora.addColorStop(0, 'rgba(56, 189, 248, 0.06)');
             aurora.addColorStop(0.5, 'rgba(168, 85, 247, 0.08)');
@@ -1334,7 +1346,6 @@
             ctx.fillStyle = aurora;
             ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT * 0.65);
 
-            // 반짝이는 별
             for (let star of gameState.stars) {
                 const alpha = 0.3 + 0.6 * Math.abs(Math.sin(t * 1.4 + star.phase));
                 ctx.fillStyle = `rgba(248, 250, 252, ${alpha.toFixed(2)})`;
@@ -1343,7 +1354,6 @@
                 ctx.fill();
             }
 
-            // 달과 헤일로
             const mx = WORLD_WIDTH * 0.82;
             const my = 105;
             const moonHalo = ctx.createRadialGradient(mx, my, 15, mx, my, 95);
@@ -1359,7 +1369,6 @@
             ctx.arc(mx, my, 34, 0, Math.PI * 2);
             ctx.fill();
 
-            // 원경 산맥 실루엣
             ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
             ctx.beginPath();
             ctx.moveTo(0, WORLD_HEIGHT);
@@ -1390,7 +1399,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // 표면 잔디 하이라이트
             ctx.strokeStyle = '#4ade80';
             ctx.lineWidth = 4;
             ctx.beginPath();
@@ -1402,7 +1410,6 @@
         }
 
         function drawEffects() {
-            // 포구 화염
             for (let i = gameState.muzzleFlashes.length - 1; i >= 0; i--) {
                 const mf = gameState.muzzleFlashes[i];
                 mf.alpha -= 0.14;
@@ -1420,7 +1427,6 @@
                 ctx.restore();
             }
 
-            // 충격파 링
             for (let i = gameState.shockwaves.length - 1; i >= 0; i--) {
                 const sw = gameState.shockwaves[i];
                 sw.radius += (sw.maxRadius - sw.radius) * 0.22;
@@ -1436,7 +1442,6 @@
                 ctx.restore();
             }
 
-            // 파티클
             for (let i = gameState.particles.length - 1; i >= 0; i--) {
                 const p = gameState.particles[i];
                 p.x += p.vx;
@@ -1452,7 +1457,6 @@
             }
             ctx.globalAlpha = 1;
 
-            // 데미지 텍스트
             for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
                 const ft = gameState.floatingTexts[i];
                 ft.y += ft.vy;
@@ -1470,9 +1474,6 @@
             ctx.globalAlpha = 1;
         }
 
-        // ==========================================
-        // 10. 메인 게임 루프
-        // ==========================================
         function update() {
             if (gameState.screenShake > 0) gameState.screenShake = Math.max(0, gameState.screenShake - 0.6);
             if (gameState.phase === 'MENU' || gameState.phase === 'GAMEOVER') return;
@@ -1539,9 +1540,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ==========================================
-        // 11. UI 및 입력 이벤트 바인딩
-        // ==========================================
         function updateHUD() {
             if (gameState.tanks.length < 2) return;
             const p1 = gameState.tanks[0];
@@ -1556,26 +1554,10 @@
             const turnEl = document.getElementById('turn-indicator');
             if (gameState.turn === 0) {
                 turnEl.textContent = 'PLAYER 1 TURN';
-                turnEl.className = 'text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-blue-600/30 border border-blue-400 text-blue-200 mb-0.5';
+                turnEl.className = 'text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-sky-600/30 border border-sky-400 text-sky-200 mb-0.5';
             } else {
                 turnEl.textContent = p2.isAI ? 'CPU (AI) TURN' : 'PLAYER 2 TURN';
                 turnEl.className = 'text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-rose-600/30 border border-rose-400 text-rose-200 mb-0.5';
-            }
-
-            const windBar = document.getElementById('wind-bar');
-            const windText = document.getElementById('wind-text');
-            const windRatio = (Math.abs(gameState.wind) / 15) * 50;
-            if (gameState.wind > 0) {
-                windBar.style.left = '50%'; windBar.style.width = `${windRatio}%`;
-                windBar.className = 'h-full bg-emerald-400 absolute transition-all duration-500';
-                windText.textContent = `→${gameState.wind}`;
-            } else if (gameState.wind < 0) {
-                windBar.style.left = `${50 - windRatio}%`; windBar.style.width = `${windRatio}%`;
-                windBar.className = 'h-full bg-amber-400 absolute transition-all duration-500';
-                windText.textContent = `←${Math.abs(gameState.wind)}`;
-            } else {
-                windBar.style.left = '50%'; windBar.style.width = '0%';
-                windText.textContent = '0';
             }
 
             document.getElementById('angle-display').textContent = `${active.angle}°`;
@@ -1606,6 +1588,60 @@
         }
 
         let currentVipSolution = null;
+        let vipSensorEnabled = false;
+
+        function calculatePowerForAngle(shooter, target, angleDeg) {
+            if (!shooter || !target || target.hp <= 0) return null;
+            const rad = (-angleDeg * Math.PI) / 180;
+            let bestPower = 50;
+            let minDist = Infinity;
+
+            for (let p = 5; p <= 100; p += 0.5) {
+                const speed = (p / 100) * MAX_POWER;
+                let sx = shooter.x + Math.cos(rad) * 30;
+                let sy = (shooter.y - 13) + Math.sin(rad) * 30;
+                let vx = Math.cos(rad) * speed;
+                let vy = Math.sin(rad) * speed;
+
+                for (let frame = 0; frame < 240; frame++) {
+                    vy += GRAVITY;
+                    for (let s = 0; s < 4; s++) {
+                        sx += vx / 4;
+                        sy += vy / 4;
+                        if (sx < 0 || sx >= WORLD_WIDTH) break;
+                        const dTank = Math.hypot(sx - target.x, sy - (target.y - 11));
+                        if (dTank < 16) {
+                            return { angle: angleDeg, power: Math.round(p), dist: 0 };
+                        }
+                        const ix = Math.floor(sx);
+                        if (ix >= 0 && ix < WORLD_WIDTH && sy >= gameState.terrain[ix]) {
+                            const d = Math.hypot(sx - target.x, sy - (target.y - 11));
+                            if (d < minDist) {
+                                minDist = d;
+                                bestPower = Math.round(p);
+                            }
+                            frame = 240;
+                            break;
+                        }
+                    }
+                }
+            }
+            return { angle: angleDeg, power: bestPower, dist: minDist };
+        }
+
+        function updateVipSensorButtonStyle() {
+            const btn = document.getElementById('vip-sensor-btn');
+            if (!btn) return;
+            if (!authState.isVip) {
+                btn.textContent = '🔒 VIP자동센서';
+                btn.className = 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800/80 border-slate-600 text-slate-400 hover:border-amber-400/50 hover:text-amber-300 whitespace-nowrap';
+                return;
+            }
+            btn.textContent = vipSensorEnabled ? '👑 VIP자동센서 ON' : '👑 VIP자동센서 OFF';
+            btn.className = vipSensorEnabled
+                ? 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-amber-400 border-yellow-200 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.85)] whitespace-nowrap'
+                : 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800 border-amber-400/50 text-amber-300 hover:bg-slate-700 whitespace-nowrap';
+        }
 
         function calculateVipSolution(shooter, target) {
             if (!shooter || !target || target.hp <= 0) return null;
@@ -1625,7 +1661,6 @@
                 let vy = Math.sin(rad) * speed;
 
                 for (let frame = 0; frame < 220; frame++) {
-                    vx += gameState.wind * 0.012;
                     vy += GRAVITY;
                     for (let s = 0; s < 4; s++) {
                         sx += vx / 4;
@@ -1642,7 +1677,6 @@
                 return Infinity;
             };
 
-            // 1차 광역 탐색
             for (let a = angleMin; a <= angleMax; a += 3) {
                 for (let p = 15; p <= 100; p += 2) {
                     const d = simulate(a, p);
@@ -1655,7 +1689,6 @@
                 if (minDist === 0) break;
             }
 
-            // 2차 정밀 보정
             if (best) {
                 const baseA = best.angle;
                 const baseP = best.power;
@@ -1673,32 +1706,53 @@
         }
 
         function updateVipAssistUI() {
+            updateVipSensorButtonStyle();
             const badge = document.getElementById('vip-assist-badge');
             const vipMarker = document.getElementById('vip-power-marker');
+            const targetLabel = document.getElementById('vip-target-power-label');
             if (!badge || !vipMarker) return;
 
             const active = gameState.tanks[gameState.turn];
             const opponent = gameState.tanks[(gameState.turn + 1) % 2];
-            const showAssist = authState.isVip && active && !active.isAI && opponent && opponent.hp > 0 && (gameState.phase === 'AIMING' || gameState.phase === 'CHARGING');
+            const showAssist = authState.isVip && vipSensorEnabled && active && !active.isAI && opponent && opponent.hp > 0 && (gameState.phase === 'AIMING' || gameState.phase === 'CHARGING');
 
             if (!showAssist) {
                 badge.classList.add('hidden');
                 vipMarker.classList.add('hidden');
+                if (targetLabel) targetLabel.classList.add('hidden');
                 currentVipSolution = null;
                 return;
             }
 
-            currentVipSolution = calculateVipSolution(active, opponent);
+            currentVipSolution = calculatePowerForAngle(active, opponent, active.angle);
+
             if (currentVipSolution) {
-                badge.textContent = `👑 VIP 조준: ${currentVipSolution.angle}° · ${currentVipSolution.power}%`;
+                badge.textContent = `👑 VIP 센서 · ${currentVipSolution.angle}° → 파워 ${currentVipSolution.power}%`;
                 badge.classList.remove('hidden');
                 vipMarker.style.left = `${Math.max(2, Math.min(98, currentVipSolution.power))}%`;
                 vipMarker.classList.remove('hidden');
+                if (targetLabel) {
+                    targetLabel.textContent = `목표 ${currentVipSolution.power}%`;
+                    targetLabel.classList.remove('hidden');
+                }
             } else {
                 badge.classList.add('hidden');
                 vipMarker.classList.add('hidden');
+                if (targetLabel) targetLabel.classList.add('hidden');
             }
         }
+
+        document.getElementById('vip-sensor-btn')?.addEventListener('click', () => {
+            if (!authState.isVip) {
+                vipSensorEnabled = false;
+                updateVipAssistUI();
+                showToast('🔒 VIP 유저만 사용 가능합니다. (VIP 가입 후 이용 가능)');
+                return;
+            }
+            vipSensorEnabled = !vipSensorEnabled;
+            updateVipAssistUI();
+            showToast(vipSensorEnabled ? '👑 VIP자동센서 ON: 포물선 예측 및 파워 게이지 표시!' : '👑 VIP자동센서 OFF');
+        });
 
         document.getElementById('vip-assist-badge').addEventListener('click', () => {
             if (!authState.isVip || !currentVipSolution || gameState.phase !== 'AIMING') return;
@@ -1714,6 +1768,11 @@
             const p = Math.round(gameState.power);
             document.getElementById('power-bar').style.width = `${p}%`;
             document.getElementById('power-text').textContent = `${p}%`;
+            const container = document.getElementById('power-container');
+            if (container) {
+                const isNearTarget = gameState.phase === 'CHARGING' && authState.isVip && vipSensorEnabled && currentVipSolution && Math.abs(p - currentVipSolution.power) <= 2;
+                container.style.borderColor = isNearTarget ? '#fde047' : '';
+            }
         }
 
         function setControlsEnabled(enabled) {
@@ -1789,15 +1848,44 @@
         window.addEventListener('mouseup', () => { if (gameState.phase === 'CHARGING') releaseFire(); });
         window.addEventListener('touchend', () => { if (gameState.phase === 'CHARGING') releaseFire(); });
 
-        document.getElementById('sound-toggle').addEventListener('click', (e) => {
-            const muted = sfx.toggleMute();
-            e.target.textContent = muted ? '🔇' : '🔊';
+        function refreshSoundButtons() {
+            const bgmBtn = document.getElementById('bgmToggleBtn');
+            const sfxBtn = document.getElementById('soundToggleBtn');
+            if (bgmBtn) {
+                bgmBtn.textContent = sfx.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+                bgmBtn.className = sfx.bgmEnabled
+                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+            }
+            if (sfxBtn) {
+                sfxBtn.textContent = !sfx.muted ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+                sfxBtn.className = !sfx.muted
+                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+            }
+        }
+        refreshSoundButtons();
+
+        document.getElementById('bgmToggleBtn').addEventListener('click', () => {
+            sfx.toggleBGM();
+            refreshSoundButtons();
+            showToast(sfx.bgmEnabled ? '🎵 배경음이 켜졌습니다.' : '🔇 배경음이 꺼졌습니다.');
+        });
+        document.getElementById('soundToggleBtn').addEventListener('click', () => {
+            sfx.toggleMute();
+            refreshSoundButtons();
+            showToast(!sfx.muted ? '🔊 효과음이 켜졌습니다.' : '🔇 효과음이 꺼졌습니다.');
         });
         document.getElementById('menu-btn').addEventListener('click', () => showMainMenu());
+        document.getElementById('headerExitLobbyBtn').addEventListener('click', () => {
+            sfx.stopBGM();
+            window.location.href = 'https://02826k.github.io/aigameroom/';
+        });
 
         window.onload = function() {
             generateTerrain();
             restoreAuthSession();
+            refreshSoundButtons();
             requestAnimationFrame(gameLoop);
         };
     </script>
