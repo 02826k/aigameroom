@@ -1206,7 +1206,7 @@ function createVipLamborghini() {
     root.add(rim);
   });
 
-  // 양쪽 헤드라이트 + 야간 양쪽 빔 (좌우로 살짝 벌림)
+  // Front LED headlights + night spot beam
   const headlightMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
   [-0.68, 0.68].forEach(x => {
     const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.08), headlightMat);
@@ -1232,7 +1232,7 @@ function createVipLamborghini() {
     headBeams.push(beam);
   });
 
-  // 브레이크등 (평소 어두운 적색 -> 브레이크 시 밝은 적색 점등)
+  // Rear Y-shaped LED taillights & twin exhaust flames
   const tailMat = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
   [-0.58, 0.58].forEach(x => {
     const tl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), tailMat);
