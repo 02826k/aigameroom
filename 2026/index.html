@@ -57,34 +57,22 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-[100dvh] flex flex-col">
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-2.5 sm:px-4 py-1.5 sticky top-0 z-30 shadow-lg shadow-black/25 shrink-0">
-    <div class="max-w-3xl mx-auto flex flex-col gap-1">
-      <div class="flex items-center justify-between gap-1.5">
-        <div class="flex items-center gap-1.5 min-w-0">
-          <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gradient-to-br from-sky-400/25 to-indigo-600/25 text-sky-300 font-extrabold text-xs border border-sky-400/40 shrink-0">✈️</span>
-          <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-50 truncate">2026 스카이</h1>
-          <span id="userBadge" class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0 whitespace-nowrap">👤 게스트</span>
+  <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 py-2 sticky top-0 z-30 shadow-lg shadow-black/25 shrink-0">
+    <div class="max-w-3xl mx-auto flex flex-col gap-1.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400/25 to-indigo-600/25 text-sky-300 font-extrabold text-xs border border-sky-400/40 shrink-0">✈️</span>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">2026 스카이</h1>
         </div>
-
-        <div class="flex items-center gap-1 shrink-0">
-          <button id="vipOpenBtn" type="button" class="vip-btn-glow px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 transition active:scale-95 flex items-center gap-0.5 cursor-pointer whitespace-nowrap">
-            <span>👑</span>
-            <span id="vipHeaderBtnLabel">VIP</span>
-          </button>
-          <!-- 용사키우기 방식 참고: 통합 로그인/로그아웃 토글 버튼 -->
-          <button id="authToggleBtn" type="button" class="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-gradient-to-b from-amber-300 to-amber-500 text-slate-950 border border-yellow-200/80 shadow transition active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap">
-            <span id="authToggleBtnLabel">로그인</span>
-          </button>
-        </div>
+        <button id="authToggleBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+          로그인
+        </button>
       </div>
 
-      <div class="flex items-center justify-between gap-1.5 pt-1 border-t border-slate-800/70">
-        <p id="syncStatusText" class="hidden sm:block text-[11px] text-slate-400 truncate">1~7 스테이지 최종보스를 격파하세요!</p>
-        <div class="flex items-center gap-1 w-full sm:w-auto justify-end">
-          <button id="bgmToggleBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-indigo-950/80 border border-indigo-700/60 text-indigo-200 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
-          <button id="soundToggleBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-slate-800 border border-slate-700 text-slate-200 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
-          <button id="resetOpenBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer whitespace-nowrap">로비로</button>
-        </div>
+      <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
+        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
       </div>
     </div>
   </header>
@@ -93,8 +81,11 @@
   <main class="flex-1 max-w-3xl w-full mx-auto px-2 sm:px-4 py-2 sm:py-3 flex flex-col gap-2.5">
     <section id="hangarSection" class="bg-slate-900/95 border-2 border-sky-500/40 rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-col gap-2.5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2 gap-2">
-        <h2 class="text-sm sm:text-base font-black text-sky-300">✈️ 출격 기체 선택</h2>
-        <span id="hangarBombBadge" class="px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[11px] font-black">💣 시작 폭탄: 1개</span>
+        <h2 class="text-sm sm:text-base font-black text-sky-300 truncate">✈️ 출격 기체 선택</h2>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="rankOpenBtn" type="button" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 text-[11px] font-black cursor-pointer active:scale-95 transition">🏆 RANK</button>
+          <button id="hangarFullscreenBtn" type="button" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[11px] font-black cursor-pointer active:scale-95 transition shadow">⛶ 전체화면</button>
+        </div>
       </div>
 
       <div>
@@ -123,13 +114,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-extrabold text-amber-300">🏆 2026 스카이 파이터 랭킹 TOP 10 (최고 점수)</span>
-          <button id="skyRankRefreshBtn" type="button" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-700 cursor-pointer">🔄 새로고침</button>
-        </div>
-        <div id="skyRankList" class="flex flex-col gap-1 max-h-32 overflow-y-auto text-[11px] text-slate-400">기록을 불러오는 중...</div>
-      </div>
+
     </section>
 
     <section id="gameSection" class="hidden flex-col gap-1.5 flex-1 min-h-0">
@@ -178,28 +163,31 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="holdFireBtn" type="button" class="px-4 sm:px-6 h-14 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border-2 border-sky-200 cursor-pointer flex items-center gap-1.5">
-            <span>🚀</span>
-            <span>미사일 (누르기)</span>
-          </button>
           <button id="bombBtn" type="button" class="px-4 h-14 rounded-2xl bg-gradient-to-b from-rose-500 to-red-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border-2 border-rose-200 cursor-pointer flex items-center gap-1">
             <span>💣</span>
             <span id="bombBtnCount">폭탄(1)</span>
+          </button>
+          <button id="holdFireBtn" type="button" class="px-4 sm:px-6 h-14 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border-2 border-sky-200 cursor-pointer flex items-center gap-1.5">
+            <span>🚀</span>
+            <span>미사일 (누르기)</span>
           </button>
         </div>
       </div>
     </section>
 
-    <section id="shortcutCard" class="bg-gradient-to-br from-slate-900 to-sky-950/25 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl mb-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-lg shrink-0">✈️</div>
-          <div class="text-sm font-black text-sky-300 truncate">2026 스카이 파이터 바로가기</div>
-        </div>
-        <button id="androidInstallBtn" type="button" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs sm:text-sm shadow-md shrink-0 cursor-pointer">아이콘 만들기</button>
-      </div>
-    </section>
+
   </main>
+
+  <!-- TOP 10 랭킹 모달 -->
+  <div id="skyRankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm sm:text-base font-black text-amber-300">🏆 2026 스카이 TOP 10</h2>
+        <button id="skyRankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
+      </div>
+      <div id="skyRankList" class="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto text-xs text-slate-400">기록을 불러오는 중...</div>
+    </div>
+  </div>
 
   <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
     <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs sm:text-sm font-bold text-sky-200 shadow-2xl">알림</div>
@@ -237,10 +225,10 @@
       </div>
       <form id="authForm" class="flex flex-col gap-3">
         <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
-          <span class="px-3 py-2 bg-slate-900 text-sky-300 font-extrabold text-sm border-r border-slate-800">010 -</span>
-          <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="w-full px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
+          <span class="px-3 py-2 bg-slate-900 text-sky-300 font-extrabold text-sm border-r border-slate-800 whitespace-nowrap shrink-0">010 -</span>
+          <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="min-w-0 flex-1 px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
         </div>
-        <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 비밀번호" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none" />
+        <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 비밀번호" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] placeholder:tracking-normal text-slate-100 focus:outline-none" />
         <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold"></div>
         <button type="submit" id="authSubmitBtn" class="w-full py-2.5 rounded-xl text-xs font-black bg-sky-600 text-white cursor-pointer">로그인 및 저장 연동</button>
       </form>
@@ -274,8 +262,27 @@
       const TOKEN_KEY = 'sky2026_jwt_token';
       const USER_KEY = 'sky2026_username';
 
-      let authToken = localStorage.getItem(TOKEN_KEY) || null;
-      let currentUsername = localStorage.getItem(USER_KEY) || null;
+      const ALL_TOKEN_KEYS = [TOKEN_KEY, 'hero_clicker_jwt_token', 'abuse_jwt_token', 'aigameroom_jwt_token'];
+      const ALL_USER_KEYS = [USER_KEY, 'hero_clicker_username', 'abuse_username', 'aigameroom_username'];
+      function readSharedAuth() {
+        let t = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('aigameroom_jwt_token') || null;
+        let u = localStorage.getItem(USER_KEY) || localStorage.getItem('aigameroom_username') || null;
+        return { t, u };
+      }
+      function syncSharedAuth(t, u, vipFlag) {
+        try {
+          if (t && u) {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, t));
+            ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, u));
+            if (typeof vipFlag === 'boolean') localStorage.setItem('hero_clicker_is_vip', String(vipFlag));
+          } else {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            localStorage.removeItem('hero_clicker_is_vip');
+          }
+        } catch (e) {}
+      }
+      let { t: authToken, u: currentUsername } = readSharedAuth();
 
       let state = {
         bestScore: 0,
@@ -405,7 +412,7 @@
         document.getElementById('selectedPlaneInfo').textContent = `선택 기체: ${cur.name} (${cur.vipOnly ? 'VIP 전용' : '일반'})`;
         const descEl = document.getElementById('selectedPlaneDesc');
         if (descEl) descEl.textContent = cur.desc;
-        document.getElementById('hangarBombBadge').textContent = `💣 시작 폭탄: ${state.isVip ? 3 : 1}개`;
+        const hbEl = document.getElementById('hangarBombBadge'); if (hbEl) hbEl.textContent = `💣 폭탄 ${state.isVip ? 3 : 1}개`;
       }
 
       const ARENA_W = 540;
@@ -452,11 +459,38 @@
         setTimeout(() => { b.classList.add('hidden'); b.classList.remove('flex'); }, ms);
       }
 
+      function enterPortraitFullscreen() {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('portrait').catch(() => {});
+        }
+      }
+      function exitFullscreenRestore() {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('portrait').catch(() => {});
+        }
+      }
+      const hangarFsBtn = document.getElementById('hangarFullscreenBtn');
+      if (hangarFsBtn) {
+        hangarFsBtn.addEventListener('click', () => {
+          if (document.fullscreenElement) exitFullscreenRestore();
+          else enterPortraitFullscreen();
+        });
+        document.addEventListener('fullscreenchange', () => {
+          hangarFsBtn.textContent = document.fullscreenElement ? '✕ 축소' : '⛶ 전체화면';
+        });
+      }
+
       function startMission() {
         const tpl = PLANES[state.selectedPlane] || PLANES.falcon;
         window.scrollTo(0, 0);
+        enterPortraitFullscreen();
         document.body.classList.add('in-game');
-        document.getElementById('shortcutCard')?.classList.add('hidden');
         document.getElementById('hangarSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('hidden');
         document.getElementById('gameSection').classList.add('flex');
@@ -564,6 +598,7 @@
 
       function finishGame(victory) {
         running = false;
+        exitFullscreenRestore();
         if (score > state.bestScore) {
           state.bestScore = score;
           saveState(true);
@@ -668,81 +703,104 @@
         }
       }
 
+      function drawBoss(b) {
+        const t = performance.now() * 0.004;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.shadowColor = b.accent; ctx.shadowBlur = 22;
+        const bodyGrad = ctx.createLinearGradient(0, -50, 0, 55);
+        bodyGrad.addColorStop(0, b.color);
+        bodyGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bodyGrad;
+        ctx.strokeStyle = b.accent;
+        ctx.lineWidth = 2.8;
+
+        ctx.beginPath(); ctx.moveTo(0, 64); ctx.lineTo(-104, 10); ctx.lineTo(-82, -44); ctx.lineTo(-28, -32); ctx.lineTo(28, -32); ctx.lineTo(82, -44); ctx.lineTo(104, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(-74, -66, 148, 11);
+        ctx.fillStyle = b.accent; ctx.fillRect(-74, -66, 148 * Math.max(0, b.hp / b.maxHp), 11);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(-74, -66, 148, 11);
+        ctx.restore();
+      }
+
+      function drawPlaneModel(tCtx, tpl, x, y, sc = 1, hasShield = false, invuln = 0) {
+        if (invuln > 0 && Math.floor(invuln * 12) % 2 === 0) return;
+        tCtx.save();
+        tCtx.translate(x, y);
+        tCtx.scale(sc, sc);
+        if (hasShield) {
+          tCtx.strokeStyle = '#22d3ee'; tCtx.lineWidth = 3;
+          tCtx.shadowColor = '#22d3ee'; tCtx.shadowBlur = 12;
+          tCtx.beginPath(); tCtx.arc(0, 0, 31, 0, Math.PI * 2); tCtx.stroke();
+        }
+        tCtx.shadowColor = tpl.color;
+        tCtx.shadowBlur = 10;
+        tCtx.strokeStyle = tpl.accent;
+        tCtx.lineWidth = 2;
+        tCtx.lineJoin = 'round';
+
+        const drawPoly = (pts, fill) => {
+          tCtx.fillStyle = fill;
+          tCtx.beginPath();
+          tCtx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 1; i < pts.length; i++) tCtx.lineTo(pts[i][0], pts[i][1]);
+          tCtx.closePath();
+          tCtx.fill();
+          tCtx.stroke();
+        };
+
+        if (tpl.id === 'striker') {
+          drawPoly([[0,-26],[8,-6],[28,-14],[22,10],[8,8],[12,22],[0,16],[-12,22],[-8,8],[-22,10],[-28,-14],[-8,-6]], tpl.color);
+          tCtx.fillStyle = '#0ea5e9'; tCtx.beginPath(); tCtx.ellipse(0, -8, 4, 8, 0, 0, Math.PI * 2); tCtx.fill();
+        } else if (tpl.id === 'phoenix') {
+          drawPoly([[0,-28],[9,-10],[29,4],[20,14],[8,10],[14,24],[0,18],[-14,24],[-8,10],[-20,14],[-29,4],[-9,-10]], tpl.color);
+          tCtx.fillStyle = '#fef08a';
+          tCtx.beginPath(); tCtx.moveTo(0,-20); tCtx.lineTo(6,-2); tCtx.lineTo(0,12); tCtx.lineTo(-6,-2); tCtx.closePath(); tCtx.fill();
+          tCtx.fillStyle = '#ef4444'; tCtx.beginPath(); tCtx.ellipse(0, -9, 4.2, 8, 0, 0, Math.PI * 2); tCtx.fill();
+        } else if (tpl.id === 'seraphim') {
+          drawPoly([[0,-27],[7,-12],[26,-4],[24,12],[11,6],[16,23],[0,15],[-16,23],[-11,6],[-24,12],[-26,-4],[-7,-12]], '#3b0764');
+          tCtx.fillStyle = tpl.color;
+          tCtx.beginPath(); tCtx.moveTo(0,-22); tCtx.lineTo(5,-4); tCtx.lineTo(0,13); tCtx.lineTo(-5,-4); tCtx.closePath(); tCtx.fill();
+          tCtx.fillStyle = '#f0abfc'; tCtx.fillRect(-18, -14, 3, 14); tCtx.fillRect(15, -14, 3, 14);
+          tCtx.fillStyle = '#38bdf8'; tCtx.beginPath(); tCtx.ellipse(0, -8, 3.8, 7.5, 0, 0, Math.PI * 2); tCtx.fill();
+        } else {
+          drawPoly([[0,-26],[8,-6],[26,8],[21,16],[7,11],[12,23],[0,18],[-12,23],[-7,11],[-21,16],[-26,8],[-8,-6]], tpl.color);
+          tCtx.fillStyle = '#e0f2fe'; tCtx.beginPath(); tCtx.ellipse(0, -8, 4, 8.5, 0, 0, Math.PI * 2); tCtx.fill();
+        }
+        // 엔진 불꽃
+        tCtx.shadowBlur = 0;
+        tCtx.fillStyle = tpl.id === 'seraphim' ? '#e879f9' : '#fbbf24';
+        tCtx.beginPath(); tCtx.moveTo(-7, 20); tCtx.lineTo(-3, 20); tCtx.lineTo(-5, 28 + Math.random() * 4); tCtx.closePath(); tCtx.fill();
+        tCtx.beginPath(); tCtx.moveTo(3, 20); tCtx.lineTo(7, 20); tCtx.lineTo(5, 28 + Math.random() * 4); tCtx.closePath(); tCtx.fill();
+        tCtx.restore();
+      }
+
+      function drawPlayerPlane(p) {
+        drawPlaneModel(ctx, p.tpl, p.x, p.y, 1, p.shield, p.invuln);
+      }
+
       function drawEnemyPlane(en) {
         ctx.save();
         ctx.translate(en.x, en.y);
         if (en.heavy) {
-          // 중형 적 전투기/폭격기
-          ctx.shadowColor = '#ef4444';
-          ctx.shadowBlur = 10;
-          const grad = ctx.createLinearGradient(0, -28, 0, 28);
-          grad.addColorStop(0, '#7f1d1d');
-          grad.addColorStop(0.5, '#dc2626');
-          grad.addColorStop(1, '#fb7185');
-          ctx.fillStyle = grad;
-          ctx.strokeStyle = '#fecaca';
-          ctx.lineWidth = 1.8;
+          ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 10;
+          ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#fecaca'; ctx.lineWidth = 1.8;
           ctx.beginPath();
-          ctx.moveTo(0, 28);
-          ctx.lineTo(10, 8);
-          ctx.lineTo(32, 0);
-          ctx.lineTo(28, -14);
-          ctx.lineTo(11, -12);
-          ctx.lineTo(14, -24);
-          ctx.lineTo(0, -18);
-          ctx.lineTo(-14, -24);
-          ctx.lineTo(-11, -12);
-          ctx.lineTo(-28, -14);
-          ctx.lineTo(-32, 0);
-          ctx.lineTo(-10, 8);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          // 조종석 & 엔진 코어
-          ctx.fillStyle = '#fde047';
-          ctx.beginPath();
-          ctx.ellipse(0, 6, 4.5, 8, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // 중형기 체력바
-          const hpRatio = Math.max(0, en.hp / (en.maxHp || 1));
+          ctx.moveTo(0,28); ctx.lineTo(10,8); ctx.lineTo(32,0); ctx.lineTo(28,-14); ctx.lineTo(11,-12);
+          ctx.lineTo(14,-24); ctx.lineTo(0,-18); ctx.lineTo(-14,-24); ctx.lineTo(-11,-12);
+          ctx.lineTo(-28,-14); ctx.lineTo(-32,0); ctx.lineTo(-10,8);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.ellipse(0, 6, 4.5, 8, 0, 0, Math.PI * 2); ctx.fill();
           ctx.shadowBlur = 0;
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-          ctx.fillRect(-24, -34, 48, 5);
-          ctx.fillStyle = '#f87171';
-          ctx.fillRect(-24, -34, 48 * hpRatio, 5);
+          ctx.fillStyle = 'rgba(15,23,42,0.85)'; ctx.fillRect(-24, -34, 48, 5);
+          ctx.fillStyle = '#f87171'; ctx.fillRect(-24, -34, 48 * Math.max(0, en.hp / (en.maxHp || 1)), 5);
         } else {
-          // 일반 적 전투기 (아래 방향)
-          const grad = ctx.createLinearGradient(0, -18, 0, 20);
-          grad.addColorStop(0, '#881337');
-          grad.addColorStop(0.6, '#f43f5e');
-          grad.addColorStop(1, '#fda4af');
-          ctx.fillStyle = grad;
-          ctx.strokeStyle = '#ffe4e6';
-          ctx.lineWidth = 1.4;
+          ctx.fillStyle = '#f43f5e'; ctx.strokeStyle = '#ffe4e6'; ctx.lineWidth = 1.4;
           ctx.beginPath();
-          ctx.moveTo(0, 20);
-          ctx.lineTo(6, 3);
-          ctx.lineTo(20, -6);
-          ctx.lineTo(17, -13);
-          ctx.lineTo(5, -9);
-          ctx.lineTo(8, -18);
-          ctx.lineTo(0, -14);
-          ctx.lineTo(-8, -18);
-          ctx.lineTo(-5, -9);
-          ctx.lineTo(-17, -13);
-          ctx.lineTo(-20, -6);
-          ctx.lineTo(-6, 3);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          // 적기 조종석
-          ctx.fillStyle = '#38bdf8';
-          ctx.beginPath();
-          ctx.ellipse(0, 4, 2.8, 5.5, 0, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(0,20); ctx.lineTo(6,3); ctx.lineTo(20,-6); ctx.lineTo(17,-13); ctx.lineTo(5,-9);
+          ctx.lineTo(8,-18); ctx.lineTo(0,-14); ctx.lineTo(-8,-18); ctx.lineTo(-5,-9);
+          ctx.lineTo(-17,-13); ctx.lineTo(-20,-6); ctx.lineTo(-6,3);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.ellipse(0, 4, 2.8, 5.5, 0, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
       }
@@ -753,82 +811,10 @@
         const col = colors[it.type] || '#fbbf24';
         ctx.save();
         ctx.translate(it.x, it.y);
-        ctx.shadowColor = col;
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = '#0f172a';
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 2.4;
-        ctx.beginPath();
-        ctx.arc(0, 0, it.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = col;
-        ctx.font = '900 13px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = col; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(0, 0, it.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = col; ctx.font = '900 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(labels[it.type] || 'G', 0, 1);
-        ctx.restore();
-      }
-
-      function drawBoss(b) {
-        const t = performance.now() * 0.004;
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        ctx.shadowColor = b.accent; ctx.shadowBlur = 22;
-        const bodyGrad = ctx.createLinearGradient(0, -55, 0, 65);
-        bodyGrad.addColorStop(0, b.color);
-        bodyGrad.addColorStop(1, '#0f172a');
-        ctx.fillStyle = bodyGrad;
-        ctx.strokeStyle = b.accent;
-        ctx.lineWidth = 2.8;
-
-        ctx.beginPath();
-        ctx.moveTo(0, 66);
-        ctx.lineTo(-22, 34);
-        ctx.lineTo(-104, 10);
-        ctx.lineTo(-84, -42);
-        ctx.lineTo(-30, -30);
-        ctx.lineTo(-16, -48);
-        ctx.lineTo(16, -48);
-        ctx.lineTo(30, -30);
-        ctx.lineTo(84, -42);
-        ctx.lineTo(104, 10);
-        ctx.lineTo(22, 34);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // 보스 코어 발광
-        ctx.fillStyle = b.accent;
-        ctx.beginPath();
-        ctx.arc(0, 8, 12 + Math.sin(t * 2) * 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 보스 체력바
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#0f172a'; ctx.fillRect(-74, -68, 148, 11);
-        ctx.fillStyle = b.accent; ctx.fillRect(-74, -68, 148 * Math.max(0, b.hp / b.maxHp), 11);
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(-74, -68, 148, 11);
-        ctx.restore();
-      }
-
-      function drawPlayerPlane(p) {
-        if (p.invuln > 0 && Math.floor(p.invuln * 12) % 2 === 0) return;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        if (p.shield) {
-          ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 3;
-          ctx.shadowColor = '#22d3ee'; ctx.shadowBlur = 12;
-          ctx.beginPath(); ctx.arc(0, 0, 31, 0, Math.PI * 2); ctx.stroke();
-        }
-        const jetGrad = ctx.createLinearGradient(0, -28, 0, 22);
-        jetGrad.addColorStop(0, '#ffffff'); jetGrad.addColorStop(0.4, p.tpl.color); jetGrad.addColorStop(1, '#1e293b');
-        ctx.fillStyle = jetGrad; ctx.strokeStyle = p.tpl.accent; ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(0, -28); ctx.lineTo(8, -6); ctx.lineTo(26, 10); ctx.lineTo(22, 17); ctx.lineTo(7, 12); ctx.lineTo(12, 22); ctx.lineTo(0, 18); ctx.lineTo(-12, 22); ctx.lineTo(-7, 12); ctx.lineTo(-22, 17); ctx.lineTo(-26, 10); ctx.lineTo(-8, -6);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#0ea5e9';
-        ctx.beginPath(); ctx.ellipse(0, -7, 4, 9, 0, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       }
 
@@ -905,18 +891,8 @@
 
         for (let i = pBullets.length - 1; i >= 0; i--) {
           const b = pBullets[i];
-          if (b.homing) {
-            let target = boss;
-            if (!target && enemies.length > 0) target = enemies[0];
-            if (target) {
-              const ang = Math.atan2(target.y - b.y, target.x - b.x);
-              const spd = Math.hypot(b.vx, b.vy) || 540;
-              b.vx += (Math.cos(ang) * spd - b.vx) * Math.min(1, dt * 6);
-              b.vy += (Math.sin(ang) * spd - b.vy) * Math.min(1, dt * 6);
-            }
-          }
           b.x += b.vx * dt; b.y += b.vy * dt;
-          if (b.y < -20 || b.y > ARENA_H + 20 || b.x < -30 || b.x > ARENA_W + 30) { pBullets.splice(i, 1); continue; }
+          if (b.y < -20) { pBullets.splice(i, 1); continue; }
           let hit = false;
           for (const en of enemies) {
             if (Math.hypot(en.x - b.x, en.y - b.y) < en.radius + b.radius) { en.hp -= b.dmg; hit = true; break; }
@@ -961,21 +937,16 @@
         const oy = (viewH - ARENA_H * scale) / 2;
         ctx.save(); ctx.translate(ox, oy); ctx.scale(scale, scale);
 
-        // 배경 별빛 스크롤
         ctx.fillStyle = 'rgba(226, 232, 240, 0.35)';
         for (let s = 0; s < 28; s++) {
-          const sx = (s * 97) % ARENA_W;
-          const sy = ((s * 67 + scrollY * 3.5) % ARENA_H);
-          ctx.fillRect(sx, sy, (s % 2) + 1.2, (s % 2) + 1.2);
+          ctx.fillRect((s * 97) % ARENA_W, (s * 67 + scrollY * 3.5) % ARENA_H, (s % 2) + 1.2, (s % 2) + 1.2);
         }
-
         items.forEach(drawItemIcon);
         pBullets.forEach(b => { ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill(); });
         eBullets.forEach(eb => { ctx.fillStyle = eb.color; ctx.beginPath(); ctx.arc(eb.x, eb.y, eb.radius, 0, Math.PI * 2); ctx.fill(); });
         enemies.forEach(drawEnemyPlane);
         if (boss) drawBoss(boss);
         drawPlayerPlane(player);
-
         for (let i = particles.length - 1; i >= 0; i--) {
           const pt = particles[i];
           pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
@@ -1037,8 +1008,9 @@
       document.getElementById('retryBtn').addEventListener('click', startMission);
       function returnHangar() {
         running = false;
+        stopBGM();
+        exitFullscreenRestore();
         document.body.classList.remove('in-game');
-        document.getElementById('shortcutCard')?.classList.remove('hidden');
         document.getElementById('gameSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('flex');
         document.getElementById('hangarSection').classList.remove('hidden');
@@ -1080,16 +1052,21 @@
       }
 
       function updateAuthUI() {
-        const b = document.getElementById('userBadge');
-        const authToggleBtnLabel = document.getElementById('authToggleBtnLabel');
+        const btn = document.getElementById('authToggleBtn');
+        if (!btn) return;
+        const vipActive = state.isVip || localStorage.getItem('hero_clicker_is_vip') === 'true';
         if (authToken && currentUsername) {
-          b.textContent = `📱 ${maskPrivacyInfo(currentUsername)}`;
-          authToggleBtnLabel.textContent = '로그아웃';
+          if (vipActive) {
+            btn.textContent = '👑 VIP 로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/70 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+          } else {
+            btn.textContent = '로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+          }
         } else {
-          b.textContent = '👤 게스트';
-          authToggleBtnLabel.textContent = '로그인';
+          btn.textContent = '로그인';
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
         }
-        document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP중' : 'VIP';
       }
 
       function handleLogout() {
@@ -1097,10 +1074,27 @@
         state.isVip = false;
         if (PLANES[state.selectedPlane]?.vipOnly) state.selectedPlane = 'falcon';
         saveState(false);
-        try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); } catch (e) {}
+        syncSharedAuth(null, null, false);
         updateAuthUI(); renderHangar();
         showToast('로그아웃되었습니다.');
       }
+
+      function syncAuthFromStorage() {
+        const { t, u } = readSharedAuth();
+        const vipStored = localStorage.getItem('hero_clicker_is_vip') === 'true';
+        if (t !== authToken || u !== currentUsername || (t && vipStored !== state.isVip)) {
+          authToken = t; currentUsername = u;
+          state.isVip = Boolean(t && vipStored);
+          if (!state.isVip && PLANES[state.selectedPlane]?.vipOnly) state.selectedPlane = 'falcon';
+          updateAuthUI(); renderHangar();
+          if (authToken) loadServerProfile();
+        }
+      }
+      window.addEventListener('pageshow', syncAuthFromStorage);
+      window.addEventListener('storage', syncAuthFromStorage);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncAuthFromStorage();
+      });
 
       const authModal = document.getElementById('authModal');
       const phoneInput = document.getElementById('authPhoneDigits');
@@ -1108,8 +1102,8 @@
       let isRegisterMode = false;
 
       document.getElementById('authToggleBtn').addEventListener('click', () => {
-        if (authToken) {
-          handleLogout();
+        if (authToken && currentUsername) {
+          if (confirm('로그아웃 하시겠습니까?')) handleLogout();
         } else {
           authModal.classList.remove('hidden');
           authModal.classList.add('flex');
@@ -1156,7 +1150,7 @@
           const data = await res.json();
           if (res.ok && data.token) {
             authToken = data.token; currentUsername = data.username || fullId;
-            try { localStorage.setItem(TOKEN_KEY, authToken); localStorage.setItem(USER_KEY, currentUsername); } catch (e) {}
+            syncSharedAuth(authToken, currentUsername, Boolean(data.isVip || data.saveData?.isVip));
             if (data.isVip || data.saveData?.isVip) state.isVip = true;
             if (typeof data.saveData?.bestScore === 'number') state.bestScore = Math.max(state.bestScore, data.saveData.bestScore);
             saveState(false); updateAuthUI(); renderHangar();
@@ -1173,7 +1167,7 @@
         }
       });
 
-      document.getElementById('vipOpenBtn').addEventListener('click', () => { document.getElementById('vipModal').classList.remove('hidden'); document.getElementById('vipModal').classList.add('flex'); });
+      document.getElementById('vipOpenBtn')?.addEventListener('click', () => { document.getElementById('vipModal').classList.remove('hidden'); document.getElementById('vipModal').classList.add('flex'); });
       document.getElementById('vipCloseBtn').addEventListener('click', () => { document.getElementById('vipModal').classList.add('hidden'); document.getElementById('vipModal').classList.remove('flex'); });
       document.getElementById('vipConfirmBtn').addEventListener('click', () => {
         state.isVip = true; saveState(true); updateAuthUI(); renderHangar();
@@ -1181,9 +1175,79 @@
         showToast('👑 VIP 패키지가 적용되었습니다!');
       });
 
-      document.getElementById('resetOpenBtn').addEventListener('click', returnHangar);
-      document.getElementById('bgmToggleBtn').addEventListener('click', () => { state.bgmEnabled = !state.bgmEnabled; saveState(false); document.getElementById('bgmToggleBtn').textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF'; if (state.bgmEnabled) startBGM(); else stopBGM(); });
-      document.getElementById('soundToggleBtn').addEventListener('click', () => { state.soundEnabled = !state.soundEnabled; saveState(false); document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF'; });
+      function updateAudioButtons() {
+        const bgmBtn = document.getElementById('bgmToggleBtn');
+        const sfxBtn = document.getElementById('soundToggleBtn');
+        if (bgmBtn) {
+          bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+          bgmBtn.className = state.bgmEnabled
+            ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+            : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+        }
+        if (sfxBtn) {
+          sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+          sfxBtn.className = state.soundEnabled
+            ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+            : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+        }
+      }
+      updateAudioButtons();
+
+      document.getElementById('headerExitLobbyBtn').addEventListener('click', () => {
+        window.location.href = 'https://02826k.github.io/aigameroom/';
+      });
+      document.getElementById('bgmToggleBtn').addEventListener('click', () => {
+        state.bgmEnabled = !state.bgmEnabled; saveState(false); updateAudioButtons();
+        if (state.bgmEnabled && running) startBGM(); else stopBGM();
+      });
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled; saveState(false); updateAudioButtons();
+      });
+
+      const skyRankModal = document.getElementById('skyRankModal');
+      document.getElementById('rankOpenBtn').addEventListener('click', () => {
+        loadSkyRanking();
+        skyRankModal.classList.remove('hidden');
+        skyRankModal.classList.add('flex');
+      });
+      document.getElementById('skyRankCloseBtn').addEventListener('click', () => {
+        skyRankModal.classList.add('hidden');
+        skyRankModal.classList.remove('flex');
+      });
+      skyRankModal.addEventListener('click', (e) => {
+        if (e.target === skyRankModal) {
+          skyRankModal.classList.add('hidden');
+          skyRankModal.classList.remove('flex');
+        }
+      });
+
+      const previewCanvas = document.getElementById('previewCanvas');
+      const pCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
+      function drawPreviewLoop(ts) {
+        if (pCtx && !running) {
+          const rect = previewCanvas.getBoundingClientRect();
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const w = Math.max(160, rect.width || 208);
+          const h = Math.max(88, rect.height || 128);
+          if (previewCanvas.width !== Math.floor(w * dpr) || previewCanvas.height !== Math.floor(h * dpr)) {
+            previewCanvas.width = Math.floor(w * dpr);
+            previewCanvas.height = Math.floor(h * dpr);
+          }
+          pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          pCtx.fillStyle = '#020617';
+          pCtx.fillRect(0, 0, w, h);
+          pCtx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+          for (let i = 0; i < 16; i++) {
+            pCtx.fillRect((i * 37) % w, (i * 29 + ts * 0.06) % h, 1.5, 1.5);
+          }
+          const tpl = PLANES[state.selectedPlane] || PLANES.falcon;
+          const hoverX = w / 2 + Math.sin(ts * 0.0025) * 14;
+          const hoverY = h / 2 + 2 + Math.cos(ts * 0.003) * 4;
+          drawPlaneModel(pCtx, tpl, hoverX, hoverY, 1.15, false, 0);
+        }
+        requestAnimationFrame(drawPreviewLoop);
+      }
+      requestAnimationFrame(drawPreviewLoop);
 
       async function loadSkyRanking() {
         const listEl = document.getElementById('skyRankList');
@@ -1225,54 +1289,7 @@
         } catch (e) {}
       }
 
-      // LIVE 미리보기 캔버스 렌더링
-      const previewCanvas = document.getElementById('previewCanvas');
-      const pCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
-      function drawPreviewLoop(ts) {
-        if (pCtx && !running) {
-          const rect = previewCanvas.getBoundingClientRect();
-          const dpr = Math.min(window.devicePixelRatio || 1, 2);
-          const w = Math.max(160, rect.width || 208);
-          const h = Math.max(88, rect.height || 128);
-          if (previewCanvas.width !== Math.floor(w * dpr) || previewCanvas.height !== Math.floor(h * dpr)) {
-            previewCanvas.width = Math.floor(w * dpr);
-            previewCanvas.height = Math.floor(h * dpr);
-          }
-          pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-          pCtx.fillStyle = '#020617';
-          pCtx.fillRect(0, 0, w, h);
-
-          // 배경 별
-          pCtx.fillStyle = 'rgba(148, 163, 184, 0.45)';
-          for (let i = 0; i < 16; i++) {
-            const sx = (i * 37) % w;
-            const sy = ((i * 29 + (ts * 0.06)) % h);
-            pCtx.fillRect(sx, sy, 1.5, 1.5);
-          }
-
-          const tpl = PLANES[state.selectedPlane] || PLANES.falcon;
-          const hoverX = w / 2 + Math.sin(ts * 0.0025) * 14;
-          const hoverY = h / 2 + 4 + Math.cos(ts * 0.003) * 4;
-          pCtx.save();
-          pCtx.translate(hoverX, hoverY);
-          pCtx.scale(1.15, 1.15);
-          pCtx.shadowColor = tpl.color;
-          pCtx.shadowBlur = 14;
-          const g = pCtx.createLinearGradient(0, -28, 0, 22);
-          g.addColorStop(0, '#ffffff'); g.addColorStop(0.4, tpl.color); g.addColorStop(1, '#1e293b');
-          pCtx.fillStyle = g; pCtx.strokeStyle = tpl.accent; pCtx.lineWidth = 1.8;
-          pCtx.beginPath();
-          pCtx.moveTo(0, -28); pCtx.lineTo(8, -6); pCtx.lineTo(26, 10); pCtx.lineTo(22, 17); pCtx.lineTo(7, 12); pCtx.lineTo(12, 22); pCtx.lineTo(0, 18); pCtx.lineTo(-12, 22); pCtx.lineTo(-7, 12); pCtx.lineTo(-22, 17); pCtx.lineTo(-26, 10); pCtx.lineTo(-8, -6);
-          pCtx.closePath(); pCtx.fill(); pCtx.stroke();
-          pCtx.fillStyle = '#0ea5e9';
-          pCtx.beginPath(); pCtx.ellipse(0, -7, 4, 9, 0, 0, Math.PI * 2); pCtx.fill();
-          pCtx.restore();
-        }
-        requestAnimationFrame(drawPreviewLoop);
-      }
-      requestAnimationFrame(drawPreviewLoop);
-
-      document.getElementById('skyRankRefreshBtn').addEventListener('click', loadSkyRanking);
+      document.getElementById('skyRankRefreshBtn')?.addEventListener('click', loadSkyRanking);
       window.addEventListener('load', () => { updateAuthUI(); renderHangar(); loadServerProfile(); loadSkyRanking(); });
     })();
   </script>
