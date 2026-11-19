@@ -1,0 +1,36 @@
+{
+  "id": "./",
+  "name": "AI게임장",
+  "short_name": "AI게임장",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "description": "AI게임장은 다양한 웹게임과 미니게임을 모아놓은 종합 게임 포털입니다. 언제 어디서나 간편하게 즐겨보세요!",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "AI게임장 메인 화면"
+    }
+  ],
+  "orientation": "any",
+  "lang": "ko"
+}
