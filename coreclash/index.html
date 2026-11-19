@@ -152,6 +152,9 @@
         <button id="modePvPTab" type="button" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer">
           ⚔️ 대전 모드 (실시간 매칭)
         </button>
+        <button id="rankOpenBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 shadow active:scale-95 transition cursor-pointer">
+          🏆 RANK
+        </button>
       </div>
       <div class="flex items-center gap-2 text-xs font-bold">
         <span class="text-slate-400">선택 챔피언:</span>
@@ -272,19 +275,6 @@
       </div>
       <div class="text-[11px] text-slate-400 text-center" id="pvpNoticeText">챔피언을 선택한 뒤 블루팀/레드팀 자리에 참가하세요.</div>
 
-      <div class="pt-2 border-t border-slate-800">
-        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-extrabold text-amber-300">🏆 칼바람 대전모드 랭킹 TOP 10 <span class="text-[10px] font-semibold text-slate-400">(로그인 유저 전적 · 승 많은 순)</span></span>
-            <button id="pvpRankingRefreshBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
-              🔄 새로고침
-            </button>
-          </div>
-          <div id="pvpRankingList" class="flex flex-col gap-1 max-h-40 overflow-y-auto text-[11px]">
-            <div class="text-slate-500">랭킹 정보를 불러오는 중...</div>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- ============================================================== -->
@@ -487,6 +477,21 @@
 
 
   </main>
+
+  <!-- 칼바람 TOP 10 랭킹 모달 (연습 + 대전 총 승수) -->
+  <div id="kalbaramRankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm sm:text-base font-black text-amber-300">🏆 칼바람 최다 승리 TOP 10 <span class="text-[10px] font-semibold text-slate-400">(연습+대전)</span></h2>
+        <button id="kalbaramRankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
+      </div>
+      <div class="rounded-xl bg-slate-950/90 border border-amber-500/30 px-3 py-2 flex items-center justify-between text-xs">
+        <span class="text-slate-300 font-semibold">내 총 전적</span>
+        <span id="kalbaramMyWinsText" class="font-black text-amber-300">0승 0패</span>
+      </div>
+      <div id="kalbaramRankList" class="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto text-xs text-slate-400">기록을 불러오는 중...</div>
+    </div>
+  </div>
 
   <!-- Toast Notification -->
   <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
@@ -2979,7 +2984,6 @@
         document.getElementById('pvpLobbySection').classList.add('flex');
         renderWaitingList([{ username: getDisplayName(), socketId: socket.id }]);
         socket.emit('enter_pvp_lobby', { gameId: GAME_ID, username: getDisplayName() });
-        loadPvpRanking();
       }
 
       document.getElementById('modePracticeTab').addEventListener('click', switchToPracticeSelect);
@@ -3062,28 +3066,50 @@
         }[ch]));
       }
 
-      async function loadPvpRanking() {
-        const listEl = document.getElementById('pvpRankingList');
+      async function loadKalbaramRanking() {
+        const listEl = document.getElementById('kalbaramRankList');
+        const myEl = document.getElementById('kalbaramMyWinsText');
+        if (myEl) myEl.textContent = `${state.wins || 0}승 ${state.losses || 0}패`;
         if (!listEl) return;
         try {
-          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}`);
+          const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}&_t=${Date.now()}`, { headers });
           if (res.ok) {
             const data = await res.json();
-            const arr = (data.rankings || []).slice(0, 10);
+            const arr = (data.rankings || [])
+              .slice()
+              .sort((a, b) => (b.wins ?? b.score ?? 0) - (a.wins ?? a.score ?? 0))
+              .slice(0, 10);
             if (arr.length > 0) {
               listEl.innerHTML = arr.map((r, i) => `
-                <div class="flex justify-between px-2.5 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
-                  <span>${i + 1}위 ${escapeHtml(maskPrivacyInfo(r.maskedName || r.username || r.name || '익명'))}</span>
-                  <span class="text-amber-300 font-extrabold">${r.score || 0}승</span>
+                <div class="flex justify-between items-center px-3 py-2 rounded-xl bg-slate-950/80 border ${r.isMe ? 'border-amber-400/60' : 'border-slate-800'}">
+                  <span class="text-slate-200 font-bold">${i + 1}위 ${escapeHtml(maskPrivacyInfo(r.maskedName || r.username || r.name || '익명'))}</span>
+                  <span class="text-amber-300 font-black">${r.wins ?? r.score ?? 0}승</span>
                 </div>
               `).join('');
               return;
             }
           }
         } catch (e) {}
-        listEl.innerHTML = '<div class="text-slate-500 py-2 text-center">등록된 대전 기록이 없습니다.</div>';
+        listEl.innerHTML = '<div class="text-slate-500 py-4 text-center">아직 등록된 승리 기록이 없습니다.</div>';
       }
-      document.getElementById('pvpRankingRefreshBtn').addEventListener('click', loadPvpRanking);
+
+      const kalbaramRankModal = document.getElementById('kalbaramRankModal');
+      document.getElementById('rankOpenBtn').addEventListener('click', () => {
+        loadKalbaramRanking();
+        kalbaramRankModal.classList.remove('hidden');
+        kalbaramRankModal.classList.add('flex');
+      });
+      document.getElementById('kalbaramRankCloseBtn').addEventListener('click', () => {
+        kalbaramRankModal.classList.add('hidden');
+        kalbaramRankModal.classList.remove('flex');
+      });
+      kalbaramRankModal.addEventListener('click', (e) => {
+        if (e.target === kalbaramRankModal) {
+          kalbaramRankModal.classList.add('hidden');
+          kalbaramRankModal.classList.remove('flex');
+        }
+      });
 
       function updateAudioButtonsUI() {
         const bgmBtn = document.getElementById('bgmToggleBtn');
