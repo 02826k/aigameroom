@@ -50,24 +50,13 @@
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
-  <!-- Header (2단 깔끔 정렬 구조) -->
-  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-20 shadow-lg shadow-black/20">
-    <div class="max-w-4xl mx-auto flex flex-col gap-2">
-      <!-- 1단: 타이틀 + 전화번호 배지 + VIP 버튼 / 골드 + 골드바 로그인 버튼 + 로그아웃 -->
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0 flex-wrap">
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400/25 to-orange-600/25 text-amber-400 font-extrabold text-sm border border-amber-500/40 shadow-inner shrink-0">⚔️</span>
-          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">용사 키우기</h1>
-
-          <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0">
-            👤 게스트
-          </span>
-
-          <button id="vipOpenBtn" type="button" title="VIP 전용 특전 보기 및 구매"
-            class="vip-btn-glow px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white border border-amber-300/80 transition active:scale-95 flex items-center gap-1 cursor-pointer shrink-0">
-            <span>👑</span>
-            <span id="vipHeaderBtnLabel">VIP</span>
-          </button>
+  <!-- Header (통일된 2단 표준 규격) -->
+  <header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 sm:px-4 py-2 sticky top-0 z-20 shadow-lg shadow-black/25">
+    <div class="max-w-4xl mx-auto flex flex-col gap-1.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400/25 to-orange-600/25 text-amber-400 font-extrabold text-xs border border-amber-500/40 shrink-0">⚔️</span>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">용사 키우기</h1>
         </div>
 
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -77,31 +66,17 @@
             <span>G</span>
           </div>
 
-          <!-- 로그인 / 로그아웃 토글 버튼 -->
           <button id="authToggleBtn" type="button" title="로그인 및 로그아웃"
-            class="group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-3.5 h-3.5 shrink-0 gold-bar-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.5 7.5L8.5 5H15.5L18.5 7.5L21 17.5H3L5.5 7.5Z" fill="#78350F" stroke="#451A03" stroke-width="1.4" stroke-linejoin="round"/>
-              <path d="M8.5 5H15.5L17 9.5H7L8.5 5Z" fill="#FEF08A"/>
-              <path d="M7 9.5H17L19.2 16.5H4.8L7 9.5Z" fill="#F59E0B"/>
-              <path d="M8.8 6.2H15.2L16.1 8.6H7.9L8.8 6.2Z" fill="#FFFFFF" fill-opacity="0.55"/>
-            </svg>
-            <span id="authToggleBtnLabel">로그인</span>
+            class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+            로그인
           </button>
         </div>
       </div>
 
-      <!-- 2단: [배경음 / 효과음] 버튼 -->
-      <div class="flex items-center justify-end gap-2 pt-1.5 border-t border-slate-800/70">
-        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-          <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
-            🎵 배경음 ON
-          </button>
-
-          <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
-            🔊 효과음 ON
-          </button>
-        </div>
+      <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
+        <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+        <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+        <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
       </div>
     </div>
   </header>
@@ -155,14 +130,7 @@
         </div>
       </div>
 
-      <!-- 왕국 실시간 랭킹 전광판 바 -->
-      <div id="kingdomTickerBar" class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px] cursor-pointer hover:opacity-90 transition">
-        <div class="flex items-center gap-1.5 min-w-0">
-          <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold border border-amber-500/35 shrink-0">🏆 명예의 전당</span>
-          <span id="topPlayerTickerText" class="text-slate-300 truncate font-medium">랭킹 정보를 불러오는 중...</span>
-        </div>
-        <span id="myRankQuickBadge" class="shrink-0 font-extrabold text-sky-300">순위 확인 →</span>
-      </div>
+
     </section>
 
     <!-- Training Canvas Arena -->
@@ -237,73 +205,37 @@
 
       <!-- 명예의 전당 & 전체 서버 현황 전적 패널 (비로그인 전체 공개 + 1시간 주기 공식 집계) -->
       <div id="rankingPanel" class="hidden flex-col gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="text-xs sm:text-sm font-extrabold text-amber-300">👑 왕국 명예의 전당 · 전체 서버 전적 현황</span>
-              <span id="rankingLastUpdated" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">매시 정각 집계 대기</span>
-              <span id="nextHourlyCountdown" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-semibold">다음 집계 계산 중...</span>
-            </div>
-            <div class="text-[11px] text-slate-400 mt-0.5">
-              집계 방식: 서버 부하 방지를 위해 <strong class="text-slate-200">1시간마다 정각에 최종 전적을 일괄 집계</strong>합니다 · 비로그인 게스트도 전체 서버 현황 열람 가능
-            </div>
-          </div>
-          <button id="refreshRankingBtn" type="button" title="현재 시간대 서버 집계 전적을 다시 확인합니다" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
-            🔄 즉시 갱신
-          </button>
-        </div>
 
-        <!-- 비로그인 유저도 한눈에 보는 전체 서버 실시간 전적 요약 대시보드 -->
+
+        <!-- 랭킹 요약 대시보드 -->
         <div id="serverStatusDashboard" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
             <div class="text-[10px] text-slate-400 font-semibold">🌍 서버 참전 용사</div>
-            <div id="srvStatTotalPlayers" class="text-xs sm:text-sm font-black text-emerald-400 mt-0.5">집계 중...</div>
-            <div id="srvStatActiveRegions" class="text-[10px] text-slate-400 truncate mt-0.5">전체 서버 통합 전적</div>
+            <div id="srvStatTotalPlayers" class="text-sm sm:text-base font-black text-emerald-400 mt-0.5">집계 중...</div>
           </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
             <div class="text-[10px] text-slate-400 font-semibold">🥇 현재 왕국 1위</div>
-            <div id="srvStatTopPlayer" class="text-xs sm:text-sm font-black text-amber-300 truncate mt-0.5">-</div>
-            <div id="srvStatTopEquip" class="text-[10px] text-slate-400 truncate mt-0.5">-</div>
+            <div id="srvStatTopPlayer" class="text-sm sm:text-base font-black text-amber-300 truncate mt-0.5">-</div>
           </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
-            <div class="text-[10px] text-slate-400 font-semibold">⚡ 서버 누적 파워 총합</div>
-            <div id="srvStatTotalPower" class="text-xs sm:text-sm font-black text-sky-300 truncate mt-0.5">0 파워</div>
-            <div id="srvStatAvgPower" class="text-[10px] text-slate-400 truncate mt-0.5">평균 계산 중...</div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
+            <div class="text-[10px] text-slate-400 font-semibold">⚡ 파워 종합</div>
+            <div id="srvStatTotalPower" class="text-sm sm:text-base font-black text-sky-300 truncate mt-0.5">0 파워</div>
           </div>
-          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
-            <div class="text-[10px] text-slate-400 font-semibold">👑 서버 최고 명예 · 무장</div>
-            <div id="srvStatMaxHonor" class="text-xs sm:text-sm font-black text-purple-300 truncate mt-0.5">명예 Lv.0</div>
-            <div id="srvStatTopRegionDist" class="text-[10px] text-slate-400 truncate mt-0.5">집계 기준 스냅샷</div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 flex flex-col justify-center">
+            <div class="text-[10px] text-slate-400 font-semibold">👑 내 명예</div>
+            <div id="srvStatMaxHonor" class="text-sm sm:text-base font-black text-purple-300 truncate mt-0.5">명예 Lv.0</div>
           </div>
         </div>
 
-        <!-- 내 현재 순위 및 게스트 비교 요약 박스 -->
-        <div id="myRankSummaryBox" class="rounded-xl bg-gradient-to-r from-sky-950/50 via-slate-950 to-slate-950 border border-sky-500/35 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span class="text-slate-300 font-semibold">내 전적 및 예상 순위:</span>
-          <span id="myRankDetailText" class="font-extrabold text-sky-300">전체 서버 전적과 비교 중...</span>
+        <!-- 전체 랭킹 리스트 (TOP 100) -->
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-extrabold text-amber-300">🏆 TOP 100</span>
         </div>
-
-        <!-- 전체 랭킹 리스트 -->
-        <div id="rankingListContainer" class="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1"></div>
+        <div id="rankingListContainer" class="flex flex-col gap-2"></div>
       </div>
     </section>
 
-    <!-- 용사 키우기 바로가기 카드 (최하단 배치) -->
-    <section class="bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/35 rounded-2xl p-3.5 shadow-xl shadow-black/40 mb-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-lg shrink-0 overflow-hidden">
-            <img id="shortcutIconImg" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e293b'/%3E%3Cpath d='M46 14L50 18L26 42L20 44L22 38L46 14Z' fill='%23fbbf24' stroke='%23fef08a' stroke-width='2'/%3E%3Cpath d='M16 48L22 42M18 36L28 46' stroke='%23f59e0b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" alt="AI게임장" class="w-full h-full object-cover" />
-            <span style="display:none">📲</span>
-          </div>
-          <div class="text-sm font-black text-amber-300 truncate">용사 키우기 바로가기</div>
-        </div>
-        <button id="androidInstallBtn" type="button"
-          class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black text-xs sm:text-sm shadow-md transition shrink-0 cursor-pointer">
-          <span id="androidInstallBtnText">아이콘 만들기</span>
-        </button>
-      </div>
-    </section>
+
   </main>
 
   <!-- Toast Notification -->
@@ -448,66 +380,7 @@
         navigator.serviceWorker.register('./sw.js').catch(() => {});
       }
 
-      let deferredInstallPrompt = null;
-      const installBtn = document.getElementById('androidInstallBtn');
-      const installBtnText = document.getElementById('androidInstallBtnText');
 
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        installBtnText.textContent = '바탕화면 아이콘 설치 완료됨';
-        installBtn.disabled = true;
-        installBtn.className = 'px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs border border-slate-700 shrink-0 cursor-default';
-      }
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredInstallPrompt = e;
-        installBtnText.textContent = '아이콘 만들기 (설치 가능)';
-      });
-
-      window.addEventListener('appinstalled', () => {
-        deferredInstallPrompt = null;
-        installBtnText.textContent = '바탕화면 아이콘 생성 완료!';
-        showToast('📲 바탕화면에 [AI게임장] 아이콘이 생성되었습니다!');
-      });
-
-      installBtn.addEventListener('click', async () => {
-        if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt();
-          const { outcome } = await deferredInstallPrompt.userChoice;
-          if (outcome === 'accepted') {
-            showToast('📲 바탕화면 아이콘을 생성하는 중입니다...');
-          }
-          deferredInstallPrompt = null;
-          return;
-        }
-
-        const ua = navigator.userAgent || '';
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-        const isAndroid = /Android/i.test(ua);
-        const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line|wv\)/i.test(ua);
-
-        if (!isMobile) {
-          const targetUrl = 'https://link.inpock.co.kr/aigame';
-          const urlContent = '[InternetShortcut]\r\nURL=' + targetUrl + '\r\n';
-          const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'AI게임장_바로가기.url';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(a.href);
-          showToast('💻 윈도우용 [AI게임장_바로가기.url]이 다운로드되었습니다!');
-        } else if (isAndroid && isInApp) {
-          const cleanUrl = window.location.href.split('#')[0].replace(/^https?:\/\//, '');
-          showToast('📲 인앱 브라우저에서는 설치가 제한되어 Chrome으로 이동합니다...');
-          setTimeout(() => {
-            window.location.href = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.android.chrome;end';
-          }, 300);
-        } else {
-          showToast('⚠️ 이미 설치되었거나 대기 중입니다. 브라우저 메뉴 [⋮] → [홈 화면에 추가]를 눌러주세요.');
-        }
-      });
 
       // ==========================================
       // 1. 클라우드 서버 연결 URL, 토스페이먼츠 & 게임 데이터 설정
@@ -612,37 +485,37 @@
       // 6종 응원 애완동물 정의 (주인공 뒤쪽에서 통통 튀며 응원만 담당)
       const PETS = [
         {
-          id: 'baby_slime', name: '아기 슬라임', icon: '💧', cost: 0,
+          id: 'baby_slime', name: '아기 슬라임', icon: '💧', reqHonor: 1,
           bodyColor: '#38bdf8', subColor: '#bae6fd', pomColor: '#f472b6',
           cheers: ['용사님 화이팅!💧', '말랑말랑 응원~!', '할 수 있어요!✨'],
-          desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임'
+          desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임 (명예 Lv.1)'
         },
         {
-          id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', cost: 5000,
+          id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', reqHonor: 10,
           bodyColor: '#f59e0b', subColor: '#fef3c7', pomColor: '#ef4444',
           cheers: ['멍멍! 힘내요!🐾', '최고의 용사님!', '가즈아 멍!!🔥'],
-          desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지'
+          desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지 (명예 Lv.10)'
         },
         {
-          id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', cost: 50000,
+          id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', reqHonor: 100,
           bodyColor: '#f8fafc', subColor: '#fca5a5', pomColor: '#fbbf24',
           cheers: ['골드 쏟아져라냥!🪙', '냥냥 펀치 응원!', '대박 나라냥~💛'],
-          desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이'
+          desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이 (명예 Lv.100)'
         },
         {
-          id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', cost: 250000,
+          id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', reqHonor: 1000,
           bodyColor: '#a7f3d0', subColor: '#34d399', pomColor: '#fef08a',
           cheers: ['반짝반짝 빛나라!✨', '요정의 축복을~!', '멋진 검술이에요!🌿'],
-          desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정'
+          desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정 (명예 Lv.1,000)'
         },
         {
-          id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', cost: 1500000,
+          id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', reqHonor: 10000,
           bodyColor: '#fb7185', subColor: '#fef08a', pomColor: '#f97316',
           cheers: ['크아앙! 다 부숴요!🔥', '불꽃 응원 발사!', '용사님 무적!!⚡'],
-          desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤'
+          desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤 (명예 Lv.10,000)'
         },
         {
-          id: 'gold_haetae', name: '황금 해태', icon: '🦁', cost: 0, isVipOnly: true,
+          id: 'gold_haetae', name: '황금 해태', icon: '🦁', reqHonor: 0, isVipOnly: true,
           bodyColor: '#fbbf24', subColor: '#fef08a', pomColor: '#c084fc',
           cheers: ['👑 천하무적 용사님!', '황금빛 승리!!✨', '전설의 일격!!👑'],
           desc: '👑 VIP 전용 - 신비한 황금 오오라를 두르고 응원하는 수호신 아기 해태'
@@ -659,8 +532,8 @@
         totalClicks: 0,
         ownedWeapons: ['wooden_sword'],
         equippedWeaponId: 'wooden_sword',
-        ownedPets: ['baby_slime'],
-        equippedPetId: 'baby_slime',
+        ownedPets: [],
+        equippedPetId: null,
         currentRegionId: 'village',
         soundEnabled: true,
         bgmEnabled: true,
@@ -754,10 +627,8 @@
           : [...base.ownedWeapons];
         if (!ownedWeapons.includes('wooden_sword')) ownedWeapons.unshift('wooden_sword');
 
-        const ownedPets = Array.isArray(parsed.ownedPets) && parsed.ownedPets.length > 0
-          ? Array.from(new Set(parsed.ownedPets.filter(id => PETS.some(p => p.id === id))))
-          : [...base.ownedPets];
-        if (!ownedPets.includes('baby_slime')) ownedPets.unshift('baby_slime');
+        const honorVal = typeof rawHonor === 'number' && Number.isFinite(rawHonor) && rawHonor >= 0 ? Math.floor(rawHonor) : base.honorLevel;
+        const ownedPets = PETS.filter(p => p.isVipOnly ? isVip : honorVal >= p.reqHonor).map(p => p.id);
 
         if (isVip && !ownedWeapons.includes('light_sword')) {
           ownedWeapons.push('light_sword');
@@ -1125,7 +996,6 @@
       // 2-1. VIP 모달 & 토스페이먼츠 SDK v2 결제위젯 연동
       // ==========================================
       const vipModal = document.getElementById('vipModal');
-      const vipOpenBtn = document.getElementById('vipOpenBtn');
       const vipCloseBtn = document.getElementById('vipCloseBtn');
       const vipPaySubmitBtn = document.getElementById('vipPaySubmitBtn');
       const vipPaySubmitBtnText = document.getElementById('vipPaySubmitBtnText');
@@ -1201,8 +1071,6 @@
         }
       }
 
-      vipOpenBtn.addEventListener('click', openVipModal);
-
       vipCloseBtn.addEventListener('click', () => {
         vipModal.classList.add('hidden');
         vipModal.classList.remove('flex');
@@ -1253,7 +1121,7 @@
       const autoClickToggleBtn = document.getElementById('autoClickToggleBtn');
       autoClickToggleBtn.addEventListener('click', () => {
         if (!state.isVip) {
-          showToast('👑 자동클릭기는 VIP 전용 기능입니다!');
+          showToast('👑 VIP 가입후 사용하세요');
           openVipModal();
           return;
         }
@@ -1287,8 +1155,7 @@
       }
 
       function updateNextHourlyCountdownUI() {
-        const countdownEl = document.getElementById('nextHourlyCountdown');
-        if (!countdownEl) return;
+        return;
         const now = new Date();
         const nextHour = new Date(now);
         nextHour.setHours(now.getHours() + 1, 0, 0, 0);
@@ -1423,9 +1290,6 @@
 
       function renderRankingFromData(data) {
         const listContainer = document.getElementById('rankingListContainer');
-        const tickerText = document.getElementById('topPlayerTickerText');
-        const quickBadge = document.getElementById('myRankQuickBadge');
-        const myRankDetail = document.getElementById('myRankDetailText');
 
         const rawRankings = Array.isArray(data?.rankings) ? [...data.rankings] : [];
 
@@ -1473,79 +1337,23 @@
         const avgServerPower = totalCount > 0 ? Math.floor(totalServerPower / totalCount) : 0;
         const maxHonorItem = normalizedRankings.reduce((best, cur) => (!best || cur.honorLevel > best.honorLevel ? cur : best), null);
 
-        // 비로그인/첫 접속자용 전체 서버 전적 대시보드 업데이트
+        // 랭킹 요약 대시보드 업데이트
         const elTotalPlayers = document.getElementById('srvStatTotalPlayers');
-        const elActiveRegions = document.getElementById('srvStatActiveRegions');
         const elTopPlayer = document.getElementById('srvStatTopPlayer');
-        const elTopEquip = document.getElementById('srvStatTopEquip');
         const elTotalPower = document.getElementById('srvStatTotalPower');
-        const elAvgPower = document.getElementById('srvStatAvgPower');
         const elMaxHonor = document.getElementById('srvStatMaxHonor');
-        const elTopRegionDist = document.getElementById('srvStatTopRegionDist');
 
         if (elTotalPlayers) elTotalPlayers.textContent = `${totalCount.toLocaleString('ko-KR')}명 참전 중`;
-        if (elTotalPower) elTotalPower.textContent = `${formatNumber(totalServerPower)} 파워`;
-        if (elAvgPower) elAvgPower.textContent = `용사 평균 ⚡ ${formatNumber(avgServerPower)}`;
+        if (elTotalPower) elTotalPower.textContent = `${formatNumber(state.power)} 파워`;
+        if (elMaxHonor) elMaxHonor.textContent = `명예 Lv.${state.honorLevel}`;
 
         if (normalizedRankings.length > 0) {
           const top1 = normalizedRankings[0];
-          const topWeapon = WEAPONS.find(w => w.id === top1.weaponId) || WEAPONS[0];
-          const topRegion = REGIONS.find(r => r.id === top1.regionId) || REGIONS[0];
-          const topRankTitle = getRankInfo(top1.power).current;
-
-          tickerText.textContent = `[서버 전적] 참전 ${totalCount}명 · 1위 ${maskPhoneMiddle(top1.maskedName)} (👑명예 Lv.${top1.honorLevel} · ⚡${formatNumber(top1.power)} · ${topRegion.icon}${topRegion.name} · 🗡️${topWeapon.name})`;
-
-          if (elTopPlayer) elTopPlayer.textContent = `${maskPhoneMiddle(top1.maskedName)} (⚡${formatNumber(top1.power)})`;
-          if (elTopEquip) elTopEquip.textContent = `${topRegion.icon} ${topRegion.name} · 🗡️ ${topWeapon.name}`;
-          if (elActiveRegions) elActiveRegions.textContent = `1위 등급: Lv.${topRankTitle.level} ${topRankTitle.title}`;
-
-          if (maxHonorItem) {
-            const mhWeapon = WEAPONS.find(w => w.id === maxHonorItem.weaponId) || WEAPONS[0];
-            if (elMaxHonor) elMaxHonor.textContent = `👑 명예 Lv.${maxHonorItem.honorLevel} (${ mhWeapon.name })`;
-          }
-          const highTierCount = normalizedRankings.filter(r => r.regionId === 'secret_dungeon' || r.regionId === 'ice').length;
-          if (elTopRegionDist) elTopRegionDist.textContent = `상위 던전 진입: ${highTierCount}명`;
+          if (elTopPlayer) elTopPlayer.textContent = `${maskPhoneMiddle(top1.maskedName)}`;
         } else {
-          tickerText.textContent = '아직 집계된 용사가 없습니다. 첫 번째 랭킹 1위에 도전하세요!';
           if (elTopPlayer) elTopPlayer.textContent = '기록 없음';
-          if (elTopEquip) elTopEquip.textContent = '기본 마을 · 목검';
-          if (elMaxHonor) elMaxHonor.textContent = '명예 Lv.0';
-          if (elTopRegionDist) elTopRegionDist.textContent = '집계 대기 중';
         }
 
-        const myItem = normalizedRankings.find(r => r.isMe)
-          || normalizedRankings.find(r => r.isLastLoggedOutUser)
-          || (data?.myRank ? { ...data.myRank, ...extractRankItemFields({ ...data.myRank, isMe: Boolean(authToken) }) } : null);
-
-        // 비로그인 게스트라도 현재 로컬 캐릭터의 전적이 서버 몇 위권에 해당하는지 즉시 시뮬레이션 표시
-        const localW = getEquippedWeapon();
-        const localR = getCurrentRegion();
-        let guestSimulatedRank = 1;
-        normalizedRankings.forEach(r => {
-          if (r.honorLevel > state.honorLevel || (r.honorLevel === state.honorLevel && r.power > state.power)) {
-            guestSimulatedRank += 1;
-          }
-        });
-
-        if (myItem && authToken) {
-          const myW = WEAPONS.find(w => w.id === myItem.weaponId) || WEAPONS[0];
-          const myR = REGIONS.find(r => r.id === myItem.regionId) || REGIONS[0];
-          quickBadge.textContent = `공식 ${myItem.rank || 1}위 · 전적 보기 →`;
-          myRankDetail.textContent = `전체 ${totalCount}명 중 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.icon} ${myR.name} · 🗡️ ${myW.name})`;
-        } else if (myItem && !authToken) {
-          const myW = WEAPONS.find(w => w.id === myItem.weaponId) || WEAPONS[0];
-          const myR = REGIONS.find(r => r.id === myItem.regionId) || REGIONS[0];
-          quickBadge.textContent = `전체 전적 (${totalCount}명) →`;
-          myRankDetail.textContent = `비로그인 열람 중 · 내 기록 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.icon} ${myR.name} · 🗡️ ${myW.name})`;
-        } else {
-          quickBadge.textContent = `서버 전적 (${totalCount}명) →`;
-          myRankDetail.textContent = `게스트 열람 중 · 내 현재 전적(👑 명예 Lv.${state.honorLevel} · ⚡ ${formatNumber(state.power)} · ${localR.name} · ${localW.name})은 서버 예상 ${guestSimulatedRank}위권`;
-        }
-
-        const updatedEl = document.getElementById('rankingLastUpdated');
-        if (updatedEl) {
-          updatedEl.textContent = getHourAggregationLabel(new Date());
-        }
         updateNextHourlyCountdownUI();
 
         listContainer.innerHTML = '';
@@ -1558,7 +1366,7 @@
           return;
         }
 
-        normalizedRankings.forEach((item) => {
+        normalizedRankings.slice(0, 100).forEach((item) => {
           const wInfo = WEAPONS.find(w => w.id === item.weaponId) || WEAPONS[0];
           const rInfo = REGIONS.find(r => r.id === item.regionId) || REGIONS[0];
           const pInfo = PETS.find(p => p.id === item.petId) || PETS[0];
@@ -1585,8 +1393,6 @@
 
           const badgeTag = item.isMe
             ? '<span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold">나</span>'
-            : item.isLastLoggedOutUser
-            ? '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-sky-300 border border-sky-500/30 text-[10px] font-bold">내 기록</span>'
             : '';
 
           const rowEl = document.createElement('div');
@@ -1600,17 +1406,11 @@
                   <span class="px-1.5 py-0.5 rounded bg-slate-800/90 text-slate-300 border border-slate-700 text-[10px] font-bold">Lv.${rankInfo.level} ${rankInfo.title}</span>
                   ${badgeTag}
                 </div>
-                <div class="text-[11px] text-slate-300 truncate mt-1 flex flex-wrap items-center gap-1.5">
-                  <span class="px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-700/40 text-emerald-300 font-semibold">${rInfo.icon} ${rInfo.name}</span>
-                  <span class="px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-700/40 text-purple-200 font-semibold">🗡️ ${wInfo.name}</span>
-                  <span class="px-1.5 py-0.5 rounded bg-pink-950/50 border border-pink-700/30 text-pink-200 font-semibold">${pInfo.icon} ${pInfo.name}</span>
-                  <span class="text-[10px] text-slate-400">타격당 +${formatNumber(estHitPower)}</span>
-                </div>
               </div>
             </div>
-            <div class="text-right shrink-0">
-              <div class="text-xs sm:text-sm font-black text-amber-400">👑 명예 Lv.${item.honorLevel}</div>
-              <div class="text-[11px] font-bold text-sky-300 mt-0.5">⚡ ${formatNumber(item.power)} 파워</div>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+              <span class="text-xs sm:text-sm font-black text-amber-400 whitespace-nowrap">👑 명예 Lv.${item.honorLevel}</span>
+              <span class="text-xs sm:text-sm font-bold text-sky-300 whitespace-nowrap">⚡ ${formatNumber(item.power)} 파워</span>
             </div>
           `;
           listContainer.appendChild(rowEl);
@@ -1619,8 +1419,6 @@
 
       async function fetchAndRenderRanking(showToastMsg = false, forceServerFetch = false) {
         const listContainer = document.getElementById('rankingListContainer');
-        const tickerText = document.getElementById('topPlayerTickerText');
-
         if (currentUsername) {
           recordUserRankSnapshot(currentUsername, state);
         }
@@ -1639,7 +1437,7 @@
         try {
           const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
           const hourKey = getCurrentHourBucketKey();
-          const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}&hourBucket=${encodeURIComponent(hourKey)}&_t=${Date.now()}`, {
+          const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}&limit=100&hourBucket=${encodeURIComponent(hourKey)}&_t=${Date.now()}`, {
             headers,
             cache: 'no-store'
           });
@@ -1670,7 +1468,6 @@
           if (localFallbackList.length > 0) {
             renderRankingFromData({ rankings: localFallbackList, totalPlayers: localFallbackList.length });
           } else {
-            tickerText.textContent = '랭킹 서버 연결 대기 중...';
             listContainer.innerHTML = `
               <div class="text-center py-6 text-xs text-rose-300 bg-rose-950/25 rounded-xl border border-rose-800/40">
                 랭킹 정보를 불러올 수 없습니다. 클라우드 서버 연결 상태를 확인해 주세요.
@@ -1715,21 +1512,17 @@
       }, 60000);
 
       function updateAuthHeaderUI() {
-        const userBadge = document.getElementById('userBadge');
         const authToggleBtn = document.getElementById('authToggleBtn');
-        const authToggleBtnLabel = document.getElementById('authToggleBtnLabel');
+        if (!authToggleBtn) return;
 
         if (authToken && currentUsername) {
-          const adminTag = isAdminAccount(currentUsername) ? ' 👑관리자' : '';
-          userBadge.textContent = `📱 ${maskPhoneMiddle(currentUsername)}${adminTag}`;
-          userBadge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shrink-0';
-          authToggleBtnLabel.textContent = '로그아웃';
-          authToggleBtn.className = 'group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer';
+          authToggleBtn.textContent = state.isVip ? '👑 VIP 로그아웃' : '로그아웃';
+          authToggleBtn.className = state.isVip
+            ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
+            : 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
         } else {
-          userBadge.textContent = '👤 게스트';
-          userBadge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0';
-          authToggleBtnLabel.textContent = '로그인';
-          authToggleBtn.className = 'group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer';
+          authToggleBtn.textContent = '로그인';
+          authToggleBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
         }
       }
 
@@ -3405,9 +3198,6 @@
           state.honorLevel === 0 ? 'Lv.1 달성 시 황금 오오라 개방' : `오오라 농도 ${Math.min(100, 22 + state.honorLevel * 12)}% · 획득량 +${honorBonusPct}%`;
         document.getElementById('honorCostText').textContent = `${formatNumber(honorCost)} G`;
 
-        const vipLabel = document.getElementById('vipHeaderBtnLabel');
-        vipLabel.textContent = state.isVip ? 'VIP 적용중' : 'VIP';
-
         const autoBtn = document.getElementById('autoClickToggleBtn');
         const autoDot = document.getElementById('autoClickDot');
         const autoLabel = document.getElementById('autoClickBtnLabel');
@@ -3472,14 +3262,14 @@
         const bgmBtn = document.getElementById('bgmToggleBtn');
         bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
         bgmBtn.className = state.bgmEnabled
-          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/90 hover:bg-indigo-900/90 border border-indigo-600/70 text-indigo-200 transition active:scale-95 cursor-pointer'
-          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
 
         const soundBtn = document.getElementById('soundToggleBtn');
         soundBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
         soundBtn.className = state.soundEnabled
-          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer'
-          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
 
         renderWeaponsPanel();
         renderRegionsPanel();
@@ -3569,19 +3359,18 @@
         panel.innerHTML = '';
 
         PETS.forEach(pet => {
-          const owned = state.ownedPets.includes(pet.id);
-          const equipped = state.equippedPetId === pet.id;
           const isVipOnly = pet.isVipOnly === true;
-          const canBuy = !owned && state.gold >= pet.cost && !isVipOnly;
+          const unlocked = isVipOnly ? state.isVip : (state.honorLevel >= pet.reqHonor);
+          const equipped = state.equippedPetId === pet.id;
 
-          let actionLabel = pet.cost === 0 ? '무료 분양받기' : `분양받기 (${formatNumber(pet.cost)} G)`;
+          let actionLabel = unlocked ? '함께 응원하기' : `잠김 (명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')})`;
           if (isVipOnly) {
-            actionLabel = state.isVip ? '동행하기' : '👑 VIP 전용';
+            actionLabel = state.isVip ? '함께 응원하기' : '👑 VIP 전용';
           }
 
           const card = document.createElement('div');
           card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2.5 ${
-            equipped ? 'bg-pink-950/25 border-pink-500/60 shadow-md shadow-pink-500/10' : owned ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/60 border-slate-800/90'
+            equipped ? 'bg-pink-950/25 border-pink-500/60 shadow-md shadow-pink-500/10' : unlocked ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/60 border-slate-800/90 opacity-85'
           }`;
           card.innerHTML = `
             <div>
@@ -3591,8 +3380,8 @@
                   <span>${pet.name}</span>
                 </span>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                  equipped ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40' : owned ? 'bg-slate-800 text-slate-300' : isVipOnly ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800/40' : 'bg-slate-900 text-slate-400 border border-slate-800'
-                }">${equipped ? '응원 중' : owned ? '보유 중' : isVipOnly ? 'VIP 펫' : '미보유'}</span>
+                  equipped ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40' : unlocked ? 'bg-slate-800 text-slate-300' : isVipOnly ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800/40' : 'bg-amber-950/60 text-amber-300 border border-amber-700/40'
+                }">${equipped ? '응원 중' : unlocked ? '해금됨' : isVipOnly ? 'VIP 펫' : `명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')}`}</span>
               </div>
               <p class="text-[11px] text-slate-400 mt-1">${pet.desc}</p>
               <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
@@ -3600,8 +3389,8 @@
               </div>
             </div>
             <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${
-              equipped ? 'bg-slate-800 hover:bg-slate-700 text-pink-300 cursor-pointer' : (owned || (isVipOnly && state.isVip)) ? 'bg-pink-600 hover:bg-pink-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : canBuy ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
-            }">${equipped ? '응원 쉬기 (해제)' : (owned || (isVipOnly && state.isVip)) ? '함께 응원하기' : actionLabel}</button>
+              equipped ? 'bg-slate-800 hover:bg-slate-700 text-pink-300 cursor-pointer' : unlocked ? 'bg-pink-600 hover:bg-pink-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
+            }">${equipped ? '응원 쉬기 (해제)' : actionLabel}</button>
           `;
 
           card.querySelector('button').addEventListener('click', () => {
@@ -3613,42 +3402,27 @@
               return;
             }
 
-            if (isVipOnly) {
-              if (!state.isVip) {
-                openVipModal();
-                return;
-              }
-              if (!state.ownedPets.includes(pet.id)) {
-                state.ownedPets.push(pet.id);
-              }
-            }
-
-            if (owned || (isVipOnly && state.isVip)) {
-              state.equippedPetId = pet.id;
-              anim.petCheerBoost = 1.0;
-              anim.petBubbleText = pet.cheers[0];
-              anim.petBubbleTimer = 2.0;
-              saveState(true);
-              playPurchaseSound();
-              showToast(`${pet.icon} [${pet.name}]이(가) 뒤에서 응원을 시작합니다!`);
-              updateUI();
+            if (isVipOnly && !state.isVip) {
+              openVipModal();
               return;
             }
 
-            if (state.gold >= pet.cost) {
-              state.gold -= pet.cost;
-              state.ownedPets.push(pet.id);
-              state.equippedPetId = pet.id;
-              anim.petCheerBoost = 1.0;
-              anim.petBubbleText = pet.cheers[0];
-              anim.petBubbleTimer = 2.0;
-              saveState(true);
-              playPurchaseSound();
-              showToast(`🎉 [${pet.name}] 분양 완료! 용사님 뒤에서 열심히 응원합니다!`);
-              updateUI();
-            } else {
-              showToast(`골드가 부족합니다! (필요: ${formatNumber(pet.cost)} G)`);
+            if (!unlocked) {
+              showToast(`👑 명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')} 달성 시 해금됩니다!`);
+              return;
             }
+
+            if (!state.ownedPets.includes(pet.id)) {
+              state.ownedPets.push(pet.id);
+            }
+            state.equippedPetId = pet.id;
+            anim.petCheerBoost = 1.0;
+            anim.petBubbleText = pet.cheers[0];
+            anim.petBubbleTimer = 2.0;
+            saveState(true);
+            playPurchaseSound();
+            showToast(`${pet.icon} [${pet.name}]이(가) 뒤에서 응원을 시작합니다!`);
+            updateUI();
           });
 
           panel.appendChild(card);
@@ -3761,13 +3535,9 @@
       tabPetsBtn.addEventListener('click', () => switchMainTab('pets'));
       tabRankingBtn.addEventListener('click', () => switchMainTab('ranking'));
 
-      document.getElementById('kingdomTickerBar').addEventListener('click', () => {
-        switchMainTab('ranking');
-        rankingPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-
-      document.getElementById('refreshRankingBtn').addEventListener('click', () => {
-        syncAndRefreshRanking(true, true);
+      document.getElementById('headerExitLobbyBtn')?.addEventListener('click', () => {
+        stopBGM();
+        window.location.href = 'https://02826k.github.io/aigameroom/';
       });
 
       canvasWrapper.addEventListener('pointerdown', (e) => {
@@ -4074,15 +3844,6 @@
 
       async function initGame() {
         resizeCanvas();
-
-        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-          const iconImg = document.getElementById('shortcutIconImg');
-          if (iconImg && !window.location.hostname.includes('usercontent')) {
-            const probe = new Image();
-            probe.onload = () => { iconImg.src = './icon.png'; };
-            probe.src = './icon.png';
-          }
-        }
 
         try {
           const params = new URLSearchParams(window.location.search);
