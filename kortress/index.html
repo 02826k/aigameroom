@@ -1474,6 +1474,24 @@
             ctx.globalAlpha = 1;
         }
 
+        const FIXED_STEP_MS = 1000 / 60;
+        const POWER_CHARGE_SPEED = 38; // 초당 38% (5%→100% 약 2.5초, 모든 모니터 주사율 동일)
+        let lastFrameTime = 0;
+        let stepAccumulator = 0;
+
+        function updateCharging(dtSec) {
+            if (gameState.phase !== 'CHARGING') return;
+            gameState.power += gameState.powerDir * POWER_CHARGE_SPEED * dtSec;
+            if (gameState.power >= 100) { gameState.power = 100; gameState.powerDir = -1; }
+            else if (gameState.power <= 5) { gameState.power = 5; gameState.powerDir = 1; }
+            updatePowerBar();
+            const now = Date.now();
+            if (now - gameState.lastTickTime > 90) {
+                sfx.playChargeTick(gameState.power / 100);
+                gameState.lastTickTime = now;
+            }
+        }
+
         function update() {
             if (gameState.screenShake > 0) gameState.screenShake = Math.max(0, gameState.screenShake - 0.6);
             if (gameState.phase === 'MENU' || gameState.phase === 'GAMEOVER') return;
@@ -1484,18 +1502,6 @@
                 if (gameState.keys['ArrowRight'] || gameState.buttonHold === 'right') { activeTank.move(1); updateHUD(); }
                 if (gameState.keys['ArrowUp'] || gameState.buttonHold === 'up') { activeTank.adjustAngle(1); updateHUD(); }
                 if (gameState.keys['ArrowDown'] || gameState.buttonHold === 'down') { activeTank.adjustAngle(-1); updateHUD(); }
-            }
-
-            if (gameState.phase === 'CHARGING') {
-                gameState.power += gameState.powerDir * 1.4;
-                if (gameState.power >= 100) { gameState.power = 100; gameState.powerDir = -1; }
-                else if (gameState.power <= 5) { gameState.power = 5; gameState.powerDir = 1; }
-                updatePowerBar();
-                const now = Date.now();
-                if (now - gameState.lastTickTime > 70) {
-                    sfx.playChargeTick(gameState.power / 100);
-                    gameState.lastTickTime = now;
-                }
             }
 
             if (gameState.phase === 'FIRING') {
@@ -1534,8 +1540,19 @@
             ctx.restore();
         }
 
-        function gameLoop() {
-            update();
+        function gameLoop(timestamp) {
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const rawDeltaMs = Math.min(100, Math.max(0, timestamp - lastFrameTime));
+            lastFrameTime = timestamp;
+
+            updateCharging(rawDeltaMs / 1000);
+
+            stepAccumulator += rawDeltaMs;
+            while (stepAccumulator >= FIXED_STEP_MS) {
+                update();
+                stepAccumulator -= FIXED_STEP_MS;
+            }
+
             render();
             requestAnimationFrame(gameLoop);
         }
