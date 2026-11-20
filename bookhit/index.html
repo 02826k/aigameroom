@@ -31,13 +31,20 @@
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
     ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
 
-    #fullscreenStage { display: contents; }
+    /* display: contents 대신 일반 flex 컨테이너 사용 (전체화면 검은 화면 버그 방지) */
+    #fullscreenStage {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      width: 100%;
+    }
 
     /* 전체화면 (Native Fullscreen API + iOS/모바일 CSS 폴백 공용) */
     #fullscreenStage:fullscreen,
     #fullscreenStage.is-fullscreen {
       display: flex !important;
       flex-direction: column !important;
+      gap: 0 !important;
       position: fixed !important;
       inset: 0 !important;
       width: 100vw !important;
@@ -80,6 +87,7 @@
       flex-wrap: nowrap !important;
       padding: 4px 10px !important;
       gap: 6px !important;
+      overflow-x: auto !important;
     }
     #fullscreenStage:fullscreen #gameTopHud > div:first-child,
     #fullscreenStage.is-fullscreen #gameTopHud > div:first-child {
@@ -102,18 +110,18 @@
     }
     #fullscreenStage:fullscreen #canvasWrap,
     #fullscreenStage.is-fullscreen #canvasWrap {
+      position: relative !important;
       flex: 1 1 0% !important;
       min-height: 0 !important;
       width: 100% !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
       background: #020617 !important;
       overflow: hidden !important;
     }
-    /* 전체화면 시 PC/모바일 모두 캔버스 꽉 차게 */
+    /* position: absolute; inset: 0 으로 높이 0px 붕괴 방지 및 꽉 찬 화면 */
     #fullscreenStage:fullscreen #cv,
     #fullscreenStage.is-fullscreen #cv {
+      position: absolute !important;
+      inset: 0 !important;
       width: 100% !important;
       height: 100% !important;
       max-width: none !important;
@@ -367,12 +375,18 @@
         bestMoney: 0,
         soundEnabled: true,
         bgmEnabled: true,
-        isVip: false
+        isVip: false,
+        power: 3
       };
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) saveStateObj = { ...saveStateObj, ...JSON.parse(raw) };
       } catch (e) {}
+
+      function getSavedPower() {
+        const p = Number(saveStateObj.power);
+        return (p >= 1 && p <= 5) ? p : 3;
+      }
 
       function persistState(syncCloud = false) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saveStateObj)); } catch (e) {}
@@ -595,7 +609,7 @@
       const G = {
         book: 0, mode: 'AI', np: 2, stage: 1, cur: 0, scores: [0, 0, 0],
         inv: [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }], hl: {},
-        rc: 100, rn: 2, power: 2, auto: true, layout: 'vertical',
+        rc: 100, rn: 2, power: getSavedPower(), auto: true, layout: 'vertical',
         coins: [], parts: [], placed: [0, 0, 0], startFace: 1, mixed: false, slapCount: 0,
         state: 'SETUP', winner: null, reason: '', msg: '',
         aiT: 0, aiPos: null, aiDir: 0,
@@ -673,7 +687,7 @@
         }
       }
 
-      // HUD DOM 텍스트 동기화 (불필요한 DOM 갱신 방지)
+      // HUD DOM 텍스트 동기화
       let lastHudScore = '', lastHudStage = '', lastHudMsg = '';
       function syncHudDom() {
         const sc = Array.from({ length: G.np }, (_, i) => `${pname(i)}: ${G.scores[i]}승`).join('  |  ');
@@ -744,7 +758,58 @@
 
       function refund() { if (G.state === 'SETUP' || G.state === 'READY') G.coins.forEach(c => G.inv[c.owner][c.v]++); }
 
+      // 자동 동전 교환 (500원 1개 ↔ 100원 5개)
+      function autoExchangeCoins() {
+        const msgs = [];
+        for (let p = 0; p < G.np; p++) {
+          // 100원 판인데 100원이 부족하고 500원이 있을 때 → 상대에게 500원 1개 주고 100원 5개 받기
+          if (G.rc === 100 && G.inv[p][100] < G.rn && G.inv[p][500] >= 1) {
+            let donor = -1, max100 = 5; // 상대가 최소 1개 이상 남도록 6개 이상 보유자 탐색
+            for (let q = 0; q < G.np; q++) {
+              if (q !== p && G.inv[q][100] > max100) {
+                max100 = G.inv[q][100];
+                donor = q;
+              }
+            }
+            if (donor !== -1) {
+              G.inv[p][500] -= 1;
+              G.inv[p][100] += 5;
+              G.inv[donor][100] -= 5;
+              G.inv[donor][500] += 1;
+              G.hl[p + '_100'] = 24;
+              G.hl[donor + '_500'] = 24;
+              msgs.push(`${pname(p)} 500원 ↔ ${pname(donor)} 100원×5`);
+            }
+          }
+          // 500원 판인데 500원이 부족하고 100원이 5개 이상 있을 때 → 상대에게 100원 5개 주고 500원 1개 받기
+          else if (G.rc === 500 && G.inv[p][500] < G.rn && G.inv[p][100] >= 5) {
+            let donor = -1, max500 = 1; // 상대가 최소 1개 이상 남도록 2개 이상 보유자 탐색
+            for (let q = 0; q < G.np; q++) {
+              if (q !== p && G.inv[q][500] > max500) {
+                max500 = G.inv[q][500];
+                donor = q;
+              }
+            }
+            if (donor !== -1) {
+              G.inv[p][100] -= 5;
+              G.inv[p][500] += 1;
+              G.inv[donor][500] -= 1;
+              G.inv[donor][100] += 5;
+              G.hl[p + '_500'] = 24;
+              G.hl[donor + '_100'] = 24;
+              msgs.push(`${pname(p)} 100원×5 ↔ ${pname(donor)} 500원`);
+            }
+          }
+        }
+        if (msgs.length) {
+          showToast(`💱 자동 동전 교환: ${msgs.join(' / ')}`);
+          beep(780, 0.08, 'sine', 0.1);
+        }
+      }
+
       function adjustRuleForBalance() {
+        autoExchangeCoins();
+
         let canCurrent = true;
         for (let p = 0; p < G.np; p++) if (G.inv[p][G.rc] < 1) canCurrent = false;
         if (!canCurrent) {
@@ -777,7 +842,10 @@
       function startSetup(rf = false) {
         if (rf) refund();
         adjustRuleForBalance();
-        Object.assign(G, { coins: [], placed: [0, 0, 0], state: 'SETUP', winner: null, cur: 0, mixed: false, slapCount: 0, aiT: 36, aiPos: null });
+        Object.assign(G, {
+          coins: [], placed: [0, 0, 0], state: 'SETUP', winner: null, cur: 0,
+          mixed: false, slapCount: 0, aiT: 36, aiPos: null, power: getSavedPower()
+        });
         G.auto ? autoPlace() : setupMsg();
       }
       function setupMsg() {
@@ -816,7 +884,7 @@
             G.placed[p]++; i++;
           }
         }
-        Object.assign(G, { startFace: 1, mixed: false, slapCount: 0, cur: 0, state: 'READY', aiPos: null });
+        Object.assign(G, { startFace: 1, mixed: false, slapCount: 0, cur: 0, state: 'READY', aiPos: null, power: getSavedPower() });
         G.msg = `자동배치 완료 (${G.layout === 'vertical' ? '세로배치' : '뭉치배치'}, 뒷면 통일)! ${pname(0)} 차례 - 드래그해 치세요!`;
       }
       function placeCoin(x, y, toggle = true) {
@@ -834,7 +902,7 @@
         if (G.placed[G.cur] >= G.rn) {
           G.cur++;
           if (G.cur >= G.np) {
-            Object.assign(G, { cur: 0, startFace: G.coins[0].face, mixed: false, slapCount: 0, state: 'READY', aiPos: null });
+            Object.assign(G, { cur: 0, startFace: G.coins[0].face, mixed: false, slapCount: 0, state: 'READY', aiPos: null, power: getSavedPower() });
             G.msg = `배치 완료 (${faceName(G.startFace)} 통일)! ${pname(0)} 차례 - 손을 두고 드래그해 치세요!`;
             return true;
           }
@@ -891,7 +959,12 @@
       function checkResult() {
         if (G.coins.some(c => c.out)) { absorb((G.cur + 1) % G.np, `${pname(G.cur)} 동전 낙하`); return; }
         const fs = new Set(G.coins.map(c => c.face));
-        const nxt = () => { G.cur = (G.cur + 1) % G.np; G.state = 'READY'; G.aiPos = null; };
+        const nxt = () => {
+          G.cur = (G.cur + 1) % G.np;
+          G.state = 'READY';
+          G.aiPos = null;
+          if (!isAI()) G.power = getSavedPower();
+        };
         if (fs.size === 1) {
           const f = [...fs][0];
           if (!G.mixed && f === G.startFace) { nxt(); G.msg = `뒤집히지 않았습니다! ${pname(G.cur)} 차례입니다.`; return; }
@@ -1199,7 +1272,12 @@
         if (G.state === 'ROUND_OVER' && hit(NEXT, x, y)) { startSetup(); return; }
         for (const v of [100, 500]) if (hit(RULE[v], x, y)) { if (G.rc === v) G.rn = G.rn === 2 ? 1 : 2; else G.rc = v; startSetup(true); return; }
         if (isAI()) return;
-        for (const b of PBTN) if (Math.hypot(x - b.x, y - b.y) <= b.r + 7) { G.power = b.l; return; }
+        for (const b of PBTN) if (Math.hypot(x - b.x, y - b.y) <= b.r + 7) {
+          G.power = b.l;
+          saveStateObj.power = b.l;
+          persistState(false);
+          return;
+        }
         if (G.state === 'SETUP') placeCoin(x, y);
         else if (G.state === 'READY' && inBook(x, y, 15)) {
           G.hand = [x, y]; G.handOk = handValid(x, y);
@@ -1219,7 +1297,11 @@
       cv.addEventListener('pointercancel', () => { G.drag = false; });
       window.addEventListener('keydown', (e) => {
         if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-        if (/^[1-5]$/.test(e.key) && !isAI()) G.power = +e.key;
+        if (/^[1-5]$/.test(e.key) && !isAI()) {
+          G.power = +e.key;
+          saveStateObj.power = +e.key;
+          persistState(false);
+        }
         if (e.key === ' ' && G.state === 'ROUND_OVER' && !hasActiveBanner()) { e.preventDefault(); startSetup(); }
         if (e.key === 'Escape' && fullscreenStage.classList.contains('is-fullscreen') && !document.fullscreenElement) {
           exitCssFullscreen();
