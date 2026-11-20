@@ -2023,7 +2023,7 @@
         }
 
         if (defender.guarding) {
-          dmg *= K ? 0.22 : 0.15;
+          dmg = 0;
           defender.vx = attacker.dir * push * 2.5;
           attacker.vx = -attacker.dir * push * 1.1;
           playSfx('guard');
@@ -2080,6 +2080,9 @@
       }
 
       function startFight(mode, resetArcade = true) {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
         currentMode = mode;
         p1Rounds = 0;
         p2Rounds = 0;
@@ -2599,6 +2602,10 @@
             return;
           }
         }
+        if (['Space', 'Enter', 'NumpadEnter'].includes(e.code)) {
+          e.preventDefault();
+          return;
+        }
         keys[e.code] = true;
         if (!canControlPlayer()) return;
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
@@ -2652,7 +2659,6 @@
         document.getElementById('arcadeControlsPanel').classList.remove('hidden');
         document.getElementById('startFightBtn').classList.remove('hidden');
         document.getElementById('startFightBtn').textContent = '🥊 STAGE 1 도전 시작!';
-        // '1P 파이터를 고른 뒤 <b>나무 샌드백</b>으로 스킬을 연습하고, [STAGE 1 도전 시작]을 누르면 나머지 파이터들과 랜덤 연전을 펼칩니다!';
         returnToSelect();
       });
       document.getElementById('modePvPTab').addEventListener('click', () => {
@@ -2666,7 +2672,6 @@
         document.getElementById('pvpLobbySection').classList.add('flex');
         document.getElementById('charSelectPanel').classList.remove('hidden');
         document.getElementById('startFightBtn').classList.add('hidden');
-        // '대전 모드에서는 1P와 2P 캐릭터를 각각 선택하거나 실시간 대기실 슬롯에 참가할 수 있습니다.';
         updateSelectUi();
         renderWaitingList([{ username: getDisplayName(), socketId: socket.id }]);
         socket.emit('enter_pvp_lobby', { gameId: GAME_ID, username: getDisplayName() });
