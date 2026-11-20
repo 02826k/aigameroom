@@ -434,40 +434,58 @@
       // ==========================================
       const FIGHTERS = {
         akira: {
-          id:'akira', name:'아키라', style:'팔극권',
+          id:'akira', name:'아키라', style:'팔극권', primary:'punch',
           skin:'#f2c29b', hair:'#14151a', headband:'#ef4444', top:'#f1f5f9', stripe:null, sleeve:'#e2e8f0', pants:'#d6d3d1', trim:'#94a3b8', shoe:'#f2c29b', glove:'#f2c29b', belt:'#18181b',
           hairStyle:'spike', body:'gi', bulk:1.05, h:1, aura:'#38bdf8', power:1.15, speed:215,
-          skill:{ name:'철산고!', button:'punch', buttonLabel:'오른손', motion:'tetsuzanko', dur:0.50, lunge:440, reach:100, dmg:25 }
+          skills:{
+            punch:{ name:'철산고!', button:'punch', buttonLabel:'오른손', motion:'tetsuzanko', dur:0.50, lunge:440, reach:100, dmg:25 },
+            kick:{ name:'진각 파쇄!', button:'kick', buttonLabel:'오른발', motion:'stomp_axe', dur:0.52, lunge:260, vy:-340, reach:112, dmg:24 }
+          }
         },
         pai: {
-          id:'pai', name:'파이', style:'연권',
+          id:'pai', name:'파이', style:'연권', primary:'kick',
           skin:'#f7d5b0', hair:'#18181b', headband:'#f43f5e', top:'#be123c', stripe:'#fde047', sleeve:null, pants:'#1f2937', trim:'#fde047', shoe:'#be123c', glove:'#f7d5b0', belt:'#fde047',
           hairStyle:'ponytail', body:'suit', bulk:0.86, h:0.93, aura:'#fb7185', power:0.95, speed:265,
-          skill:{ name:'비연각!', button:'kick', buttonLabel:'오른발', motion:'flying_kick', dur:0.48, lunge:390, vy:-290, reach:115, dmg:22 }
+          skills:{
+            punch:{ name:'연환 장타!', button:'punch', buttonLabel:'오른손', motion:'rapid_flurry', dur:0.48, lunge:320, reach:104, dmg:23 },
+            kick:{ name:'비연각!', button:'kick', buttonLabel:'오른발', motion:'flying_kick', dur:0.48, lunge:390, vy:-290, reach:115, dmg:22 }
+          }
         },
         jacky: {
-          id:'jacky', name:'잭키', style:'절권도',
+          id:'jacky', name:'잭키', style:'절권도', primary:'kick',
           skin:'#f0b98f', hair:'#facc15', headband:null, top:'#dc2626', stripe:'#f8fafc', sleeve:null, pants:'#22232b', trim:'#dc2626', shoe:'#f1f5f9', glove:'#17171c', belt:'#d4a017',
           hairStyle:'spike', body:'jacket', bulk:1, h:1, aura:'#fbbf24', power:1.05, speed:245,
-          skill:{ name:'섬머솔트 킥!', button:'kick', buttonLabel:'오른발', motion:'somersault', dur:0.50, lunge:250, vy:-580, reach:110, dmg:24 }
+          skills:{
+            punch:{ name:'라이트닝 어퍼!', button:'punch', buttonLabel:'오른손', motion:'lightning_upper', dur:0.48, lunge:240, vy:-460, reach:98, dmg:24 },
+            kick:{ name:'섬머솔트 킥!', button:'kick', buttonLabel:'오른발', motion:'somersault', dur:0.50, lunge:250, vy:-580, reach:110, dmg:24 }
+          }
         },
         wolf: {
-          id:'wolf', name:'울프', style:'레슬링',
+          id:'wolf', name:'울프', style:'레슬링', primary:'punch',
           skin:'#e0a070', hair:'#a16207', headband:null, top:'#e0a070', stripe:null, sleeve:null, pants:'#b91c1c', trim:'#fbbf24', shoe:'#1f2937', glove:'#fbbf24', belt:'#fbbf24',
           hairStyle:'long', body:'bare', bulk:1.32, h:1.04, aura:'#f97316', power:1.25, speed:190,
-          skill:{ name:'자이언트 스윙!', button:'punch', buttonLabel:'오른손', motion:'lariat_slam', dur:0.54, lunge:240, reach:92, dmg:27 }
+          skills:{
+            punch:{ name:'자이언트 스윙!', button:'punch', buttonLabel:'오른손', motion:'lariat_slam', dur:0.54, lunge:240, reach:92, dmg:27 },
+            kick:{ name:'드롭킥!', button:'kick', buttonLabel:'오른발', motion:'dropkick', dur:0.52, lunge:420, vy:-310, reach:122, dmg:26 }
+          }
         },
         sarah: {
-          id:'sarah', name:'사라', style:'마샬아츠',
+          id:'sarah', name:'사라', style:'마샬아츠', primary:'kick',
           skin:'#fbe0c8', hair:'#fde047', headband:null, top:'#38bdf8', stripe:'#f8fafc', sleeve:null, pants:'#0ea5e9', trim:'#f8fafc', shoe:'#f8fafc', glove:'#f8fafc', belt:'#f8fafc',
           hairStyle:'ponytail', body:'suit', bulk:0.88, h:0.95, aura:'#22d3ee', power:1.0, speed:255,
-          skill:{ name:'라이징 니!', button:'kick', buttonLabel:'오른발', motion:'rising_knee', dur:0.46, lunge:320, vy:-450, reach:106, dmg:23 }
+          skills:{
+            punch:{ name:'스피닝 백피스트!', button:'punch', buttonLabel:'오른손', motion:'spin_backfist', dur:0.46, lunge:340, reach:106, dmg:23 },
+            kick:{ name:'라이징 니!', button:'kick', buttonLabel:'오른발', motion:'rising_knee', dur:0.46, lunge:320, vy:-450, reach:106, dmg:23 }
+          }
         },
         lau: {
-          id:'lau', name:'라우', style:'호권',
+          id:'lau', name:'라우', style:'호권', primary:'punch',
           skin:'#f0c090', hair:'#1c1917', headband:null, top:'#f59e0b', stripe:null, sleeve:'#f59e0b', pants:'#451a03', trim:'#fde68a', shoe:'#292524', glove:'#f0c090', belt:'#7c2d12',
           hairStyle:'short', body:'gi', bulk:1, h:0.98, aura:'#fb923c', power:1.1, speed:225,
-          skill:{ name:'호포 연격!', button:'punch', buttonLabel:'오른손', motion:'tiger_palm', dur:0.48, lunge:330, reach:108, dmg:23 }
+          skills:{
+            punch:{ name:'호포 연격!', button:'punch', buttonLabel:'오른손', motion:'tiger_palm', dur:0.48, lunge:330, reach:108, dmg:23 },
+            kick:{ name:'선풍 회오리각!', button:'kick', buttonLabel:'오른발', motion:'tornado_kick', dur:0.52, lunge:360, vy:-330, reach:118, dmg:25 }
+          }
         }
       };
 
@@ -782,8 +800,8 @@
                   phase = 'countdown';
                   p1Rounds = data.p1Rounds;
                   p2Rounds = data.p2Rounds;
-                  showBanner(`ROUND ${data.roundNum}`, 1050);
-                  setTimeout(() => { if (phase === 'countdown') { phase = 'fight'; showBanner('FIGHT!', 700); } }, 1100);
+                  showBanner(`ROUND ${data.roundNum}`, 2050);
+                  setTimeout(() => { if (phase === 'countdown') { phase = 'fight'; showBanner('FIGHT!', 700); } }, 2100);
                 } else if (data.pvpEvent === 'round_end') {
                   phase = 'roundEnd';
                   p1Rounds = data.p1Rounds;
@@ -819,12 +837,21 @@
                   phase = data.phase;
                 }
               } else if (data.clientInput && pvpRole === 'left') {
-                if (data.action) triggerFighterAction(f2, f1, data.action, data.strong);
-                if (data.jump && f2.y >= FLOOR_Y && f2.action === 'idle') f2.vy = -520;
                 f2.moveDir = data.moveDir || 0;
                 f2.guarding = Boolean(data.guarding);
                 f2.crouching = Boolean(data.crouching);
                 f2.backGuard = f2.moveDir !== 0 && f2.moveDir === -f2.dir;
+                let tok2 = null;
+                if (f2.moveDir !== 0 && f2.moveDir === -f2.dir) tok2 = 'B';
+                else if (f2.crouching) tok2 = 'D';
+                else if (f2.moveDir !== 0 && f2.moveDir === f2.dir) tok2 = 'F';
+                if (tok2 && tok2 !== f2.lastTok) {
+                  f2.cmd.push({ tok: tok2, t: animTime });
+                  f2.cmd = f2.cmd.filter(c => animTime - c.t <= 1.2).slice(-6);
+                }
+                f2.lastTok = tok2;
+                if (data.action) triggerFighterAction(f2, f1, data.action, data.strong);
+                if (data.jump && f2.y >= FLOOR_Y && f2.action === 'idle') f2.vy = -520;
               }
             });
           }
@@ -876,8 +903,7 @@
         const band = f.headband ? `<path d="M20 33 Q40 22 60 33 L60 38 Q40 28 20 38Z" fill="${f.headband}" stroke="${ol}" stroke-width="1.4"/>
             <path d="M20 34 L6 42 L9 33 L3 28 L20 30Z" fill="${f.headband}" stroke="${ol}" stroke-width="1.2"/>` : '';
         const beard = f.id === 'wolf' ? `<path d="M24 50 C27 68 53 68 56 50 C50 60 30 60 24 50Z" fill="${f.hair}" opacity=".7"/>` : '';
-        const scar = f.id === 'jacky' ? `<path d="M52 42 L56 52" stroke="#9f1239" stroke-width="1.8" stroke-linecap="round"/>`
-                   : f.id === 'lau' ? `<path d="M28 34 L35 48 M30 34 L37 47" stroke="#b91c1c" stroke-width="1.3" stroke-linecap="round"/>` : '';
+        const scar = '';
         const earring = (f.id === 'pai' || f.id === 'sarah') ? `<circle cx="${f.id==='pai'?21:19}" cy="52" r="2.4" fill="#fde047" stroke="${ol}" stroke-width=".8"/>
             <circle cx="59" cy="52" r="2.4" fill="#fde047" stroke="${ol}" stroke-width=".8"/>` : '';
         const lips = (f.id === 'pai' || f.id === 'sarah') ? '#e11d48' : '#7c2d12';
@@ -929,7 +955,7 @@
         Object.values(FIGHTERS).forEach(f => {
           const isP1 = state.p1Id === f.id;
           const isP2 = false;
-          const isArmSkill = f.skill.button === 'punch';
+          const isArmSkill = !['pai', 'sarah'].includes(f.id);
 
           const baseBgClass = isArmSkill
             ? 'bg-gradient-to-b from-blue-900/85 to-blue-950/95 hover:from-blue-800/90 hover:to-blue-900/95'
@@ -1414,6 +1440,7 @@
         let lean = f.crouching ? 0.28 : 0.1;
         let rf = [-22, 0], ff = [24, 0], kk = 0;
         let bodySpinAngle = 0;
+        let spinScaleX = 1;
 
         if (mv) {
           const s = Math.sin(t * 12);
@@ -1448,16 +1475,52 @@
 
         if (M === 'tetsuzanko') {
           lean = 0.42; hx = 14 * Math.max(0, ext); hy += 8; ff = [36, 0]; rf = [-32, 0];
+        } else if (M === 'stomp_axe') {
+          if (p < 0.45) {
+            const up = p / 0.45;
+            lean = -0.32 * up; hx = -6 * up; hy = -84;
+            ff = [20 + up * 42, -30 - Math.sin(up * Math.PI * 0.5) * 105];
+            rf = [-18, -14 * up];
+          } else {
+            const dn = (p - 0.45) / 0.55;
+            lean = -0.32 + dn * 0.72; hx = 12 * dn; hy = -84 + dn * 24;
+            ff = [62 + dn * 32, -135 + dn * 135];
+            rf = [-24, 0];
+          }
+        } else if (M === 'rapid_flurry') {
+          lean = 0.34; hx = 12; hy += 10; ff = [34, 0]; rf = [-26, 0];
         } else if (M === 'flying_kick') {
           lean = -0.52; hx = -10; hy = -82; ff = [96, -74]; rf = [58, -56];
+        } else if (M === 'lightning_upper') {
+          if (p < 0.24) {
+            const c = p / 0.24;
+            lean = 0.32 * c; hy = -66 + 20 * c; ff = [28, 0]; rf = [-24, 0];
+          } else {
+            const u = Math.min(1, (p - 0.24) / 0.35);
+            lean = -0.22 * u; hx = 8 * u; hy = -86;
+            ff = [24, -44 * u]; rf = [-14, -20 * u];
+          }
         } else if (M === 'somersault') {
           bodySpinAngle = -p * Math.PI * 2; hy = -86; ff = [78, -92]; rf = [-18, -36];
         } else if (M === 'lariat_slam') {
           lean = -0.15 + p * 0.65; hx = 10 * Math.max(0, ext); ff = [32, 0]; rf = [-28, 0];
+        } else if (M === 'dropkick') {
+          bodySpinAngle = -Math.min(1, p * 2.4) * 1.15;
+          lean = -0.18; hx = -8; hy = -82;
+          ff = [96, -54]; rf = [86, -40];
+        } else if (M === 'spin_backfist') {
+          spinScaleX = Math.cos(p * Math.PI * 2);
+          if (Math.abs(spinScaleX) < 0.22) spinScaleX = (spinScaleX >= 0 ? 1 : -1) * 0.22;
+          lean = 0.24; hx = 10 * Math.max(0, ext); ff = [32, 0]; rf = [-28, 0];
         } else if (M === 'rising_knee') {
           lean = -0.22; hy = -84; ff = [48, -96]; rf = [-14, -24];
         } else if (M === 'tiger_palm') {
           lean = 0.26; hx = 10 * Math.max(0, ext); ff = [30, 0]; rf = [-24, 0];
+        } else if (M === 'tornado_kick') {
+          spinScaleX = Math.cos(p * Math.PI * 4);
+          if (Math.abs(spinScaleX) < 0.24) spinScaleX = (spinScaleX >= 0 ? 1 : -1) * 0.24;
+          lean = -0.18; hx = -4; hy = -86;
+          ff = [94, -68]; rf = [-12, -26];
         }
 
         const sx = hx + 3 * Math.cos(lean) + 42 * Math.sin(lean);
@@ -1481,6 +1544,26 @@
 
         if (M === 'tetsuzanko') {
           fh = [sx + 48, sy + 6]; rh = [sx - 24, sy - 12];
+        } else if (M === 'stomp_axe') {
+          const swing = p < 0.45 ? -26 : 14;
+          fh = [sx - 16, sy + swing]; rh = [sx + 24, sy - 16];
+        } else if (M === 'rapid_flurry') {
+          const rapid = Math.sin(p * Math.PI * 10) * 18;
+          const rapidY = Math.cos(p * Math.PI * 10) * 12;
+          fh = [sx + 56 + rapid, sy - 8 + rapidY]; rh = [sx + 56 - rapid, sy + 8 - rapidY];
+        } else if (M === 'lightning_upper') {
+          if (p < 0.24) {
+            fh = [sx + 14, sy + 28]; rh = [sx - 10, sy + 10];
+          } else {
+            const u = Math.min(1, (p - 0.24) / 0.32);
+            fh = [sx + 26, sy - 68 * u]; rh = [sx - 14, sy + 18];
+          }
+        } else if (M === 'dropkick') {
+          fh = [sx - 24, sy + 12]; rh = [sx - 16, sy - 12];
+        } else if (M === 'spin_backfist') {
+          fh = [sx + 68, sy - 6]; rh = [sx - 28, sy + 6];
+        } else if (M === 'tornado_kick') {
+          fh = [sx - 22, sy - 10]; rh = [sx + 24, sy - 14];
         } else if (M === 'flying_kick' || M === 'somersault' || M === 'rising_knee') {
           fh = [sx + 16, sy - 24]; rh = [sx - 18, sy + 6];
         } else if (M === 'lariat_slam') {
@@ -1539,6 +1622,9 @@
           ctx.rotate(bodySpinAngle);
           ctx.translate(0, 65);
         }
+        if (spinScaleX !== 1) {
+          ctx.scale(spinScaleX, 1);
+        }
 
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -1575,7 +1661,7 @@
         };
 
         if (!(kicking && !useFg)) leg(rf[0], rf[1], -38);
-        if (!(punching && !useFg) && M !== 'lariat_slam' && M !== 'tiger_palm') arm(rh, -38);
+        if (!(punching && !useFg) && M !== 'lariat_slam' && M !== 'tiger_palm' && M !== 'rapid_flurry') arm(rh, -38);
 
         ctx.save();
         ctx.translate(hx, hy);
@@ -1658,21 +1744,62 @@
 
         leg(ff[0], ff[1], 0);
         if (kicking && !useFg) leg(rf[0], rf[1], 0);
-        if ((punching && !useFg) || M === 'lariat_slam' || M === 'tiger_palm') arm(rh, 0);
+        if ((punching && !useFg) || M === 'lariat_slam' || M === 'tiger_palm' || M === 'rapid_flurry') arm(rh, 0);
         arm(fh, 0);
 
         if (((punching || kicking) && ext > 0.45) || K) {
           ctx.save();
           ctx.globalCompositeOperation = 'lighter';
           ctx.strokeStyle = K ? tpl.aura : 'rgba(255,220,140,.5)';
-          ctx.globalAlpha = K ? 0.75 : 1;
-          ctx.lineWidth = K ? 18 : 9;
-          const e = kicking ? (useFg ? ff : rf) : (useFg ? fh : rh);
-          const o = kicking ? [hx, hy] : [sx + 4, sy];
-          ctx.beginPath();
-          ctx.moveTo(o[0], o[1]);
-          ctx.lineTo(e[0] + 10, e[1] - 4);
-          ctx.stroke();
+          ctx.globalAlpha = K ? 0.78 : 1;
+          if (M === 'stomp_axe') {
+            ctx.lineWidth = 14;
+            ctx.beginPath();
+            ctx.arc(hx + 20, hy - 18, 76, -Math.PI * 0.78, Math.PI * 0.15);
+            ctx.stroke();
+          } else if (M === 'rapid_flurry') {
+            ctx.lineWidth = 8;
+            for (let ri = -1; ri <= 1; ri++) {
+              const off = Math.sin(p * Math.PI * 10 + ri * 1.4) * 14;
+              ctx.beginPath();
+              ctx.moveTo(sx + 12, sy + ri * 15);
+              ctx.lineTo(sx + 78 + off, sy + ri * 13);
+              ctx.stroke();
+            }
+          } else if (M === 'lightning_upper') {
+            ctx.lineWidth = 15;
+            ctx.beginPath();
+            ctx.moveTo(sx + 8, sy + 24);
+            ctx.lineTo(sx + 32, sy - 20);
+            ctx.lineTo(sx + 18, sy - 44);
+            ctx.lineTo(sx + 34, sy - 92);
+            ctx.stroke();
+          } else if (M === 'dropkick') {
+            ctx.lineWidth = 13;
+            ctx.beginPath();
+            ctx.moveTo(hx, hy); ctx.lineTo(ff[0] + 14, ff[1] - 2);
+            ctx.moveTo(hx, hy + 8); ctx.lineTo(rf[0] + 14, rf[1] + 2);
+            ctx.stroke();
+          } else if (M === 'spin_backfist' || M === 'tornado_kick') {
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.ellipse(0, M === 'tornado_kick' ? -72 : -88, 74, 18, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            if (M === 'tornado_kick') {
+              ctx.lineWidth = 6;
+              ctx.beginPath();
+              ctx.ellipse(0, -44, 56, 14, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          } else {
+            ctx.lineWidth = K ? 18 : 9;
+            const e = kicking ? (useFg ? ff : rf) : (useFg ? fh : rh);
+            const o = kicking ? [hx, hy] : [sx + 4, sy];
+            ctx.beginPath();
+            ctx.moveTo(o[0], o[1]);
+            ctx.lineTo(e[0] + 10, e[1] - 4);
+            ctx.stroke();
+          }
           ctx.restore();
         }
         ctx.restore();
@@ -1751,12 +1878,12 @@
       let p1CalloutTimer = null;
       let p2CalloutTimer = null;
 
-      function showSkillCallout(fighter, skillName) {
+      function showSkillCallout(fighter, skillName, btnType = 'punch') {
         const isP1 = (fighter === f1);
         const el = document.getElementById(isP1 ? 'p1SkillCallout' : 'p2SkillCallout');
         if (!el) return;
         const tpl = FIGHTERS[fighter.id] || FIGHTERS.akira;
-        const isArm = tpl.skill.button === 'punch';
+        const isArm = btnType === 'punch';
 
         el.textContent = `⚡ ${skillName}`;
         el.style.borderColor = tpl.aura;
@@ -1788,12 +1915,23 @@
       function checkCommandInput(f, btnType) {
         const recent = f.cmd.filter(c => animTime - c.t <= 1.2);
         const seq = recent.map(c => c.tok).join('');
-        let idxB = seq.indexOf('B');
-        let idxD = idxB >= 0 ? seq.indexOf('D', idxB + 1) : -1;
-        let idxF = idxD >= 0 ? seq.indexOf('F', idxD + 1) : -1;
-        if (idxB >= 0 && idxD > idxB && idxF > idxD) {
-          const sk = FIGHTERS[f.id].skill;
-          if (sk && sk.button === btnType) {
+        const skills = FIGHTERS[f.id]?.skills;
+        if (!skills) return false;
+        if (btnType === 'punch' && skills.punch) {
+          // 뒤 -> 아래 -> 앞 + 오른손 (손스킬)
+          const idxB = seq.indexOf('B');
+          const idxD = idxB >= 0 ? seq.indexOf('D', idxB + 1) : -1;
+          const idxF = idxD >= 0 ? seq.indexOf('F', idxD + 1) : -1;
+          if (idxB >= 0 && idxD > idxB && idxF > idxD) {
+            f.cmd = [];
+            return true;
+          }
+        } else if (btnType === 'kick' && skills.kick) {
+          // 앞 -> 아래 -> 뒤 + 오른발 (발스킬)
+          const idxF = seq.indexOf('F');
+          const idxD = idxF >= 0 ? seq.indexOf('D', idxF + 1) : -1;
+          const idxB = idxD >= 0 ? seq.indexOf('B', idxD + 1) : -1;
+          if (idxF >= 0 && idxD > idxF && idxB > idxD) {
             f.cmd = [];
             return true;
           }
@@ -1809,7 +1947,7 @@
         if (!canControlPlayer() || attacker.action !== 'idle') return;
 
         if (strong && checkCommandInput(attacker, act)) {
-          triggerSkill(attacker);
+          triggerSkill(attacker, act);
           return;
         }
 
@@ -1823,9 +1961,11 @@
         attacker.guarding = false;
       }
 
-      function triggerSkill(f) {
+      function triggerSkill(f, btnType = 'punch') {
         if (!canControlPlayer() || f.action !== 'idle') return;
-        const sk = FIGHTERS[f.id].skill;
+        const skills = FIGHTERS[f.id]?.skills;
+        const sk = skills?.[btnType] || skills?.punch || skills?.kick;
+        if (!sk) return;
         f.action = 'skill';
         f.sk = sk;
         f.strong = true;
@@ -1838,7 +1978,7 @@
         if (sk.vy) f.vy = sk.vy;
         playSfx('skill');
         screenShake = 5;
-        showSkillCallout(f, sk.name);
+        showSkillCallout(f, sk.name, sk.button);
       }
 
       function checkMeleeHit(attacker, defender) {
@@ -1985,13 +2125,13 @@
         const stageHeader = currentMode === 'practice'
           ? `STAGE ${arcadeStage} · VS ${FIGHTERS[state.p2Id].name}\nROUND ${num}`
           : `ROUND ${num}`;
-        showBanner(stageHeader, 1050);
+        showBanner(stageHeader, 2050);
 
         setTimeout(() => {
           if (phase !== 'countdown') return;
           phase = 'fight';
           showBanner('FIGHT!', 700);
-        }, 1100);
+        }, 2100);
       }
 
       function finishRound(winnerNum, reasonText) {
@@ -2170,7 +2310,7 @@
         if (!f2.guarding && a.punishReady && f2.action === 'idle' && dist < 120) {
           a.punishReady = false;
           if (Math.random() < 0.35 + lv * 0.08) {
-            triggerSkill(f2);
+            triggerSkill(f2, Math.random() < 0.5 ? 'punch' : 'kick');
           } else {
             triggerFighterAction(f2, f1, Math.random() < 0.5 ? 'punch' : 'kick', true);
           }
@@ -2195,7 +2335,7 @@
           a.cd = Math.max(0.5, 1.3 - lv * 0.14) + Math.random() * 0.45;
         }
         if (f2.action === 'idle' && !f2.guarding && dist < 126 && Math.random() < dt * (0.20 + lv * 0.10)) {
-          triggerSkill(f2);
+          triggerSkill(f2, Math.random() < 0.5 ? 'punch' : 'kick');
           a.cd = Math.max(0.6, 1.2 - lv * 0.1);
         }
       }
@@ -2375,10 +2515,12 @@
         ctx.restore();
 
         const sEl = document.getElementById('skillStatus');
-        const mySk = FIGHTERS[f1.id].skill;
-        const isArm = mySk.button === 'punch';
-        if (sEl) {
-          sEl.innerHTML = `<span class="${isArm ? 'text-sky-300' : 'text-rose-300'}">${mySk.name}</span><br><span class="text-amber-300">←↓→+${mySk.buttonLabel}</span>`;
+        const myFighter = (currentMode === 'pvp' && pvpRole === 'right') ? f2 : f1;
+        const mySkills = FIGHTERS[myFighter.id]?.skills;
+        if (sEl && mySkills) {
+          const punchArrows = myFighter.dir === 1 ? '←↓→' : '→↓←';
+          const kickArrows = myFighter.dir === 1 ? '→↓←' : '←↓→';
+          sEl.innerHTML = `<span class="text-sky-300">👊 ${mySkills.punch.name}</span> <span class="text-amber-300">${punchArrows}+오른손</span><br><span class="text-rose-300">🦵 ${mySkills.kick.name}</span> <span class="text-amber-300">${kickArrows}+오른발</span>`;
         }
 
         document.getElementById('hudP1Hp').style.width = `${Math.max(0, f1.hp)}%`;
@@ -2442,6 +2584,21 @@
       };
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        const resultBanner = document.getElementById('matchResultBanner');
+        if (phase === 'matchEnd' && resultBanner && !resultBanner.classList.contains('hidden')) {
+          if (!e.repeat && (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter')) {
+            e.preventDefault();
+            const rematchBtn = document.getElementById('rematchBtn');
+            if (rematchBtn && !rematchBtn.classList.contains('hidden')) rematchBtn.click();
+            return;
+          }
+          if (!e.repeat && e.code === 'Escape') {
+            e.preventDefault();
+            const backBtn = document.getElementById('backSelectBtn');
+            if (backBtn && !backBtn.classList.contains('hidden')) backBtn.click();
+            return;
+          }
+        }
         keys[e.code] = true;
         if (!canControlPlayer()) return;
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
