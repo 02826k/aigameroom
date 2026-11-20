@@ -309,3 +309,1154 @@
       <form id="authForm" class="flex flex-col gap-3.5">
         <div>
           <label class="block text-[11px] font-bold text-slate-300 mb-1">아이디 (휴대폰 번호 뒷 8자리)</label>
+          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
+            <span class="px-3 py-2 bg-slate-900 text-amber-300 font-extrabold text-sm border-r border-slate-800">010 -</span>
+            <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="w-full px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1">비밀번호 (숫자 4자리)</label>
+          <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="1234" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none" />
+        </div>
+        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
+        <button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-amber-500 hover:bg-amber-400 text-slate-950 shadow cursor-pointer">로그인 및 서버저장 연동</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // ==========================================
+      // 1. 서버 연동 & 공용 인증 (최고 보유 금액 랭킹)
+      // ==========================================
+      const GAME_ID = 'panchigi_v1';
+      const CLOUD_API_URL = 'https://02826k.duckdns.org';
+      const API_BASE_URL = CLOUD_API_URL;
+      const STORAGE_KEY = 'panchigi_save_v1';
+      const TOKEN_KEY = 'aigameroom_jwt_token';
+      const USER_KEY = 'aigameroom_username';
+
+      const ALL_TOKEN_KEYS = [TOKEN_KEY, 'abuse_jwt_token', 'hero_clicker_jwt_token', 'sky2026_jwt_token'];
+      const ALL_USER_KEYS = [USER_KEY, 'abuse_username', 'hero_clicker_username', 'sky2026_username'];
+
+      function readSharedAuth() {
+        let t = null, u = null;
+        try {
+          for (const k of ALL_TOKEN_KEYS) { if (!t) t = localStorage.getItem(k); }
+          for (const k of ALL_USER_KEYS) { if (!u) u = localStorage.getItem(k); }
+        } catch (e) {}
+        return { t, u };
+      }
+      function syncSharedAuth(t, u) {
+        try {
+          if (t && u) {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, t));
+            ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, u));
+          } else {
+            ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            localStorage.removeItem('hero_clicker_is_vip');
+          }
+        } catch (e) {}
+      }
+
+      let { t: authToken, u: currentUsername } = readSharedAuth();
+      let isRegisterMode = false;
+
+      let saveStateObj = {
+        bestMoney: 0,
+        soundEnabled: true,
+        bgmEnabled: true,
+        isVip: false
+      };
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) saveStateObj = { ...saveStateObj, ...JSON.parse(raw) };
+      } catch (e) {}
+
+      function persistState(syncCloud = false) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saveStateObj)); } catch (e) {}
+        if (syncCloud && authToken) syncSaveToServer(false);
+      }
+
+      function maskPhoneMiddle(name) {
+        const str = String(name || '');
+        const m = str.match(/^(01[016789])[-.\s]?(\d{3,4}|\*{3,4})[-.\s]?(\d{4}|\*{4})$/);
+        if (m) return `${m[1]}-****-${m[3]}`;
+        return str.replace(/(01[016789])[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, '$1-****-$3');
+      }
+
+      let toastTimer = null;
+      function showToast(msg) {
+        const b = document.getElementById('toastBox');
+        document.getElementById('toastMsg').textContent = msg;
+        b.classList.remove('opacity-0', 'translate-y-2');
+        b.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          b.classList.remove('opacity-100', 'translate-y-0');
+          b.classList.add('opacity-0', 'translate-y-2');
+        }, 2200);
+      }
+
+      async function syncSaveToServer(notify = false) {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({
+              gameId: GAME_ID,
+              saveData: saveStateObj,
+              score: saveStateObj.bestMoney
+            })
+          });
+          if (res.status === 401 || res.status === 403) { handleLogout(true); return; }
+          if (res.ok) {
+            if (notify) showToast('🟨 클라우드 서버에 기록이 저장되었습니다!');
+            fetchRanking();
+          }
+        } catch (e) {}
+      }
+
+      async function loadFromServer() {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/load?gameId=${GAME_ID}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (res.status === 401 || res.status === 403) { handleLogout(true); return; }
+          const data = await res.json();
+          if (res.ok && data.saveData) {
+            const sd = typeof data.saveData === 'string' ? JSON.parse(data.saveData) : data.saveData;
+            saveStateObj.bestMoney = Math.max(saveStateObj.bestMoney, Number(sd.bestMoney || 0));
+            saveStateObj.isVip = Boolean(data.isVip || sd.isVip || saveStateObj.isVip);
+            persistState(false);
+            updateHeaderUI();
+          }
+        } catch (e) {}
+      }
+
+      async function fetchRanking() {
+        const listEl = document.getElementById('rankingListContainer');
+        const myRankEl = document.getElementById('myRankDetailText');
+        try {
+          const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}&_t=${Date.now()}`, { headers });
+          const data = await res.json();
+          if (!res.ok) throw new Error();
+          const rankings = data.rankings || [];
+          if (data.myRank) {
+            myRankEl.textContent = `전체 ${data.totalPlayers || rankings.length}명 중 ${data.myRank.rank}위 · 최고 ${Number(data.myRank.score || saveStateObj.bestMoney).toLocaleString()}원`;
+          } else if (authToken) {
+            myRankEl.textContent = '게임 종료 시 최고 보유 금액이 반영됩니다';
+          } else {
+            myRankEl.textContent = '로그인 시 실시간 순위에 등록됩니다';
+          }
+          if (!rankings.length) {
+            listEl.innerHTML = '<div class="text-center py-4 text-xs text-slate-500">아직 등록된 기록이 없습니다. 첫 1위에 도전하세요!</div>';
+            return;
+          }
+          listEl.innerHTML = rankings.slice(0, 10).map((item, idx) => {
+            const rank = item.rank ?? (idx + 1);
+            return `
+              <div class="rounded-xl px-3 py-2 border ${item.isMe ? 'bg-amber-950/30 border-amber-400/60' : 'bg-slate-950/80 border-slate-800'} flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-black text-amber-300 w-6">${rank}위</span>
+                  <span class="font-bold text-slate-100 truncate">${maskPhoneMiddle(item.maskedName)}</span>
+                  ${item.isMe ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">나</span>' : ''}
+                </div>
+                <span class="font-black text-emerald-400 shrink-0">${Number(item.score || 0).toLocaleString()}원</span>
+              </div>
+            `;
+          }).join('');
+        } catch (e) {
+          listEl.innerHTML = '<div class="text-center py-4 text-xs text-slate-500">랭킹 서버 연결 대기 중...</div>';
+        }
+      }
+
+      // ==========================================
+      // 2. Web Audio (BGM & 효과음)
+      // ==========================================
+      let audioCtx = null, bgmTimer = null, bgmStep = 0;
+      function getAC() {
+        if (!saveStateObj.soundEnabled && !saveStateObj.bgmEnabled) return null;
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        return audioCtx;
+      }
+      function beep(f, d, t = 'triangle', vol = 0.12) {
+        if (!saveStateObj.soundEnabled) return;
+        const ac = getAC(); if (!ac) return;
+        try {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = t; o.frequency.value = f; g.gain.value = vol;
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + d);
+          o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + d);
+        } catch (e) {}
+      }
+      function startBGM() {
+        stopBGM();
+        if (!saveStateObj.bgmEnabled) return;
+        const notes = [261.63, 329.63, 392.0, 329.63, 293.66, 349.23, 440.0, 392.0];
+        bgmTimer = setInterval(() => {
+          if (!saveStateObj.bgmEnabled || !audioCtx || audioCtx.state !== 'running') return;
+          try {
+            const now = audioCtx.currentTime;
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(notes[bgmStep % notes.length], now);
+            g.gain.setValueAtTime(0.018, now);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now); o.stop(now + 0.36);
+            bgmStep++;
+          } catch (e) {}
+        }, 420);
+      }
+      function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
+
+      // ==========================================
+      // 3. 판치기 게임 엔진 (전체화면 가로모드 / 일반 모바일 세로모드)
+      // ==========================================
+      const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+      const fullscreenStage = document.getElementById('fullscreenStage');
+      const isFullscreenActive = () => Boolean(document.fullscreenElement) || fullscreenStage.classList.contains('is-fullscreen');
+
+      const FONT = '"Noto Sans KR",sans-serif';
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const hit = (r, x, y) => x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3];
+
+      let isPortrait = false;
+      let W = 1120, H = 646;
+      let BR = { x: 300, y: 65, w: 460, h: 540 };
+      let CARD = { 1: [18, 22, 168, 206], 2: [18, 424, 168, 206], 0: [862, 484, 240, 146] };
+      let RULE = { 100: [862, 20, 114, 68], 500: [988, 20, 114, 68] };
+      let PANEL = [928, 112, 108, 356];
+      let NEXT = [BR.x + BR.w / 2 - 105, BR.y + BR.h / 2 - 28, 210, 56];
+      let PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 982, y: 174 + i * 64, r: 11 + l * 2.4 }));
+
+      const inBook = (x, y, m = 0) => x >= BR.x - m && x <= BR.x + BR.w + m && y >= BR.y - m && y <= BR.y + BR.h + m;
+
+      const BOOKS = [
+        { n: '국어', s: '고등학교 1학년', bg: '#f6f4ec', sp: '#34669a', ac: '#4b87c3', tx: '#1c2d46' },
+        { n: '수학', s: '고등학교 공통', bg: '#ecf6f0', sp: '#2e8052', ac: '#48a570', tx: '#18412a' },
+        { n: '영어', s: 'High School', bg: '#f8efef', sp: '#ac3e3e', ac: '#d25f5f', tx: '#581c1c' }
+      ];
+      const PCOL = { 1: '#41af5f', 2: '#91be37', 3: '#ebaf28', 4: '#eb6e28', 5: '#d72d2d' };
+      const T = (s, x, y, sz, c, al = 'center', b = true) => { ctx.font = `${b ? '800' : '500'} ${sz}px ${FONT}`; ctx.fillStyle = c; ctx.textAlign = al; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); };
+      const rr = (x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); };
+
+      const SPR = {};
+      function sprite(v, f, year = 2024) {
+        const yKey = f === 1 ? year : 0;
+        const k = `${v}_${f}_${yKey}`;
+        if (SPR[k]) return SPR[k];
+        const c = document.createElement('canvas'); c.width = c.height = 160; const g = c.getContext('2d');
+        const silver = v === 100;
+        const base = silver ? '#cdd1d6' : '#d4cec0', hi = silver ? '#f2f5f8' : '#f6f2e6', sh = silver ? '#70747a' : '#766e62', rim = silver ? '#8a8e94' : '#918a7a', em = silver ? '#bcc0c6' : '#c6c0b0';
+        const cir = (r, col) => { g.beginPath(); g.arc(80, 80, r, 0, 7); g.fillStyle = col; g.fill(); };
+        cir(76, sh); cir(74, hi); cir(73, rim); cir(69, base);
+        const gr = g.createLinearGradient(0, 0, 160, 160);
+        gr.addColorStop(0, 'rgba(255,255,255,.35)'); gr.addColorStop(.5, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(0,0,0,.12)');
+        g.beginPath(); g.arc(80, 80, 69, 0, 7); g.fillStyle = gr; g.fill();
+        const et = (s, x, y, sz) => { g.font = `900 ${sz}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = sh; g.fillText(s, x + 2, y + 2); g.fillStyle = hi; g.fillText(s, x - 1, y - 1); g.fillStyle = em; g.fillText(s, x, y); };
+        const poly = (p) => { [[2, sh], [-1, hi], [0, em]].forEach(([o, col]) => { g.beginPath(); p.forEach(([x, y], i) => i ? g.lineTo(x + o, y + o) : g.moveTo(x + o, y + o)); g.closePath(); g.fillStyle = col; g.fill(); }); };
+        if (f === 1) {
+          for (let i = 0; i < 48; i++) {
+            const a = i / 48 * 6.283, x = 80 + Math.cos(a) * 63, y = 80 + Math.sin(a) * 63;
+            g.fillStyle = sh; g.beginPath(); g.arc(x + 1, y + 1, 2, 0, 7); g.fill();
+            g.fillStyle = hi; g.beginPath(); g.arc(x, y, 2, 0, 7); g.fill();
+          }
+          et(String(year), 80, 40, 22); et(String(v), 80, 82, 50); et('한 국 은 행', 80, 124, 17);
+        } else if (v === 500) {
+          poly([[58, 72], [50, 42], [62, 26], [76, 30], [74, 52], [82, 62]]);
+          poly([[66, 78], [94, 72], [118, 86], [124, 102], [104, 100], [78, 92]]);
+          poly([[38, 104], [66, 82], [96, 62], [116, 48], [132, 46], [114, 54], [94, 76], [52, 102]]);
+          et('오 백 원', 80, 125, 22);
+        } else {
+          poly([[36, 134], [56, 108], [104, 108], [124, 134], [80, 146]]);
+          poly([[44, 52], [116, 52], [114, 62], [46, 62]]);
+          poly([[58, 56], [62, 30], [98, 30], [102, 56]]);
+          poly([[62, 58], [98, 58], [96, 92], [80, 104], [64, 92]]);
+          poly([[68, 92], [92, 92], [88, 126], [80, 132], [72, 126]]);
+          et('백', 34, 84, 22); et('원', 126, 84, 22);
+        }
+        return SPR[k] = c;
+      }
+      function drawCoin(x, y, r, v, f, sy = 1, year = 2024) {
+        const w = Math.max(8, r * 2), h = Math.max(4, r * 2 * sy);
+        ctx.drawImage(sprite(v, f, year), x - w / 2, y - h / 2, w, h);
+      }
+
+      const G = {
+        book: 0, mode: 'AI', np: 2, stage: 1, cur: 0, scores: [0, 0, 0],
+        inv: [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }], hl: {},
+        rc: 100, rn: 2, power: 2, auto: true, layout: 'vertical',
+        coins: [], parts: [], placed: [0, 0, 0], startFace: 1, mixed: false, slapCount: 0,
+        state: 'SETUP', winner: null, reason: '', msg: '',
+        aiT: 0, aiPos: null, aiDir: 0,
+        hand: [BR.x + BR.w - 50, BR.y + BR.h / 2], handOk: true,
+        drag: false, ds: [0, 0], dc: [0, 0], shake: 0, anim: 0, lastDir: 0,
+        banners: []
+      };
+
+      const pname = (i) => G.mode === 'AI' ? (i === 0 ? '나(P1)' : 'AI') : `${i + 1}P`;
+      const isAI = () => G.mode === 'AI' && G.cur === 1;
+      const rad = (v) => v === 100 ? 22 : 28;
+      const faceName = (f) => f === 1 ? '뒷면(숫자)' : '앞면(그림)';
+      const totalMoney = (p) => G.inv[p][100] * 100 + G.inv[p][500] * 500;
+
+      // 반응형 레이아웃 계산 (전체화면 시 무조건 가로모드, 일반 모바일 세로일 때만 세로모드)
+      function shouldUsePortrait() {
+        if (isFullscreenActive()) return false;
+        return window.innerWidth < 820 && window.innerHeight > window.innerWidth;
+      }
+
+      function applyCanvasLayout(force = false) {
+        const nextPortrait = shouldUsePortrait();
+        const oldBR = { ...BR };
+        const changed = force || nextPortrait !== isPortrait || (nextPortrait && ((G.np === 3 && CARD[1][2] !== 174) || (G.np !== 3 && CARD[1][2] !== 236)));
+        if (!changed) return;
+
+        isPortrait = nextPortrait;
+        if (isPortrait) {
+          W = 580;
+          H = 816;
+          BR = { x: 20, y: 132, w: 438, h: 520 };
+          if (G.np === 3) {
+            CARD = {
+              1: [10, 12, 174, 102],
+              2: [190, 12, 174, 102],
+              0: [140, 672, 300, 126]
+            };
+            RULE = { 100: [374, 14, 92, 66], 500: [474, 14, 92, 66] };
+          } else {
+            CARD = {
+              1: [14, 12, 236, 102],
+              2: [14, 12, 236, 102],
+              0: [140, 672, 300, 126]
+            };
+            RULE = { 100: [344, 14, 104, 68], 500: [460, 14, 104, 68] };
+          }
+          PANEL = [470, 186, 98, 360];
+          PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 519, y: 248 + i * 64, r: 12 + l * 2.4 }));
+        } else {
+          W = 1120;
+          H = 646;
+          BR = { x: 300, y: 65, w: 460, h: 540 };
+          CARD = { 1: [18, 22, 168, 206], 2: [18, 424, 168, 206], 0: [862, 484, 240, 146] };
+          RULE = { 100: [862, 20, 114, 68], 500: [988, 20, 114, 68] };
+          PANEL = [928, 112, 108, 356];
+          PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 982, y: 174 + i * 64, r: 11 + l * 2.4 }));
+        }
+        NEXT = [BR.x + BR.w / 2 - 105, BR.y + BR.h / 2 - 28, 210, 56];
+
+        if (cv.width !== W || cv.height !== H) {
+          cv.width = W;
+          cv.height = H;
+        }
+
+        // 화면 회전/리사이즈 시 책 위 동전 및 손 위치 보정
+        const oldCx = oldBR.x + oldBR.w / 2, oldCy = oldBR.y + oldBR.h / 2;
+        const newCx = BR.x + BR.w / 2, newCy = BR.y + BR.h / 2;
+        const dx = newCx - oldCx, dy = newCy - oldCy;
+        if (!force && (dx !== 0 || dy !== 0)) {
+          G.coins.forEach((c) => { c.x += dx; c.y += dy; });
+          G.hand = [Math.min(BR.x + BR.w - 30, Math.max(BR.x + 30, G.hand[0] + dx)), Math.min(BR.y + BR.h - 30, Math.max(BR.y + 30, G.hand[1] + dy))];
+          if (G.aiPos) G.aiPos = [G.aiPos[0] + dx, G.aiPos[1] + dy];
+        } else if (force) {
+          G.hand = [BR.x + BR.w - 50, BR.y + BR.h / 2];
+        }
+      }
+
+      // HUD DOM 텍스트 동기화 (불필요한 DOM 갱신 방지)
+      let lastHudScore = '', lastHudStage = '', lastHudMsg = '';
+      function syncHudDom() {
+        const sc = Array.from({ length: G.np }, (_, i) => `${pname(i)}: ${G.scores[i]}승`).join('  |  ');
+        const st = G.mode === 'AI' ? `📘 ${BOOKS[G.book].n}  ${G.stage}교시 쉬는시간` : `📘 ${BOOKS[G.book].n}  ${G.np}인 대전`;
+        if (sc !== lastHudScore) { document.getElementById('hudScoreText').textContent = sc; lastHudScore = sc; }
+        if (st !== lastHudStage) { document.getElementById('hudStageText').textContent = st; lastHudStage = st; }
+        if (G.msg !== lastHudMsg) { document.getElementById('gameBottomMsg').textContent = G.msg; lastHudMsg = G.msg; }
+      }
+
+      function queueBanner(text, sub = '', color = '#fde047', duration = 62) {
+        G.banners.push({ text, sub, color, duration, timer: 0 });
+      }
+      function hasActiveBanner() { return G.banners.length > 0; }
+
+      function recordMaxMoney(notify = false) {
+        let maxNow = 0;
+        if (G.mode === 'AI') {
+          maxNow = totalMoney(0);
+        } else {
+          for (let p = 0; p < G.np; p++) maxNow = Math.max(maxNow, totalMoney(p));
+        }
+        if (maxNow > saveStateObj.bestMoney) {
+          saveStateObj.bestMoney = maxNow;
+          persistState(true);
+          if (notify) showToast(`💰 최고 보유 금액 갱신: ${maxNow.toLocaleString()}원!`);
+        }
+      }
+
+      class Coin {
+        constructor(x, y, v, owner, face) {
+          Object.assign(this, {
+            x, y, z: 0, vx: 0, vy: 0, vz: 0, v, owner, face,
+            year: 2000 + Math.floor(Math.random() * 27),
+            r: rad(v), mass: v === 100 ? 1 : 1.4, tilt: 0, av: 0, moving: false, out: false, delay: 0
+          });
+        }
+        slap(hx, hy, p, dir) {
+          const dx = this.x - hx, dy = this.y - hy, d = Math.hypot(dx, dy), range = 150 + p * 26;
+          if (d > range) return;
+          const base = (0.9 + p * 0.65) * Math.pow(1 - d / range, 1.5) / this.mass;
+          if (base < 0.45) return;
+          this.vz = base * rnd(1.0, 1.35);
+          const dn = Math.max(d, 1);
+          if (dir) { this.vx = dir * base * rnd(.7, 1.05); this.vy = dy / dn * base * .22; }
+          else { this.vx = dx / dn * base * .3; this.vy = dy / dn * base * .3; }
+          this.av = base * rnd(8, 11); this.moving = true;
+        }
+        update() {
+          if (!this.moving) return;
+          this.x += this.vx; this.y += this.vy; this.z += this.vz; this.vz -= .48;
+          if (this.z > 0) { this.tilt += this.av; this.av *= .96; }
+          if (this.z <= 0) {
+            this.z = 0;
+            if (this.tilt > 0) { const n = this.tilt % 360; if (n >= 90 && n <= 270) this.face = 1 - this.face; this.tilt = 0; this.av = 0; }
+            if (Math.abs(this.vz) > 1.2) { this.vz = -this.vz * .25; this.vx *= .6; this.vy *= .6; }
+            else { this.vz = 0; this.vx *= .72; this.vy *= .72; if (Math.abs(this.vx) < .1 && Math.abs(this.vy) < .1) { this.vx = this.vy = 0; this.moving = false; } }
+          }
+          if (!inBook(this.x, this.y)) this.out = true;
+        }
+        draw() {
+          const so = this.z * .35, sr = Math.max(8, this.r - this.z * .05);
+          ctx.fillStyle = 'rgba(70,60,50,.35)'; ctx.beginPath(); ctx.ellipse(this.x + so, this.y + so + 3, sr, sr * .9, 0, 0, 7); ctx.fill();
+          const n = this.tilt % 360, air = this.tilt > 0, flip = air && n >= 90 && n <= 270;
+          const df = flip ? 1 - this.face : this.face;
+          drawCoin(this.x, this.y - this.z * 1.1, this.r * (1 + this.z * .01), this.v, df, Math.max(.16, Math.abs(Math.cos(n * Math.PI / 180))), this.year);
+        }
+      }
+
+      function refund() { if (G.state === 'SETUP' || G.state === 'READY') G.coins.forEach(c => G.inv[c.owner][c.v]++); }
+
+      function adjustRuleForBalance() {
+        let canCurrent = true;
+        for (let p = 0; p < G.np; p++) if (G.inv[p][G.rc] < 1) canCurrent = false;
+        if (!canCurrent) {
+          const other = G.rc === 100 ? 500 : 100;
+          let canOther = true;
+          for (let p = 0; p < G.np; p++) if (G.inv[p][other] < 1) canOther = false;
+          if (canOther) G.rc = other;
+        }
+        for (let p = 0; p < G.np; p++) {
+          if (G.inv[p][G.rc] < G.rn && G.inv[p][G.rc] >= 1) G.rn = 1;
+        }
+      }
+
+      function startMatch() {
+        G.stage = 1;
+        G.scores = [0, 0, 0];
+        G.inv = [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }];
+        G.banners = [];
+        applyCanvasLayout(true);
+        syncUI();
+        if (G.mode === 'AI') {
+          queueBanner(`${G.stage}교시 쉬는시간`, '학교 교실 판치기', '#fde047', 62);
+          queueBanner('파이트~!', 'AI의 동전을 모두 따내세요!', '#fb923c', 55);
+        } else {
+          queueBanner('START~', `${G.np}인 대전 시작!`, '#38bdf8', 60);
+        }
+        startSetup(false);
+      }
+
+      function startSetup(rf = false) {
+        if (rf) refund();
+        adjustRuleForBalance();
+        Object.assign(G, { coins: [], placed: [0, 0, 0], state: 'SETUP', winner: null, cur: 0, mixed: false, slapCount: 0, aiT: 36, aiPos: null });
+        G.auto ? autoPlace() : setupMsg();
+      }
+      function setupMsg() {
+        const rem = G.rn - G.placed[G.cur], n = pname(G.cur);
+        if (isAI()) G.msg = '[동전 배치] AI가 동전을 올리는 중입니다...';
+        else if (!G.coins.length) G.msg = `[동전 배치] ${n}: 첫 동전을 놓으세요! (다시 누르면 앞/뒷면 전환)`;
+        else G.msg = `[동전 배치] ${n}: ${G.rc}원(${faceName(G.coins[0].face)}) ${rem}개 더 배치하세요!`;
+      }
+      function tight(total, r) {
+        const cx = BR.x + BR.w / 2 - 10, cy = BR.y + BR.h / 2 + 20, s = r * 2 + 1, V = G.layout === 'vertical';
+        if (total === 2) return V ? [[cx, cy - s / 2], [cx, cy + s / 2]] : [[cx - s / 2, cy], [cx + s / 2, cy]];
+        if (total === 3) return V ? [[cx, cy - s], [cx, cy], [cx, cy + s]] : [[cx, cy - s * .43], [cx - s / 2, cy + s * .43], [cx + s / 2, cy + s * .43]];
+        if (total === 4) return V ? [0, 1, 2, 3].map(i => [cx, cy - s * 1.5 + i * s]) : [[cx - s / 2, cy - s / 2], [cx + s / 2, cy - s / 2], [cx - s / 2, cy + s / 2], [cx + s / 2, cy + s / 2]];
+        if (total === 6) {
+          const a = [];
+          if (V) for (let i = 0; i < 3; i++) a.push([cx - s / 2, cy + (i - 1) * s], [cx + s / 2, cy + (i - 1) * s]);
+          else for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) a.push([cx + (j - 1) * s, cy + (i - .5) * s]);
+          return a;
+        }
+        return Array.from({ length: total }, (_, i) => [cx, cy - s * (total - 1) / 2 + i * s]);
+      }
+      function autoPlace() {
+        refund(); G.coins = []; G.placed = [0, 0, 0];
+        for (let p = 0; p < G.np; p++) {
+          if (G.inv[p][G.rc] < G.rn) {
+            G.auto = false; syncUI(); G.state = 'SETUP';
+            G.msg = `${pname(p)}의 ${G.rc}원 동전이 부족해 자동배치를 끕니다.`;
+            return;
+          }
+        }
+        const pos = tight(G.np * G.rn, rad(G.rc)); let i = 0;
+        for (let p = 0; p < G.np; p++) {
+          for (let k = 0; k < G.rn; k++) {
+            G.inv[p][G.rc]--;
+            G.coins.push(new Coin(pos[i][0], pos[i][1], G.rc, p, 1));
+            G.placed[p]++; i++;
+          }
+        }
+        Object.assign(G, { startFace: 1, mixed: false, slapCount: 0, cur: 0, state: 'READY', aiPos: null });
+        G.msg = `자동배치 완료 (${G.layout === 'vertical' ? '세로배치' : '뭉치배치'}, 뒷면 통일)! ${pname(0)} 차례 - 드래그해 치세요!`;
+      }
+      function placeCoin(x, y, toggle = true) {
+        if (toggle && G.coins.length) {
+          const f = G.coins[0];
+          if (Math.hypot(f.x - x, f.y - y) <= f.r + 4) {
+            const nf = 1 - f.face; G.coins.forEach(c => c.face = nf); setupMsg(); return true;
+          }
+        }
+        if (!inBook(x, y, -28)) return false;
+        const r = rad(G.rc);
+        if (G.coins.some(c => Math.hypot(c.x - x, c.y - y) < c.r + r + 2)) return false;
+        if (G.inv[G.cur][G.rc] <= 0) { G.msg = `${pname(G.cur)}의 ${G.rc}원 동전이 부족합니다!`; return false; }
+        G.inv[G.cur][G.rc]--; G.coins.push(new Coin(x, y, G.rc, G.cur, G.coins.length ? G.coins[0].face : 1)); G.placed[G.cur]++; beep(520, .06);
+        if (G.placed[G.cur] >= G.rn) {
+          G.cur++;
+          if (G.cur >= G.np) {
+            Object.assign(G, { cur: 0, startFace: G.coins[0].face, mixed: false, slapCount: 0, state: 'READY', aiPos: null });
+            G.msg = `배치 완료 (${faceName(G.startFace)} 통일)! ${pname(0)} 차례 - 손을 두고 드래그해 치세요!`;
+            return true;
+          }
+          if (isAI()) G.aiT = 40;
+        }
+        setupMsg(); return true;
+      }
+      function handValid(hx, hy) {
+        if (!inBook(hx, hy, 20)) return false;
+        const l = hx - 20, r = hx + 22, t = hy - 42, b = hy + 32;
+        return !G.coins.some(c => Math.hypot(c.x - Math.max(l, Math.min(c.x, r)), c.y - Math.max(t, Math.min(c.y, b))) < c.r + 4);
+      }
+      function planAI() {
+        const n0 = G.coins.filter(c => c.face === 0).length, n1 = G.coins.length - n0;
+        let tg = G.coins; if (n0 > 0 && n0 < n1) tg = G.coins.filter(c => c.face === 0); else if (n1 > 0 && n1 < n0) tg = G.coins.filter(c => c.face === 1);
+        const t = tg[Math.floor(Math.random() * tg.length)]; let best = [BR.x + BR.w - 55, BR.y + BR.h / 2], ok = false;
+        for (const d of [62, 78, 95, 115]) {
+          for (let i = 0; i < 16 && !ok; i++) {
+            const a = rnd(0, 6.283), x = t.x + Math.cos(a) * d, y = t.y + Math.sin(a) * d;
+            if (inBook(x, y, -30) && handValid(x, y)) { best = [x, y]; ok = true; }
+          }
+          if (ok) break;
+        }
+        G.aiPos = best;
+        G.aiDir = t.x > BR.x + BR.w / 2 + 70 ? -1 : t.x < BR.x + BR.w / 2 - 70 ? 1 : [-1, 0, 0, 1][Math.floor(Math.random() * 4)];
+        G.power = [2, 2, 3, 3, 4][Math.floor(Math.random() * 5)];
+        G.aiT = 95;
+      }
+      function slap(dir) {
+        G.slapCount++; G.lastDir = dir; G.anim = 15; G.shake = G.power; const [hx, hy] = G.hand;
+        for (let i = 0; i < 6 + G.power * 2; i++) {
+          const a = rnd(0, 6.283), s = rnd(2, 5.5);
+          G.parts.push({ x: hx, y: hy, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 18, ml: 18, r: rnd(2, 4), c: ['#ffe182', '#ffb95a', '#f5f0e1'][i % 3] });
+        }
+        G.coins.forEach(c => c.slap(hx, hy, G.power, dir)); G.state = 'MOVING'; beep(140 + G.power * 20, .12, 'square', .1);
+        G.msg = `${pname(G.cur)}: 탁!! [${dir === -1 ? '안쪽(왼쪽)' : dir === 1 ? '바깥쪽(오른쪽)' : '수직'} 치기 / 파워 ${G.power}]`;
+      }
+
+      function getCardStackPos(p, v) {
+        const [x, y, w, h] = CARD[p];
+        if (isPortrait) {
+          if (p === 0) return [x + (v === 100 ? 64 : 196), y + 88];
+          if (G.np === 3) return [x + (v === 100 ? 32 : 112), y + 72];
+          return [x + (v === 100 ? 48 : 152), y + 72];
+        }
+        return p === 0 ? [x + (v === 100 ? 48 : 158), y + 104] : [x + 52, y + (v === 100 ? 168 : 88)];
+      }
+
+      function absorb(w, why) {
+        G.winner = w; G.reason = why; G.state = 'ABSORBING'; G.scores[w]++;
+        G.coins.forEach((c, i) => { c.delay = i * 6; c.z = 0; c.tilt = 0; });
+        G.msg = `🎉 ${pname(w)} 승리! (${why}) 동전을 흡수합니다...`; beep(660, .25, 'sine');
+      }
+      function checkResult() {
+        if (G.coins.some(c => c.out)) { absorb((G.cur + 1) % G.np, `${pname(G.cur)} 동전 낙하`); return; }
+        const fs = new Set(G.coins.map(c => c.face));
+        const nxt = () => { G.cur = (G.cur + 1) % G.np; G.state = 'READY'; G.aiPos = null; };
+        if (fs.size === 1) {
+          const f = [...fs][0];
+          if (!G.mixed && f === G.startFace) { nxt(); G.msg = `뒤집히지 않았습니다! ${pname(G.cur)} 차례입니다.`; return; }
+          absorb(G.cur, f === 0 ? '모두 앞면' : '모두 뒷면');
+        } else { G.mixed = true; nxt(); G.msg = `아쉽네요! ${pname(G.cur)} 차례입니다.`; }
+      }
+
+      function onAbsorbComplete() {
+        recordMaxMoney(false);
+
+        if (G.mode === 'AI') {
+          const myMoney = totalMoney(0);
+          const aiMoney = totalMoney(1);
+
+          if (aiMoney <= 0) {
+            recordMaxMoney(true);
+            G.stage++;
+            G.inv[1] = { 100: 10, 500: 2 };
+            syncUI();
+            queueBanner('YOU WIN !!', `보유 금액 ${myMoney.toLocaleString()}원 달성!`, '#4ade80', 78);
+            queueBanner(`${G.stage}교시 쉬는시간`, '새로운 상대 등장!', '#fde047', 62);
+            queueBanner('파이트~!', '연승에 도전하세요!', '#fb923c', 55);
+            startSetup(false);
+            return;
+          }
+          if (myMoney <= 0) {
+            recordMaxMoney(false);
+            G.stage = 1;
+            G.inv = [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }];
+            syncUI();
+            queueBanner('GAME OVER', '동전을 모두 잃었습니다...', '#f87171', 80);
+            queueBanner('1교시 쉬는시간', '다시 도전!', '#fde047', 62);
+            queueBanner('파이트~!', '동전을 모두 뒤집어라!', '#fb923c', 55);
+            startSetup(false);
+            return;
+          }
+          G.state = 'ROUND_OVER';
+          G.msg = `🎉 ${pname(G.winner)} 승리! (${G.reason}) - [다음 판 시작]을 눌러주세요`;
+        } else {
+          queueBanner(`${G.winner + 1}P WIN !!`, G.reason, '#4ade80', 75);
+          let broke = false;
+          for (let p = 0; p < G.np; p++) if (totalMoney(p) <= 0) broke = true;
+          if (broke) {
+            G.inv = [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }];
+          }
+          G.state = 'ROUND_OVER';
+          G.msg = `🎉 ${G.winner + 1}P WIN !! (${G.reason}) - [다음 판 시작]을 눌러주세요`;
+        }
+      }
+
+      function update() {
+        if (G.shake > 0) G.shake--;
+        if (G.anim > 0) G.anim--;
+        for (const k in G.hl) if (G.hl[k] > 0) G.hl[k]--;
+        G.parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vx *= .9; p.vy *= .9; p.life--; });
+        G.parts = G.parts.filter(p => p.life > 0);
+
+        if (G.banners.length > 0) {
+          const b = G.banners[0];
+          b.timer++;
+          if (b.timer >= b.duration) G.banners.shift();
+          if (G.state === 'SETUP' || G.state === 'READY') return;
+        }
+
+        if (G.state === 'SETUP' && isAI()) {
+          if (G.aiT > 0) G.aiT--;
+          else {
+            for (let i = 0; i < 50; i++) {
+              if (placeCoin(rnd(BR.x + 80, BR.x + BR.w - 90), rnd(BR.y + 115, BR.y + BR.h - 80), false)) {
+                G.aiT = 36;
+                break;
+              }
+            }
+          }
+        } else if (G.state === 'READY' && isAI()) {
+          if (!G.aiPos) planAI();
+          else {
+            G.hand[0] += (G.aiPos[0] - G.hand[0]) * .075;
+            G.hand[1] += (G.aiPos[1] - G.hand[1]) * .075;
+            G.handOk = true;
+            if (G.aiT > 0) G.aiT--;
+            else { G.hand = [...G.aiPos]; G.aiPos = null; slap(G.aiDir); }
+          }
+        } else if (G.state === 'MOVING') {
+          let mv = false;
+          G.coins.forEach(c => { c.update(); if (c.moving) mv = true; });
+          if (!mv) checkResult();
+        } else if (G.state === 'ABSORBING') {
+          const rem = [];
+          for (const c of G.coins) {
+            if (c.delay > 0) { c.delay--; rem.push(c); continue; }
+            const [tx, ty] = getCardStackPos(G.winner, c.v), dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy);
+            if (d < 18) { G.inv[G.winner][c.v]++; G.hl[G.winner + '_' + c.v] = 14; }
+            else { const s = Math.max(14, d * .18); c.x += dx / d * s; c.y += dy / d * s; rem.push(c); }
+          }
+          G.coins = rem;
+          if (!rem.length) onAbsorbComplete();
+        }
+      }
+
+      // ---------- 그리기 ----------
+      function drawRoom(ox, oy) {
+        let g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#d9d2bf'); g.addColorStop(.55, '#cbc2aa'); g.addColorStop(.56, '#a98f6a'); g.addColorStop(1, '#8c7352');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(80,60,35,.25)'; ctx.lineWidth = 2;
+        for (let x = 0; x < W; x += 72) { ctx.beginPath(); ctx.moveTo(x, H * .56); ctx.lineTo(x - 60, H); ctx.stroke(); }
+
+        if (isPortrait) {
+          ctx.fillStyle = 'rgba(60,45,30,.32)';
+          rr(10 + ox, 122 + oy, 462, 548, 12); ctx.fill();
+          rr(6 + ox, 118 + oy, 462, 546, 10);
+          ctx.fillStyle = '#d6ae7a'; ctx.fill();
+          ctx.strokeStyle = '#ca9e6e'; ctx.lineWidth = 2;
+          for (let i = 0; i < 6; i++) {
+            const ly = 165 + i * 88 + oy;
+            ctx.beginPath(); ctx.moveTo(12 + ox, ly); ctx.lineTo(462 + ox, ly); ctx.stroke();
+          }
+          rr(6 + ox, 118 + oy, 462, 546, 10);
+          ctx.strokeStyle = '#986c44'; ctx.lineWidth = 5; ctx.stroke();
+        } else {
+          rr(60 + ox, 8 + oy, 190, 76, 4); ctx.fillStyle = '#3d5a4a'; ctx.fill(); ctx.strokeStyle = '#8a6a3c'; ctx.lineWidth = 5; ctx.stroke();
+          T('오늘의 목표', 155 + ox, 34 + oy, 14, 'rgba(255,255,255,.75)');
+          T('판치기 장인!', 155 + ox, 58 + oy, 15, 'rgba(255,240,170,.85)');
+          [[880, 6], [990, 6]].forEach(([x, y]) => {
+            ctx.fillStyle = '#bfe3f5'; ctx.fillRect(x, y, 90, 86);
+            ctx.strokeStyle = '#7b6a55'; ctx.lineWidth = 4; ctx.strokeRect(x, y, 90, 86);
+            ctx.beginPath(); ctx.moveTo(x + 45, y); ctx.lineTo(x + 45, y + 86); ctx.moveTo(x, y + 43); ctx.lineTo(x + 90, y + 43); ctx.stroke();
+          });
+          ctx.fillStyle = 'rgba(60,45,30,.35)';
+          ctx.beginPath(); ctx.moveTo(234 + ox, 30 + oy); ctx.lineTo(854 + ox, 30 + oy); ctx.lineTo(904 + ox, 640 + oy); ctx.lineTo(184 + ox, 640 + oy); ctx.fill();
+          const desk = () => { ctx.beginPath(); ctx.moveTo(218 + ox, 16 + oy); ctx.lineTo(842 + ox, 16 + oy); ctx.lineTo(888 + ox, 634 + oy); ctx.lineTo(172 + ox, 634 + oy); ctx.closePath(); };
+          desk(); ctx.fillStyle = '#d6ae7a'; ctx.fill(); ctx.strokeStyle = '#ca9e6e'; ctx.lineWidth = 2;
+          for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(205 + ox, 70 + i * 95 + oy); ctx.lineTo(855 + ox, 70 + i * 95 + oy); ctx.stroke(); }
+          desk(); ctx.strokeStyle = '#986c44'; ctx.lineWidth = 6; ctx.stroke();
+        }
+      }
+      function drawBook(ox, oy) {
+        const b = BOOKS[G.book], x = BR.x + ox, y = BR.y + oy;
+        rr(x + 10, y + 12, BR.w, BR.h, 7); ctx.fillStyle = '#806c52'; ctx.fill();
+        rr(x + 5, y + 5, BR.w, BR.h, 6); ctx.fillStyle = '#e4e0d6'; ctx.fill();
+        rr(x, y, BR.w, BR.h, 6); ctx.fillStyle = b.bg; ctx.fill();
+        ctx.fillStyle = b.ac; ctx.fillRect(x + 32, y + 18, BR.w - 32, 8);
+        ctx.fillStyle = b.sp; ctx.beginPath(); ctx.roundRect(x, y, 34, BR.h, [6, 0, 0, 6]); ctx.fill();
+        rr(x, y, BR.w, BR.h, 6); ctx.strokeStyle = '#5f5f5f'; ctx.lineWidth = 2; ctx.stroke();
+        T(b.n.split('').join(' '), x + BR.w / 2 + 16, y + 56, 40, b.tx);
+        T(b.s, x + BR.w / 2 + 16, y + 96, 12, '#6e737d');
+        T('교 육 부', x + BR.w / 2 + 16, y + BR.h - 18, 12, '#82828a');
+      }
+      function drawStack(cx, by, v, n, hl, compact = false) {
+        const r = compact ? (v === 100 ? 15 : 18) : (v === 100 ? 19 : 24);
+        const L = Math.min(compact ? 6 : 9, n);
+        const step = compact ? 3 : 4;
+        if (!n) {
+          ctx.strokeStyle = '#968e84'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(cx, by, r, compact ? 7 : 9, 0, 0, 7); ctx.stroke();
+        } else {
+          for (let i = 0; i < L; i++) {
+            ctx.beginPath(); ctx.ellipse(cx, by - i * step + 1, r, compact ? 8 : 10, 0, 0, 7);
+            ctx.fillStyle = v === 100 ? '#949aa4' : '#8e8876'; ctx.fill();
+            ctx.strokeStyle = '#5f5f5f'; ctx.lineWidth = 1; ctx.stroke();
+          }
+          drawCoin(cx, by - (L - 1) * step - 2, r, v, 1, .52, 2024);
+        }
+        const fz = compact ? (hl > 0 ? 18 : 14) : (hl > 0 ? 22 : 17);
+        T('x' + n, cx + r + (compact ? 5 : 8), by - 2, fz, hl > 0 ? '#eb461e' : '#262a30', 'left');
+      }
+      function drawCard(i, title) {
+        if (i === 2 && G.np < 3) return;
+        const [x, y, w, h] = CARD[i], act = (G.state === 'SETUP' || G.state === 'READY') && G.cur === i;
+        rr(x + 3, y + 4, w, h, 12); ctx.fillStyle = 'rgba(70,60,50,.4)'; ctx.fill();
+        rr(x, y, w, h, 12); ctx.fillStyle = act ? '#fcf8ec' : '#eeeae0'; ctx.fill(); ctx.strokeStyle = act ? '#e6a519' : '#a59b8c'; ctx.lineWidth = act ? 3 : 2; ctx.stroke();
+        const hh = isPortrait && i !== 0 ? 24 : 28;
+        ctx.beginPath(); ctx.roundRect(x, y, w, hh, [10, 10, 0, 0]); ctx.fillStyle = act ? '#e6a519' : '#5f6670'; ctx.fill();
+        T(`${title} (${totalMoney(i).toLocaleString()}원)`, x + w / 2, y + hh / 2 + 1, isPortrait && G.np === 3 && i !== 0 ? 11 : 12, '#fff');
+        const hl = (v) => G.hl[i + '_' + v] || 0;
+        const compact = isPortrait && i !== 0;
+        const p100 = getCardStackPos(i, 100), p500 = getCardStackPos(i, 500);
+        if (isPortrait || i === 0) {
+          drawStack(p100[0], p100[1], 100, G.inv[i][100], hl(100), compact);
+          drawStack(p500[0], p500[1], 500, G.inv[i][500], hl(500), compact);
+        } else {
+          drawStack(p500[0], p500[1], 500, G.inv[i][500], hl(500), false);
+          drawStack(p100[0], p100[1], 100, G.inv[i][100], hl(100), false);
+        }
+      }
+      function drawHand(hx, hy, ok, slapping, ai) {
+        const skin = !ok ? '#f28484' : ai ? '#d2e0f0' : slapping ? '#eebea0' : '#f4ccb0', ol = !ok ? '#c32a2a' : ai ? '#5f7694' : '#a87a60';
+        ctx.fillStyle = 'rgba(70,60,50,.35)'; const so = slapping ? 3 : 10; ctx.beginPath(); ctx.ellipse(hx + so, hy + so + 10, 24, 29, 0, 0, 7); ctx.fill();
+        const box = (x, y, w, h, r, lw) => { rr(x, y, w, h, r); ctx.fillStyle = skin; ctx.fill(); ctx.strokeStyle = ol; ctx.lineWidth = lw; ctx.stroke(); };
+        [[-15, -46, 9, 34], [-5, -52, 9, 38], [5, -48, 9, 35], [14, -40, 8, 28]].forEach(f => box(hx + f[0], hy + f[1], f[2], f[3], 4, 1));
+        box(hx - 27, hy - 12, 14, 24, 6, 1); box(hx - 19, hy - 18, 42, 46, 14, 2); box(hx - 13, hy + 24, 30, 16, 4, 1);
+        if (ai && ok) T('AI', hx + 2, hy + 4, 13, '#2d466e'); else if (!ok) T('X', hx + 2, hy + 4, 17, '#b41414');
+      }
+      function drawCenterBanner() {
+        if (!G.banners.length) return;
+        const b = G.banners[0];
+        const t = b.timer, dur = b.duration;
+        let alpha = 1, scale = 1;
+        if (t < 12) { const p = t / 12; alpha = p; scale = 0.65 + 0.42 * p; }
+        else if (t < 18) { scale = 1.07 - 0.07 * ((t - 12) / 6); }
+        else if (t > dur - 14) { alpha = Math.max(0, (dur - t) / 14); }
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(W / 2, H / 2 - 10);
+        ctx.scale(scale, scale);
+
+        const bw = isPortrait ? Math.min(540, W - 20) : 640;
+        const bh = isPortrait ? 118 : 136;
+        const grad = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+        grad.addColorStop(0, 'rgba(9, 13, 22, 0)');
+        grad.addColorStop(0.2, 'rgba(9, 13, 22, 0.88)');
+        grad.addColorStop(0.8, 'rgba(9, 13, 22, 0.88)');
+        grad.addColorStop(1, 'rgba(9, 13, 22, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+
+        const lineW = isPortrait ? 190 : 240;
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-lineW, -bh / 2); ctx.lineTo(lineW, -bh / 2);
+        ctx.moveTo(-lineW, bh / 2); ctx.lineTo(lineW, bh / 2);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `900 ${isPortrait ? 40 : 54}px ${FONT}`;
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 7;
+        ctx.strokeText(b.text, 0, b.sub ? -13 : 0);
+        ctx.fillStyle = b.color;
+        ctx.fillText(b.text, 0, b.sub ? -13 : 0);
+
+        if (b.sub) {
+          ctx.font = `800 ${isPortrait ? 17 : 20}px ${FONT}`;
+          ctx.lineWidth = 5;
+          ctx.strokeText(b.sub, 0, 28);
+          ctx.fillStyle = '#f1f5f9';
+          ctx.fillText(b.sub, 0, 28);
+        }
+        ctx.restore();
+      }
+
+      function draw() {
+        syncHudDom();
+        const ox = G.shake ? rnd(-G.shake, G.shake) : 0, oy = G.shake ? rnd(-G.shake, G.shake) : 0;
+        drawRoom(ox, oy); drawBook(ox, oy);
+        drawCard(1, G.mode === 'AI' ? 'AI' : '2P'); drawCard(2, '3P'); drawCard(0, G.mode === 'AI' ? '나' : '1P');
+        [100, 500].forEach(v => {
+          const [x, y, w, h] = RULE[v], sel = G.rc === v;
+          rr(x + 2, y + 3, w, h, 10); ctx.fillStyle = 'rgba(70,60,50,.4)'; ctx.fill();
+          rr(x, y, w, h, 10); ctx.fillStyle = sel ? '#fff8d4' : '#eae6dc'; ctx.fill(); ctx.strokeStyle = sel ? '#e8a216' : '#9b948a'; ctx.lineWidth = sel ? 4 : 2; ctx.stroke();
+          const r = v === 100 ? (isPortrait ? 19 : 22) : (isPortrait ? 23 : 26), cx = x + w / 2, cy = y + h / 2;
+          if (sel && G.rn === 2) { drawCoin(cx + 9, cy - 3, r, v, 1); drawCoin(cx - 9, cy + 3, r, v, 1); } else drawCoin(cx, cy, r, v, 1);
+          if (sel) T(`${v}원 × ${G.rn}`, cx, y + h + 13, 12, '#7a5200');
+        });
+        rr(...PANEL, 14); ctx.fillStyle = '#eee8dc'; ctx.fill(); ctx.strokeStyle = '#afa596'; ctx.lineWidth = 2; ctx.stroke();
+        T('파워 단계', PANEL[0] + PANEL[2] / 2, PANEL[1] + 19, 13, '#412d23');
+        PBTN.forEach(b => {
+          const s = b.l === G.power, c = PCOL[b.l];
+          if (s) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 4, 0, 7); ctx.fillStyle = '#ffeb96'; ctx.fill(); }
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fillStyle = s ? c : '#f6f2ec'; ctx.fill(); ctx.strokeStyle = s ? '#fff' : c; ctx.lineWidth = s ? 2 : 3; ctx.stroke(); T(String(b.l), b.x, b.y, 14, s ? '#fff' : c);
+        });
+        G.coins.forEach((c, i) => { c.draw(); if (G.state === 'SETUP' && i === 0 && !isAI()) { ctx.beginPath(); ctx.arc(c.x, c.y, c.r + 4, 0, 7); ctx.strokeStyle = '#ffbe00'; ctx.lineWidth = 2; ctx.stroke(); } });
+        G.parts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, p.r * p.life / p.ml), 0, 7); ctx.fillStyle = p.c; ctx.fill(); });
+        if (G.state === 'READY' || G.state === 'MOVING') {
+          let hx = G.hand[0], hy = G.hand[1]; const sl = G.anim > 0;
+          if (sl) { hx += G.lastDir * 16; hy += 8; ctx.beginPath(); ctx.arc(hx, hy, (16 - G.anim) * 11, 0, 7); ctx.strokeStyle = '#ffd76e'; ctx.lineWidth = 3; ctx.stroke(); }
+          drawHand(hx, hy, G.handOk || G.state === 'MOVING', sl, isAI());
+        }
+        if (G.drag && G.state === 'READY' && !isAI()) {
+          const dx = G.dc[0] - G.ds[0], [gd, col] = dx < -30 ? ['◀ 안쪽(왼쪽) 치기', '#2878dc'] : dx > 30 ? ['바깥쪽(오른쪽) 땡겨치기 ▶', '#dc5032'] : ['▼ 수직 내리치기', '#28a050'];
+          ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(...G.ds); ctx.lineTo(...G.dc); ctx.stroke(); ctx.beginPath(); ctx.arc(G.dc[0], G.dc[1], 6, 0, 7); ctx.fillStyle = col; ctx.fill();
+          T(gd, BR.x + BR.w / 2, isPortrait ? BR.y + 124 : 32, 17, col);
+        }
+        if (G.state === 'ROUND_OVER' && !hasActiveBanner()) {
+          rr(...NEXT, 10); ctx.fillStyle = '#2a9456'; ctx.fill(); ctx.strokeStyle = '#fff0aa'; ctx.lineWidth = 3; ctx.stroke();
+          T('다음 판 시작 ▶', NEXT[0] + 105, NEXT[1] + 28, 20, '#fff');
+        }
+
+        drawCenterBanner();
+      }
+
+      // ---------- 입력 ----------
+      const pos = (e) => {
+        const r = cv.getBoundingClientRect();
+        const fit = getComputedStyle(cv).objectFit;
+        if (fit === 'fill' || !isFullscreenActive()) {
+          return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height];
+        }
+        const aspect = W / H;
+        let rw = r.width, rh = r.height, ox = 0, oy = 0;
+        if (rw / rh > aspect) { rw = rh * aspect; ox = (r.width - rw) / 2; }
+        else { rh = rw / aspect; oy = (r.height - rh) / 2; }
+        return [(e.clientX - r.left - ox) * W / rw, (e.clientY - r.top - oy) * H / rh];
+      };
+
+      cv.addEventListener('pointerdown', (e) => {
+        getAC();
+        if (saveStateObj.bgmEnabled && !bgmTimer) startBGM();
+        if (hasActiveBanner()) return;
+        const [x, y] = pos(e);
+        try { cv.setPointerCapture(e.pointerId); } catch {}
+        if (G.state === 'ROUND_OVER' && hit(NEXT, x, y)) { startSetup(); return; }
+        for (const v of [100, 500]) if (hit(RULE[v], x, y)) { if (G.rc === v) G.rn = G.rn === 2 ? 1 : 2; else G.rc = v; startSetup(true); return; }
+        if (isAI()) return;
+        for (const b of PBTN) if (Math.hypot(x - b.x, y - b.y) <= b.r + 7) { G.power = b.l; return; }
+        if (G.state === 'SETUP') placeCoin(x, y);
+        else if (G.state === 'READY' && inBook(x, y, 15)) {
+          G.hand = [x, y]; G.handOk = handValid(x, y);
+          if (G.handOk) { G.drag = true; G.ds = [x, y]; G.dc = [x, y]; } else G.msg = '동전을 건드리지 않는 빈 공간에 손을 올려주세요!';
+        }
+      });
+      cv.addEventListener('pointermove', (e) => {
+        const [x, y] = pos(e);
+        if (G.state === 'READY' && !G.drag && !isAI() && inBook(x, y, 15)) { G.hand = [x, y]; G.handOk = handValid(x, y); }
+        if (G.drag) G.dc = [x, y];
+      });
+      const up = (e) => {
+        if (!G.drag) return; G.drag = false;
+        if (G.state === 'READY' && !isAI() && !hasActiveBanner()) { const dx = pos(e)[0] - G.ds[0]; slap(dx < -30 ? -1 : dx > 30 ? 1 : 0); }
+      };
+      cv.addEventListener('pointerup', up);
+      cv.addEventListener('pointercancel', () => { G.drag = false; });
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (/^[1-5]$/.test(e.key) && !isAI()) G.power = +e.key;
+        if (e.key === ' ' && G.state === 'ROUND_OVER' && !hasActiveBanner()) { e.preventDefault(); startSetup(); }
+        if (e.key === 'Escape' && fullscreenStage.classList.contains('is-fullscreen') && !document.fullscreenElement) {
+          exitCssFullscreen();
+        }
+      });
+      window.addEventListener('resize', () => { applyCanvasLayout(false); });
+      window.addEventListener('orientationchange', () => { setTimeout(() => applyCanvasLayout(false), 120); });
+
+      // ==========================================
+      // 4. UI / 헤더 / 로그인 / 전체화면 바인딩
+      // ==========================================
+      const $ = (id) => document.getElementById(id);
+
+      function syncUI() {
+        $('modeBtn').textContent = G.mode === 'AI' ? 'AI 대전' : G.mode === '2P' ? '2인 대전' : '3인 대전';
+        $('stageInfoDisplay').textContent = G.mode === 'AI' ? `${G.stage}교시 쉬는시간 · 학교 교실` : `${G.np}인 대전 · 학교 교실`;
+        $('autoBtn').className = 'px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black border active:scale-95 cursor-pointer whitespace-nowrap ' + (G.auto ? 'bg-emerald-600 border-amber-300 text-white' : 'bg-slate-800 border-slate-600 text-slate-300');
+        $('autoIcons').className = G.auto ? 'flex items-center gap-1' : 'hidden';
+        const on = 'border-amber-400 bg-amber-100 text-slate-900', off = 'border-slate-600 bg-slate-200 text-slate-600';
+        $('icV').className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'vertical' ? on : off);
+        $('icC').className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'cluster' ? on : off);
+      }
+
+      $('bookBtn').onclick = () => { G.book = (G.book + 1) % BOOKS.length; };
+      $('modeBtn').onclick = () => {
+        recordMaxMoney(false);
+        G.mode = G.mode === 'AI' ? '2P' : G.mode === '2P' ? '3P' : 'AI';
+        G.np = G.mode === '3P' ? 3 : 2;
+        startMatch();
+      };
+      $('autoBtn').onclick = () => { G.auto = !G.auto; syncUI(); if (G.auto && G.state === 'SETUP') autoPlace(); };
+      $('resetBtn').onclick = () => { recordMaxMoney(false); startSetup(true); };
+      const relay = (l) => { G.layout = l; syncUI(); if (G.auto && (G.state === 'SETUP' || (G.state === 'READY' && G.slapCount === 0))) autoPlace(); };
+      $('icV').onclick = () => relay('vertical');
+      $('icC').onclick = () => relay('cluster');
+
+      // 배경음 & 효과음 토글
+      function updateAudioButtons() {
+        const b = $('bgmToggleBtn'), s = $('soundToggleBtn');
+        b.textContent = saveStateObj.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+        b.className = saveStateObj.bgmEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+        s.textContent = saveStateObj.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+        s.className = saveStateObj.soundEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer';
+      }
+      updateAudioButtons();
+      $('bgmToggleBtn').onclick = () => {
+        saveStateObj.bgmEnabled = !saveStateObj.bgmEnabled; persistState(false); updateAudioButtons();
+        if (saveStateObj.bgmEnabled) { getAC(); startBGM(); } else stopBGM();
+      };
+      $('soundToggleBtn').onclick = () => {
+        saveStateObj.soundEnabled = !saveStateObj.soundEnabled; persistState(false); updateAudioButtons();
+      };
+      $('headerExitLobbyBtn').onclick = () => { recordMaxMoney(false); window.location.href = 'https://02826k.github.io/aigameroom/'; };
+
+      // 전체화면 전환 (모바일 가로모드 고정 + iOS CSS 폴백)
+      const fullscreenBtn = $('fullscreenBtn');
+      function lockLandscapeOrientation() {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }
+      function unlockOrientation() {
+        if (screen.orientation && screen.orientation.unlock) {
+          try { screen.orientation.unlock(); } catch (e) {}
+        }
+      }
+      function updateFullscreenUi(active) {
+        fullscreenBtn.textContent = active ? '✕ 축소' : '⛶ 전체화면';
+        document.body.classList.toggle('fs-lock', active);
+        applyCanvasLayout(false);
+        setTimeout(() => applyCanvasLayout(false), 120);
+      }
+      function enterCssFullscreen() {
+        fullscreenStage.classList.add('is-fullscreen');
+        updateFullscreenUi(true);
+        lockLandscapeOrientation();
+      }
+      function exitCssFullscreen() {
+        fullscreenStage.classList.remove('is-fullscreen');
+        unlockOrientation();
+        updateFullscreenUi(false);
+      }
+      async function toggleFullscreen() {
+        if (isFullscreenActive()) {
+          if (document.fullscreenElement) {
+            try { await document.exitFullscreen(); } catch (e) {}
+          }
+          exitCssFullscreen();
+        } else {
+          if (fullscreenStage.requestFullscreen) {
+            try {
+              await fullscreenStage.requestFullscreen();
+              updateFullscreenUi(true);
+              lockLandscapeOrientation();
+              return;
+            } catch (e) {}
+          }
+          enterCssFullscreen();
+        }
+      }
+      fullscreenBtn.onclick = toggleFullscreen;
+      $('fsExitBtn').onclick = toggleFullscreen;
+      document.addEventListener('fullscreenchange', () => {
+        const isFs = Boolean(document.fullscreenElement);
+        if (!isFs) {
+          fullscreenStage.classList.remove('is-fullscreen');
+          unlockOrientation();
+        }
+        updateFullscreenUi(isFs);
+        if (isFs) lockLandscapeOrientation();
+      });
+
+      // 로그인 / 로그아웃 / VIP 헤더
+      function updateHeaderUI() {
+        const btn = $('authHeaderBtn');
+        let vipFlag = false;
+        try { vipFlag = localStorage.getItem('hero_clicker_is_vip') === 'true'; } catch (e) {}
+        const isVip = saveStateObj.isVip || vipFlag;
+        if (authToken && currentUsername) {
+          if (isVip) {
+            btn.textContent = '👑 VIP 로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/70 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
+          } else {
+            btn.textContent = '로그아웃';
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
+          }
+        } else {
+          btn.textContent = '로그인';
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap';
+        }
+      }
+      function handleLogout(expired = false) {
+        authToken = null; currentUsername = null; saveStateObj.isVip = false;
+        syncSharedAuth(null, null); updateHeaderUI(); fetchRanking();
+        showToast(expired ? '로그인이 만료되었습니다.' : '로그아웃되었습니다.');
+      }
+      function syncAuthFromStorage() {
+        const { t, u } = readSharedAuth();
+        if (t !== authToken || u !== currentUsername) {
+          authToken = t; currentUsername = u;
+          if (!authToken) saveStateObj.isVip = false;
+          updateHeaderUI(); if (authToken) loadFromServer(); fetchRanking();
+        }
+      }
+      window.addEventListener('pageshow', syncAuthFromStorage);
+      window.addEventListener('storage', syncAuthFromStorage);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncAuthFromStorage(); });
+
+      const authModal = $('authModal'), logoutModal = $('logoutModal'), phoneInput = $('authPhoneDigits'), pinInput = $('authPinCode');
+      $('authHeaderBtn').onclick = () => {
+        if (authToken && currentUsername) {
+          logoutModal.classList.remove('hidden'); logoutModal.classList.add('flex');
+        } else {
+          authModal.classList.remove('hidden'); authModal.classList.add('flex'); phoneInput.focus();
+        }
+      };
+      $('logoutCancelBtn').onclick = () => { logoutModal.classList.add('hidden'); logoutModal.classList.remove('flex'); };
+      $('logoutConfirmBtn').onclick = () => { logoutModal.classList.add('hidden'); logoutModal.classList.remove('flex'); handleLogout(false); };
+      $('authCloseBtn').onclick = () => { authModal.classList.add('hidden'); authModal.classList.remove('flex'); };
+      $('modeLoginBtn').onclick = () => {
+        isRegisterMode = false;
+        $('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer';
+        $('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+      };
+      $('modeRegisterBtn').onclick = () => {
+        isRegisterMode = true;
+        $('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer';
+        $('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+      };
+      phoneInput.addEventListener('input', (e) => {
+        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+        e.target.value = d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d;
+      });
+      pinInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+
+      $('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errEl = $('authErrorMsg'); errEl.classList.add('hidden');
+        const digits = phoneInput.value.replace(/\D/g, ''), pin = pinInput.value.trim();
+        if (digits.length !== 8 || !/^\d{4}$/.test(pin)) {
+          errEl.textContent = '휴대폰 번호 8자리와 숫자 비밀번호 4자리를 확인해 주세요.';
+          errEl.classList.remove('hidden'); return;
+        }
+        const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+        try {
+          const res = await fetch(`${API_BASE_URL}${isRegisterMode ? '/api/register' : '/api/login'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fullId, password: pin, gameId: GAME_ID, initialSaveData: saveStateObj })
+          });
+          const data = await res.json();
+          if (!res.ok) { errEl.textContent = data.error || '처리 중 오류가 발생했습니다.'; errEl.classList.remove('hidden'); return; }
+          authToken = data.token; currentUsername = data.username;
+          syncSharedAuth(authToken, currentUsername);
+          if (data.isVip) saveStateObj.isVip = true;
+          await loadFromServer(); await syncSaveToServer(false);
+          updateHeaderUI(); authModal.classList.add('hidden'); authModal.classList.remove('flex'); pinInput.value = '';
+          showToast(`🟨 [${maskPhoneMiddle(currentUsername)}] 연동 완료!`);
+        } catch (err) {
+          errEl.textContent = '클라우드 서버와 연결할 수 없습니다.'; errEl.classList.remove('hidden');
+        }
+      });
+
+      // 랭킹 오버레이 (열 때마다 자동 갱신)
+      const rankOverlay = $('rankOverlay');
+      const openRank = () => { fetchRanking(); rankOverlay.classList.remove('hidden'); };
+      $('rankOpenBtn').onclick = openRank;
+      $('fsRankBtn').onclick = openRank;
+      $('rankCloseBtn').onclick = () => { rankOverlay.classList.add('hidden'); };
+      rankOverlay.addEventListener('click', (e) => { if (e.target === rankOverlay) rankOverlay.classList.add('hidden'); });
+
+      // 시작 & 60fps 고정 타임스텝 메인 루프
+      updateHeaderUI();
+      if (authToken) loadFromServer();
+      fetchRanking();
+      startMatch();
+
+      const STEP = 1 / 60;
+      let lastTs = 0, acc = 0;
+      function loop(ts) {
+        if (!lastTs) lastTs = ts;
+        const dt = Math.min(0.05, (ts - lastTs) / 1000);
+        lastTs = ts;
+        acc += dt;
+        while (acc >= STEP) {
+          update();
+          acc -= STEP;
+        }
+        draw();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
