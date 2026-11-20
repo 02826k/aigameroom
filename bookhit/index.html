@@ -22,6 +22,10 @@
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior: none;
     }
+    body.fs-lock {
+      overflow: hidden !important;
+      height: 100dvh !important;
+    }
     canvas { touch-action: none; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
@@ -29,40 +33,55 @@
 
     #fullscreenStage { display: contents; }
 
-    /* 전체화면 기본 (모바일 포함) */
-    #fullscreenStage:fullscreen {
+    /* 전체화면 (Native Fullscreen API + iOS/모바일 CSS 폴백 공용) */
+    #fullscreenStage:fullscreen,
+    #fullscreenStage.is-fullscreen {
       display: flex !important;
       flex-direction: column !important;
       position: fixed !important;
       inset: 0 !important;
       width: 100vw !important;
       height: 100dvh !important;
+      padding-top: env(safe-area-inset-top, 0px) !important;
+      padding-bottom: env(safe-area-inset-bottom, 0px) !important;
       background: #020617 !important;
       overflow: hidden !important;
-      z-index: 40 !important;
+      z-index: 60 !important;
     }
-    #fullscreenStage:fullscreen #topControlBar {
-      width: 100% !important;
-      flex-shrink: 0 !important;
-      border-radius: 0 !important;
-      border-left: none !important;
-      border-right: none !important;
-      border-top: none !important;
-      padding: 6px 14px !important;
-      background: rgba(15, 23, 42, 0.95) !important;
+    /* 전체화면 시 중복 상단바 숨김 (게임 HUD 내 축소/랭킹 버튼으로 통합) */
+    #fullscreenStage:fullscreen #topControlBar,
+    #fullscreenStage.is-fullscreen #topControlBar {
+      display: none !important;
     }
-    #fullscreenStage:fullscreen #gameAreaSection {
+    #fullscreenStage:fullscreen #fsQuickActions,
+    #fullscreenStage.is-fullscreen #fsQuickActions {
+      display: flex !important;
+    }
+    #fullscreenStage:fullscreen #gameAreaSection,
+    #fullscreenStage.is-fullscreen #gameAreaSection {
       flex: 1 1 0% !important;
       min-height: 0 !important;
       width: 100% !important;
+      height: 100% !important;
       border: none !important;
       border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background: #020617 !important;
+    }
+    #fullscreenStage:fullscreen #canvasWrap,
+    #fullscreenStage.is-fullscreen #canvasWrap {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+      width: 100% !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       background: #020617 !important;
+      overflow: hidden !important;
     }
-    #fullscreenStage:fullscreen #cv {
+    #fullscreenStage:fullscreen #cv,
+    #fullscreenStage.is-fullscreen #cv {
       max-width: 100% !important;
       max-height: 100% !important;
       width: auto !important;
@@ -85,7 +104,8 @@
         width: 100% !important;
         height: auto !important;
       }
-      #fullscreenStage:fullscreen #cv {
+      #fullscreenStage:fullscreen #cv,
+      #fullscreenStage.is-fullscreen #cv {
         width: 100% !important;
         height: 100% !important;
         max-width: none !important;
@@ -97,8 +117,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/30">
-    <div id="headerInner" class="max-w-5xl mx-auto flex flex-col gap-2">
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-3 sm:px-4 py-2 sticky top-0 z-30 shadow-lg shadow-black/30">
+    <div id="headerInner" class="max-w-5xl mx-auto flex flex-col gap-1.5">
       <!-- 1단 -->
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
@@ -131,47 +151,82 @@
   </header>
 
   <!-- Main Content -->
-  <main id="mainWrap" class="flex-1 max-w-5xl w-full mx-auto px-2.5 sm:px-4 py-3 sm:py-4 flex flex-col gap-3">
+  <main id="mainWrap" class="flex-1 max-w-5xl w-full mx-auto px-2 sm:px-4 py-2.5 sm:py-3.5 flex flex-col gap-2.5">
     <div id="fullscreenStage">
-      <!-- 통합 상단 바: 좌측(스테이지) · 중앙(게임 메뉴) · 우측(RANK / 전체화면) -->
-      <section id="topControlBar" class="bg-slate-900/90 border border-amber-500/35 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-        <div class="shrink-0">
-          <div class="text-[10px] text-amber-300/90 font-bold leading-tight">🪙 책 위 동전 뒤집기</div>
-          <div id="stageInfoDisplay" class="text-xs font-extrabold text-emerald-300 mt-0.5 leading-tight">1교시 쉬는시간 · 학교 교실</div>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-center gap-1.5">
-          <button id="bookBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 active:scale-95 cursor-pointer">📘 책 교체</button>
-          <button id="modeBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 active:scale-95 cursor-pointer">AI 대전</button>
-          <div class="flex items-center gap-1">
-            <button id="autoBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-emerald-600 border border-amber-300 text-white active:scale-95 cursor-pointer">자동 배치</button>
-            <div id="autoIcons" class="flex items-center gap-1">
-              <button id="icV" type="button" title="세로배치" class="w-7 h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer">
-                <svg width="15" height="17" viewBox="0 0 16 18"><circle cx="8" cy="3.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="14.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-              </button>
-              <button id="icC" type="button" title="뭉치배치" class="w-7 h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer">
-                <svg width="15" height="15" viewBox="0 0 16 16"><circle cx="4.5" cy="4.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="4.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="11.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="11.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-              </button>
-            </div>
-          </div>
-          <button id="resetBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-rose-900/70 hover:bg-rose-800/80 border border-rose-500/50 text-rose-200 active:scale-95 cursor-pointer">이번판 리셋</button>
+      <!-- 상단 바: 좌측(스테이지) · 우측(RANK / 전체화면) -->
+      <section id="topControlBar" class="bg-slate-900/90 border border-amber-500/35 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shadow-lg">
+        <div class="min-w-0">
+          <div class="text-[10px] text-amber-300/90 font-bold leading-tight truncate">🪙 책 위 동전 뒤집기</div>
+          <div id="stageInfoDisplay" class="text-xs font-extrabold text-emerald-300 mt-0.5 leading-tight truncate">1교시 쉬는시간 · 학교 교실</div>
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
           <button id="rankOpenBtn" type="button" title="TOP 10 랭킹 보기"
-            class="px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 cursor-pointer active:scale-95 transition shadow">
+            class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 cursor-pointer active:scale-95 transition shadow whitespace-nowrap">
             🏆 RANK
           </button>
           <button id="fullscreenBtn" type="button" title="전체화면 전환"
-            class="px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 cursor-pointer active:scale-95 transition shadow">
+            class="px-3 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 cursor-pointer active:scale-95 transition shadow whitespace-nowrap">
             ⛶ 전체화면
           </button>
         </div>
       </section>
 
-      <!-- 게임 캔버스 영역 -->
-      <section id="gameAreaSection" class="relative rounded-2xl overflow-hidden border-2 border-slate-800 shadow-2xl shadow-black/60 bg-slate-900">
-        <canvas id="cv" width="1120" height="740" class="block w-full h-auto cursor-crosshair"></canvas>
+      <!-- 게임 영역 (통합 상단 HUD + 캔버스 + 하단 안내 바) -->
+      <section id="gameAreaSection" class="relative rounded-2xl overflow-hidden border-2 border-slate-800 shadow-2xl shadow-black/60 bg-slate-900 flex flex-col">
+        <!-- 게임 상단 HUD: 좌측(승수) · 중앙(중간 메뉴) · 우측(스테이지 & 전체화면 축소) -->
+        <div id="gameTopHud" class="bg-[#202630] border-b-2 border-[#465063] px-2.5 sm:px-4 py-1.5 flex flex-col md:flex-row md:items-center md:justify-between gap-1.5 shrink-0">
+          <!-- 모바일 1행 / PC 좌측+우측 분리 배치 -->
+          <div class="flex items-center justify-between gap-2 md:contents">
+            <div id="hudScoreText" class="text-xs sm:text-sm font-extrabold text-[#ffe478] tracking-tight whitespace-nowrap md:order-1">
+              나(P1): 0승 &nbsp;|&nbsp; AI: 0승
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0 md:order-3">
+              <div id="hudStageText" class="text-[11px] sm:text-xs font-bold text-[#9fb4d0] whitespace-nowrap">
+                📘 국어 &nbsp; 1교시 쉬는시간
+              </div>
+              <div id="fsQuickActions" class="hidden items-center gap-1 ml-1">
+                <button id="fsRankBtn" type="button" title="TOP 10 랭킹 보기"
+                  class="px-2 py-1 rounded-md text-[11px] font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 cursor-pointer active:scale-95">
+                  🏆
+                </button>
+                <button id="fsExitBtn" type="button" title="전체화면 종료"
+                  class="px-2.5 py-1 rounded-md text-[11px] font-black bg-amber-400 hover:bg-amber-300 text-slate-950 cursor-pointer active:scale-95 whitespace-nowrap">
+                  ✕ 축소
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 중앙 게임 메뉴 (책 교체 · 대전 모드 · 자동 배치 · 배치 아이콘 · 리셋) -->
+          <div id="midGameMenu" class="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 bg-[#121722]/90 border border-slate-700/70 rounded-lg px-2 py-1 md:order-2">
+            <button id="bookBtn" type="button" class="px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 active:scale-95 cursor-pointer whitespace-nowrap">📘 책 교체</button>
+            <button id="modeBtn" type="button" class="px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 active:scale-95 cursor-pointer whitespace-nowrap">AI 대전</button>
+            <div class="flex items-center gap-1">
+              <button id="autoBtn" type="button" class="px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black bg-emerald-600 border border-amber-300 text-white active:scale-95 cursor-pointer whitespace-nowrap">자동 배치</button>
+              <div id="autoIcons" class="flex items-center gap-1">
+                <button id="icV" type="button" title="세로배치" class="w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer">
+                  <svg width="14" height="16" viewBox="0 0 16 18"><circle cx="8" cy="3.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="14.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+                </button>
+                <button id="icC" type="button" title="뭉치배치" class="w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer">
+                  <svg width="14" height="14" viewBox="0 0 16 16"><circle cx="4.5" cy="4.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="4.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="11.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="11.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+                </button>
+              </div>
+            </div>
+            <button id="resetBtn" type="button" class="px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black bg-rose-900/70 hover:bg-rose-800/80 border border-rose-500/50 text-rose-200 active:scale-95 cursor-pointer whitespace-nowrap">이번판 리셋</button>
+          </div>
+        </div>
+
+        <!-- 캔버스 래퍼 -->
+        <div id="canvasWrap" class="relative w-full flex items-center justify-center bg-[#020617]">
+          <canvas id="cv" width="1120" height="646" class="block w-full h-auto cursor-crosshair"></canvas>
+        </div>
+
+        <!-- 하단 상태 메시지 바 -->
+        <div id="gameBottomMsg" class="bg-[#202630] border-t border-[#3b4456] px-3 py-2 text-center text-xs sm:text-sm font-bold text-[#f5f8fc] leading-snug shrink-0">
+          자동배치 완료 (세로배치, 뒷면 통일)! 나(P1) 차례 - 드래그해 치세요!
+        </div>
 
         <!-- 게임 화면 내 RANK TOP 10 오버레이 -->
         <div id="rankOverlay" class="hidden absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-3">
@@ -190,18 +245,30 @@
       </section>
     </div>
 
-    <p class="text-[11px] text-slate-400 text-center leading-relaxed">
+    <p class="text-[11px] text-slate-400 text-center leading-relaxed px-2">
       마우스(손가락)를 누른 채 <b class="text-sky-300">왼쪽</b>으로 당기면 안쪽 치기, 제자리 클릭은 <b class="text-emerald-300">수직</b> 내리치기, <b class="text-rose-300">오른쪽</b>으로 당기면 바깥쪽 치기! (숫자 1~5 파워 조절)
     </p>
   </main>
 
   <!-- Toast -->
-  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
-    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-xs sm:text-sm font-bold text-amber-200 shadow-2xl">알림</div>
+  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-[70] opacity-0 transition-all duration-200 translate-y-2">
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-xs sm:text-sm font-bold text-amber-200 shadow-2xl whitespace-nowrap">알림</div>
+  </div>
+
+  <!-- 로그아웃 확인 모달 -->
+  <div id="logoutModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl">
+      <h2 class="text-sm font-extrabold text-slate-100 mb-2">로그아웃 확인</h2>
+      <p class="text-xs text-slate-400 mb-4">현재 계정에서 로그아웃 하시겠습니까?</p>
+      <div class="flex gap-2">
+        <button id="logoutCancelBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 cursor-pointer">취소</button>
+        <button id="logoutConfirmBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white cursor-pointer">로그아웃</button>
+      </div>
+    </div>
   </div>
 
   <!-- 로그인 모달 -->
-  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div id="authModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-base font-extrabold text-amber-300">🟨 서버 저장 계정</h2>
@@ -237,8 +304,7 @@
       // ==========================================
       const GAME_ID = 'panchigi_v1';
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+      const API_BASE_URL = CLOUD_API_URL;
       const STORAGE_KEY = 'panchigi_save_v1';
       const TOKEN_KEY = 'aigameroom_jwt_token';
       const USER_KEY = 'aigameroom_username';
@@ -248,8 +314,10 @@
 
       function readSharedAuth() {
         let t = null, u = null;
-        for (const k of ALL_TOKEN_KEYS) { if (!t) t = localStorage.getItem(k); }
-        for (const k of ALL_USER_KEYS) { if (!u) u = localStorage.getItem(k); }
+        try {
+          for (const k of ALL_TOKEN_KEYS) { if (!t) t = localStorage.getItem(k); }
+          for (const k of ALL_USER_KEYS) { if (!u) u = localStorage.getItem(k); }
+        } catch (e) {}
         return { t, u };
       }
       function syncSharedAuth(t, u) {
@@ -425,14 +493,24 @@
       function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
 
       // ==========================================
-      // 3. 판치기 게임 엔진 (60fps 고정 타임스텝)
+      // 3. 판치기 게임 엔진 (PC 가로 / 모바일 세로 반응형 레이아웃)
       // ==========================================
       const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-      const W = 1120, H = 740, BR = { x: 300, y: 115, w: 460, h: 540 };
       const FONT = '"Noto Sans KR",sans-serif';
-      const inBook = (x, y, m = 0) => x >= BR.x - m && x <= BR.x + BR.w + m && y >= BR.y - m && y <= BR.y + BR.h + m;
       const rnd = (a, b) => a + Math.random() * (b - a);
       const hit = (r, x, y) => x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3];
+
+      let isPortrait = false;
+      let W = 1120, H = 646;
+      let BR = { x: 300, y: 65, w: 460, h: 540 };
+      let CARD = { 1: [18, 22, 168, 206], 2: [18, 424, 168, 206], 0: [862, 484, 240, 146] };
+      let RULE = { 100: [862, 20, 114, 68], 500: [988, 20, 114, 68] };
+      let PANEL = [928, 112, 108, 356];
+      let NEXT = [BR.x + BR.w / 2 - 105, BR.y + BR.h / 2 - 28, 210, 56];
+      let PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 982, y: 174 + i * 64, r: 11 + l * 2.4 }));
+
+      const inBook = (x, y, m = 0) => x >= BR.x - m && x <= BR.x + BR.w + m && y >= BR.y - m && y <= BR.y + BR.h + m;
+
       const BOOKS = [
         { n: '국어', s: '고등학교 1학년', bg: '#f6f4ec', sp: '#34669a', ac: '#4b87c3', tx: '#1c2d46' },
         { n: '수학', s: '고등학교 공통', bg: '#ecf6f0', sp: '#2e8052', ac: '#48a570', tx: '#18412a' },
@@ -495,15 +573,84 @@
         drag: false, ds: [0, 0], dc: [0, 0], shake: 0, anim: 0, lastDir: 0,
         banners: []
       };
-      const CARD = { 1: [18, 72, 168, 206], 2: [18, 474, 168, 206], 0: [862, 534, 240, 146] };
-      const RULE = { 100: [862, 84, 114, 68], 500: [988, 84, 114, 68] };
-      const PANEL = [928, 162, 108, 356], NEXT = [BR.x + BR.w / 2 - 105, BR.y + BR.h / 2 - 28, 210, 56];
-      const PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 982, y: 224 + i * 64, r: 11 + l * 2.4 }));
+
       const pname = (i) => G.mode === 'AI' ? (i === 0 ? '나(P1)' : 'AI') : `${i + 1}P`;
       const isAI = () => G.mode === 'AI' && G.cur === 1;
       const rad = (v) => v === 100 ? 22 : 28;
       const faceName = (f) => f === 1 ? '뒷면(숫자)' : '앞면(그림)';
       const totalMoney = (p) => G.inv[p][100] * 100 + G.inv[p][500] * 500;
+
+      // 반응형 레이아웃 계산 (모바일 세로모드 vs PC 가로모드)
+      function shouldUsePortrait() {
+        return window.innerWidth < 820 && window.innerHeight > window.innerWidth;
+      }
+
+      function applyCanvasLayout(force = false) {
+        const nextPortrait = shouldUsePortrait();
+        const oldBR = { ...BR };
+        const changed = force || nextPortrait !== isPortrait || (nextPortrait && ((G.np === 3 && CARD[1][2] !== 174) || (G.np !== 3 && CARD[1][2] !== 236)));
+        if (!changed) return;
+
+        isPortrait = nextPortrait;
+        if (isPortrait) {
+          W = 580;
+          H = 816;
+          BR = { x: 20, y: 132, w: 438, h: 520 };
+          if (G.np === 3) {
+            CARD = {
+              1: [10, 12, 174, 102],
+              2: [190, 12, 174, 102],
+              0: [140, 672, 300, 126]
+            };
+            RULE = { 100: [374, 14, 92, 66], 500: [474, 14, 92, 66] };
+          } else {
+            CARD = {
+              1: [14, 12, 236, 102],
+              2: [14, 12, 236, 102],
+              0: [140, 672, 300, 126]
+            };
+            RULE = { 100: [344, 14, 104, 68], 500: [460, 14, 104, 68] };
+          }
+          PANEL = [470, 186, 98, 360];
+          PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 519, y: 248 + i * 64, r: 12 + l * 2.4 }));
+        } else {
+          W = 1120;
+          H = 646;
+          BR = { x: 300, y: 65, w: 460, h: 540 };
+          CARD = { 1: [18, 22, 168, 206], 2: [18, 424, 168, 206], 0: [862, 484, 240, 146] };
+          RULE = { 100: [862, 20, 114, 68], 500: [988, 20, 114, 68] };
+          PANEL = [928, 112, 108, 356];
+          PBTN = [5, 4, 3, 2, 1].map((l, i) => ({ l, x: 982, y: 174 + i * 64, r: 11 + l * 2.4 }));
+        }
+        NEXT = [BR.x + BR.w / 2 - 105, BR.y + BR.h / 2 - 28, 210, 56];
+
+        if (cv.width !== W || cv.height !== H) {
+          cv.width = W;
+          cv.height = H;
+        }
+
+        // 화면 회전/리사이즈 시 책 위 동전 및 손 위치 보정
+        const oldCx = oldBR.x + oldBR.w / 2, oldCy = oldBR.y + oldBR.h / 2;
+        const newCx = BR.x + BR.w / 2, newCy = BR.y + BR.h / 2;
+        const dx = newCx - oldCx, dy = newCy - oldCy;
+        if (!force && (dx !== 0 || dy !== 0)) {
+          G.coins.forEach((c) => { c.x += dx; c.y += dy; });
+          G.hand = [Math.min(BR.x + BR.w - 30, Math.max(BR.x + 30, G.hand[0] + dx)), Math.min(BR.y + BR.h - 30, Math.max(BR.y + 30, G.hand[1] + dy))];
+          if (G.aiPos) G.aiPos = [G.aiPos[0] + dx, G.aiPos[1] + dy];
+        } else if (force) {
+          G.hand = [BR.x + BR.w - 50, BR.y + BR.h / 2];
+        }
+      }
+
+      // HUD DOM 텍스트 동기화 (불필요한 DOM 갱신 방지)
+      let lastHudScore = '', lastHudStage = '', lastHudMsg = '';
+      function syncHudDom() {
+        const sc = Array.from({ length: G.np }, (_, i) => `${pname(i)}: ${G.scores[i]}승`).join('  |  ');
+        const st = G.mode === 'AI' ? `📘 ${BOOKS[G.book].n}  ${G.stage}교시 쉬는시간` : `📘 ${BOOKS[G.book].n}  ${G.np}인 대전`;
+        if (sc !== lastHudScore) { document.getElementById('hudScoreText').textContent = sc; lastHudScore = sc; }
+        if (st !== lastHudStage) { document.getElementById('hudStageText').textContent = st; lastHudStage = st; }
+        if (G.msg !== lastHudMsg) { document.getElementById('gameBottomMsg').textContent = G.msg; lastHudMsg = G.msg; }
+      }
 
       function queueBanner(text, sub = '', color = '#fde047', duration = 62) {
         G.banners.push({ text, sub, color, duration, timer: 0 });
@@ -585,6 +732,7 @@
         G.scores = [0, 0, 0];
         G.inv = [{ 100: 10, 500: 2 }, { 100: 10, 500: 2 }, { 100: 10, 500: 2 }];
         G.banners = [];
+        applyCanvasLayout(true);
         syncUI();
         if (G.mode === 'AI') {
           queueBanner(`${G.stage}교시 쉬는시간`, '학교 교실 판치기', '#fde047', 62);
@@ -608,7 +756,7 @@
         else G.msg = `[동전 배치] ${n}: ${G.rc}원(${faceName(G.coins[0].face)}) ${rem}개 더 배치하세요!`;
       }
       function tight(total, r) {
-        const cx = BR.x + BR.w / 2 - 15, cy = BR.y + BR.h / 2 + 20, s = r * 2 + 1, V = G.layout === 'vertical';
+        const cx = BR.x + BR.w / 2 - 10, cy = BR.y + BR.h / 2 + 20, s = r * 2 + 1, V = G.layout === 'vertical';
         if (total === 2) return V ? [[cx, cy - s / 2], [cx, cy + s / 2]] : [[cx - s / 2, cy], [cx + s / 2, cy]];
         if (total === 3) return V ? [[cx, cy - s], [cx, cy], [cx, cy + s]] : [[cx, cy - s * .43], [cx - s / 2, cy + s * .43], [cx + s / 2, cy + s * .43]];
         if (total === 4) return V ? [0, 1, 2, 3].map(i => [cx, cy - s * 1.5 + i * s]) : [[cx - s / 2, cy - s / 2], [cx + s / 2, cy - s / 2], [cx - s / 2, cy + s / 2], [cx + s / 2, cy + s / 2]];
@@ -693,7 +841,17 @@
         G.coins.forEach(c => c.slap(hx, hy, G.power, dir)); G.state = 'MOVING'; beep(140 + G.power * 20, .12, 'square', .1);
         G.msg = `${pname(G.cur)}: 탁!! [${dir === -1 ? '안쪽(왼쪽)' : dir === 1 ? '바깥쪽(오른쪽)' : '수직'} 치기 / 파워 ${G.power}]`;
       }
-      function stackTarget(p, v) { const c = CARD[p]; return p === 0 ? [c[0] + (v === 100 ? 48 : 158), c[1] + 98] : [c[0] + 52, c[1] + (v === 100 ? 160 : 80)]; }
+
+      function getCardStackPos(p, v) {
+        const [x, y, w, h] = CARD[p];
+        if (isPortrait) {
+          if (p === 0) return [x + (v === 100 ? 64 : 196), y + 88];
+          if (G.np === 3) return [x + (v === 100 ? 32 : 112), y + 72];
+          return [x + (v === 100 ? 48 : 152), y + 72];
+        }
+        return p === 0 ? [x + (v === 100 ? 48 : 158), y + 104] : [x + 52, y + (v === 100 ? 168 : 88)];
+      }
+
       function absorb(w, why) {
         G.winner = w; G.reason = why; G.state = 'ABSORBING'; G.scores[w]++;
         G.coins.forEach((c, i) => { c.delay = i * 6; c.z = 0; c.tilt = 0; });
@@ -771,7 +929,7 @@
           if (G.aiT > 0) G.aiT--;
           else {
             for (let i = 0; i < 50; i++) {
-              if (placeCoin(rnd(BR.x + 90, BR.x + BR.w - 110), rnd(BR.y + 120, BR.y + BR.h - 90), false)) {
+              if (placeCoin(rnd(BR.x + 80, BR.x + BR.w - 90), rnd(BR.y + 115, BR.y + BR.h - 80), false)) {
                 G.aiT = 36;
                 break;
               }
@@ -794,7 +952,7 @@
           const rem = [];
           for (const c of G.coins) {
             if (c.delay > 0) { c.delay--; rem.push(c); continue; }
-            const [tx, ty] = stackTarget(G.winner, c.v), dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy);
+            const [tx, ty] = getCardStackPos(G.winner, c.v), dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy);
             if (d < 18) { G.inv[G.winner][c.v]++; G.hl[G.winner + '_' + c.v] = 14; }
             else { const s = Math.max(14, d * .18); c.x += dx / d * s; c.y += dy / d * s; rem.push(c); }
           }
@@ -807,14 +965,38 @@
       function drawRoom(ox, oy) {
         let g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#d9d2bf'); g.addColorStop(.55, '#cbc2aa'); g.addColorStop(.56, '#a98f6a'); g.addColorStop(1, '#8c7352');
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-        ctx.strokeStyle = 'rgba(80,60,35,.25)'; ctx.lineWidth = 2; for (let x = 0; x < W; x += 72) { ctx.beginPath(); ctx.moveTo(x, H * .56); ctx.lineTo(x - 60, H); ctx.stroke(); }
-        rr(60 + ox, 52 + oy, 190, 80, 4); ctx.fillStyle = '#3d5a4a'; ctx.fill(); ctx.strokeStyle = '#8a6a3c'; ctx.lineWidth = 5; ctx.stroke(); T('오늘의 목표', 155 + ox, 82 + oy, 15, 'rgba(255,255,255,.75)'); T('판치기 장인!', 155 + ox, 106 + oy, 16, 'rgba(255,240,170,.85)');
-        [[880, 36], [990, 36]].forEach(([x, y]) => { ctx.fillStyle = '#bfe3f5'; ctx.fillRect(x, y, 90, 100); ctx.strokeStyle = '#7b6a55'; ctx.lineWidth = 4; ctx.strokeRect(x, y, 90, 100); ctx.beginPath(); ctx.moveTo(x + 45, y); ctx.lineTo(x + 45, y + 100); ctx.moveTo(x, y + 50); ctx.lineTo(x + 90, y + 50); ctx.stroke(); });
-        ctx.fillStyle = 'rgba(60,45,30,.35)'; ctx.beginPath(); ctx.moveTo(234 + ox, 80 + oy); ctx.lineTo(854 + ox, 80 + oy); ctx.lineTo(904 + ox, 704 + oy); ctx.lineTo(184 + ox, 704 + oy); ctx.fill();
-        const desk = () => { ctx.beginPath(); ctx.moveTo(218 + ox, 66 + oy); ctx.lineTo(842 + ox, 66 + oy); ctx.lineTo(888 + ox, 688 + oy); ctx.lineTo(172 + ox, 688 + oy); ctx.closePath(); };
-        desk(); ctx.fillStyle = '#d6ae7a'; ctx.fill(); ctx.strokeStyle = '#ca9e6e'; ctx.lineWidth = 2;
-        for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(205 + ox, 120 + i * 95 + oy); ctx.lineTo(855 + ox, 120 + i * 95 + oy); ctx.stroke(); }
-        desk(); ctx.strokeStyle = '#986c44'; ctx.lineWidth = 6; ctx.stroke();
+        ctx.strokeStyle = 'rgba(80,60,35,.25)'; ctx.lineWidth = 2;
+        for (let x = 0; x < W; x += 72) { ctx.beginPath(); ctx.moveTo(x, H * .56); ctx.lineTo(x - 60, H); ctx.stroke(); }
+
+        if (isPortrait) {
+          // 세로모드 책상
+          ctx.fillStyle = 'rgba(60,45,30,.32)';
+          rr(10 + ox, 122 + oy, 462, 548, 12); ctx.fill();
+          rr(6 + ox, 118 + oy, 462, 546, 10);
+          ctx.fillStyle = '#d6ae7a'; ctx.fill();
+          ctx.strokeStyle = '#ca9e6e'; ctx.lineWidth = 2;
+          for (let i = 0; i < 6; i++) {
+            const ly = 165 + i * 88 + oy;
+            ctx.beginPath(); ctx.moveTo(12 + ox, ly); ctx.lineTo(462 + ox, ly); ctx.stroke();
+          }
+          rr(6 + ox, 118 + oy, 462, 546, 10);
+          ctx.strokeStyle = '#986c44'; ctx.lineWidth = 5; ctx.stroke();
+        } else {
+          rr(60 + ox, 8 + oy, 190, 76, 4); ctx.fillStyle = '#3d5a4a'; ctx.fill(); ctx.strokeStyle = '#8a6a3c'; ctx.lineWidth = 5; ctx.stroke();
+          T('오늘의 목표', 155 + ox, 34 + oy, 14, 'rgba(255,255,255,.75)');
+          T('판치기 장인!', 155 + ox, 58 + oy, 15, 'rgba(255,240,170,.85)');
+          [[880, 6], [990, 6]].forEach(([x, y]) => {
+            ctx.fillStyle = '#bfe3f5'; ctx.fillRect(x, y, 90, 86);
+            ctx.strokeStyle = '#7b6a55'; ctx.lineWidth = 4; ctx.strokeRect(x, y, 90, 86);
+            ctx.beginPath(); ctx.moveTo(x + 45, y); ctx.lineTo(x + 45, y + 86); ctx.moveTo(x, y + 43); ctx.lineTo(x + 90, y + 43); ctx.stroke();
+          });
+          ctx.fillStyle = 'rgba(60,45,30,.35)';
+          ctx.beginPath(); ctx.moveTo(234 + ox, 30 + oy); ctx.lineTo(854 + ox, 30 + oy); ctx.lineTo(904 + ox, 640 + oy); ctx.lineTo(184 + ox, 640 + oy); ctx.fill();
+          const desk = () => { ctx.beginPath(); ctx.moveTo(218 + ox, 16 + oy); ctx.lineTo(842 + ox, 16 + oy); ctx.lineTo(888 + ox, 634 + oy); ctx.lineTo(172 + ox, 634 + oy); ctx.closePath(); };
+          desk(); ctx.fillStyle = '#d6ae7a'; ctx.fill(); ctx.strokeStyle = '#ca9e6e'; ctx.lineWidth = 2;
+          for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(205 + ox, 70 + i * 95 + oy); ctx.lineTo(855 + ox, 70 + i * 95 + oy); ctx.stroke(); }
+          desk(); ctx.strokeStyle = '#986c44'; ctx.lineWidth = 6; ctx.stroke();
+        }
       }
       function drawBook(ox, oy) {
         const b = BOOKS[G.book], x = BR.x + ox, y = BR.y + oy;
@@ -824,24 +1006,46 @@
         ctx.fillStyle = b.ac; ctx.fillRect(x + 32, y + 18, BR.w - 32, 8);
         ctx.fillStyle = b.sp; ctx.beginPath(); ctx.roundRect(x, y, 34, BR.h, [6, 0, 0, 6]); ctx.fill();
         rr(x, y, BR.w, BR.h, 6); ctx.strokeStyle = '#5f5f5f'; ctx.lineWidth = 2; ctx.stroke();
-        T(b.n.split('').join(' '), x + BR.w / 2 + 16, y + 56, 42, b.tx); T(b.s, x + BR.w / 2 + 16, y + 98, 12, '#6e737d'); T('교 육 부', x + BR.w / 2 + 16, y + BR.h - 18, 12, '#82828a');
+        T(b.n.split('').join(' '), x + BR.w / 2 + 16, y + 56, 40, b.tx);
+        T(b.s, x + BR.w / 2 + 16, y + 96, 12, '#6e737d');
+        T('교 육 부', x + BR.w / 2 + 16, y + BR.h - 18, 12, '#82828a');
       }
-      function drawStack(cx, by, v, n, hl) {
-        const r = v === 100 ? 19 : 24, L = Math.min(9, n);
-        if (!n) { ctx.strokeStyle = '#968e84'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, by, r, 9, 0, 0, 7); ctx.stroke(); }
-        else { for (let i = 0; i < L; i++) { ctx.beginPath(); ctx.ellipse(cx, by - i * 4 + 1, r, 10, 0, 0, 7); ctx.fillStyle = v === 100 ? '#949aa4' : '#8e8876'; ctx.fill(); ctx.strokeStyle = '#5f5f5f'; ctx.lineWidth = 1; ctx.stroke(); } drawCoin(cx, by - (L - 1) * 4 - 2, r, v, 1, .52, 2024); }
-        T('x' + n, cx + r + 8, by - 2, hl > 0 ? 22 : 17, hl > 0 ? '#eb461e' : '#262a30', 'left');
+      function drawStack(cx, by, v, n, hl, compact = false) {
+        const r = compact ? (v === 100 ? 15 : 18) : (v === 100 ? 19 : 24);
+        const L = Math.min(compact ? 6 : 9, n);
+        const step = compact ? 3 : 4;
+        if (!n) {
+          ctx.strokeStyle = '#968e84'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(cx, by, r, compact ? 7 : 9, 0, 0, 7); ctx.stroke();
+        } else {
+          for (let i = 0; i < L; i++) {
+            ctx.beginPath(); ctx.ellipse(cx, by - i * step + 1, r, compact ? 8 : 10, 0, 0, 7);
+            ctx.fillStyle = v === 100 ? '#949aa4' : '#8e8876'; ctx.fill();
+            ctx.strokeStyle = '#5f5f5f'; ctx.lineWidth = 1; ctx.stroke();
+          }
+          drawCoin(cx, by - (L - 1) * step - 2, r, v, 1, .52, 2024);
+        }
+        const fz = compact ? (hl > 0 ? 18 : 14) : (hl > 0 ? 22 : 17);
+        T('x' + n, cx + r + (compact ? 5 : 8), by - 2, fz, hl > 0 ? '#eb461e' : '#262a30', 'left');
       }
-      function drawCard(i, title, horiz) {
+      function drawCard(i, title) {
         if (i === 2 && G.np < 3) return;
         const [x, y, w, h] = CARD[i], act = (G.state === 'SETUP' || G.state === 'READY') && G.cur === i;
         rr(x + 3, y + 4, w, h, 12); ctx.fillStyle = 'rgba(70,60,50,.4)'; ctx.fill();
         rr(x, y, w, h, 12); ctx.fillStyle = act ? '#fcf8ec' : '#eeeae0'; ctx.fill(); ctx.strokeStyle = act ? '#e6a519' : '#a59b8c'; ctx.lineWidth = act ? 3 : 2; ctx.stroke();
-        ctx.beginPath(); ctx.roundRect(x, y, w, 28, [10, 10, 0, 0]); ctx.fillStyle = act ? '#e6a519' : '#5f6670'; ctx.fill();
-        T(`${title} (${totalMoney(i).toLocaleString()}원)`, x + w / 2, y + 15, 12, '#fff');
+        const hh = isPortrait && i !== 0 ? 24 : 28;
+        ctx.beginPath(); ctx.roundRect(x, y, w, hh, [10, 10, 0, 0]); ctx.fillStyle = act ? '#e6a519' : '#5f6670'; ctx.fill();
+        T(`${title} (${totalMoney(i).toLocaleString()}원)`, x + w / 2, y + hh / 2 + 1, isPortrait && G.np === 3 && i !== 0 ? 11 : 12, '#fff');
         const hl = (v) => G.hl[i + '_' + v] || 0;
-        if (horiz) { drawStack(x + 48, y + 104, 100, G.inv[i][100], hl(100)); drawStack(x + 158, y + 104, 500, G.inv[i][500], hl(500)); }
-        else { drawStack(x + 52, y + 88, 500, G.inv[i][500], hl(500)); drawStack(x + 52, y + 168, 100, G.inv[i][100], hl(100)); }
+        const compact = isPortrait && i !== 0;
+        const p100 = getCardStackPos(i, 100), p500 = getCardStackPos(i, 500);
+        if (isPortrait || i === 0) {
+          drawStack(p100[0], p100[1], 100, G.inv[i][100], hl(100), compact);
+          drawStack(p500[0], p500[1], 500, G.inv[i][500], hl(500), compact);
+        } else {
+          drawStack(p500[0], p500[1], 500, G.inv[i][500], hl(500), false);
+          drawStack(p100[0], p100[1], 100, G.inv[i][100], hl(100), false);
+        }
       }
       function drawHand(hx, hy, ok, slapping, ai) {
         const skin = !ok ? '#f28484' : ai ? '#d2e0f0' : slapping ? '#eebea0' : '#f4ccb0', ol = !ok ? '#c32a2a' : ai ? '#5f7694' : '#a87a60';
@@ -865,7 +1069,8 @@
         ctx.translate(W / 2, H / 2 - 10);
         ctx.scale(scale, scale);
 
-        const bw = 640, bh = 136;
+        const bw = isPortrait ? Math.min(540, W - 20) : 640;
+        const bh = isPortrait ? 118 : 136;
         const grad = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
         grad.addColorStop(0, 'rgba(9, 13, 22, 0)');
         grad.addColorStop(0.2, 'rgba(9, 13, 22, 0.88)');
@@ -874,45 +1079,48 @@
         ctx.fillStyle = grad;
         ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
 
+        const lineW = isPortrait ? 190 : 240;
         ctx.strokeStyle = b.color;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(-240, -bh / 2); ctx.lineTo(240, -bh / 2);
-        ctx.moveTo(-240, bh / 2); ctx.lineTo(240, bh / 2);
+        ctx.moveTo(-lineW, -bh / 2); ctx.lineTo(lineW, -bh / 2);
+        ctx.moveTo(-lineW, bh / 2); ctx.lineTo(lineW, bh / 2);
         ctx.stroke();
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `900 54px ${FONT}`;
+        ctx.font = `900 ${isPortrait ? 40 : 54}px ${FONT}`;
         ctx.strokeStyle = '#090d16';
-        ctx.lineWidth = 8;
-        ctx.strokeText(b.text, 0, b.sub ? -14 : 0);
+        ctx.lineWidth = 7;
+        ctx.strokeText(b.text, 0, b.sub ? -13 : 0);
         ctx.fillStyle = b.color;
-        ctx.fillText(b.text, 0, b.sub ? -14 : 0);
+        ctx.fillText(b.text, 0, b.sub ? -13 : 0);
 
         if (b.sub) {
-          ctx.font = `800 20px ${FONT}`;
+          ctx.font = `800 ${isPortrait ? 17 : 20}px ${FONT}`;
           ctx.lineWidth = 5;
-          ctx.strokeText(b.sub, 0, 32);
+          ctx.strokeText(b.sub, 0, 28);
           ctx.fillStyle = '#f1f5f9';
-          ctx.fillText(b.sub, 0, 32);
+          ctx.fillText(b.sub, 0, 28);
         }
         ctx.restore();
       }
 
       function draw() {
+        syncHudDom();
         const ox = G.shake ? rnd(-G.shake, G.shake) : 0, oy = G.shake ? rnd(-G.shake, G.shake) : 0;
         drawRoom(ox, oy); drawBook(ox, oy);
-        drawCard(1, G.mode === 'AI' ? 'AI' : '2P', false); drawCard(2, '3P', false); drawCard(0, G.mode === 'AI' ? '나' : '1P', true);
+        drawCard(1, G.mode === 'AI' ? 'AI' : '2P'); drawCard(2, '3P'); drawCard(0, G.mode === 'AI' ? '나' : '1P');
         [100, 500].forEach(v => {
           const [x, y, w, h] = RULE[v], sel = G.rc === v;
           rr(x + 2, y + 3, w, h, 10); ctx.fillStyle = 'rgba(70,60,50,.4)'; ctx.fill();
           rr(x, y, w, h, 10); ctx.fillStyle = sel ? '#fff8d4' : '#eae6dc'; ctx.fill(); ctx.strokeStyle = sel ? '#e8a216' : '#9b948a'; ctx.lineWidth = sel ? 4 : 2; ctx.stroke();
-          const r = v === 100 ? 22 : 26, cx = x + w / 2, cy = y + h / 2;
-          if (sel && G.rn === 2) { drawCoin(cx + 10, cy - 3, r, v, 1); drawCoin(cx - 10, cy + 3, r, v, 1); } else drawCoin(cx, cy, r, v, 1);
-          if (sel) T(`${v}원 × ${G.rn}`, cx, y + h + 12, 12, '#7a5200');
+          const r = v === 100 ? (isPortrait ? 19 : 22) : (isPortrait ? 23 : 26), cx = x + w / 2, cy = y + h / 2;
+          if (sel && G.rn === 2) { drawCoin(cx + 9, cy - 3, r, v, 1); drawCoin(cx - 9, cy + 3, r, v, 1); } else drawCoin(cx, cy, r, v, 1);
+          if (sel) T(`${v}원 × ${G.rn}`, cx, y + h + 13, 12, '#7a5200');
         });
-        rr(...PANEL, 14); ctx.fillStyle = '#eee8dc'; ctx.fill(); ctx.strokeStyle = '#afa596'; ctx.lineWidth = 2; ctx.stroke(); T('파워 단계', PANEL[0] + 54, PANEL[1] + 18, 14, '#412d23');
+        rr(...PANEL, 14); ctx.fillStyle = '#eee8dc'; ctx.fill(); ctx.strokeStyle = '#afa596'; ctx.lineWidth = 2; ctx.stroke();
+        T('파워 단계', PANEL[0] + PANEL[2] / 2, PANEL[1] + 19, 13, '#412d23');
         PBTN.forEach(b => {
           const s = b.l === G.power, c = PCOL[b.l];
           if (s) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 4, 0, 7); ctx.fillStyle = '#ffeb96'; ctx.fill(); }
@@ -927,26 +1135,25 @@
         }
         if (G.drag && G.state === 'READY' && !isAI()) {
           const dx = G.dc[0] - G.ds[0], [gd, col] = dx < -30 ? ['◀ 안쪽(왼쪽) 치기', '#2878dc'] : dx > 30 ? ['바깥쪽(오른쪽) 땡겨치기 ▶', '#dc5032'] : ['▼ 수직 내리치기', '#28a050'];
-          ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(...G.ds); ctx.lineTo(...G.dc); ctx.stroke(); ctx.beginPath(); ctx.arc(G.dc[0], G.dc[1], 6, 0, 7); ctx.fillStyle = col; ctx.fill(); T(gd, BR.x + BR.w / 2, 76, 17, col);
+          ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(...G.ds); ctx.lineTo(...G.dc); ctx.stroke(); ctx.beginPath(); ctx.arc(G.dc[0], G.dc[1], 6, 0, 7); ctx.fillStyle = col; ctx.fill();
+          T(gd, BR.x + BR.w / 2, isPortrait ? BR.y + 124 : 32, 17, col);
         }
         if (G.state === 'ROUND_OVER' && !hasActiveBanner()) {
           rr(...NEXT, 10); ctx.fillStyle = '#2a9456'; ctx.fill(); ctx.strokeStyle = '#fff0aa'; ctx.lineWidth = 3; ctx.stroke();
           T('다음 판 시작 ▶', NEXT[0] + 105, NEXT[1] + 28, 20, '#fff');
         }
-        ctx.fillStyle = '#202630'; ctx.fillRect(0, 0, W, 50); ctx.fillStyle = '#465063'; ctx.fillRect(0, 50, W, 2);
-        T(Array.from({ length: G.np }, (_, i) => `${pname(i)}: ${G.scores[i]}승`).join('   |   '), 20, 26, 17, '#ffe478', 'left');
-        const rightHud = G.mode === 'AI' ? `📘 ${BOOKS[G.book].n}   ${G.stage}교시 쉬는시간` : `📘 ${BOOKS[G.book].n}   ${G.np}인 대전`;
-        T(rightHud, W - 20, 26, 15, '#9fb4d0', 'right');
-        ctx.fillStyle = '#202630'; ctx.fillRect(0, H - 44, W, 44); T(G.msg, W / 2, H - 22, 17, '#f5f8fc');
 
         drawCenterBanner();
       }
 
-      // ---------- 입력 (PC 전체화면 fill & 모바일 contain 모두 정밀 보정) ----------
+      // ---------- 입력 (PC 가로 fill & 모바일 세로 contain 모두 정밀 보정) ----------
+      const fullscreenStage = document.getElementById('fullscreenStage');
+      const isFullscreenActive = () => Boolean(document.fullscreenElement) || fullscreenStage.classList.contains('is-fullscreen');
+
       const pos = (e) => {
         const r = cv.getBoundingClientRect();
         const fit = getComputedStyle(cv).objectFit;
-        if (fit === 'fill' || !document.fullscreenElement) {
+        if (fit === 'fill' || !isFullscreenActive()) {
           return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height];
         }
         const aspect = W / H;
@@ -955,6 +1162,7 @@
         else { rh = rw / aspect; oy = (r.height - rh) / 2; }
         return [(e.clientX - r.left - ox) * W / rw, (e.clientY - r.top - oy) * H / rh];
       };
+
       cv.addEventListener('pointerdown', (e) => {
         getAC();
         if (saveStateObj.bgmEnabled && !bgmTimer) startBGM();
@@ -964,7 +1172,7 @@
         if (G.state === 'ROUND_OVER' && hit(NEXT, x, y)) { startSetup(); return; }
         for (const v of [100, 500]) if (hit(RULE[v], x, y)) { if (G.rc === v) G.rn = G.rn === 2 ? 1 : 2; else G.rc = v; startSetup(true); return; }
         if (isAI()) return;
-        for (const b of PBTN) if (Math.hypot(x - b.x, y - b.y) <= b.r + 5) { G.power = b.l; return; }
+        for (const b of PBTN) if (Math.hypot(x - b.x, y - b.y) <= b.r + 7) { G.power = b.l; return; }
         if (G.state === 'SETUP') placeCoin(x, y);
         else if (G.state === 'READY' && inBook(x, y, 15)) {
           G.hand = [x, y]; G.handOk = handValid(x, y);
@@ -986,7 +1194,12 @@
         if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
         if (/^[1-5]$/.test(e.key) && !isAI()) G.power = +e.key;
         if (e.key === ' ' && G.state === 'ROUND_OVER' && !hasActiveBanner()) { e.preventDefault(); startSetup(); }
+        if (e.key === 'Escape' && fullscreenStage.classList.contains('is-fullscreen') && !document.fullscreenElement) {
+          exitCssFullscreen();
+        }
       });
+      window.addEventListener('resize', () => { applyCanvasLayout(false); });
+      window.addEventListener('orientationchange', () => { setTimeout(() => applyCanvasLayout(false), 120); });
 
       // ==========================================
       // 4. UI / 헤더 / 로그인 / 전체화면 바인딩
@@ -996,11 +1209,11 @@
       function syncUI() {
         $('modeBtn').textContent = G.mode === 'AI' ? 'AI 대전' : G.mode === '2P' ? '2인 대전' : '3인 대전';
         $('stageInfoDisplay').textContent = G.mode === 'AI' ? `${G.stage}교시 쉬는시간 · 학교 교실` : `${G.np}인 대전 · 학교 교실`;
-        $('autoBtn').className = 'px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-black border active:scale-95 cursor-pointer ' + (G.auto ? 'bg-emerald-600 border-amber-300 text-white' : 'bg-slate-800 border-slate-600 text-slate-300');
+        $('autoBtn').className = 'px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-black border active:scale-95 cursor-pointer whitespace-nowrap ' + (G.auto ? 'bg-emerald-600 border-amber-300 text-white' : 'bg-slate-800 border-slate-600 text-slate-300');
         $('autoIcons').className = G.auto ? 'flex items-center gap-1' : 'hidden';
         const on = 'border-amber-400 bg-amber-100 text-slate-900', off = 'border-slate-600 bg-slate-200 text-slate-600';
-        $('icV').className = 'w-7 h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'vertical' ? on : off);
-        $('icC').className = 'w-7 h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'cluster' ? on : off);
+        $('icV').className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'vertical' ? on : off);
+        $('icC').className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center active:scale-95 cursor-pointer ' + (G.layout === 'cluster' ? on : off);
       }
 
       $('bookBtn').onclick = () => { G.book = (G.book + 1) % BOOKS.length; };
@@ -1038,41 +1251,60 @@
       };
       $('headerExitLobbyBtn').onclick = () => { recordMaxMoney(false); window.location.href = 'https://02826k.github.io/aigameroom/'; };
 
-      // 전체화면 전환 & 모바일 화면 회전 잠금
-      const fullscreenStage = $('fullscreenStage'), fullscreenBtn = $('fullscreenBtn');
-      function lockOrientationMode(mode) {
+      // 전체화면 전환 (모바일 세로모드 고정 + iOS CSS 폴백)
+      const fullscreenBtn = $('fullscreenBtn');
+      function lockPortraitOrientation() {
         if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock(mode).catch(() => {
-            if (mode === 'portrait' && screen.orientation.unlock) { try { screen.orientation.unlock(); } catch {} }
-          });
+          screen.orientation.lock('portrait').catch(() => {});
         }
       }
+      function updateFullscreenUi(active) {
+        fullscreenBtn.textContent = active ? '✕ 축소' : '⛶ 전체화면';
+        document.body.classList.toggle('fs-lock', active);
+        setTimeout(() => applyCanvasLayout(false), 60);
+      }
+      function enterCssFullscreen() {
+        fullscreenStage.classList.add('is-fullscreen');
+        updateFullscreenUi(true);
+        lockPortraitOrientation();
+      }
+      function exitCssFullscreen() {
+        fullscreenStage.classList.remove('is-fullscreen');
+        updateFullscreenUi(false);
+      }
       async function toggleFullscreen() {
-        try {
-          if (!document.fullscreenElement) {
-            await fullscreenStage.requestFullscreen();
-            fullscreenBtn.textContent = '✕ 축소';
-            lockOrientationMode('landscape');
-          } else {
-            await document.exitFullscreen();
-            fullscreenBtn.textContent = '⛶ 전체화면';
-            lockOrientationMode('portrait');
+        if (isFullscreenActive()) {
+          if (document.fullscreenElement) {
+            try { await document.exitFullscreen(); } catch (e) {}
           }
-        } catch (e) {
-          showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
+          exitCssFullscreen();
+        } else {
+          if (fullscreenStage.requestFullscreen) {
+            try {
+              await fullscreenStage.requestFullscreen();
+              updateFullscreenUi(true);
+              lockPortraitOrientation();
+              return;
+            } catch (e) {}
+          }
+          enterCssFullscreen();
         }
       }
       fullscreenBtn.onclick = toggleFullscreen;
+      $('fsExitBtn').onclick = toggleFullscreen;
       document.addEventListener('fullscreenchange', () => {
         const isFs = Boolean(document.fullscreenElement);
-        fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
-        if (!isFs) lockOrientationMode('portrait');
+        if (!isFs) fullscreenStage.classList.remove('is-fullscreen');
+        updateFullscreenUi(isFs);
+        if (isFs) lockPortraitOrientation();
       });
 
       // 로그인 / 로그아웃 / VIP 헤더
       function updateHeaderUI() {
         const btn = $('authHeaderBtn');
-        const isVip = saveStateObj.isVip || localStorage.getItem('hero_clicker_is_vip') === 'true';
+        let vipFlag = false;
+        try { vipFlag = localStorage.getItem('hero_clicker_is_vip') === 'true'; } catch (e) {}
+        const isVip = saveStateObj.isVip || vipFlag;
         if (authToken && currentUsername) {
           if (isVip) {
             btn.textContent = '👑 VIP 로그아웃';
@@ -1103,11 +1335,16 @@
       window.addEventListener('storage', syncAuthFromStorage);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncAuthFromStorage(); });
 
-      const authModal = $('authModal'), phoneInput = $('authPhoneDigits'), pinInput = $('authPinCode');
+      const authModal = $('authModal'), logoutModal = $('logoutModal'), phoneInput = $('authPhoneDigits'), pinInput = $('authPinCode');
       $('authHeaderBtn').onclick = () => {
-        if (authToken && currentUsername) { if (confirm('로그아웃 하시겠습니까?')) handleLogout(false); }
-        else { authModal.classList.remove('hidden'); authModal.classList.add('flex'); phoneInput.focus(); }
+        if (authToken && currentUsername) {
+          logoutModal.classList.remove('hidden'); logoutModal.classList.add('flex');
+        } else {
+          authModal.classList.remove('hidden'); authModal.classList.add('flex'); phoneInput.focus();
+        }
       };
+      $('logoutCancelBtn').onclick = () => { logoutModal.classList.add('hidden'); logoutModal.classList.remove('flex'); };
+      $('logoutConfirmBtn').onclick = () => { logoutModal.classList.add('hidden'); logoutModal.classList.remove('flex'); handleLogout(false); };
       $('authCloseBtn').onclick = () => { authModal.classList.add('hidden'); authModal.classList.remove('flex'); };
       $('modeLoginBtn').onclick = () => {
         isRegisterMode = false;
@@ -1155,7 +1392,9 @@
 
       // 랭킹 오버레이 (열 때마다 자동 갱신)
       const rankOverlay = $('rankOverlay');
-      $('rankOpenBtn').onclick = () => { fetchRanking(); rankOverlay.classList.remove('hidden'); };
+      const openRank = () => { fetchRanking(); rankOverlay.classList.remove('hidden'); };
+      $('rankOpenBtn').onclick = openRank;
+      $('fsRankBtn').onclick = openRank;
       $('rankCloseBtn').onclick = () => { rankOverlay.classList.add('hidden'); };
       rankOverlay.addEventListener('click', (e) => { if (e.target === rankOverlay) rankOverlay.classList.add('hidden'); });
 
