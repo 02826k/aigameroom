@@ -26,7 +26,11 @@
       background: #020617;
       height: 100dvh;
     }
-    canvas { touch-action: none; }
+    canvas {
+      touch-action: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
     .hidden { display: none !important; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
@@ -79,9 +83,8 @@
     </div>
   </header>
 
-  <!-- 메인 게임 영역 (전체화면 대상: 나가기 버튼 아래부터 게임화면 바닥까지) -->
+  <!-- 메인 게임 영역 -->
   <main id="fullscreenMain" class="flex-1 min-h-0 w-full max-w-md mx-auto px-2 py-2 flex flex-col gap-1.5">
-    <!-- 상단 컨트롤 바: 왼쪽 상단 수류탄 개수 표시 / 오른쪽 VIP생존본능·RANK·전체화면 -->
     <div class="flex items-center justify-between gap-1 shrink-0">
       <button id="grenadeBtn" type="button" class="px-2.5 py-1 rounded-lg bg-rose-950/90 hover:bg-rose-900 border border-rose-500/60 text-rose-200 text-[11px] font-black cursor-pointer active:scale-95 transition whitespace-nowrap flex items-center gap-1 shadow">
         <span>💣</span>
@@ -149,11 +152,10 @@
         <h2 class="text-base sm:text-lg font-black text-amber-300">🎉 레벨 업! 무기 및 능력 강화</h2>
         <div id="upgradeOptions" class="flex flex-col gap-2 w-full max-w-sm mt-1"></div>
       </div>
-
     </div>
   </main>
 
-  <!-- RANK 모달 (명예의 전당) -->
+  <!-- RANK 모달 -->
   <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
       <div class="flex items-center justify-between gap-2">
@@ -494,6 +496,355 @@
       }
     });
 
+    // ==========================================
+    // 픽셀 아트 스프라이트 & 옥상 헬리패드 배경 엔진
+    // ==========================================
+    function createPixelSprite(grid, palette, flashWhite = false) {
+      const h = grid.length;
+      const w = grid[0].length;
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const cctx = c.getContext('2d');
+      for (let y = 0; y < h; y++) {
+        const row = grid[y];
+        for (let x = 0; x < w; x++) {
+          const ch = row[x];
+          if (ch === '.' || !palette[ch]) continue;
+          cctx.fillStyle = flashWhite ? '#ffffff' : palette[ch];
+          cctx.fillRect(x, y, 1, 1);
+        }
+      }
+      return c;
+    }
+
+    // 1) 플레이어: 귀여운 핑크 트윈테일 SD 캐릭터 (16x16, 2프레임)
+    const PLAYER_PALETTE = {
+      K: '#18181b', // 검은 외곽선
+      P: '#f472b6', // 핑크 머리
+      L: '#fbcfe8', // 머리 하이라이트
+      D: '#db2777', // 머리 그림자
+      S: '#fde68a', // 피부
+      E: '#0f172a', // 눈동자
+      B: '#38bdf8', // 파란 눈빛
+      W: '#ffffff', // 흰 셔츠
+      R: '#f43f5e', // 빨간 리본
+      N: '#1e293b'  // 치마/부츠
+    };
+
+    const PLAYER_GRID_0 = [
+      '....KKKKKKKK....',
+      '..KKLLPPPPPPKK..',
+      '.KPPPLPPPPPPDPK.',
+      'KPKPPPLLLPPPDKPK',
+      'KPKPPSSSSSSPPKPK',
+      'KPKPKSESSSESPKPK',
+      'KPKPKSBSSSBSPKPK',
+      'KDKPPSSSSSSPPKDK',
+      '.KKDKPPPPPPKDKK.',
+      '..KKKWWWWWWKKK..',
+      '....KWWWRWWK....',
+      '...KSWWWWWWKS...',
+      '....KNNNNNNK....',
+      '....KNN..NNK....',
+      '....KSS..SSK....',
+      '....KKK..KKK....'
+    ];
+
+    const PLAYER_GRID_1 = [
+      '....KKKKKKKK....',
+      '..KKLLPPPPPPKK..',
+      '.KPPPLPPPPPPDPK.',
+      'KPKPPPLLLPPPDKPK',
+      'KPKPPSSSSSSPPKPK',
+      'KPKPKSESSSESPKPK',
+      'KPKPKSBSSSBSPKPK',
+      'KDKPPSSSSSSPPKDK',
+      '.KKDKPPPPPPKDKK.',
+      '..KKKWWWWWWKKK..',
+      '....KWWWRWWK....',
+      '...KSWWWWWWKS...',
+      '....KNNNNNNK....',
+      '...KNN....NNK...',
+      '...KSS....SSK...',
+      '...KKK....KKK...'
+    ];
+
+    // 2) 일반 좀비: 귀여운 초록 도트 좀비 (14x14, 2프레임)
+    const ZOMBIE_PALETTE = {
+      K: '#18181b',
+      G: '#84cc16',
+      L: '#a3e635',
+      D: '#4d7c0f',
+      R: '#ef4444',
+      C: '#94a3b8',
+      T: '#334155'
+    };
+
+    const ZOMBIE_GRID_0 = [
+      '...KKKKKKKK...',
+      '..KLLGGGGGGK..',
+      '.KLGGGGGGGGDK.',
+      '.KGGGGGGGGGDK.',
+      '.KGGKRGGKRGDK.',
+      '.KGGGGGGGGGDK.',
+      '..KDDDDDDDDK..',
+      '..KKCCCCCCKK..',
+      '.KGGCCCCCCGGK.',
+      '.KKKCCCCCCKKK.',
+      '...KTTTTTTK...',
+      '...KTT..TTK...',
+      '...KTT..TTK...',
+      '...KKK..KKK...'
+    ];
+
+    const ZOMBIE_GRID_1 = [
+      '...KKKKKKKK...',
+      '..KLLGGGGGGK..',
+      '.KLGGGGGGGGDK.',
+      '.KGGGGGGGGGDK.',
+      '.KGGKRGGKRGDK.',
+      '.KGGGGGGGGGDK.',
+      '..KDDDDDDDDK..',
+      '..KKCCCCCCKK..',
+      '.KGGCCCCCCGGK.',
+      '.KKKCCCCCCKKK.',
+      '...KTTTTTTK...',
+      '..KTT....TTK..',
+      '..KTT....TTK..',
+      '..KKK....KKK..'
+    ];
+
+    // 3) 러너 좀비: 민첩한 형광 라임 좀비 (14x14)
+    const RUNNER_PALETTE = {
+      K: '#18181b',
+      G: '#bef264',
+      L: '#ecfccb',
+      D: '#65a30d',
+      R: '#f97316',
+      C: '#475569',
+      T: '#1e293b'
+    };
+
+    // 4) 스테이지 보스: 뿔 달린 거대 보라색 괴물 보스 (22x22, 2프레임)
+    const BOSS_PALETTE = {
+      K: '#18181b',
+      H: '#fef3c7',
+      h: '#d6d3d1',
+      P: '#6b5b7b',
+      L: '#8b7aa0',
+      D: '#453754',
+      Y: '#facc15',
+      B: '#92400e',
+      R: '#d97706'
+    };
+
+    const BOSS_GRID_0 = [
+      '...KK............KK...',
+      '..KHHK..........KHHK..',
+      '..KhhKK.KKKKKK.KKhhK..',
+      '...KKhKKLLPPPPKKhKK...',
+      '....KKKLLPPPPPPKKK....',
+      '.....KLLPPPPPPPDK.....',
+      '.....KPPKYPPKYPDK.....',
+      '.....KPPPPPPPPPDK.....',
+      '...KKKPPDDDDDDPPKKK...',
+      '.KKLLPPPPPPPPPPPPLLKK.',
+      'KLLPPPPKPPPPPPKPPPPLLK',
+      'KPPPPPPKPPPPPPKPPPPPPK',
+      'KPPPPPDKDDDDDDKDPPPPPK',
+      'KPPPPDKRRRRRRRRKDPPPPK',
+      'KDDDDDKBBBBBBBBKDDDDDK',
+      '.KKKK.KBBBBBBBBK.KKKK.',
+      '......KBBBKKBBBK......',
+      '.....KBBBK..KBBBK.....',
+      '.....KPPPK..KPPPK.....',
+      '.....KDDDK..KDDDK.....',
+      '.....KKKKK..KKKKK.....',
+      '......................'
+    ];
+
+    const BOSS_GRID_1 = [
+      '......................',
+      '...KK............KK...',
+      '..KHHK..........KHHK..',
+      '..KhhKK.KKKKKK.KKhhK..',
+      '...KKhKKLLPPPPKKhKK...',
+      '....KKKLLPPPPPPKKK....',
+      '.....KLLPPPPPPPDK.....',
+      '.....KPPKYPPKYPDK.....',
+      '.....KPPPPPPPPPDK.....',
+      '...KKKPPDDDDDDPPKKK...',
+      '.KKLLPPPPPPPPPPPPLLKK.',
+      'KLLPPPPKPPPPPPKPPPPLLK',
+      'KPPPPPPKPPPPPPKPPPPPPK',
+      'KPPPPPDKDDDDDDKDPPPPPK',
+      'KPPPPDKRRRRRRRRKDPPPPK',
+      'KDDDDDKBBBBBBBBKDDDDDK',
+      '.KKKK.KBBBBBBBBK.KKKK.',
+      '....KBBBK....KBBBK....',
+      '....KPPPK....KPPPK....',
+      '....KDDDK....KDDDK....',
+      '....KKKKK....KKKKK....',
+      '......................'
+    ];
+
+    // 5) 경험치 보석 (8x8)
+    const GEM_PALETTE = {
+      K: '#0f172a',
+      C: '#38bdf8',
+      L: '#e0f2fe',
+      D: '#0284c7'
+    };
+    const GEM_GRID = [
+      '...KK...',
+      '..KLLK..',
+      '.KLCCCK.',
+      'KLCCCCDK',
+      'KCCCCDDK',
+      '.KCCDDK.',
+      '..KDDK..',
+      '...KK...'
+    ];
+
+    const SPRITES = {
+      player: [
+        createPixelSprite(PLAYER_GRID_0, PLAYER_PALETTE),
+        createPixelSprite(PLAYER_GRID_1, PLAYER_PALETTE)
+      ],
+      zombie: [
+        createPixelSprite(ZOMBIE_GRID_0, ZOMBIE_PALETTE),
+        createPixelSprite(ZOMBIE_GRID_1, ZOMBIE_PALETTE)
+      ],
+      zombieFlash: [
+        createPixelSprite(ZOMBIE_GRID_0, ZOMBIE_PALETTE, true),
+        createPixelSprite(ZOMBIE_GRID_1, ZOMBIE_PALETTE, true)
+      ],
+      runner: [
+        createPixelSprite(ZOMBIE_GRID_0, RUNNER_PALETTE),
+        createPixelSprite(ZOMBIE_GRID_1, RUNNER_PALETTE)
+      ],
+      runnerFlash: [
+        createPixelSprite(ZOMBIE_GRID_0, RUNNER_PALETTE, true),
+        createPixelSprite(ZOMBIE_GRID_1, RUNNER_PALETTE, true)
+      ],
+      boss: [
+        createPixelSprite(BOSS_GRID_0, BOSS_PALETTE),
+        createPixelSprite(BOSS_GRID_1, BOSS_PALETTE)
+      ],
+      bossFlash: [
+        createPixelSprite(BOSS_GRID_0, BOSS_PALETTE, true),
+        createPixelSprite(BOSS_GRID_1, BOSS_PALETTE, true)
+      ],
+      gem: createPixelSprite(GEM_GRID, GEM_PALETTE)
+    };
+
+    // 옥상 헬리패드 오프스크린 배경 캐시
+    let bgCanvas = document.createElement('canvas');
+    function buildRooftopBackground(w, h) {
+      bgCanvas.width = w;
+      bgCanvas.height = h;
+      const bctx = bgCanvas.getContext('2d');
+      bctx.imageSmoothingEnabled = false;
+
+      // 콘크리트 옥상 바닥
+      bctx.fillStyle = '#8b929e';
+      bctx.fillRect(0, 0, w, h);
+
+      // 픽셀 타일 격자
+      const tile = 32;
+      bctx.strokeStyle = '#737a86';
+      bctx.lineWidth = 2;
+      for (let gx = 0; gx <= w; gx += tile) {
+        bctx.beginPath(); bctx.moveTo(gx, 0); bctx.lineTo(gx, h); bctx.stroke();
+      }
+      for (let gy = 0; gy <= h; gy += tile) {
+        bctx.beginPath(); bctx.moveTo(0, gy); bctx.lineTo(w, gy); bctx.stroke();
+      }
+
+      // 콘크리트 질감 도트 노이즈 (고정 시드 패턴)
+      for (let i = 0; i < Math.floor((w * h) / 1400); i++) {
+        const nx = (i * 97 + 13) % w;
+        const ny = (i * 193 + 29) % h;
+        bctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.12)';
+        bctx.fillRect(Math.floor(nx / 3) * 3, Math.floor(ny / 3) * 3, 3, 3);
+      }
+
+      // 옥상 난간 테두리
+      bctx.strokeStyle = '#334155';
+      bctx.lineWidth = 10;
+      bctx.strokeRect(5, 5, w - 10, h - 10);
+      bctx.strokeStyle = '#18181b';
+      bctx.lineWidth = 2;
+      bctx.strokeRect(10, 10, w - 20, h - 20);
+
+      // 중앙 원형 헬리패드 (H 마크)
+      const cx = Math.floor(w / 2);
+      const cy = Math.floor(h / 2);
+      const padR = Math.min(w, h) * 0.29;
+
+      // 검은 외곽선
+      bctx.fillStyle = '#18181b';
+      bctx.beginPath(); bctx.arc(cx, cy, padR + 4, 0, Math.PI * 2); bctx.fill();
+
+      // 흰 링
+      bctx.fillStyle = '#e2e8f0';
+      bctx.beginPath(); bctx.arc(cx, cy, padR + 1, 0, Math.PI * 2); bctx.fill();
+
+      // 진회색 헬리패드 아스팔트
+      bctx.fillStyle = '#474e5b';
+      bctx.beginPath(); bctx.arc(cx, cy, padR - 6, 0, Math.PI * 2); bctx.fill();
+
+      // 점선 원
+      bctx.save();
+      bctx.strokeStyle = 'rgba(226, 232, 240, 0.35)';
+      bctx.lineWidth = 3;
+      bctx.setLineDash([8, 8]);
+      bctx.beginPath(); bctx.arc(cx, cy, padR - 14, 0, Math.PI * 2); bctx.stroke();
+      bctx.restore();
+
+      // 중앙 'H' 픽셀 마크
+      const hW = Math.floor(padR * 0.62);
+      const hH = Math.floor(padR * 0.78);
+      const bar = Math.max(8, Math.floor(padR * 0.16));
+      bctx.fillStyle = '#e2e8f0';
+      bctx.fillRect(cx - hW / 2, cy - hH / 2, bar, hH);
+      bctx.fillRect(cx + hW / 2 - bar, cy - hH / 2, bar, hH);
+      bctx.fillRect(cx - hW / 2, cy - bar / 2, hW, bar);
+
+      // 장식용 모래주머니 바리케이드 (우측 상단 & 우측 하단)
+      function drawSandbags(bx, by) {
+        const bags = [
+          [0, 0], [18, 0], [36, 0],
+          [8, 9], [26, 9]
+        ];
+        bags.forEach(([ox, oy]) => {
+          bctx.fillStyle = '#18181b';
+          bctx.fillRect(bx + ox - 2, by + oy - 2, 20, 12);
+          bctx.fillStyle = '#c2a375';
+          bctx.fillRect(bx + ox, by + oy, 16, 8);
+          bctx.fillStyle = '#dfc498';
+          bctx.fillRect(bx + ox + 2, by + oy + 1, 10, 3);
+        });
+      }
+      drawSandbags(w - 78, 28);
+      drawSandbags(24, h - 42);
+
+      // 장식용 옥상 환풍기(AC 유닛, 좌측 상단)
+      const acX = 22, acY = 24;
+      bctx.fillStyle = '#18181b';
+      bctx.fillRect(acX - 2, acY - 2, 38, 30);
+      bctx.fillStyle = '#94a3b8';
+      bctx.fillRect(acX, acY, 34, 26);
+      bctx.fillStyle = '#cbd5e1';
+      bctx.fillRect(acX + 2, acY + 2, 30, 5);
+      bctx.fillStyle = '#334155';
+      bctx.beginPath(); bctx.arc(acX + 17, acY + 16, 8, 0, Math.PI * 2); bctx.fill();
+      bctx.fillStyle = '#1e293b';
+      bctx.fillRect(acX + 11, acY + 15, 12, 2);
+      bctx.fillRect(acX + 16, acY + 10, 2, 12);
+    }
+
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -505,6 +856,7 @@
       if (w > 0 && h > 0) {
         canvas.width = w;
         canvas.height = h;
+        buildRooftopBackground(w, h);
       }
     }
     window.addEventListener('resize', resizeCanvas);
@@ -522,10 +874,10 @@
     let stageTargetKills = 15;
     let bossSpawned = false;
     let spawnTimer = null;
+    let animTick = 0;
 
     // 5단계 업그레이드 상수
     const MAX_UPGRADE_STEP = 5;
-    // 속사 5단계 쿨다운 테이블 (0단계: 28 -> 5단계: 8)
     const RAPID_FIRE_COOLDOWNS = [28, 23, 18, 14, 11, 8];
 
     let player = {
@@ -539,20 +891,23 @@
       exp: 0,
       maxExp: 30,
       damage: 18,
-      rapidLevel: 0,        // 0 ~ 5단계
+      rapidLevel: 0,
       attackSpeed: RAPID_FIRE_COOLDOWNS[0],
       attackCooldown: 0,
       range: 210,
       facingAngle: 0,
-      multiShotLevel: 0,    // 0 ~ 5단계 (0단계=기본 1발, 5단계=1+5=6발)
+      multiShotLevel: 0,
       multiShot: 1,
-      grenades: 0
+      grenades: 0,
+      isMoving: false,
+      muzzleFlash: 0
     };
 
     let zombies = [];
     let bullets = [];
     let gems = [];
     let particles = [];
+    let floatingTexts = [];
 
     function updateGrenadeUI() {
       const el = document.getElementById('grenadeCountVal');
@@ -572,7 +927,6 @@
       updateGrenadeUI();
       playSfx('boom');
 
-      // 폭발 시각 효과
       const expEl = document.getElementById('grenadeExplosionOverlay');
       if (expEl) {
         expEl.classList.remove('hidden');
@@ -582,22 +936,24 @@
         setTimeout(() => expEl.classList.add('hidden'), 680);
       }
 
-      // 화면의 모든 적 제거 처리
       let killedCount = 0;
       let bossKilled = false;
 
       for (let i = zombies.length - 1; i >= 0; i--) {
         const z = zombies[i];
-        for (let p = 0; p < 8; p++) {
+        for (let p = 0; p < 10; p++) {
           particles.push({
             x: z.x, y: z.y,
             vx: (Math.random() - 0.5) * 8,
             vy: (Math.random() - 0.5) * 8,
-            life: 20,
-            color: z.isBoss ? '#f43f5e' : '#f97316'
+            life: 22,
+            size: 4 + Math.floor(Math.random() * 4),
+            color: p % 2 === 0 ? '#facc15' : '#f97316'
           });
         }
-        score += z.isBoss ? 500 : 15;
+        const pts = z.isBoss ? 500 : 15;
+        score += pts;
+        floatingTexts.push({ x: z.x, y: z.y - 10, text: `+${pts}`, life: 32, color: '#fde047' });
         gems.push({ x: z.x, y: z.y, val: z.expVal, radius: z.isBoss ? 10 : 6 });
         if (z.isBoss) bossKilled = true;
         else killedCount++;
@@ -834,6 +1190,7 @@
       bullets = [];
       gems = [];
       particles = [];
+      floatingTexts = [];
 
       player.x = canvas.width / 2;
       player.y = canvas.height / 2;
@@ -843,13 +1200,12 @@
       player.maxHp = userState.isVip ? 150 : 100;
       player.hp = player.maxHp;
       player.damage = userState.isVip ? 24 : 18;
-      // 처음에 총을 1발 쏘는 것으로 시작 +5까지 업그레이드
       player.multiShotLevel = 0;
       player.multiShot = 1;
-      // 속사도 5단계까지만, 처음에 느리게 시작
       player.rapidLevel = 0;
       player.attackSpeed = RAPID_FIRE_COOLDOWNS[0];
       player.grenades = 0;
+      player.muzzleFlash = 0;
 
       document.getElementById('scoreVal').textContent = '0';
       document.getElementById('levelVal').textContent = '1';
@@ -875,10 +1231,10 @@
     function spawnZombie(isBoss) {
       const edge = Math.floor(Math.random() * 4);
       let x, y;
-      if (edge === 0) { x = Math.random() * canvas.width; y = -25; }
-      else if (edge === 1) { x = Math.random() * canvas.width; y = canvas.height + 25; }
-      else if (edge === 2) { x = -25; y = Math.random() * canvas.height; }
-      else { x = canvas.width + 25; y = Math.random() * canvas.height; }
+      if (edge === 0) { x = Math.random() * canvas.width; y = -28; }
+      else if (edge === 1) { x = Math.random() * canvas.width; y = canvas.height + 28; }
+      else if (edge === 2) { x = -28; y = Math.random() * canvas.height; }
+      else { x = canvas.width + 28; y = Math.random() * canvas.height; }
 
       if (isBoss) {
         bossSpawned = true;
@@ -894,19 +1250,23 @@
           hp: 280 + stage * 180,
           maxHp: 280 + stage * 180,
           isBoss: true,
-          expVal: 50
+          expVal: 50,
+          hitFlash: 0,
+          animOffset: Math.floor(Math.random() * 60)
         });
       } else {
         const isRunner = Math.random() < 0.25;
         zombies.push({
           x, y,
-          radius: isRunner ? 11 : 14,
+          radius: isRunner ? 12 : 15,
           speed: isRunner ? 2.3 + stage * 0.1 : 1.5 + stage * 0.08,
           hp: 20 + stage * 12,
           maxHp: 20 + stage * 12,
           isBoss: false,
           isRunner,
-          expVal: 6
+          expVal: 6,
+          hitFlash: 0,
+          animOffset: Math.floor(Math.random() * 60)
         });
       }
     }
@@ -969,6 +1329,7 @@
     }
 
     function update() {
+      animTick++;
       if (gameState !== 'PLAY') return;
 
       let vx = touchControl.moveX;
@@ -984,10 +1345,13 @@
         vy = dodge.vy;
       }
 
-      player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + vx));
-      player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + vy));
+      player.isMoving = Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1;
+      player.x = Math.max(player.radius + 8, Math.min(canvas.width - player.radius - 8, player.x + vx));
+      player.y = Math.max(player.radius + 8, Math.min(canvas.height - player.radius - 8, player.y + vy));
 
+      if (player.muzzleFlash > 0) player.muzzleFlash--;
       player.attackCooldown--;
+
       let nearest = null;
       let minDist = player.range;
       zombies.forEach(z => {
@@ -1002,14 +1366,16 @@
             let spread = (i - (player.multiShot - 1) / 2) * 0.13;
             let angle = player.facingAngle + spread;
             bullets.push({
-              x: player.x + Math.cos(angle) * 18,
-              y: player.y + Math.sin(angle) * 18,
-              vx: Math.cos(angle) * 8.5,
-              vy: Math.sin(angle) * 8.5,
+              x: player.x + Math.cos(angle) * 20,
+              y: player.y + 4 + Math.sin(angle) * 20,
+              vx: Math.cos(angle) * 9.5,
+              vy: Math.sin(angle) * 9.5,
+              angle,
               damage: player.damage,
-              radius: 4
+              radius: 4.5
             });
           }
+          player.muzzleFlash = 4;
           playSfx('shoot');
           player.attackCooldown = player.attackSpeed;
         }
@@ -1021,13 +1387,14 @@
         let b = bullets[i];
         b.x += b.vx;
         b.y += b.vy;
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+        if (b.x < -10 || b.x > canvas.width + 10 || b.y < -10 || b.y > canvas.height + 10) {
           bullets.splice(i, 1);
         }
       }
 
       for (let zIdx = zombies.length - 1; zIdx >= 0; zIdx--) {
         let z = zombies[zIdx];
+        if (z.hitFlash > 0) z.hitFlash--;
         let angle = Math.atan2(player.y - z.y, player.x - z.x);
         z.x += Math.cos(angle) * z.speed;
         z.y += Math.sin(angle) * z.speed;
@@ -1044,25 +1411,49 @@
           let b = bullets[bIdx];
           if (Math.hypot(b.x - z.x, b.y - z.y) < b.radius + z.radius) {
             z.hp -= b.damage;
+            z.hitFlash = 4;
             bullets.splice(bIdx, 1);
 
-            for (let p = 0; p < 3; p++) {
+            // 피격 도트 스파크 & 슬라임 파편
+            for (let p = 0; p < 5; p++) {
               particles.push({
-                x: z.x, y: z.y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 12,
-                color: '#84cc16'
+                x: b.x, y: b.y,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 5,
+                life: 14,
+                size: p === 0 ? 5 : 3,
+                color: p < 2 ? '#facc15' : (z.isBoss ? '#a855f7' : '#84cc16')
               });
             }
 
             if (z.hp <= 0) {
-              score += z.isBoss ? 500 : 15;
+              const pts = z.isBoss ? 500 : 15;
+              score += pts;
               document.getElementById('scoreVal').textContent = score.toLocaleString();
               if (score > userState.bestScore) {
                 userState.bestScore = score;
               }
               playSfx('kill');
+
+              // 처치 시 만화 폭발 픽셀 파편 + 팝업 텍스트
+              for (let p = 0; p < (z.isBoss ? 18 : 8); p++) {
+                particles.push({
+                  x: z.x, y: z.y,
+                  vx: (Math.random() - 0.5) * (z.isBoss ? 8 : 5),
+                  vy: (Math.random() - 0.5) * (z.isBoss ? 8 : 5),
+                  life: 18,
+                  size: 4 + Math.floor(Math.random() * 3),
+                  color: p % 3 === 0 ? '#f97316' : (p % 3 === 1 ? '#facc15' : '#65a30d')
+                });
+              }
+              floatingTexts.push({
+                x: z.x,
+                y: z.y - z.radius,
+                text: `+${pts}`,
+                life: 28,
+                color: z.isBoss ? '#fde047' : '#ffffff'
+              });
+
               gems.push({ x: z.x, y: z.y, val: z.expVal, radius: z.isBoss ? 10 : 6 });
               zombies.splice(zIdx, 1);
 
@@ -1101,8 +1492,16 @@
       for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].x += particles[i].vx;
         particles[i].y += particles[i].vy;
+        particles[i].vx *= 0.92;
+        particles[i].vy *= 0.92;
         particles[i].life--;
         if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        floatingTexts[i].y -= 0.8;
+        floatingTexts[i].life--;
+        if (floatingTexts[i].life <= 0) floatingTexts.splice(i, 1);
       }
     }
 
@@ -1248,117 +1647,194 @@
       document.getElementById('overlay').classList.remove('hidden');
     }
 
+    // ==========================================
+    // 4. 픽셀 아트 렌더링 (SD 캐릭터 / 좀비 / 총구 화염)
+    // ==========================================
+    function drawPixelHPBar(x, y, w, h, ratio, fillColor) {
+      const rx = Math.round(x - w / 2);
+      const ry = Math.round(y);
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(rx - 1, ry - 1, w + 2, h + 2);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(rx, ry, w, h);
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(rx, ry, Math.max(0, Math.round(w * ratio)), h);
+    }
+
     function drawFemaleCharacter(x, y, angle) {
       ctx.save();
-      ctx.translate(x, y);
+      ctx.translate(Math.round(x), Math.round(y));
 
+      // VIP 오라 링
       if (userState.isVip) {
-        ctx.strokeStyle = userState.autoDodge ? 'rgba(52, 211, 153, 0.55)' : 'rgba(250, 204, 21, 0.45)';
+        ctx.strokeStyle = userState.autoDodge ? 'rgba(52, 211, 153, 0.7)' : 'rgba(250, 204, 21, 0.7)';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(0, 0, 23, 0, Math.PI * 2);
+        ctx.ellipse(0, 14, 20, 9, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
 
+      // 바닥 그림자
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.42)';
+      ctx.beginPath();
+      ctx.ellipse(0, 16, 13, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 걷기 애니메이션 프레임 & 통통 튀는 바운스
+      const frame = player.isMoving ? Math.floor(animTick / 8) % 2 : 0;
+      const bob = player.isMoving ? (frame === 1 ? -2 : 0) : Math.round(Math.sin(animTick * 0.1) * 1);
+      const facingLeft = Math.cos(angle) < 0;
+
+      // SD 핑크 트윈테일 캐릭터 그리기 (좌우 반전)
+      ctx.save();
+      if (facingLeft) ctx.scale(-1, 1);
+      const spr = SPRITES.player[frame];
+      const size = 40;
+      ctx.drawImage(spr, -size / 2, -size / 2 - 2 + bob, size, size);
+      ctx.restore();
+
+      // 도트 소총 (타겟 방향으로 회전)
+      ctx.save();
+      ctx.translate(0, 4 + bob);
       ctx.rotate(angle);
+      if (facingLeft) ctx.scale(1, -1);
 
-      ctx.fillStyle = '#f43f5e';
-      ctx.beginPath();
-      ctx.ellipse(-13, 0, 8, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(6, 3, 18, 4);
+      // 총기 검은 외곽선
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(2, -5, 22, 9);
+      // 총 몸체
       ctx.fillStyle = '#334155';
-      ctx.fillRect(4, 2, 8, 6);
+      ctx.fillRect(4, -3, 14, 5);
+      // 총열
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(16, -2, 6, 3);
+      // 탄창
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(9, 2, 4, 4);
 
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.arc(0, 0, 12, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#fde68a';
-      ctx.beginPath();
-      ctx.arc(2, 0, 8, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#e11d48';
-      ctx.beginPath();
-      ctx.arc(0, 0, 8.5, Math.PI * 0.65, Math.PI * 1.35);
-      ctx.fill();
+      // 총구 화염 (Muzzle Flash)
+      if (player.muzzleFlash > 0) {
+        const fSize = 7 + player.muzzleFlash * 2;
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(22, -fSize / 2, fSize + 4, fSize);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(23, -fSize / 4, fSize, fSize / 2);
+      }
+      ctx.restore();
 
       ctx.restore();
     }
 
     function drawZombie(z) {
       ctx.save();
-      ctx.translate(z.x, z.y);
-      let angle = Math.atan2(player.y - z.y, player.x - z.x);
-      ctx.rotate(angle);
+      ctx.translate(Math.round(z.x), Math.round(z.y));
 
-      ctx.fillStyle = z.isBoss ? '#7f1d1d' : '#4d7c0f';
-      ctx.fillRect(2, -z.radius * 0.85, z.radius * 1.1, 4);
-      ctx.fillRect(2, z.radius * 0.85 - 4, z.radius * 1.1, 4);
+      const frame = Math.floor((animTick + z.animOffset) / (z.isRunner ? 6 : 10)) % 2;
+      const bob = frame === 1 ? -2 : 0;
+      const facingLeft = player.x < z.x;
 
-      ctx.fillStyle = z.isBoss ? '#991b1b' : (z.isRunner ? '#65a30d' : '#3f6212');
+      // 바닥 그림자
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.42)';
       ctx.beginPath();
-      ctx.arc(0, 0, z.radius, 0, Math.PI * 2);
+      ctx.ellipse(0, z.isBoss ? 28 : 13, z.isBoss ? 26 : 12, z.isBoss ? 10 : 5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(z.radius * 0.45, -z.radius * 0.3, z.isBoss ? 3.5 : 2, 0, Math.PI * 2);
-      ctx.arc(z.radius * 0.45, z.radius * 0.3, z.isBoss ? 3.5 : 2, 0, Math.PI * 2);
-      ctx.fill();
+      // 스프라이트 선택 (피격 시 흰색 플래시)
+      let spr;
+      let drawSize;
+      if (z.isBoss) {
+        spr = z.hitFlash > 0 ? SPRITES.bossFlash[frame] : SPRITES.boss[frame];
+        drawSize = 74;
+      } else if (z.isRunner) {
+        spr = z.hitFlash > 0 ? SPRITES.runnerFlash[frame] : SPRITES.runner[frame];
+        drawSize = 30;
+      } else {
+        spr = z.hitFlash > 0 ? SPRITES.zombieFlash[frame] : SPRITES.zombie[frame];
+        drawSize = 36;
+      }
+
+      ctx.save();
+      if (facingLeft) ctx.scale(-1, 1);
+      ctx.drawImage(spr, -drawSize / 2, -drawSize / 2 - 2 + bob, drawSize, drawSize);
+      ctx.restore();
 
       ctx.restore();
 
-      const barW = z.isBoss ? 54 : 24;
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(z.x - barW / 2, z.y - z.radius - 9, barW, 4);
-      ctx.fillStyle = z.isBoss ? '#f43f5e' : '#22c55e';
-      ctx.fillRect(z.x - barW / 2, z.y - z.radius - 9, barW * Math.max(0, z.hp / z.maxHp), 4);
+      // 도트 체력바
+      const barW = z.isBoss ? 58 : 26;
+      const barY = z.y - (z.isBoss ? 44 : 24);
+      drawPixelHPBar(z.x, barY, barW, z.isBoss ? 6 : 4, z.hp / z.maxHp, z.isBoss ? '#f43f5e' : '#22c55e');
     }
 
     function draw() {
+      ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.strokeStyle = 'rgba(30, 41, 59, 0.45)';
-      ctx.lineWidth = 1;
-      for (let gx = 0; gx < canvas.width; gx += 40) {
-        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, canvas.height); ctx.stroke();
-      }
-      for (let gy = 0; gy < canvas.height; gy += 40) {
-        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(canvas.width, gy); ctx.stroke();
-      }
+      // 1. 캐싱된 옥상 헬리패드 배경
+      ctx.drawImage(bgCanvas, 0, 0);
 
+      // 2. 경험치 보석 (도트 다이아몬드 + 둥실둥실 애니메이션)
       gems.forEach(g => {
-        ctx.fillStyle = '#38bdf8';
+        const floatY = Math.sin(animTick * 0.12 + g.x) * 2;
+        const size = g.radius > 7 ? 20 : 14;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
         ctx.beginPath();
-        ctx.arc(g.x, g.y, g.radius, 0, Math.PI * 2);
+        ctx.ellipse(g.x, g.y + size * 0.45, size * 0.35, 3, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.drawImage(SPRITES.gem, Math.round(g.x - size / 2), Math.round(g.y - size / 2 + floatY), size, size);
       });
 
-      ctx.fillStyle = '#facc15';
+      // 3. Y좌표 기준 정렬(Depth Sorting)로 입체감 있게 캐릭터 & 좀비 그리기
+      const renderList = [
+        ...zombies.map(z => ({ type: 'zombie', y: z.y, data: z })),
+        { type: 'player', y: player.y, data: player }
+      ];
+      renderList.sort((a, b) => a.y - b.y);
+
+      renderList.forEach(item => {
+        if (item.type === 'zombie') {
+          drawZombie(item.data);
+        } else {
+          drawFemaleCharacter(player.x, player.y, player.facingAngle);
+          drawPixelHPBar(player.x, player.y - 29, 38, 5, player.hp / player.maxHp, '#ef4444');
+        }
+      });
+
+      // 4. 예광탄 스타일 총알 (주황 글로우 + 노란 코어)
       bullets.forEach(b => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.angle);
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(-10, -3, 14, 6);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(-6, -1.5, 11, 3);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(1, -1, 4, 2);
+        ctx.restore();
       });
 
-      zombies.forEach(z => drawZombie(z));
-
+      // 5. 픽셀 파편 파티클
       particles.forEach(p => {
+        const s = p.size || 4;
+        ctx.fillStyle = '#18181b';
+        ctx.fillRect(Math.round(p.x) - 1, Math.round(p.y) - 1, s + 2, s + 2);
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s);
       });
 
-      drawFemaleCharacter(player.x, player.y, player.facingAngle);
-
-      ctx.fillStyle = 'rgba(0,0,0,0.7)';
-      ctx.fillRect(player.x - 18, player.y - 24, 36, 5);
-      ctx.fillStyle = '#ef4444';
-      ctx.fillRect(player.x - 18, player.y - 24, 36 * Math.max(0, player.hp / player.maxHp), 5);
+      // 6. 만화풍 도트 점수 팝업 (+15, +500)
+      ctx.font = '900 11px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      floatingTexts.forEach(ft => {
+        ctx.globalAlpha = Math.min(1, ft.life / 12);
+        ctx.fillStyle = '#18181b';
+        ctx.fillText(ft.text, Math.round(ft.x) + 1, Math.round(ft.y) + 1);
+        ctx.fillText(ft.text, Math.round(ft.x) - 1, Math.round(ft.y) - 1);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, Math.round(ft.x), Math.round(ft.y));
+        ctx.globalAlpha = 1;
+      });
     }
 
     function loop() {
