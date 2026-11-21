@@ -8,8 +8,6 @@
   <link rel="manifest" href="./manifest.json" />
   <title>벽돌깨기 — 네온 아케이드 아레나</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <!-- 토스페이먼츠 결제위젯 SDK v2 -->
-  <script src="https://js.tosspayments.com/v2/standard"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -163,130 +161,6 @@
     </div>
   </div>
 
-  <!-- VIP 모달 -->
-  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border-2 border-purple-500/60 rounded-2xl max-w-lg w-full my-auto shadow-2xl shadow-purple-950/60 overflow-hidden">
-      <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 px-5 py-4 border-b border-purple-500/30 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <span class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-xl">👑</span>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <h2 class="text-base sm:text-lg font-black text-amber-300 tracking-tight">벽돌깨기 VIP 영구 패키지</h2>
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-fuchsia-500/25 text-fuchsia-200 border border-fuchsia-400/40">1회 구매 평생 적용</span>
-            </div>
-            <p class="text-[11px] text-slate-300 mt-0.5">상시 3배 점수 및 골드 보상, 무제한 부활 특권을 누리세요!</p>
-          </div>
-        </div>
-        <button id="vipCloseBtn" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2.5 py-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">✕</button>
-      </div>
-
-      <div class="p-4 sm:p-5 max-h-[82vh] overflow-y-auto flex flex-col gap-4">
-        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
-          <div class="text-xs font-extrabold text-purple-300 mb-2.5 flex items-center gap-1.5">
-            <span>✨</span>
-            <span>VIP 전용 핵심 혜택 3종</span>
-          </div>
-          <ul class="flex flex-col gap-2">
-            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
-              <span class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/35 flex items-center justify-center text-base shrink-0">🪙</span>
-              <div class="min-w-0">
-                <div class="text-xs sm:text-sm font-extrabold text-slate-100">골드 획득량 5배 뻥튀기</div>
-                <div class="text-[11px] text-slate-400">벽돌 파괴 시 획득하는 골드가 5배로 폭증</div>
-              </div>
-            </li>
-            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
-              <span class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/35 flex items-center justify-center text-base shrink-0">⚡</span>
-              <div class="min-w-0">
-                <div class="text-xs sm:text-sm font-extrabold text-slate-100">플라즈마 볼 공 파워 MAX 시작</div>
-                <div class="text-[11px] text-slate-400">모든 게임 시작 시 최고 파워 적용</div>
-              </div>
-            </li>
-            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
-              <span class="w-8 h-8 rounded-lg bg-fuchsia-500/15 border border-fuchsia-500/35 flex items-center justify-center text-base shrink-0">🛡️</span>
-              <div class="min-w-0">
-                <div class="text-xs sm:text-sm font-extrabold text-slate-100">무제한 목숨 & 패들 확장</div>
-                <div class="text-[11px] text-slate-400">게임 오버 없는 무한 부활 및 최장 패들 적용</div>
-              </div>
-            </li>
-          </ul>
-
-          <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-300">총 결제 금액 (VAT 포함)</span>
-            <div class="text-right">
-              <span class="text-lg sm:text-xl font-black text-amber-400">7,000원</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl overflow-hidden border border-slate-300 shadow-inner">
-          <div id="tossWidgetLoading" class="py-8 text-center text-xs font-bold text-slate-500">
-            토스페이먼츠 결제창을 불러오는 중입니다...
-          </div>
-          <div id="toss-payment-method"></div>
-          <div id="toss-agreement"></div>
-        </div>
-
-        <button id="vipPaySubmitBtn" type="button" disabled
-          class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 disabled:from-slate-700 disabled:to-slate-800 disabled:text-slate-400 active:scale-[0.99] text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
-          <span>💳</span>
-          <span id="vipPaySubmitBtnText">7,000원 결제하기</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 로그인/회원가입 모달 -->
-  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🟨</span>
-          <h2 class="text-base font-extrabold text-cyan-300">서버 저장 계정</h2>
-        </div>
-        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1">✕</button>
-      </div>
-      <p class="text-xs text-slate-400 leading-relaxed mb-4">
-        휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 간편하게 서버에 전적을 영구 저장하세요.
-      </p>
-
-      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-4">
-        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-cyan-600 text-white transition">
-          기존 계정 로그인
-        </button>
-        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 transition">
-          간편 회원가입
-        </button>
-      </div>
-
-      <form id="authForm" class="flex flex-col gap-3.5">
-        <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">아이디 (휴대폰 번호 뒷 8자리)</label>
-          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 focus-within:border-cyan-400 overflow-hidden">
-            <span class="px-3 py-2.5 bg-slate-900 text-cyan-300 font-extrabold text-sm border-r border-slate-800 select-none">
-              010 -
-            </span>
-            <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required
-              placeholder="1234-5678 (숫자 8자리)"
-              class="w-full px-3 py-2.5 bg-transparent text-sm font-bold tracking-wider text-slate-100 focus:outline-none" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">비밀번호 (숫자 4자리)</label>
-          <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required
-            placeholder="숫자 4자리 입력 (예: 1234)"
-            class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none focus:border-cyan-400" />
-        </div>
-
-        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
-
-        <button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-lg shadow-cyan-500/20 transition mt-0.5 cursor-pointer">
-          로그인 및 서버저장 연동
-        </button>
-      </form>
-    </div>
-  </div>
-
   <!-- 로그아웃 확인 모달 -->
   <div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
@@ -306,17 +180,19 @@
       // 클라우드 서버 설정 & 게임 상태
       const GAME_ID = 'brick_breaker_v4';
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
-      const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-      const VIP_PRICE = 7000;
+      const API_BASE_URL = CLOUD_API_URL;
       const ADMIN_VIP_PHONES = [];
 
       const STORAGE_KEY = 'brick_breaker_save_v4';
       const TOKEN_KEYS = ['hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'gongdaegong_jwt_token', 'aigameroom_jwt_token', 'brick_breaker_jwt_token'];
       const USER_KEYS = ['hero_clicker_username', 'gongdaegong_username', 'aigameroom_username', 'brick_breaker_username'];
       const VIP_KEY = 'hero_clicker_is_vip';
+      const ALL_NICK_KEYS = ['aigameroom_nickname', 'hero_clicker_nickname'];
       const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
+      function goLobbyAuth(mode = 'login') {
+        try { saveState(false); } catch (e) {}
+        window.location.href = `${LOBBY_URL}?auth=${encodeURIComponent(mode)}&returnTo=${encodeURIComponent(window.location.href)}`;
+      }
 
       let authToken = null;
       let currentUsername = null;
@@ -343,12 +219,12 @@
           } else {
             TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
             USER_KEYS.forEach(k => localStorage.removeItem(k));
+            ALL_NICK_KEYS.forEach(k => localStorage.removeItem(k));
             localStorage.removeItem(VIP_KEY);
           }
         } catch (e) {}
       }
       loadSharedAuth();
-      let isRegisterMode = false;
       let hasUnsavedChanges = false;
 
       function isAdminAccount(username) {
@@ -531,8 +407,13 @@
             return;
           }
           const data = await res.json();
-          if (res.ok && data.saveData) {
-            state = sanitizeState({ ...(data.saveData || {}), isVip: Boolean(data.isVip || data.saveData?.isVip) });
+          if (res.ok) {
+            const serverVip = Boolean(data.isVip);
+            try {
+              localStorage.setItem(VIP_KEY, String(serverVip));
+              if (data.nickname) ALL_NICK_KEYS.forEach(k => localStorage.setItem(k, data.nickname));
+            } catch (e) {}
+            state = sanitizeState({ ...(data.saveData || state), isVip: serverVip });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateUI();
           }
@@ -1329,33 +1210,14 @@
         }
       }
 
-      // 인증 모달
-      const authModal = document.getElementById('authModal');
+      // 통합 인증 & 로그아웃 모달
       const logoutConfirmModal = document.getElementById('logoutConfirmModal');
-      const phoneInput = document.getElementById('authPhoneDigits');
-      const pinInput = document.getElementById('authPinCode');
-      const modeLoginBtn = document.getElementById('modeLoginBtn');
-      const modeRegisterBtn = document.getElementById('modeRegisterBtn');
-
-      modeLoginBtn.addEventListener('click', () => {
-        isRegisterMode = false;
-        modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-cyan-600 text-white transition';
-        modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 transition';
-      });
-      modeRegisterBtn.addEventListener('click', () => {
-        isRegisterMode = true;
-        modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-cyan-600 text-white transition';
-        modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 transition';
-      });
-
       document.getElementById('authHeaderBtn').addEventListener('click', () => {
         if (authToken) {
           logoutConfirmModal.classList.remove('hidden');
           logoutConfirmModal.classList.add('flex');
         } else {
-          authModal.classList.remove('hidden');
-          authModal.classList.add('flex');
-          phoneInput.focus();
+          goLobbyAuth('login');
         }
       });
       document.getElementById('logoutCancelBtn').addEventListener('click', () => {
@@ -1366,58 +1228,6 @@
         logoutConfirmModal.classList.add('hidden');
         logoutConfirmModal.classList.remove('flex');
         handleLogout(false);
-      });
-
-      document.getElementById('authCloseBtn').addEventListener('click', () => {
-        authModal.classList.add('hidden'); authModal.classList.remove('flex');
-      });
-
-      phoneInput.addEventListener('input', (e) => {
-        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-        if (digits.length > 4) {
-          e.target.value = `${digits.slice(0, 4)}-${digits.slice(4)}`;
-        } else {
-          e.target.value = digits;
-        }
-      });
-
-      pinInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-      });
-
-      document.getElementById('authForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const rawDigits = phoneInput.value.replace(/\D/g, '');
-        const pin = pinInput.value.trim();
-        const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
-        const endpoint = isRegisterMode ? '/api/register' : '/api/login';
-
-        try {
-          const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: fullPhoneId, password: pin, gameId: GAME_ID, initialSaveData: state })
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            document.getElementById('authErrorMsg').textContent = data.error || '오류 발생';
-            document.getElementById('authErrorMsg').classList.remove('hidden');
-            return;
-          }
-          authToken = data.token;
-          currentUsername = data.username;
-
-          if (data.isVip || data.saveData?.isVip || isAdminAccount(fullPhoneId)) {
-            state.isVip = true;
-          }
-          saveSharedAuth(authToken, currentUsername, state.isVip);
-          state = sanitizeState(state);
-          saveState(true);
-
-          authModal.classList.add('hidden'); authModal.classList.remove('flex');
-          updateUI();
-          showToast(`🟨 [${maskPhoneMiddle(currentUsername)}] 로그인 완료!`);
-        } catch (err) {}
       });
 
       function handleLogout(expired = false) {
