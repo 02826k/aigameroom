@@ -7,7 +7,6 @@
   <title>나이트파이터 — 1:1 아케이드 격투</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
-  <script src="https://js.tosspayments.com/v2/standard"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -380,41 +379,6 @@
     <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-xs sm:text-sm font-bold text-amber-200 shadow-2xl">알림</div>
   </div>
 
-  <!-- VIP 모달 -->
-  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3">
-    <div class="bg-slate-900 border-2 border-purple-500/60 rounded-2xl max-w-md w-full p-5 shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-base font-black text-amber-300">👑 나이트파이터 VIP 영구 패키지</h2>
-        <button id="vipCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
-      </div>
-      <p class="text-xs text-slate-300 mb-4">모든 파이터 공격력 +15% · 황금 오오라</p>
-      <button id="vipMockCloseBtn" type="button" class="w-full py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs cursor-pointer">확인 (7,000원)</button>
-    </div>
-  </div>
-
-  <!-- 로그인 모달 -->
-  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-base font-extrabold text-amber-300">🟨 서버 저장 계정</h2>
-        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
-      </div>
-      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
-        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer">로그인</button>
-        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer">회원가입</button>
-      </div>
-      <form id="authForm" class="flex flex-col gap-3">
-        <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
-          <span class="px-3 py-2 bg-slate-900 text-amber-300 font-extrabold text-sm border-r border-slate-800 whitespace-nowrap shrink-0">010 -</span>
-          <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="min-w-0 flex-1 px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
-        </div>
-        <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 비밀번호" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] placeholder:tracking-normal text-slate-100 focus:outline-none" />
-        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold"></div>
-        <button type="submit" class="w-full py-2.5 rounded-xl text-xs font-black bg-amber-500 text-slate-950 cursor-pointer">로그인 및 저장 연동</button>
-      </form>
-    </div>
-  </div>
-
   <!-- 초기화 모달 -->
   <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
@@ -491,14 +455,19 @@
 
       const GAME_ID = 'virtua_fighter_v1';
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+      const API_BASE_URL = CLOUD_API_URL;
+      const LOBBY_AUTH_BASE = 'https://02826k.github.io/aigameroom/';
       const STORAGE_KEY = 'vf_arena_save_v1';
       const TOKEN_KEY = 'gongdaegong_jwt_token';
       const USER_KEY = 'gongdaegong_username';
 
       const ALL_TOKEN_KEYS = [TOKEN_KEY, 'hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
       const ALL_USER_KEYS = [USER_KEY, 'hero_clicker_username', 'abuse_username', 'sky2026_username', 'aigameroom_username'];
+      const ALL_NICK_KEYS = ['aigameroom_nickname', 'hero_clicker_nickname'];
+      function goLobbyAuth(mode = 'login') {
+        try { notifyPvpForfeit(); saveState(false); } catch (e) {}
+        window.location.href = `${LOBBY_AUTH_BASE}?auth=${encodeURIComponent(mode)}&returnTo=${encodeURIComponent(window.location.href)}`;
+      }
       function readSharedAuth() {
         let t = null, u = null;
         try {
@@ -516,6 +485,7 @@
           } else {
             ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
             ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_NICK_KEYS.forEach((k) => localStorage.removeItem(k));
             localStorage.removeItem('hero_clicker_is_vip');
           }
         } catch (e) {}
@@ -2755,60 +2725,32 @@
         if (document.visibilityState === 'visible') syncAuthFromStorage();
       });
 
+      async function loadServerProfile() {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/load?gameId=${GAME_ID}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (res.status === 401 || res.status === 403) { performLogout(); return; }
+          if (!res.ok) return;
+          const data = await res.json();
+          state.isVip = Boolean(data?.isVip);
+          try {
+            localStorage.setItem('hero_clicker_is_vip', String(state.isVip));
+            if (data?.nickname) ALL_NICK_KEYS.forEach((k) => localStorage.setItem(k, data.nickname));
+          } catch (e) {}
+          if (typeof data?.saveData?.bestStreak === 'number') {
+            state.bestStreak = Math.max(state.bestStreak || 0, data.saveData.bestStreak);
+          }
+          updateAuthUI();
+        } catch (e) {}
+      }
+
       document.getElementById('authHeaderBtn').addEventListener('click', () => {
         if (authToken && currentUsername) {
           if (confirm('로그아웃 하시겠습니까?')) performLogout();
         } else {
-          document.getElementById('authModal').classList.remove('hidden');
-          document.getElementById('authModal').classList.add('flex');
-        }
-      });
-      document.getElementById('authCloseBtn').addEventListener('click', () => { document.getElementById('authModal').classList.add('hidden'); document.getElementById('authModal').classList.remove('flex'); });
-      let isReg = false;
-      document.getElementById('modeLoginBtn').addEventListener('click', () => {
-        isReg = false;
-        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer';
-        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
-      });
-      document.getElementById('modeRegisterBtn').addEventListener('click', () => {
-        isReg = true;
-        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer';
-        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
-      });
-      document.getElementById('authPhoneDigits').addEventListener('input', (e) => {
-        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
-        e.target.value = d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d;
-      });
-      document.getElementById('authPinCode').addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-      });
-      document.getElementById('authForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const digits = document.getElementById('authPhoneDigits').value.replace(/\D/g, '');
-        const pin = document.getElementById('authPinCode').value.trim();
-        const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
-        try {
-          const res = await fetch(`${API_BASE_URL}${isReg ? '/api/register' : '/api/login'}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: fullId, password: pin, gameId: GAME_ID, initialSaveData: state })
-          });
-          const data = await res.json();
-          if (res.ok && data.token) {
-            authToken = data.token; currentUsername = data.username;
-            state.isVip = Boolean(data.isVip || data.saveData?.isVip);
-            if (typeof data.saveData?.bestStreak === 'number') state.bestStreak = Math.max(state.bestStreak || 0, data.saveData.bestStreak);
-            syncSharedAuth(authToken, currentUsername, state.isVip);
-            updateAuthUI();
-            document.getElementById('authModal').classList.add('hidden'); document.getElementById('authModal').classList.remove('flex');
-            showToast(`🟨 [${currentUsername}] 로그인 완료!`);
-          } else {
-            document.getElementById('authErrorMsg').textContent = data.error || '로그인 실패';
-            document.getElementById('authErrorMsg').classList.remove('hidden');
-          }
-        } catch (err) {
-          document.getElementById('authErrorMsg').textContent = '서버 연결 실패';
-          document.getElementById('authErrorMsg').classList.remove('hidden');
+          goLobbyAuth('login');
         }
       });
 
@@ -2889,9 +2831,7 @@
         }
       });
 
-      document.getElementById('vipOpenBtn')?.addEventListener('click', () => { document.getElementById('vipModal').classList.remove('hidden'); document.getElementById('vipModal').classList.add('flex'); });
-      document.getElementById('vipCloseBtn')?.addEventListener('click', () => { document.getElementById('vipModal').classList.add('hidden'); document.getElementById('vipModal').classList.remove('flex'); });
-      document.getElementById('vipMockCloseBtn')?.addEventListener('click', () => { document.getElementById('vipModal').classList.add('hidden'); document.getElementById('vipModal').classList.remove('flex'); });
+      document.getElementById('vipOpenBtn')?.addEventListener('click', () => goLobbyAuth('vip'));
       document.getElementById('resetOpenBtn')?.addEventListener('click', () => { document.getElementById('resetModal').classList.remove('hidden'); document.getElementById('resetModal').classList.add('flex'); });
       document.getElementById('resetCancelBtn')?.addEventListener('click', () => { document.getElementById('resetModal').classList.add('hidden'); document.getElementById('resetModal').classList.remove('flex'); });
       document.getElementById('resetConfirmBtn')?.addEventListener('click', () => {
@@ -2905,6 +2845,7 @@
         initSocket();
         updateAuthUI();
         updateSelectUi();
+        if (authToken) loadServerProfile();
         requestAnimationFrame(loop);
       });
     })();
