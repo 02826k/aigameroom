@@ -47,7 +47,7 @@
   <div class="w-full bg-[#fdf6d8] border-b border-amber-200/70 overflow-hidden marquee-wrap sticky top-0 z-30">
     <div class="marquee-track py-1.5 text-xs sm:text-[13px] font-extrabold text-[#dc2626] whitespace-nowrap">
       <span class="px-8">VIP 결재는 모든 게임에 VIP 적용됩니다</span>
-     </div>
+    </div>
   </div>
 
   <!-- 메인 컨테이너 -->
@@ -92,7 +92,7 @@
           onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://02826k.github.io/aigameroom/icon.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}" />
         <span class="hidden w-full h-full items-center justify-center text-3xl">🎮</span>
       </div>
-      <p class="text-[15px] font-bold text-[#2b2623] tracking-tight">즐거운 시간 되세요~</p>
+      <p id="welcomeGreeting" class="text-[15px] font-bold text-[#2b2623] tracking-tight">즐거운 시간 되세요~</p>
     </header>
 
     <!-- 상단 검색바 -->
@@ -229,12 +229,26 @@
         <h2 class="text-base font-extrabold text-amber-300">🟨 AI게임장 로그인</h2>
         <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
       </div>
-      <p class="text-xs text-slate-400 mb-3">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하세요.</p>
+      <p id="authModalSub" class="text-xs text-slate-400 mb-3">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하세요.</p>
       <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
         <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer">로그인</button>
         <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer">회원가입</button>
       </div>
       <form id="authForm" class="flex flex-col gap-3">
+        <!-- 회원가입 전용 별명 입력 + 중복확인 -->
+        <div id="registerNicknameWrap" class="hidden flex-col gap-1">
+          <div class="flex items-center gap-1.5">
+            <input id="loginNickname" type="text" maxlength="10" autocomplete="off"
+              placeholder="별명 (한글·영문 10자 이내)"
+              class="min-w-0 flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-slate-100 focus:outline-none focus:border-amber-400" />
+            <button id="checkNicknameBtn" type="button"
+              class="px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 text-xs font-black whitespace-nowrap shrink-0 transition cursor-pointer">
+              중복확인
+            </button>
+          </div>
+          <div id="nicknameStatusMsg" class="hidden text-[11px] font-bold px-1"></div>
+        </div>
+
         <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
           <span class="px-3 py-2 bg-slate-900 text-amber-300 font-extrabold text-xs border-r border-slate-800 select-none whitespace-nowrap shrink-0">010 -</span>
           <input id="loginPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678"
@@ -277,168 +291,67 @@
       const GOOGLE_PLAY_SKU = 'vip_lifetime_pass';
       const VIP_PRICE = 7000;
 
-      // 게임 목록 데이터 (폴더명 = 02826k.github.io/aigameroom/<folder>/, 아이콘 = <folder>/icon.png)
       const ITEMS = [
-        {
-          id: 'vip',
-          type: 'vip',
-          title: 'VIP가입하기',
-          subtitle: '',
-          icon: 'https://02826k.github.io/aigameroom/icon.png',
-          fallbackIcon: `${BASE_URL}/icon.png`,
-          emoji: '👑',
-          keywords: 'vip 가입 안내 결제'
-        },
-        {
-          id: 'dream',
-          type: 'game',
-          folder: 'dream',
-          title: '꿈 — DREAM WORLD',
-          emoji: '🫧',
-          keywords: '꿈 dream world 드림월드 장난감 물총 비눗방울 모험 dreamworld'
-        },
-        {
-          id: 'bookhit',
-          type: 'game',
-          folder: 'bookhit',
-          title: '판치기 — 교실의 전설',
-          emoji: '🪙',
-          keywords: '판치기 교실의 전설 동전 뒤집기 책상 학교 bookhit'
-        },
-        {
-          id: 'momsave',
-          type: 'game',
-          folder: 'momsave',
-          title: '엄마 구하기 — 외계인 침공',
-          emoji: '👽',
-          keywords: '엄마 구하기 외계인 침공 슈팅 액션 momsave'
-        },
-        {
-          id: 'ketris',
-          type: 'game',
-          folder: 'ketris',
-          title: '케트리스 — 블록 퍼즐 아케이드',
-          emoji: '🧱',
-          keywords: '케트리스 테트리스 블록 퍼즐 아케이드 ketris'
-        },
-        {
-          id: '2026',
-          type: 'game',
-          folder: '2026',
-          title: '2026 — 종스크롤 비행기 슈팅',
-          emoji: '✈️',
-          keywords: '2026 종스크롤 비행기 슈팅'
-        },
-        {
-          id: 'fighters',
-          type: 'game',
-          folder: 'fighters',
-          title: '나이트파이터 — 1:1 아케이드 격투',
-          emoji: '🥊',
-          keywords: '나이트파이터 1:1 아케이드 격투 대전 fighters'
-        },
-        {
-          id: 'coreclash',
-          type: 'game',
-          folder: 'coreclash',
-          title: '칼바람 — 라인 푸쉬 스타일',
-          emoji: '⚔️',
-          keywords: '칼바람 라인 푸쉬 전략 롤 coreclash'
-        },
-        {
-          id: 'bricks',
-          type: 'game',
-          folder: 'bricks',
-          title: '벽돌깨기 — 네온 아케이드 아레나',
-          emoji: '🪩',
-          keywords: '벽돌깨기 네온 아케이드 아레나 퍼즐 bricks'
-        },
-        {
-          id: 'motorcycle',
-          type: 'game',
-          folder: 'motorcycle',
-          title: '오토바이 레이싱 3D — 네온 하이웨이',
-          emoji: '🏍️',
-          keywords: '오토바이 레이싱 3d 네온 하이웨이 바이크 motorcycle'
-        },
-        {
-          id: 'survivor',
-          type: 'game',
-          folder: 'survivor',
-          title: '좀비 서바이벌 — 로그라이크 액션',
-          emoji: '🧟',
-          keywords: '좀비 서바이벌 로그라이크 액션 survivor'
-        },
-        {
-          id: 'zombie3d',
-          type: 'game',
-          folder: 'zombie3d',
-          title: '좀비 웨이브 3D — 최후의 생존자',
-          emoji: '🔫',
-          keywords: '좀비 웨이브 3d 최후의 생존자 슈팅 zombie3d'
-        },
-        {
-          id: 'ballvsball',
-          type: 'game',
-          folder: 'ballvsball',
-          title: '공대공 — 바운스 배틀 아레나',
-          emoji: '⚽',
-          keywords: '공대공 바운스 배틀 아레나 ballvsball'
-        },
-        {
-          id: 'kortress',
-          type: 'game',
-          folder: 'kortress',
-          title: '코트리스 — KORTRESS 2D',
-          emoji: '💣',
-          keywords: '코트리스 포트리스 탱크 포탄 kortress 2d'
-        },
-        {
-          id: 'clicker',
-          type: 'game',
-          folder: 'clicker',
-          title: '용사 키우기 — 클릭 훈련 RPG',
-          emoji: '🛡️',
-          keywords: '용사 키우기 클릭 훈련 rpg 방치형 clicker'
-        }
+        { id: 'vip', type: 'vip', title: 'VIP가입하기', subtitle: '', icon: 'https://02826k.github.io/aigameroom/icon.png', fallbackIcon: `${BASE_URL}/icon.png`, emoji: '👑', keywords: 'vip 가입 안내 결제' },
+        { id: 'dream', type: 'game', folder: 'dream', title: '꿈 — DREAM WORLD', emoji: '🫧', keywords: '꿈 dream world 드림월드 장난감 물총 비눗방울 모험 dreamworld' },
+        { id: 'bookhit', type: 'game', folder: 'bookhit', title: '판치기 — 교실의 전설', emoji: '🪙', keywords: '판치기 교실의 전설 동전 뒤집기 책상 학교 bookhit' },
+        { id: 'momsave', type: 'game', folder: 'momsave', title: '엄마 구하기 — 외계인 침공', emoji: '👽', keywords: '엄마 구하기 외계인 침공 슈팅 액션 momsave' },
+        { id: 'ketris', type: 'game', folder: 'ketris', title: '케트리스 — 블록 퍼즐 아케이드', emoji: '🧱', keywords: '케트리스 테트리스 블록 퍼즐 아케이드 ketris' },
+        { id: '2026', type: 'game', folder: '2026', title: '2026 — 종스크롤 비행기 슈팅', emoji: '✈️', keywords: '2026 종스크롤 비행기 슈팅' },
+        { id: 'fighters', type: 'game', folder: 'fighters', title: '나이트파이터 — 1:1 아케이드 격투', emoji: '🥊', keywords: '나이트파이터 1:1 아케이드 격투 대전 fighters' },
+        { id: 'coreclash', type: 'game', folder: 'coreclash', title: '칼바람 — 라인 푸쉬 스타일', emoji: '⚔️', keywords: '칼바람 라인 푸쉬 전략 롤 coreclash' },
+        { id: 'bricks', type: 'game', folder: 'bricks', title: '벽돌깨기 — 네온 아케이드 아레나', emoji: '🪩', keywords: '벽돌깨기 네온 아케이드 아레나 퍼즐 bricks' },
+        { id: 'motorcycle', type: 'game', folder: 'motorcycle', title: '오토바이 레이싱 3D — 네온 하이웨이', emoji: '🏍️', keywords: '오토바이 레이싱 3d 네온 하이웨이 바이크 motorcycle' },
+        { id: 'survivor', type: 'game', folder: 'survivor', title: '좀비 서바이벌 — 로그라이크 액션', emoji: '🧟', keywords: '좀비 서바이벌 로그라이크 액션 survivor' },
+        { id: 'zombie3d', type: 'game', folder: 'zombie3d', title: '좀비 웨이브 3D — 최후의 생존자', emoji: '🔫', keywords: '좀비 웨이브 3d 최후의 생존자 슈팅 zombie3d' },
+        { id: 'ballvsball', type: 'game', folder: 'ballvsball', title: '공대공 — 바운스 배틀 아레나', emoji: '⚽', keywords: '공대공 바운스 배틀 아레나 ballvsball' },
+        { id: 'kortress', type: 'game', folder: 'kortress', title: '코트리스 — KORTRESS 2D', emoji: '💣', keywords: '코트리스 포트리스 탱크 포탄 kortress 2d' },
+        { id: 'clicker', type: 'game', folder: 'clicker', title: '용사 키우기 — 클릭 훈련 RPG', emoji: '🛡️', keywords: '용사 키우기 클릭 훈련 rpg 방치형 clicker' }
       ];
 
       const VIP_KEY = 'hero_clicker_is_vip';
       const ALL_TOKEN_KEYS = [TOKEN_KEY, 'abuse_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
       const ALL_USER_KEYS = [USER_KEY, 'abuse_username', 'sky2026_username', 'aigameroom_username'];
+      const ALL_NICK_KEYS = ['aigameroom_nickname', 'hero_clicker_nickname'];
 
       let authToken = null;
       let currentUsername = null;
+      let currentNickname = null;
       let isVipUser = false;
       try {
-        for (const k of ALL_TOKEN_KEYS) {
-          const v = localStorage.getItem(k);
-          if (v) { authToken = v; break; }
-        }
-        for (const k of ALL_USER_KEYS) {
-          const v = localStorage.getItem(k);
-          if (v) { currentUsername = v; break; }
-        }
+        for (const k of ALL_TOKEN_KEYS) { const v = localStorage.getItem(k); if (v) { authToken = v; break; } }
+        for (const k of ALL_USER_KEYS) { const v = localStorage.getItem(k); if (v) { currentUsername = v; break; } }
+        for (const k of ALL_NICK_KEYS) { const v = localStorage.getItem(k); if (v) { currentNickname = v; break; } }
         isVipUser = localStorage.getItem(VIP_KEY) === 'true';
       } catch (e) {}
 
-      function syncAuthStorage(token, username, vip) {
+      function syncAuthStorage(token, username, vip, nickname = null) {
         try {
           if (token && username) {
             ALL_TOKEN_KEYS.forEach((k) => localStorage.setItem(k, token));
             ALL_USER_KEYS.forEach((k) => localStorage.setItem(k, username));
             localStorage.setItem(VIP_KEY, String(Boolean(vip)));
+            if (nickname) {
+              ALL_NICK_KEYS.forEach((k) => localStorage.setItem(k, nickname));
+            }
           } else {
             ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
             ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_NICK_KEYS.forEach((k) => localStorage.removeItem(k));
             localStorage.removeItem(VIP_KEY);
           }
         } catch (e) {}
       }
-      if (authToken && currentUsername) syncAuthStorage(authToken, currentUsername, isVipUser);
+      if (authToken && currentUsername) syncAuthStorage(authToken, currentUsername, isVipUser, currentNickname);
 
       const authHeaderBtn = document.getElementById('authHeaderBtn');
+      const welcomeGreeting = document.getElementById('welcomeGreeting');
       function updateHeaderAuthBtn() {
+        if (welcomeGreeting) {
+          welcomeGreeting.textContent = (authToken && currentNickname)
+            ? `${currentNickname}님, 즐거운 시간 되세요~`
+            : '즐거운 시간 되세요~';
+        }
         if (!authHeaderBtn) return;
         if (authToken && currentUsername) {
           if (isVipUser) {
@@ -546,24 +459,10 @@
         }).join('');
       }
 
-      // 검색 입력 이벤트
-      searchInput.addEventListener('input', (e) => {
-        renderList(e.target.value);
-      });
+      searchInput.addEventListener('input', (e) => renderList(e.target.value));
+      clearSearchBtn.addEventListener('click', () => { searchInput.value = ''; renderList(''); searchInput.focus(); });
+      resetSearchBtn.addEventListener('click', () => { searchInput.value = ''; renderList(''); searchInput.focus(); });
 
-      clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        renderList('');
-        searchInput.focus();
-      });
-
-      resetSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        renderList('');
-        searchInput.focus();
-      });
-
-      // 바탕화면 바로가기 만들기 (안드로이드 / PC 즉시 설치 프롬프트)
       let deferredInstallPrompt = null;
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -579,28 +478,16 @@
           deferredInstallPrompt.prompt();
           const { outcome } = await deferredInstallPrompt.userChoice;
           deferredInstallPrompt = null;
-          if (outcome === 'accepted') {
-            showToast('📲 바탕화면에 바로가기가 추가되었습니다!');
-          }
+          if (outcome === 'accepted') showToast('📲 바탕화면에 바로가기가 추가되었습니다!');
         } catch (e) {}
       });
 
-      // 공지 모달
       const noticeModal = document.getElementById('noticeModal');
-      document.getElementById('noticeBtn').addEventListener('click', () => {
-        noticeModal.classList.remove('hidden');
-      });
-      document.getElementById('noticeCloseBtn').addEventListener('click', () => {
-        noticeModal.classList.add('hidden');
-      });
-      document.getElementById('noticeOkBtn').addEventListener('click', () => {
-        noticeModal.classList.add('hidden');
-      });
-      noticeModal.addEventListener('click', (e) => {
-        if (e.target === noticeModal) noticeModal.classList.add('hidden');
-      });
+      document.getElementById('noticeBtn').addEventListener('click', () => noticeModal.classList.remove('hidden'));
+      document.getElementById('noticeCloseBtn').addEventListener('click', () => noticeModal.classList.add('hidden'));
+      document.getElementById('noticeOkBtn').addEventListener('click', () => noticeModal.classList.add('hidden'));
+      noticeModal.addEventListener('click', (e) => { if (e.target === noticeModal) noticeModal.classList.add('hidden'); });
 
-      // VIP 모달 & 결제 로직
       const vipModal = document.getElementById('vipModal');
       const vipCloseBtn = document.getElementById('vipCloseBtn');
       const vipPaySubmitBtn = document.getElementById('vipPaySubmitBtn');
@@ -610,11 +497,8 @@
       const logoutBtn = document.getElementById('logoutBtn');
 
       function syncVipModalState() {
-        if (authToken && currentUsername) {
-          logoutBtn.classList.remove('hidden');
-        } else {
-          logoutBtn.classList.add('hidden');
-        }
+        if (authToken && currentUsername) logoutBtn.classList.remove('hidden');
+        else logoutBtn.classList.add('hidden');
       }
 
       gameListEl.addEventListener('click', (e) => {
@@ -626,15 +510,12 @@
       });
 
       vipCloseBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
-      vipModal.addEventListener('click', (e) => {
-        if (e.target === vipModal) vipModal.classList.add('hidden');
-      });
+      vipModal.addEventListener('click', (e) => { if (e.target === vipModal) vipModal.classList.add('hidden'); });
 
       phoneInput.addEventListener('input', (e) => {
         const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
         e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
       });
-
       pinInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
       });
@@ -642,8 +523,9 @@
       function performLogout() {
         authToken = null;
         currentUsername = null;
+        currentNickname = null;
         isVipUser = false;
-        syncAuthStorage(null, null, false);
+        syncAuthStorage(null, null, false, null);
         syncVipModalState();
         updateHeaderAuthBtn();
         renderList(searchInput.value);
@@ -657,46 +539,105 @@
         logoutConfirmModal.classList.add('hidden');
         performLogout();
       });
-      logoutConfirmModal.addEventListener('click', (e) => {
-        if (e.target === logoutConfirmModal) logoutConfirmModal.classList.add('hidden');
-      });
+      logoutConfirmModal.addEventListener('click', (e) => { if (e.target === logoutConfirmModal) logoutConfirmModal.classList.add('hidden'); });
+      logoutBtn.addEventListener('click', () => logoutConfirmModal.classList.remove('hidden'));
 
-      logoutBtn.addEventListener('click', () => {
-        logoutConfirmModal.classList.remove('hidden');
-      });
-
+      // 로그인 / 회원가입 + 별명 중복확인 로직
       const authModal = document.getElementById('authModal');
+      const authModalSub = document.getElementById('authModalSub');
+      const registerNicknameWrap = document.getElementById('registerNicknameWrap');
+      const loginNicknameInput = document.getElementById('loginNickname');
+      const checkNicknameBtn = document.getElementById('checkNicknameBtn');
+      const nicknameStatusMsg = document.getElementById('nicknameStatusMsg');
       const loginPhoneInput = document.getElementById('loginPhoneDigits');
       const loginPinInput = document.getElementById('loginPinCode');
       const authErrorMsg = document.getElementById('authErrorMsg');
+
       let isRegisterMode = false;
+      let isNicknameChecked = false;
+      let checkedNicknameValue = '';
+
+      const NICKNAME_REGEX = /^[가-힣a-zA-Z]{1,10}$/;
+
+      function setNicknameStatus(text, isOk) {
+        nicknameStatusMsg.textContent = text;
+        nicknameStatusMsg.className = `text-[11px] font-bold px-1 ${isOk ? 'text-emerald-400' : 'text-rose-400'}`;
+        nicknameStatusMsg.classList.remove('hidden');
+      }
+
+      function setAuthMode(register) {
+        isRegisterMode = register;
+        authErrorMsg.classList.add('hidden');
+        if (register) {
+          document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
+          document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+          document.getElementById('authSubmitBtn').textContent = '회원가입';
+          authModalSub.textContent = '게임에 표시될 별명(한글·영문 10자 이내)과 휴대폰 번호·비밀번호를 입력하세요.';
+          registerNicknameWrap.classList.remove('hidden');
+          registerNicknameWrap.classList.add('flex');
+          loginNicknameInput.required = true;
+        } else {
+          document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
+          document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
+          document.getElementById('authSubmitBtn').textContent = '로그인';
+          authModalSub.textContent = '휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하세요.';
+          registerNicknameWrap.classList.add('hidden');
+          registerNicknameWrap.classList.remove('flex');
+          loginNicknameInput.required = false;
+        }
+      }
 
       authHeaderBtn.addEventListener('click', () => {
         if (authToken && currentUsername) {
           logoutConfirmModal.classList.remove('hidden');
         } else {
-          authErrorMsg.classList.add('hidden');
+          setAuthMode(false);
           authModal.classList.remove('hidden');
           setTimeout(() => loginPhoneInput.focus(), 50);
         }
       });
 
       document.getElementById('authCloseBtn').addEventListener('click', () => authModal.classList.add('hidden'));
-      authModal.addEventListener('click', (e) => {
-        if (e.target === authModal) authModal.classList.add('hidden');
+      authModal.addEventListener('click', (e) => { if (e.target === authModal) authModal.classList.add('hidden'); });
+      document.getElementById('modeLoginBtn').addEventListener('click', () => setAuthMode(false));
+      document.getElementById('modeRegisterBtn').addEventListener('click', () => {
+        setAuthMode(true);
+        setTimeout(() => loginNicknameInput.focus(), 50);
       });
 
-      document.getElementById('modeLoginBtn').addEventListener('click', () => {
-        isRegisterMode = false;
-        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
-        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
-        document.getElementById('authSubmitBtn').textContent = '로그인';
+      loginNicknameInput.addEventListener('input', () => {
+        isNicknameChecked = false;
+        checkedNicknameValue = '';
+        nicknameStatusMsg.classList.add('hidden');
       });
-      document.getElementById('modeRegisterBtn').addEventListener('click', () => {
-        isRegisterMode = true;
-        document.getElementById('modeRegisterBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 cursor-pointer';
-        document.getElementById('modeLoginBtn').className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer';
-        document.getElementById('authSubmitBtn').textContent = '회원가입';
+
+      checkNicknameBtn.addEventListener('click', async () => {
+        const nick = loginNicknameInput.value.trim();
+        if (!NICKNAME_REGEX.test(nick)) {
+          isNicknameChecked = false;
+          setNicknameStatus('한글 또는 영문만 1~10자 이내로 입력해 주세요. (공백·특수문자 불가)', false);
+          return;
+        }
+        checkNicknameBtn.disabled = true;
+        checkNicknameBtn.textContent = '확인 중...';
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/check-nickname?nickname=${encodeURIComponent(nick)}`);
+          const data = await res.json();
+          if (res.ok && (data.available === true || data.exists === false)) {
+            isNicknameChecked = true;
+            checkedNicknameValue = nick;
+            setNicknameStatus('✅ 사용 가능한 별명입니다.', true);
+          } else {
+            isNicknameChecked = false;
+            setNicknameStatus(data.error || '❌ 이미 사용 중인 별명입니다.', false);
+          }
+        } catch (err) {
+          isNicknameChecked = false;
+          setNicknameStatus('⚠️ 서버 연결에 실패했습니다.', false);
+        } finally {
+          checkNicknameBtn.disabled = false;
+          checkNicknameBtn.textContent = '중복확인';
+        }
       });
 
       loginPhoneInput.addEventListener('input', (e) => {
@@ -712,32 +653,58 @@
         authErrorMsg.classList.add('hidden');
         const digits = loginPhoneInput.value.replace(/\D/g, '');
         const pin = loginPinInput.value.trim();
+        const nick = loginNicknameInput.value.trim();
+
+        if (isRegisterMode) {
+          if (!NICKNAME_REGEX.test(nick)) {
+            authErrorMsg.textContent = '별명은 한글 또는 영문 1~10자 이내로 입력해 주세요.';
+            authErrorMsg.classList.remove('hidden');
+            loginNicknameInput.focus();
+            return;
+          }
+          if (!isNicknameChecked || checkedNicknameValue !== nick) {
+            authErrorMsg.textContent = '별명 중복확인을 먼저 완료해 주세요.';
+            authErrorMsg.classList.remove('hidden');
+            return;
+          }
+        }
+
         if (digits.length !== 8 || pin.length !== 4) {
           authErrorMsg.textContent = '휴대폰 번호 8자리와 숫자 비밀번호 4자리를 정확히 입력해 주세요.';
           authErrorMsg.classList.remove('hidden');
           return;
         }
+
         const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
         const endpoint = isRegisterMode ? '/api/register' : '/api/login';
+        const payload = isRegisterMode
+          ? { username: fullId, password: pin, nickname: nick, gameId: 'hero_clicker_v1' }
+          : { username: fullId, password: pin, gameId: 'hero_clicker_v1' };
+
         try {
           const res = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: fullId, password: pin, gameId: 'hero_clicker_v1' })
+            body: JSON.stringify(payload)
           });
           const data = await res.json();
           if (res.ok && data.token) {
             authToken = data.token;
             currentUsername = data.username || fullId;
+            currentNickname = data.nickname || (isRegisterMode ? nick : null);
             isVipUser = Boolean(data.isVip || data.saveData?.isVip);
-            syncAuthStorage(authToken, currentUsername, isVipUser);
+            syncAuthStorage(authToken, currentUsername, isVipUser, currentNickname);
             updateHeaderAuthBtn();
             syncVipModalState();
             authModal.classList.add('hidden');
             loginPinInput.value = '';
-            showToast(isVipUser ? '👑 VIP 계정으로 로그인되었습니다!' : '✅ 로그인되었습니다!');
+            loginNicknameInput.value = '';
+            isNicknameChecked = false;
+            checkedNicknameValue = '';
+            nicknameStatusMsg.classList.add('hidden');
+            showToast(isVipUser ? `👑 ${currentNickname || ''} VIP 로그인 완료!` : `✅ ${currentNickname ? currentNickname + '님 ' : ''}로그인되었습니다!`);
           } else {
-            authErrorMsg.textContent = data.error || '로그인에 실패했습니다.';
+            authErrorMsg.textContent = data.error || '처리에 실패했습니다.';
             authErrorMsg.classList.remove('hidden');
           }
         } catch (err) {
@@ -772,9 +739,7 @@
 
         try {
           const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-          if (!service) {
-            throw new Error('Google Play Billing 서비스를 사용할 수 없습니다.');
-          }
+          if (!service) throw new Error('Google Play Billing 서비스를 사용할 수 없습니다.');
 
           const details = await service.getDetails([GOOGLE_PLAY_SKU]);
           if (!details || details.length === 0) {
@@ -811,8 +776,9 @@
             await paymentResponse.complete('success');
             authToken = data.token;
             currentUsername = fullPhoneId;
+            currentNickname = data.nickname || currentNickname;
             isVipUser = true;
-            syncAuthStorage(authToken, currentUsername, true);
+            syncAuthStorage(authToken, currentUsername, true, currentNickname);
             updateHeaderAuthBtn();
             syncVipModalState();
             renderList(searchInput.value);
@@ -823,11 +789,8 @@
             showToast(data.message || '⚠️ 결제 검증에 실패했습니다.');
           }
         } catch (err) {
-          if (err && err.name === 'AbortError') {
-            showToast('결제가 취소되었습니다.');
-          } else {
-            showToast('⚠️ Google Play 스토어 앱 환경인지 확인해 주세요.');
-          }
+          if (err && err.name === 'AbortError') showToast('결제가 취소되었습니다.');
+          else showToast('⚠️ Google Play 스토어 앱 환경인지 확인해 주세요.');
         } finally {
           vipPaySubmitBtn.disabled = false;
           vipPaySubmitBtnText.textContent = 'Google Play로 7,000원 결제하기';
@@ -847,6 +810,10 @@
           if (res.ok) {
             const data = await res.json();
             isVipUser = Boolean(data.isVip || data.saveData?.isVip || isVipUser);
+            if (data.nickname) {
+              currentNickname = data.nickname;
+              ALL_NICK_KEYS.forEach((k) => { try { localStorage.setItem(k, currentNickname); } catch (e) {} });
+            }
             try { localStorage.setItem(VIP_KEY, String(isVipUser)); } catch (e) {}
             updateHeaderAuthBtn();
           }
@@ -854,24 +821,18 @@
       }
 
       function refreshLobbyAuthFromStorage() {
-        let t = null;
-        let u = null;
-        let v = false;
+        let t = null, u = null, n = null, v = false;
         try {
-          for (const k of ALL_TOKEN_KEYS) {
-            const val = localStorage.getItem(k);
-            if (val) { t = val; break; }
-          }
-          for (const k of ALL_USER_KEYS) {
-            const val = localStorage.getItem(k);
-            if (val) { u = val; break; }
-          }
+          for (const k of ALL_TOKEN_KEYS) { const val = localStorage.getItem(k); if (val) { t = val; break; } }
+          for (const k of ALL_USER_KEYS) { const val = localStorage.getItem(k); if (val) { u = val; break; } }
+          for (const k of ALL_NICK_KEYS) { const val = localStorage.getItem(k); if (val) { n = val; break; } }
           v = localStorage.getItem(VIP_KEY) === 'true';
         } catch (e) {}
 
-        if (t !== authToken || u !== currentUsername || v !== isVipUser) {
+        if (t !== authToken || u !== currentUsername || n !== currentNickname || v !== isVipUser) {
           authToken = t;
           currentUsername = u;
+          currentNickname = n;
           isVipUser = Boolean(t && v);
           updateHeaderAuthBtn();
           syncVipModalState();
@@ -886,7 +847,6 @@
         if (document.visibilityState === 'visible') refreshLobbyAuthFromStorage();
       });
 
-      // 초기 렌더링
       updateHeaderAuthBtn();
       renderList('');
       checkLoginVipStatus();
