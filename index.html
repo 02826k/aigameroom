@@ -157,6 +157,21 @@
           </div>
 
           <div class="flex flex-col gap-3">
+            <!-- VIP 별명 입력 + 중복확인 -->
+            <div>
+              <label for="vipNickname" class="block text-[11px] font-bold text-slate-300 mb-1">별명 (한글·영문 10자 이내)</label>
+              <div class="flex items-center gap-1.5">
+                <input id="vipNickname" type="text" maxlength="10" autocomplete="off"
+                  placeholder="게임에 표시될 별명 입력"
+                  class="min-w-0 flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-100 focus:outline-none focus:border-amber-400" />
+                <button id="vipCheckNicknameBtn" type="button"
+                  class="px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 text-xs font-black whitespace-nowrap shrink-0 transition cursor-pointer">
+                  중복확인
+                </button>
+              </div>
+              <div id="vipNicknameStatusMsg" class="hidden text-[11px] font-bold px-1 mt-1"></div>
+            </div>
+
             <div>
               <label for="authPhoneDigits" class="block text-[11px] font-bold text-slate-300 mb-1">아이디 (휴대폰 번호 뒷 8자리)</label>
               <div class="flex items-center rounded-xl bg-slate-900 border border-slate-700 focus-within:border-amber-400 overflow-hidden">
@@ -226,7 +241,7 @@
   <div id="authModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="w-full max-w-sm bg-slate-900 border border-amber-500/40 rounded-2xl p-5 shadow-2xl text-slate-100">
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-base font-extrabold text-amber-300">🟨 AI게임장 로그인</h2>
+        <h2 class="text-base font-extrabold text-amber-300">🟨 AI게임장 통합 로그인</h2>
         <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
       </div>
       <p id="authModalSub" class="text-xs text-slate-400 mb-3">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하세요.</p>
@@ -290,6 +305,41 @@
       const USER_KEY = 'hero_clicker_username';
       const GOOGLE_PLAY_SKU = 'vip_lifetime_pass';
       const VIP_PRICE = 7000;
+
+      // 🔒 전 게임 통합 로그인 복귀 URL 보안 검증 (Open Redirect 방지)
+      function getSafeReturnUrl(rawUrl) {
+        if (!rawUrl) return null;
+        try {
+          const parsed = new URL(rawUrl, window.location.origin);
+          if (parsed.origin === 'https://02826k.github.io' && parsed.pathname.startsWith('/aigameroom/')) {
+            return parsed.href;
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedAuthAction = urlParams.get('auth'); // 'login' | 'register' | 'vip'
+      const safeReturnTo = getSafeReturnUrl(urlParams.get('returnTo'));
+
+      function clearAuthQueryParams() {
+        try {
+          if (window.location.search) {
+            const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+            window.history.replaceState({}, '', cleanUrl);
+          }
+        } catch (e) {}
+      }
+
+      function redirectBackIfNeeded() {
+        if (safeReturnTo) {
+          setTimeout(() => {
+            window.location.replace(safeReturnTo);
+          }, 700);
+          return true;
+        }
+        return false;
+      }
 
       const ITEMS = [
         { id: 'vip', type: 'vip', title: 'VIP가입하기', subtitle: '', icon: 'https://02826k.github.io/aigameroom/icon.png', fallbackIcon: `${BASE_URL}/icon.png`, emoji: '👑', keywords: 'vip 가입 안내 결제' },
@@ -488,25 +538,107 @@
       document.getElementById('noticeOkBtn').addEventListener('click', () => noticeModal.classList.add('hidden'));
       noticeModal.addEventListener('click', (e) => { if (e.target === noticeModal) noticeModal.classList.add('hidden'); });
 
+      // ==========================================
+      // 👑 VIP 모달 + 별명 중복확인 로직
+      // ==========================================
+      const NICKNAME_REGEX = /^[가-힣a-zA-Z]{1,10}$/;
+
       const vipModal = document.getElementById('vipModal');
       const vipCloseBtn = document.getElementById('vipCloseBtn');
       const vipPaySubmitBtn = document.getElementById('vipPaySubmitBtn');
       const vipPaySubmitBtnText = document.getElementById('vipPaySubmitBtnText');
+      const vipNicknameInput = document.getElementById('vipNickname');
+      const vipCheckNicknameBtn = document.getElementById('vipCheckNicknameBtn');
+      const vipNicknameStatusMsg = document.getElementById('vipNicknameStatusMsg');
       const phoneInput = document.getElementById('authPhoneDigits');
       const pinInput = document.getElementById('authPinCode');
       const logoutBtn = document.getElementById('logoutBtn');
 
-      function syncVipModalState() {
-        if (authToken && currentUsername) logoutBtn.classList.remove('hidden');
-        else logoutBtn.classList.add('hidden');
+      let isVipNicknameChecked = false;
+      let checkedVipNicknameValue = '';
+
+      function setVipNicknameStatus(text, isOk) {
+        vipNicknameStatusMsg.textContent = text;
+        vipNicknameStatusMsg.className = `text-[11px] font-bold px-1 mt-1 ${isOk ? 'text-emerald-400' : 'text-rose-400'}`;
+        vipNicknameStatusMsg.classList.remove('hidden');
       }
+
+      function syncVipModalState() {
+        if (authToken && currentUsername) {
+          logoutBtn.classList.remove('hidden');
+          const m = currentUsername.match(/^010-(\d{4}-\d{4})$/);
+          if (m && !phoneInput.value) phoneInput.value = m[1];
+          if (currentNickname) {
+            vipNicknameInput.value = currentNickname;
+            vipNicknameInput.readOnly = true;
+            vipCheckNicknameBtn.disabled = true;
+            vipCheckNicknameBtn.textContent = '등록됨';
+            isVipNicknameChecked = true;
+            checkedVipNicknameValue = currentNickname;
+            setVipNicknameStatus('✅ 기존 계정의 별명이 자동 적용됩니다.', true);
+          } else {
+            vipNicknameInput.readOnly = false;
+            vipCheckNicknameBtn.disabled = false;
+            vipCheckNicknameBtn.textContent = '중복확인';
+            isVipNicknameChecked = false;
+            checkedVipNicknameValue = '';
+            vipNicknameStatusMsg.classList.add('hidden');
+          }
+        } else {
+          logoutBtn.classList.add('hidden');
+          vipNicknameInput.readOnly = false;
+          vipCheckNicknameBtn.disabled = false;
+          vipCheckNicknameBtn.textContent = '중복확인';
+          if (!isVipNicknameChecked) {
+            vipNicknameStatusMsg.classList.add('hidden');
+          }
+        }
+      }
+
+      function openVipModal() {
+        syncVipModalState();
+        vipModal.classList.remove('hidden');
+      }
+
+      vipNicknameInput.addEventListener('input', () => {
+        if (vipNicknameInput.readOnly) return;
+        isVipNicknameChecked = false;
+        checkedVipNicknameValue = '';
+        vipNicknameStatusMsg.classList.add('hidden');
+      });
+
+      vipCheckNicknameBtn.addEventListener('click', async () => {
+        const nick = vipNicknameInput.value.trim();
+        if (!NICKNAME_REGEX.test(nick)) {
+          isVipNicknameChecked = false;
+          setVipNicknameStatus('한글 또는 영문만 1~10자 이내로 입력해 주세요. (공백·특수문자 불가)', false);
+          return;
+        }
+        vipCheckNicknameBtn.disabled = true;
+        vipCheckNicknameBtn.textContent = '확인 중...';
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/check-nickname?nickname=${encodeURIComponent(nick)}`);
+          const data = await res.json();
+          if (res.ok && (data.available === true || data.exists === false)) {
+            isVipNicknameChecked = true;
+            checkedVipNicknameValue = nick;
+            setVipNicknameStatus('✅ 사용 가능한 별명입니다.', true);
+          } else {
+            isVipNicknameChecked = false;
+            setVipNicknameStatus(data.error || '❌ 이미 사용 중인 별명입니다.', false);
+          }
+        } catch (err) {
+          isVipNicknameChecked = false;
+          setVipNicknameStatus('⚠️ 서버 연결에 실패했습니다.', false);
+        } finally {
+          vipCheckNicknameBtn.disabled = false;
+          vipCheckNicknameBtn.textContent = '중복확인';
+        }
+      });
 
       gameListEl.addEventListener('click', (e) => {
         const vipTrigger = e.target.closest('[data-vip-trigger="1"]');
-        if (vipTrigger) {
-          syncVipModalState();
-          vipModal.classList.remove('hidden');
-        }
+        if (vipTrigger) openVipModal();
       });
 
       vipCloseBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
@@ -525,6 +657,12 @@
         currentUsername = null;
         currentNickname = null;
         isVipUser = false;
+        isVipNicknameChecked = false;
+        checkedVipNicknameValue = '';
+        vipNicknameInput.value = '';
+        vipNicknameInput.readOnly = false;
+        phoneInput.value = '';
+        pinInput.value = '';
         syncAuthStorage(null, null, false, null);
         syncVipModalState();
         updateHeaderAuthBtn();
@@ -542,7 +680,9 @@
       logoutConfirmModal.addEventListener('click', (e) => { if (e.target === logoutConfirmModal) logoutConfirmModal.classList.add('hidden'); });
       logoutBtn.addEventListener('click', () => logoutConfirmModal.classList.remove('hidden'));
 
-      // 로그인 / 회원가입 + 별명 중복확인 로직
+      // ==========================================
+      // 🔐 로그인 / 회원가입 + 별명 중복확인 로직
+      // ==========================================
       const authModal = document.getElementById('authModal');
       const authModalSub = document.getElementById('authModalSub');
       const registerNicknameWrap = document.getElementById('registerNicknameWrap');
@@ -556,8 +696,6 @@
       let isRegisterMode = false;
       let isNicknameChecked = false;
       let checkedNicknameValue = '';
-
-      const NICKNAME_REGEX = /^[가-힣a-zA-Z]{1,10}$/;
 
       function setNicknameStatus(text, isOk) {
         nicknameStatusMsg.textContent = text;
@@ -587,13 +725,17 @@
         }
       }
 
+      function openAuthModal(register = false) {
+        setAuthMode(register);
+        authModal.classList.remove('hidden');
+        setTimeout(() => (register ? loginNicknameInput : loginPhoneInput).focus(), 50);
+      }
+
       authHeaderBtn.addEventListener('click', () => {
         if (authToken && currentUsername) {
           logoutConfirmModal.classList.remove('hidden');
         } else {
-          setAuthMode(false);
-          authModal.classList.remove('hidden');
-          setTimeout(() => loginPhoneInput.focus(), 50);
+          openAuthModal(false);
         }
       });
 
@@ -692,7 +834,7 @@
             authToken = data.token;
             currentUsername = data.username || fullId;
             currentNickname = data.nickname || (isRegisterMode ? nick : null);
-            isVipUser = Boolean(data.isVip || data.saveData?.isVip);
+            isVipUser = Boolean(data.isVip);
             syncAuthStorage(authToken, currentUsername, isVipUser, currentNickname);
             updateHeaderAuthBtn();
             syncVipModalState();
@@ -703,6 +845,7 @@
             checkedNicknameValue = '';
             nicknameStatusMsg.classList.add('hidden');
             showToast(isVipUser ? `👑 ${currentNickname || ''} VIP 로그인 완료!` : `✅ ${currentNickname ? currentNickname + '님 ' : ''}로그인되었습니다!`);
+            redirectBackIfNeeded();
           } else {
             authErrorMsg.textContent = data.error || '처리에 실패했습니다.';
             authErrorMsg.classList.remove('hidden');
@@ -714,9 +857,20 @@
       });
 
       vipPaySubmitBtn.addEventListener('click', async () => {
+        const vipNick = vipNicknameInput.value.trim();
         const rawDigits = phoneInput.value.replace(/\D/g, '');
         const pin = pinInput.value.trim();
 
+        if (!NICKNAME_REGEX.test(vipNick)) {
+          showToast('⚠️ 별명은 한글 또는 영문 1~10자 이내로 입력해 주세요.');
+          vipNicknameInput.focus();
+          return;
+        }
+        if (!isVipNicknameChecked || checkedVipNicknameValue !== vipNick) {
+          showToast('⚠️ 별명 중복확인을 먼저 완료해 주세요.');
+          vipNicknameInput.focus();
+          return;
+        }
         if (rawDigits.length !== 8) {
           showToast('⚠️ 휴대폰 번호 뒷 8자리를 입력해 주세요.');
           phoneInput.focus();
@@ -766,6 +920,7 @@
             body: JSON.stringify({
               username: fullPhoneId,
               pin: pin,
+              nickname: vipNick,
               productId: GOOGLE_PLAY_SKU,
               purchaseToken: purchaseToken
             })
@@ -776,7 +931,7 @@
             await paymentResponse.complete('success');
             authToken = data.token;
             currentUsername = fullPhoneId;
-            currentNickname = data.nickname || currentNickname;
+            currentNickname = data.nickname || vipNick;
             isVipUser = true;
             syncAuthStorage(authToken, currentUsername, true, currentNickname);
             updateHeaderAuthBtn();
@@ -784,6 +939,7 @@
             renderList(searchInput.value);
             vipModal.classList.add('hidden');
             showToast('👑 Google Play 결제 완료! VIP가 즉시 적용되었습니다!');
+            redirectBackIfNeeded();
           } else {
             await paymentResponse.complete('fail');
             showToast(data.message || '⚠️ 결제 검증에 실패했습니다.');
@@ -809,7 +965,7 @@
           }
           if (res.ok) {
             const data = await res.json();
-            isVipUser = Boolean(data.isVip || data.saveData?.isVip || isVipUser);
+            isVipUser = Boolean(data.isVip);
             if (data.nickname) {
               currentNickname = data.nickname;
               ALL_NICK_KEYS.forEach((k) => { try { localStorage.setItem(k, currentNickname); } catch (e) {} });
@@ -850,6 +1006,26 @@
       updateHeaderAuthBtn();
       renderList('');
       checkLoginVipStatus();
+
+      // 🔗 각 게임에서 통합 로그인/회원가입/VIP 링크로 넘어온 경우 자동 처리
+      if (requestedAuthAction) {
+        clearAuthQueryParams();
+        if (requestedAuthAction === 'vip') {
+          openVipModal();
+        } else if (requestedAuthAction === 'register') {
+          if (authToken && currentUsername && safeReturnTo) {
+            window.location.replace(safeReturnTo);
+          } else {
+            openAuthModal(true);
+          }
+        } else if (requestedAuthAction === 'login') {
+          if (authToken && currentUsername && safeReturnTo) {
+            window.location.replace(safeReturnTo);
+          } else {
+            openAuthModal(false);
+          }
+        }
+      }
     })();
   </script>
 </body>
