@@ -9,7 +9,6 @@
 <link rel="apple-touch-icon" href="./icon.png"/>
 <title>오토바이 레이싱 3D — 네온 하이웨이</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<script src="https://js.tosspayments.com/v2/standard"></script>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
@@ -183,45 +182,6 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-orange-500/50 text-xs font-bold text-orange-200 shadow-xl">알림</div>
 </div>
 
-<div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
-<div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-5 max-h-[90dvh] overflow-y-auto">
-<div class="flex justify-between mb-3"><h2 class="font-black text-amber-300">👑 VIP 7,000원</h2><button id="vipCloseBtn" type="button" class="cursor-pointer text-slate-400">✕</button></div>
-<ul class="text-xs text-slate-300 space-y-1 mb-3"><li>❤️ 목숨 3개</li><li>🪙 점수·골드 3배</li><li>⚡ 부스터 강화 &amp; 2번 VIP 오토바이 해금</li></ul>
-<div id="tossWidgetLoading" class="text-xs text-center text-slate-500 py-3">결제 로딩...</div>
-<div id="toss-payment-method"></div><div id="toss-agreement"></div>
-<button id="vipPaySubmitBtn" type="button" disabled class="w-full mt-3 py-3 rounded-xl bg-amber-400 text-slate-950 font-black disabled:bg-slate-700 cursor-pointer">결제</button>
-</div>
-</div>
-
-<div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-<div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl max-h-[90dvh] overflow-y-auto">
-<div class="flex items-center justify-between mb-2">
-<div class="flex items-center gap-2"><span class="text-lg">🟨</span><h2 class="text-base font-extrabold text-amber-300">서버 저장 계정</h2></div>
-<button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1 cursor-pointer">✕</button>
-</div>
-<p class="text-xs text-slate-400 leading-relaxed mb-4">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 간편하게 서버에 데이터를 영구 저장하세요.</p>
-<div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-4">
-<button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">기존 계정 로그인</button>
-<button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">간편 회원가입</button>
-</div>
-<form id="authForm" class="flex flex-col gap-3.5">
-<div>
-<label class="block text-[11px] font-bold text-slate-300 mb-1.5">아이디 (휴대폰 번호 뒷 8자리)</label>
-<div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 focus-within:border-amber-400 overflow-hidden">
-<span class="px-3 py-2.5 bg-slate-900 text-amber-300 font-extrabold text-sm border-r border-slate-800 select-none">010 -</span>
-<input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678 (숫자 8자리)" class="w-full px-3 py-2.5 bg-transparent text-sm font-bold tracking-wider text-slate-100 focus:outline-none"/>
-</div>
-</div>
-<div>
-<label class="block text-[11px] font-bold text-slate-300 mb-1.5">비밀번호 (숫자 4자리)</label>
-<input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 입력 (예: 1234)" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none focus:border-amber-400"/>
-</div>
-<div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
-<button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition mt-0.5 cursor-pointer">로그인 및 서버저장 연동</button>
-</form>
-</div>
-</div>
-
 <!-- VIP 차량 안내 모달 -->
 <div id="vipAlertModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
 <div class="bg-slate-900 border-2 border-amber-400/60 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
@@ -251,19 +211,20 @@ const GAME_ID = 'moto_racing_3d_v1';
 const CLOUD = 'https://02826k.duckdns.org';
 const local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const API = local ? '' : CLOUD;
-const TOSS_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-const VIP_PRICE = 7000;
 const STORAGE = 'moto_racing_3d_save_v1';
 const TOKEN_KEYS = ['hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'gongdaegong_jwt_token', 'aigameroom_jwt_token', 'moto_racing_3d_jwt'];
 const USER_KEYS = ['hero_clicker_username', 'gongdaegong_username', 'aigameroom_username', 'moto_racing_3d_user'];
 const VIP_KEY = 'hero_clicker_is_vip';
 const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
+function goLobbyAuth(mode = 'login') {
+  const returnTo = encodeURIComponent(window.location.href);
+  window.location.href = `${LOBBY_URL}?auth=${encodeURIComponent(mode)}&returnTo=${returnTo}`;
+}
 const FINISH_TIME_SEC = 180;
 const LANES = [-3.2, 0, 3.2];
 
 let authToken = null;
 let currentUsername = null;
-let isRegisterMode = false;
 
 function loadSharedAuth() {
   authToken = null;
@@ -1619,7 +1580,7 @@ function updateBikeSelectUI() {
 const motoRankModal = document.getElementById('motoRankModal');
 const logoutConfirmModal = document.getElementById('logoutConfirmModal');
 function isModalOpen() {
-  return !authM.classList.contains('hidden') || !vipM.classList.contains('hidden') || !motoRankModal.classList.contains('hidden') || !logoutConfirmModal.classList.contains('hidden') || !vipAlertModal.classList.contains('hidden');
+  return !motoRankModal.classList.contains('hidden') || !logoutConfirmModal.classList.contains('hidden') || !vipAlertModal.classList.contains('hidden');
 }
 window.addEventListener('keydown', e => {
   if (isModalOpen()) return;
@@ -2126,49 +2087,12 @@ async function fetchRank() {
   } catch { box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">랭킹 대기 중</div>'; }
 }
 
-const vipM = document.getElementById('vipModal');
-document.getElementById('vipCloseBtn').onclick = () => { vipM.classList.add('hidden'); vipM.classList.remove('flex'); };
-async function initToss() {
-  if (typeof TossPayments === 'undefined') return;
-  try {
-    const tp = TossPayments(TOSS_KEY);
-    const w = tp.widgets({ customerKey: TossPayments.ANONYMOUS });
-    await w.setAmount({ currency: 'KRW', value: VIP_PRICE });
-    await Promise.all([
-      w.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
-      w.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' })
-    ]);
-    document.getElementById('tossWidgetLoading').classList.add('hidden');
-    document.getElementById('vipPaySubmitBtn').disabled = false;
-  } catch {}
-}
-
-const authM = document.getElementById('authModal');
-const phone = document.getElementById('authPhoneDigits'), pin = document.getElementById('authPinCode');
-function setAuthMode(register) {
-  isRegisterMode = register;
-  document.getElementById('authErrorMsg').classList.add('hidden');
-  const ml = document.getElementById('modeLoginBtn');
-  const mr = document.getElementById('modeRegisterBtn');
-  const sb = document.getElementById('authSubmitBtn');
-  if (register) {
-    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-    sb.textContent = '가입하고 현재 데이터 서버저장';
-  } else {
-    ml.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-    mr.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-    sb.textContent = '로그인 및 서버저장 연동';
-  }
-}
 document.getElementById('authHeaderBtn').onclick = () => {
   if (authToken) {
     logoutConfirmModal.classList.remove('hidden');
     logoutConfirmModal.classList.add('flex');
   } else {
-    setAuthMode(false);
-    authM.classList.remove('hidden'); authM.classList.add('flex');
-    setTimeout(() => phone.focus(), 50);
+    goLobbyAuth('login');
   }
 };
 document.getElementById('logoutCancelBtn').onclick = () => {
@@ -2179,65 +2103,6 @@ document.getElementById('logoutConfirmBtn').onclick = () => {
   logoutConfirmModal.classList.add('hidden');
   logoutConfirmModal.classList.remove('flex');
   handleLogout(false);
-};
-document.getElementById('authCloseBtn').onclick = () => { authM.classList.add('hidden'); authM.classList.remove('flex'); };
-document.getElementById('modeLoginBtn').onclick = () => setAuthMode(false);
-document.getElementById('modeRegisterBtn').onclick = () => setAuthMode(true);
-phone.oninput = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = d.length > 4 ? d.slice(0, 4) + '-' + d.slice(4) : d; };
-pin.oninput = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); };
-document.getElementById('authForm').onsubmit = async e => {
-  e.preventDefault();
-  const errEl = document.getElementById('authErrorMsg');
-  errEl.classList.add('hidden');
-  const raw = phone.value.replace(/\D/g, '');
-  const pinVal = pin.value.trim();
-  if (raw.length !== 8) {
-    errEl.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
-    errEl.classList.remove('hidden'); phone.focus(); return;
-  }
-  if (!/^\d{4}$/.test(pinVal)) {
-    errEl.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
-    errEl.classList.remove('hidden'); pin.focus(); return;
-  }
-  const id = '010-' + raw.slice(0, 4) + '-' + raw.slice(4);
-  const payload = isRegisterMode
-    ? { username: id, password: pinVal, initialSaveData: state, gameId: GAME_ID }
-    : { username: id, password: pinVal, gameId: GAME_ID };
-  try {
-    const res = await fetch(API + (isRegisterMode ? '/api/register' : '/api/login'), {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    });
-    const d = await res.json();
-    if (!res.ok) {
-      errEl.textContent = d.error || '로그인/가입 처리 중 오류가 발생했습니다.';
-      errEl.classList.remove('hidden'); return;
-    }
-    authToken = d.token; currentUsername = d.username;
-    if (!isRegisterMode) {
-      if (d.saveData) {
-        state = sanitize({ ...(d.saveData || {}), isVip: Boolean(d.isVip || d.saveData?.isVip) });
-        if (state.isVip) await syncSave(false);
-      } else {
-        if (d.isVip) state.isVip = true;
-        state = sanitize(state);
-        await syncSave(false);
-      }
-    } else {
-      if (d.isVip) state.isVip = true;
-      state = sanitize(state);
-    }
-    saveSharedAuth(authToken, currentUsername, state.isVip);
-    localStorage.setItem(STORAGE, JSON.stringify(state));
-    applySelectedBikeMesh();
-    authM.classList.add('hidden'); authM.classList.remove('flex');
-    pin.value = '';
-    updateUI();
-    fetchRank();
-    showToast(isRegisterMode ? `🟨 [${maskPhoneMiddle(currentUsername)}] 가입 완료!` : `🟨 [${maskPhoneMiddle(currentUsername)}] 로그인 완료!`);
-  } catch {
-    errEl.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
-    errEl.classList.remove('hidden');
-  }
 };
 function handleLogout(exp) {
   authToken = null; currentUsername = null;
