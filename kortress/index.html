@@ -210,49 +210,6 @@
             </div>
         </div>
 
-        <!-- 통합 계정 로그인 모달 -->
-        <div id="authModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div class="w-full max-w-xs mx-auto bg-slate-900 border-2 border-sky-500/40 rounded-3xl p-5 shadow-2xl text-center">
-                <div class="w-11 h-11 mx-auto mb-2 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-xl">
-                    🔐
-                </div>
-                <h3 class="text-base font-black text-amber-300 mb-3">AI게임장 통합 계정</h3>
-
-                <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
-                    <button type="button" id="modeLoginBtn" class="flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer">
-                        로그인
-                    </button>
-                    <button type="button" id="modeRegisterBtn" class="flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
-                        회원가입
-                    </button>
-                </div>
-
-                <div class="space-y-2.5 text-left">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-1">휴대폰 번호 (010 제외 8자리)</label>
-                        <div class="flex items-center gap-1.5 mt-1 w-full">
-                            <span class="px-2.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black text-amber-400 shrink-0">010-</span>
-                            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 min-w-0 w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-sky-400" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-1">비밀번호 (숫자 4자리)</label>
-                        <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full min-w-0 mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-sky-400" />
-                    </div>
-                </div>
-
-                <div id="loginMsg" class="text-[11px] font-bold text-rose-400 mt-2.5 hidden"></div>
-
-                <div class="flex gap-2 mt-4">
-                    <button type="button" id="closeLoginBtn" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">
-                        닫기
-                    </button>
-                    <button type="button" id="confirmLoginBtn" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-xs font-black text-white shadow-lg transition active:scale-95 cursor-pointer">
-                        로그인
-                    </button>
-                </div>
-            </div>
-        </div>
     </main>
 
     <!-- 하단 아케이드 컨트롤 패널 -->
@@ -349,18 +306,40 @@
             : ['https://02826k.duckdns.org', 'https://partial-catering-vatican-accounting.trycloudflare.com'];
         let API_BASE_URL = API_CANDIDATES[0];
         const ADMIN_VIP_PHONES = [];
-        const TOKEN_KEY = 'hero_clicker_jwt_token';
-        const USER_KEY = 'hero_clicker_username';
+        const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
+        function goLobbyAuth(mode = 'login') {
+            const returnTo = encodeURIComponent(window.location.href);
+            window.location.href = `${LOBBY_URL}?auth=${encodeURIComponent(mode)}&returnTo=${returnTo}`;
+        }
+        const TOKEN_KEYS = ['hero_clicker_jwt_token', 'aigameroom_jwt_token', 'sky2026_jwt_token', 'abuse_jwt_token', 'gongdaegong_jwt_token'];
+        const USER_KEYS = ['hero_clicker_username', 'aigameroom_username', 'sky2026_username', 'abuse_username', 'gongdaegong_username'];
+        const VIP_KEY = 'hero_clicker_is_vip';
         const LOCAL_WIN_KEY = 'kortress_wins_v1';
 
+        function readSharedAuth() {
+            let t = null, u = null;
+            try {
+                for (const k of TOKEN_KEYS) { const v = localStorage.getItem(k); if (v) { t = v; break; } }
+                for (const k of USER_KEYS) { const v = localStorage.getItem(k); if (v) { u = v; break; } }
+            } catch (e) {}
+            return { t, u };
+        }
+        function clearSharedAuth() {
+            try {
+                TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
+                USER_KEYS.forEach(k => localStorage.removeItem(k));
+                localStorage.removeItem(VIP_KEY);
+            } catch (e) {}
+        }
+
+        const initAuth = readSharedAuth();
         let authState = {
-            token: localStorage.getItem(TOKEN_KEY) || null,
-            username: localStorage.getItem(USER_KEY) || null,
-            isVip: false,
+            token: initAuth.t,
+            username: initAuth.u,
+            isVip: Boolean(initAuth.t && localStorage.getItem(VIP_KEY) === 'true'),
             wins: Number(localStorage.getItem(LOCAL_WIN_KEY) || 0),
             serverSaveData: null
         };
-        let isRegisterMode = false;
 
         function isAdminAccount(username) {
             return Boolean(username && ADMIN_VIP_PHONES.includes(username.trim()));
@@ -443,126 +422,36 @@
             } catch (e) {}
         }
 
-        const authModal = document.getElementById('authModal');
-        const phoneInput = document.getElementById('phoneInput');
-        const pinInput = document.getElementById('pinInput');
-        const modeLoginBtn = document.getElementById('modeLoginBtn');
-        const modeRegisterBtn = document.getElementById('modeRegisterBtn');
-        const confirmLoginBtn = document.getElementById('confirmLoginBtn');
-
-        function setAuthMode(reg) {
-            isRegisterMode = reg;
-            document.getElementById('loginMsg').classList.add('hidden');
-            if (reg) {
-                modeRegisterBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer';
-                modeLoginBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-                confirmLoginBtn.textContent = '회원가입';
-            } else {
-                modeLoginBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white transition cursor-pointer';
-                modeRegisterBtn.className = 'flex-1 min-w-0 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-                confirmLoginBtn.textContent = '로그인';
-            }
-        }
-
         document.getElementById('loginOpenBtn').onclick = () => {
-            setAuthMode(false);
-            authModal.classList.remove('hidden');
-            setTimeout(() => phoneInput.focus(), 50);
+            goLobbyAuth('login');
         };
-        document.getElementById('closeLoginBtn').onclick = () => authModal.classList.add('hidden');
         document.getElementById('logoutBtn').onclick = () => {
             authState.token = null;
             authState.username = null;
             authState.isVip = false;
             vipSensorEnabled = false;
-            localStorage.removeItem(TOKEN_KEY);
-            localStorage.removeItem(USER_KEY);
+            clearSharedAuth();
             updateAuthUI();
             showToast('로그아웃되었습니다.');
         };
-        modeLoginBtn.onclick = () => setAuthMode(false);
-        modeRegisterBtn.onclick = () => setAuthMode(true);
-        phoneInput.addEventListener('input', (e) => {
-            const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-            e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
-        });
-        pinInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-        });
 
-        confirmLoginBtn.onclick = async () => {
-            const rawDigits = phoneInput.value.replace(/\D/g, '');
-            const pin = pinInput.value.trim();
-            const msgEl = document.getElementById('loginMsg');
-
-            if (rawDigits.length !== 8) {
-                msgEl.textContent = '휴대폰 뒷자리 8자리 숫자를 정확히 입력해주세요.';
-                msgEl.classList.remove('hidden');
-                return;
-            }
-            if (!/^\d{4}$/.test(pin)) {
-                msgEl.textContent = '4자리 숫자 비밀번호를 입력해주세요.';
-                msgEl.classList.remove('hidden');
-                return;
-            }
-
-            const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
-            const endpoint = isRegisterMode ? '/api/register' : '/api/login';
-            confirmLoginBtn.disabled = true;
-            confirmLoginBtn.textContent = '확인 중...';
-            msgEl.classList.add('hidden');
-
-            try {
-                const payload = isRegisterMode
-                    ? { username: fullPhoneId, password: pin, gameId: GAME_ID, initialSaveData: { isVip: isAdminAccount(fullPhoneId), kortressWins: authState.wins } }
-                    : { username: fullPhoneId, password: pin, gameId: GAME_ID };
-                const res = await apiFetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    msgEl.textContent = result.error || '로그인에 실패했습니다.';
-                    msgEl.classList.remove('hidden');
-                    return;
-                }
-                authState.token = result.token;
-                authState.username = result.username || fullPhoneId;
-                authState.serverSaveData = result.saveData || {};
-                authState.isVip = Boolean(result.isVip || authState.serverSaveData.isVip || isAdminAccount(authState.username));
-                localStorage.setItem(TOKEN_KEY, authState.token);
-                localStorage.setItem(USER_KEY, authState.username);
-                authModal.classList.add('hidden');
-                pinInput.value = '';
+        function syncAuthFromStorage() {
+            const { t, u } = readSharedAuth();
+            const vipStored = Boolean(t && localStorage.getItem(VIP_KEY) === 'true');
+            const changed = t !== authState.token || u !== authState.username || vipStored !== authState.isVip;
+            if (changed) {
+                authState.token = t;
+                authState.username = u;
+                authState.isVip = vipStored;
+                if (!t) vipSensorEnabled = false;
                 updateAuthUI();
-                showToast(`🟨 [${authState.username}] 로그인 완료!`);
-            } catch (err) {
-                const localAccounts = JSON.parse(localStorage.getItem('aigame_shared_accounts') || '{}');
-                if (!isRegisterMode && localAccounts[fullPhoneId]) {
-                    if (localAccounts[fullPhoneId].pin !== pin) {
-                        msgEl.textContent = '❌ 비밀번호가 일치하지 않습니다!';
-                        msgEl.classList.remove('hidden');
-                        return;
-                    }
-                    authState.isVip = Boolean(localAccounts[fullPhoneId].isVip || isAdminAccount(fullPhoneId));
-                } else {
-                    const vip = Boolean(localAccounts[fullPhoneId]?.isVip || isAdminAccount(fullPhoneId));
-                    localAccounts[fullPhoneId] = { pin, isVip: vip };
-                    localStorage.setItem('aigame_shared_accounts', JSON.stringify(localAccounts));
-                    authState.isVip = vip;
-                }
-                authState.username = fullPhoneId;
-                localStorage.setItem(USER_KEY, authState.username);
-                authModal.classList.add('hidden');
-                pinInput.value = '';
-                updateAuthUI();
-                showToast(`🟨 [${authState.username}] 로그인 완료!`);
-            } finally {
-                confirmLoginBtn.disabled = false;
-                confirmLoginBtn.textContent = isRegisterMode ? '회원가입' : '로그인';
+                if (t) restoreAuthSession();
             }
-        };
+        }
+        ['pageshow', 'focus', 'storage'].forEach(evt => window.addEventListener(evt, syncAuthFromStorage));
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) syncAuthFromStorage();
+        });
 
         class SoundEffects {
             constructor() {
@@ -1817,7 +1706,6 @@
         }
 
         window.addEventListener('keydown', (e) => {
-            if (!authModal.classList.contains('hidden')) return;
             gameState.keys[e.code] = true;
             if (e.code === 'Space' && gameState.phase === 'AIMING') { e.preventDefault(); startCharging(); }
             if (e.code === 'Digit1') selectWeapon(0);
