@@ -115,7 +115,7 @@
           </div>
           <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl px-3 py-2.5 flex flex-col justify-center">
             <div class="text-[11px] text-slate-400 font-medium">장착 무기 / 펫</div>
-            <div class="text-xs sm:text-sm font-bold text-purple-300 truncate mt-0.5" id="equippedWeaponDisplay">목검 (x1)</div>
+            <div class="text-xs sm:text-sm font-bold text-purple-300 truncate mt-0.5" id="equippedWeaponDisplay">목검</div>
           </div>
         </div>
       </div>
@@ -164,7 +164,6 @@
     <!-- Action & Shop / Region / Pet / Ranking Tabs -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/30 flex flex-col gap-3.5">
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        <!-- 8 : 2 비율 타격하기 버튼 + VIP 자동클릭 버튼 -->
         <div class="flex-1 flex items-stretch gap-2 min-w-0">
           <button id="trainActionBtn" type="button" class="flex-[4] min-w-0 py-3 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.99] text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
             <span class="shrink-0">⚔️</span>
@@ -203,7 +202,6 @@
 
       <!-- 명예의 전당 & 전체 서버 현황 전적 패널 -->
       <div id="rankingPanel" class="hidden flex-col gap-3">
-        <!-- 랭킹 요약 대시보드 (전체 너비 단일 바) -->
         <div id="serverStatusDashboard" class="w-full">
           <div class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-3 flex items-center gap-2">
             <span class="text-sm sm:text-base font-extrabold text-slate-200">🌍 서버 참전 용사 :</span>
@@ -211,7 +209,6 @@
           </div>
         </div>
 
-        <!-- 전체 랭킹 리스트 (TOP 100) -->
         <div class="flex items-center justify-between px-1">
           <span class="text-xs font-extrabold text-amber-300">🏆 TOP 100</span>
         </div>
@@ -222,4 +219,2326 @@
 
   <!-- Toast Notification -->
   <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
-    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-xs sm:text-sm font-bold text-amber-200 shadow-2xl">
+      알림 메시지
+    </div>
+  </div>
+
+  <!-- VIP 상세혜택 & 토스페이먼츠 결제위젯 팝업 모달 -->
+  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border-2 border-purple-500/60 rounded-2xl max-w-lg w-full my-auto shadow-2xl shadow-purple-950/60 overflow-hidden">
+      <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 px-5 py-4 border-b border-purple-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-xl">👑</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base sm:text-lg font-black text-amber-300 tracking-tight">용사 VIP 영구 패키지</h2>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-fuchsia-500/25 text-fuchsia-200 border border-fuchsia-400/40">1회 구매 평생 적용</span>
+            </div>
+            <p class="text-[11px] text-slate-300 mt-0.5">압도적인 성장 속도와 전용 콘텐츠를 즉시 해금하세요!</p>
+          </div>
+        </div>
+        <button id="vipCloseBtn" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2.5 py-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-4 sm:p-5 max-h-[82vh] overflow-y-auto flex flex-col gap-4">
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+          <div class="text-xs font-extrabold text-purple-300 mb-2.5 flex items-center gap-1.5">
+            <span>✨</span>
+            <span>VIP 전용 핵심 혜택</span>
+          </div>
+          <ul class="flex flex-col gap-2">
+            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
+              <span class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/35 flex items-center justify-center text-base shrink-0">🗡️</span>
+              <div class="min-w-0">
+                <div class="text-xs sm:text-sm font-extrabold text-slate-100">빛의 검 & 황금 해태 펫 즉시 해금</div>
+                <div class="text-[11px] text-slate-400">최고 티어 성물 [빛의 검]과 VIP 전용 응원 펫 [황금 해태] 즉시 획득</div>
+              </div>
+            </li>
+            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
+              <span class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/35 flex items-center justify-center text-base shrink-0">⚡</span>
+              <div class="min-w-0">
+                <div class="text-xs sm:text-sm font-extrabold text-slate-100">초당 5회 자동클릭기 개방</div>
+                <div class="text-[11px] text-slate-400">화면 터치 없이도 1초에 5번 자동으로 몬스터를 연속 타격</div>
+              </div>
+            </li>
+            <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
+              <span class="w-8 h-8 rounded-lg bg-fuchsia-500/15 border border-fuchsia-500/35 flex items-center justify-center text-base shrink-0">🏰</span>
+              <div class="min-w-0">
+                <div class="text-xs sm:text-sm font-extrabold text-slate-100">비밀던젼(황금던젼) 입장</div>
+                <div class="text-[11px] text-slate-400">골드 드래곤이 지키는 VIP 전용 골드 6배 황금던젼 무제한 입장</div>
+              </div>
+            </li>
+          </ul>
+
+          <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300">총 결제 금액 (VAT 포함)</span>
+            <div class="text-right">
+              <span class="text-lg sm:text-xl font-black text-amber-400">7,000원</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl overflow-hidden border border-slate-300 shadow-inner">
+          <div id="tossWidgetLoading" class="py-8 text-center text-xs font-bold text-slate-500">
+            토스페이먼츠 결제창을 불러오는 중입니다...
+          </div>
+          <div id="toss-payment-method"></div>
+          <div id="toss-agreement"></div>
+        </div>
+
+        <button id="vipPaySubmitBtn" type="button" disabled
+          class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 disabled:from-slate-700 disabled:to-slate-800 disabled:text-slate-400 active:scale-[0.99] text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>💳</span>
+          <span id="vipPaySubmitBtnText">7,000원 결제하기</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 간편 휴대폰 번호(8자리) & PIN(4자리) 로그인/회원가입 모달 -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🟨</span>
+          <h2 class="text-base font-extrabold text-amber-300">서버 저장 계정</h2>
+        </div>
+        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">
+        휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 간편하게 서버에 데이터를 영구 저장하세요.
+      </p>
+
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-4">
+        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition">
+          기존 계정 로그인
+        </button>
+        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition">
+          간편 회원가입
+        </button>
+      </div>
+
+      <form id="authForm" class="flex flex-col gap-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">아이디 (휴대폰 번호 뒷 8자리)</label>
+          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 focus-within:border-amber-400 overflow-hidden">
+            <span class="px-3 py-2.5 bg-slate-900 text-amber-300 font-extrabold text-sm border-r border-slate-800 select-none">
+              010 -
+            </span>
+            <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required
+              placeholder="1234-5678 (숫자 8자리)"
+              class="w-full px-3 py-2.5 bg-transparent text-sm font-bold tracking-wider text-slate-100 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">비밀번호 (숫자 4자리)</label>
+          <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required
+            placeholder="숫자 4자리 입력 (예: 1234)"
+            class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none focus:border-amber-400" />
+        </div>
+
+        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
+
+        <button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition mt-0.5 cursor-pointer">
+          로그인 및 서버저장 연동
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+
+      const GAME_ID = 'clicker';
+      const CLOUD_API_URL = 'https://02826k.duckdns.org';
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+
+      const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+      const VIP_PRICE = 7000;
+      const ADMIN_VIP_PHONES = [];
+
+      if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+          const radius = typeof r === 'number' ? r : (Array.isArray(r) ? (r[0] || 0) : 0);
+          const rr = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
+          this.moveTo(x + rr, y);
+          this.arcTo(x + w, y, x + w, y + h, rr);
+          this.arcTo(x + w, y + h, x, y + h, rr);
+          this.arcTo(x, y + h, x, y, rr);
+          this.arcTo(x, y, x + w, y, rr);
+          this.closePath();
+          return this;
+        };
+      }
+
+      const STORAGE_KEY = 'hero_clicker_rpg_save_v1';
+      const TOKEN_KEY = 'hero_clicker_jwt_token';
+      const USER_KEY = 'hero_clicker_username';
+      const LAST_USER_KEY = 'hero_clicker_last_username_v1';
+      const RANK_SNAPSHOT_KEY = 'hero_clicker_rank_snapshots_v1';
+      const ACCOUNT_SAVES_KEY = 'hero_clicker_account_saves_v1';
+      const HOURLY_RANK_CACHE_KEY = 'hero_clicker_hourly_rank_cache_v2';
+      const HONOR_BASE_COST = 1000000;
+
+      function safeGetStorage(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+      }
+      function safeSetStorage(key, val) {
+        try { localStorage.setItem(key, val); } catch (e) {}
+      }
+      function safeRemoveStorage(key) {
+        try { localStorage.removeItem(key); } catch (e) {}
+      }
+
+      let authToken = safeGetStorage(TOKEN_KEY) || null;
+      let currentUsername = safeGetStorage(USER_KEY) || null;
+      let lastKnownUsername = currentUsername || safeGetStorage(LAST_USER_KEY) || null;
+      if (currentUsername) safeSetStorage(LAST_USER_KEY, currentUsername);
+
+      let isRegisterMode = false;
+      let hasUnsavedChanges = false;
+      let saveRevision = 0;
+      let isSyncInFlight = false;
+      let lastRankingPayload = null;
+      let lastAggregatedHourKey = null;
+
+      function apiFetch(endpointPath, options = {}) {
+        return fetch(API_BASE_URL + endpointPath, options);
+      }
+
+      function isAdminAccount(username) {
+        return username && ADMIN_VIP_PHONES.includes(username.trim());
+      }
+
+      // 용사 등급 Lv.1 ~ Lv.100 (다음 레벨 누적 파워 10배씩 증가)
+      const RANK_TITLES = [
+        '수련생', '견습 검사', '정식 기사', '숙련 전사', '왕국 수호자',
+        '소드 마스터', '드래곤 슬레이어', '전설의 영웅', '신화적 반신', '초월자'
+      ];
+      const RANKS = Array.from({ length: 100 }, (_, i) => {
+        const level = i + 1;
+        const titleIdx = Math.min(RANK_TITLES.length - 1, Math.floor(i / 10));
+        return {
+          level,
+          title: RANK_TITLES[titleIdx],
+          minPower: Math.pow(10, i)
+        };
+      });
+
+      // 무기 상점 (골드 보너스 제거, 파워: 목검 1 / 도끼 10 / 물의검 30 / 얼음검 40 / 화염검 50 / 빛의검 100)
+      const WEAPONS = [
+        { id: 'wooden_sword', name: '목검', tier: 0, cost: 0, powerMult: 1, bladeColor: '#b45309', edgeColor: '#d97706', guardColor: '#78350f', glowColor: 'rgba(217, 119, 6, 0)', slashColor: '#fde68a', desc: '기본 수련용 나무 검' },
+        { id: 'iron_axe', name: '도끼', tier: 1, cost: 10000, powerMult: 10, bladeColor: '#94a3b8', edgeColor: '#f1f5f9', guardColor: '#475569', glowColor: 'rgba(148, 163, 184, 0.15)', slashColor: '#e2e8f0', desc: '강력하게 내리치는 훈련용 도끼' },
+        { id: 'water_sword', name: '물의 검', tier: 2, cost: 300000, powerMult: 30, bladeColor: '#38bdf8', edgeColor: '#e0f2fe', guardColor: '#0284c7', glowColor: 'rgba(56, 189, 248, 0.35)', slashColor: '#7dd3fc', desc: '흐르는 물의 힘이 깃든 장검' },
+        { id: 'ice_sword', name: '얼음 검', tier: 3, cost: 1000000, powerMult: 40, bladeColor: '#06b6d4', edgeColor: '#ecfeff', guardColor: '#155e75', glowColor: 'rgba(34, 211, 238, 0.45)', slashColor: '#67e8f9', desc: '절대 한기의 서리가 내린 검' },
+        { id: 'fire_sword', name: '화염 검', tier: 4, cost: 10000000, powerMult: 50, bladeColor: '#ea580c', edgeColor: '#fef08a', guardColor: '#9a3412', glowColor: 'rgba(249, 115, 22, 0.55)', slashColor: '#fb923c', desc: '꺼지지 않는 불꽃이 타오르는 마검' },
+        { id: 'light_sword', name: '빛의 검', tier: 5, cost: 0, powerMult: 100, bladeColor: '#fbbf24', edgeColor: '#fef08a', guardColor: '#d97706', glowColor: 'rgba(251, 191, 36, 0.85)', slashColor: '#fef08a', desc: '👑 VIP 전용 성스러운 신성의 대검', isVipOnly: true }
+      ];
+
+      // 훈련 지역 6개 (기본 파워 제거, 골드 배율 1배 ~ 6배)
+      const REGIONS = [
+        { id: 'village', name: '기본 마을', icon: '🏡', monsterName: '허수아비', monsterType: 'scarecrow', reqPower: 1, goldMult: 1, skyTop: '#0f172a', skyBottom: '#1e293b', groundTop: '#3f6212', groundBottom: '#1a2e05', accent: '#a3e635', desc: '평화로운 마을 앞마당의 짚단 허수아비' },
+        { id: 'forest', name: '포레스트', icon: '🌲', monsterName: '거대 멧돼지', monsterType: 'boar', reqPower: 100, goldMult: 2, skyTop: '#052e16', skyBottom: '#14532d', groundTop: '#166534', groundBottom: '#052e16', accent: '#4ade80', desc: '깊은 숲속을 질주하는 사나운 거대 멧돼지' },
+        { id: 'desert', name: '사막', icon: '🏜️', monsterName: '사막 전갈', monsterType: 'scorpion', reqPower: 1000, goldMult: 3, skyTop: '#451a03', skyBottom: '#92400e', groundTop: '#d97706', groundBottom: '#78350f', accent: '#fbbf24', desc: '작열하는 모래폭풍 속 맹독 집게 사막 전갈' },
+        { id: 'volcano', name: '화염 지대', icon: '🌋', monsterName: '피닉스 (불새)', monsterType: 'phoenix', reqPower: 10000, goldMult: 4, skyTop: '#2a0808', skyBottom: '#7f1d1d', groundTop: '#991b1b', groundBottom: '#1c1917', accent: '#f87171', desc: '용암 위를 비상하는 불멸의 화염조 피닉스' },
+        { id: 'ice', name: '얼음 지대', icon: '❄️', monsterName: '아이스 드래곤', monsterType: 'ice_dragon', reqPower: 100000, goldMult: 5, skyTop: '#082f49', skyBottom: '#0369a1', groundTop: '#7dd3fc', groundBottom: '#0c4a6e', accent: '#38bdf8', desc: '절대영도의 숨결을 내뿜는 고대 아이스 드래곤' },
+        { id: 'secret_dungeon', name: '비밀던젼(황금)', icon: '👑', monsterName: '골드 드래곤', monsterType: 'gold_dragon', reqPower: 0, goldMult: 6, skyTop: '#451a03', skyBottom: '#271201', groundTop: '#d97706', groundBottom: '#78350f', accent: '#facc15', desc: '👑 VIP 전용 - 전설의 골드 드래곤이 지키는 황금 비밀던젼', isVipOnly: true }
+      ];
+
+      const PETS = [
+        { id: 'baby_slime', name: '아기 슬라임', icon: '💧', reqHonor: 1, bodyColor: '#38bdf8', subColor: '#bae6fd', pomColor: '#f472b6', cheers: ['용사님 화이팅!💧', '말랑말랑 응원~!', '할 수 있어요!✨'], desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임 (명예 Lv.1)' },
+        { id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', reqHonor: 10, bodyColor: '#f59e0b', subColor: '#fef3c7', pomColor: '#ef4444', cheers: ['멍멍! 힘내요!🐾', '최고의 용사님!', '가즈아 멍!!🔥'], desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지 (명예 Lv.10)' },
+        { id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', reqHonor: 100, bodyColor: '#f8fafc', subColor: '#fca5a5', pomColor: '#fbbf24', cheers: ['골드 쏟아져라냥!🪙', '냥냥 펀치 응원!', '대박 나라냥~💛'], desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이 (명예 Lv.100)' },
+        { id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', reqHonor: 1000, bodyColor: '#a7f3d0', subColor: '#34d399', pomColor: '#fef08a', cheers: ['반짝반짝 빛나라!✨', '요정의 축복을~!', '멋진 검술이에요!🌿'], desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정 (명예 Lv.1,000)' },
+        { id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', reqHonor: 10000, bodyColor: '#fb7185', subColor: '#fef08a', pomColor: '#f97316', cheers: ['크아앙! 다 부숴요!🔥', '불꽃 응원 발사!', '용사님 무적!!⚡'], desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤 (명예 Lv.10,000)' },
+        { id: 'gold_haetae', name: '황금 해태', icon: '🦁', reqHonor: 0, isVipOnly: true, bodyColor: '#fbbf24', subColor: '#fef08a', pomColor: '#c084fc', cheers: ['👑 천하무적 용사님!', '황금빛 승리!!✨', '전설의 일격!!👑'], desc: '👑 VIP 전용 - 신비한 황금 오오라를 두르고 응원하는 수호신 아기 해태' }
+      ];
+
+      const defaultState = () => ({
+        power: 1,
+        gold: 0,
+        honorLevel: 0,
+        totalClicks: 0,
+        ownedWeapons: ['wooden_sword'],
+        equippedWeaponId: 'wooden_sword',
+        ownedPets: [],
+        equippedPetId: null,
+        currentRegionId: 'village',
+        soundEnabled: true,
+        bgmEnabled: true,
+        isVip: isAdminAccount(currentUsername),
+        autoClickEnabled: false,
+        ownerUsername: currentUsername || lastKnownUsername || null,
+        updatedAt: Date.now()
+      });
+
+      function encodeScoreWithMeta(power, honorLevel, regionId, weaponId) {
+        const cleanPower = Math.max(1, Math.floor(Number(power) || 1));
+        if (cleanPower < 100000) return cleanPower;
+        const wIdx = Math.max(0, WEAPONS.findIndex(w => w.id === weaponId));
+        const rIdx = Math.max(0, REGIONS.findIndex(r => r.id === regionId));
+        const hClamped = Math.max(0, Math.min(99, Math.floor(Number(honorLevel) || 0)));
+        const metaCode = 6000 + (hClamped * 36) + (rIdx * 6) + wIdx;
+        return Math.floor(cleanPower / 10000) * 10000 + metaCode;
+      }
+
+      function decodeScoreMeta(rawScore) {
+        const num = Math.max(1, Math.floor(Number(rawScore) || 1));
+        if (num >= 100000) {
+          const tail = num % 10000;
+          if (tail >= 6000 && tail < 9600) {
+            const code = tail - 6000;
+            const wIdx = code % 6;
+            const rIdx = Math.floor(code / 6) % 6;
+            const honorLevel = Math.floor(code / 36);
+            return {
+              hasEncodedMeta: true,
+              power: num,
+              honorLevel,
+              weaponId: WEAPONS[wIdx]?.id || 'wooden_sword',
+              regionId: REGIONS[rIdx]?.id || 'village'
+            };
+          }
+        }
+        return { hasEncodedMeta: false, power: num };
+      }
+
+      function inferStatsFromPower(power) {
+        const p = Math.max(1, Number(power) || 1);
+        let regionId = 'village';
+        if (p >= 50000000) regionId = 'secret_dungeon';
+        else if (p >= 100000) regionId = 'ice';
+        else if (p >= 10000) regionId = 'volcano';
+        else if (p >= 1000) regionId = 'desert';
+        else if (p >= 100) regionId = 'forest';
+
+        let weaponId = 'wooden_sword';
+        if (p >= 50000000) weaponId = 'light_sword';
+        else if (p >= 5000000) weaponId = 'fire_sword';
+        else if (p >= 500000) weaponId = 'ice_sword';
+        else if (p >= 100000) weaponId = 'water_sword';
+        else if (p >= 5000) weaponId = 'iron_axe';
+
+        let honorLevel = 0;
+        if (p >= 100000000) honorLevel = Math.min(50, Math.max(5, Math.floor(p / 95000000)));
+        else if (p >= 10000000) honorLevel = Math.max(2, Math.floor(p / 20000000) + 2);
+        else if (p >= 1000000) honorLevel = 1;
+
+        let petId = 'baby_slime';
+        if (p >= 50000000) petId = 'gold_haetae';
+        else if (p >= 1500000) petId = 'baby_dragon';
+        else if (p >= 250000) petId = 'fairy_pixie';
+        else if (p >= 50000) petId = 'lucky_cat';
+        else if (p >= 5000) petId = 'cheer_dog';
+
+        return { honorLevel, weaponId, regionId, petId };
+      }
+
+      function sanitizeState(parsed) {
+        const base = defaultState();
+        if (!parsed || typeof parsed !== 'object') return base;
+
+        const rawWeaponId = parsed.equippedWeaponId ?? parsed.equipped_weapon_id ?? parsed.weaponId;
+        const rawRegionId = parsed.currentRegionId ?? parsed.current_region_id ?? parsed.regionId;
+        const rawHonor = parsed.honorLevel ?? parsed.honor_level;
+
+        const isVip = (typeof parsed.isVip === 'boolean' ? parsed.isVip : false) || isAdminAccount(currentUsername);
+        const ownedWeapons = Array.isArray(parsed.ownedWeapons) && parsed.ownedWeapons.length > 0
+          ? Array.from(new Set(parsed.ownedWeapons.filter(id => WEAPONS.some(w => w.id === id))))
+          : [...base.ownedWeapons];
+        if (!ownedWeapons.includes('wooden_sword')) ownedWeapons.unshift('wooden_sword');
+
+        const honorVal = typeof rawHonor === 'number' && Number.isFinite(rawHonor) && rawHonor >= 0 ? Math.floor(rawHonor) : base.honorLevel;
+        const ownedPets = PETS.filter(p => p.isVipOnly ? isVip : honorVal >= p.reqHonor).map(p => p.id);
+
+        if (isVip && !ownedWeapons.includes('light_sword')) ownedWeapons.push('light_sword');
+        if (isVip && !ownedPets.includes('gold_haetae')) ownedPets.push('gold_haetae');
+
+        const equippedWeaponId = WEAPONS.some(w => w.id === rawWeaponId) ? rawWeaponId : base.equippedWeaponId;
+        if (!ownedWeapons.includes(equippedWeaponId)) ownedWeapons.push(equippedWeaponId);
+
+        const validPetId = (parsed.equippedPetId === null || PETS.some(p => p.id === parsed.equippedPetId))
+          ? parsed.equippedPetId
+          : base.equippedPetId;
+        if (validPetId && !ownedPets.includes(validPetId)) ownedPets.push(validPetId);
+
+        const currentRegionId = REGIONS.some(r => r.id === rawRegionId) ? rawRegionId : base.currentRegionId;
+
+        return {
+          power: typeof parsed.power === 'number' && Number.isFinite(parsed.power) && parsed.power >= 1 ? Math.floor(parsed.power) : base.power,
+          gold: typeof parsed.gold === 'number' && Number.isFinite(parsed.gold) && parsed.gold >= 0 ? Math.floor(parsed.gold) : base.gold,
+          honorLevel: honorVal,
+          totalClicks: typeof parsed.totalClicks === 'number' && Number.isFinite(parsed.totalClicks) && parsed.totalClicks >= 0 ? Math.floor(parsed.totalClicks) : 0,
+          ownedWeapons,
+          equippedWeaponId,
+          ownedPets,
+          equippedPetId: validPetId,
+          currentRegionId,
+          soundEnabled: typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true,
+          bgmEnabled: typeof parsed.bgmEnabled === 'boolean' ? parsed.bgmEnabled : true,
+          isVip,
+          autoClickEnabled: isVip && typeof parsed.autoClickEnabled === 'boolean' ? parsed.autoClickEnabled : false,
+          ownerUsername: parsed.ownerUsername || currentUsername || lastKnownUsername || null,
+          updatedAt: typeof parsed.updatedAt === 'number' && parsed.updatedAt > 0 ? parsed.updatedAt : Date.now()
+        };
+      }
+
+      function loadRankSnapshotsMap() {
+        try {
+          const raw = safeGetStorage(RANK_SNAPSHOT_KEY);
+          const parsed = raw ? JSON.parse(raw) : {};
+          return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (e) { return {}; }
+      }
+
+      function recordUserRankSnapshot(username, st = state) {
+        const targetUser = (username || st?.ownerUsername || currentUsername || lastKnownUsername || '').trim();
+        if (!targetUser || !st) return;
+        const maskedKey = maskPhoneMiddle(targetUser);
+        const map = loadRankSnapshotsMap();
+        const prev = map[targetUser] || map[maskedKey] || {};
+
+        const nextHonor = Math.max(Number(st.honorLevel ?? 0), Number(prev.honorLevel ?? 0));
+        const nextPower = Math.max(Number(st.power ?? 1), Number(prev.power ?? 1));
+        const curWeapon = WEAPONS.some(w => w.id === st.equippedWeaponId) ? st.equippedWeaponId : (prev.equippedWeaponId || 'wooden_sword');
+        const curRegion = REGIONS.some(r => r.id === st.currentRegionId) ? st.currentRegionId : (prev.currentRegionId || 'village');
+
+        const entry = {
+          username: targetUser,
+          maskedName: maskedKey,
+          honorLevel: nextHonor,
+          power: nextPower,
+          equippedWeaponId: curWeapon,
+          currentRegionId: curRegion,
+          equippedPetId: st.equippedPetId ?? prev.equippedPetId ?? 'baby_slime',
+          updatedAt: Date.now()
+        };
+
+        map[targetUser] = entry;
+        if (maskedKey) map[maskedKey] = entry;
+        safeSetStorage(RANK_SNAPSHOT_KEY, JSON.stringify(map));
+
+        try {
+          const rawSaves = safeGetStorage(ACCOUNT_SAVES_KEY);
+          const savesMap = rawSaves ? JSON.parse(rawSaves) : {};
+          savesMap[targetUser] = { ...st, ownerUsername: targetUser, updatedAt: Date.now() };
+          safeSetStorage(ACCOUNT_SAVES_KEY, JSON.stringify(savesMap));
+        } catch (e) {}
+      }
+
+      function getUserRankSnapshot(nameOrMasked) {
+        if (!nameOrMasked) return null;
+        const rawKey = String(nameOrMasked).trim();
+        const maskedKey = maskPhoneMiddle(rawKey);
+        const map = loadRankSnapshotsMap();
+        return map[rawKey] || map[maskedKey] || null;
+      }
+
+      function getAccountSavedState(username) {
+        if (!username) return null;
+        try {
+          const rawSaves = safeGetStorage(ACCOUNT_SAVES_KEY);
+          const savesMap = rawSaves ? JSON.parse(rawSaves) : {};
+          return savesMap[username.trim()] || null;
+        } catch (e) { return null; }
+      }
+
+      function mergePlayerStates(localRaw, serverRaw, targetUsername) {
+        const loc = sanitizeState(localRaw);
+        const srv = sanitizeState(serverRaw);
+        const snap = getUserRankSnapshot(targetUsername);
+
+        const isSameOwner = !loc.ownerUsername || !targetUsername || loc.ownerUsername === targetUsername;
+        if (!isSameOwner) {
+          const mergedOther = { ...srv, ownerUsername: targetUsername };
+          if (snap) {
+            mergedOther.honorLevel = Math.max(mergedOther.honorLevel, Number(snap.honorLevel || 0));
+            mergedOther.power = Math.max(mergedOther.power, Number(snap.power || 1));
+            if (mergedOther.equippedWeaponId === 'wooden_sword' && snap.equippedWeaponId && snap.equippedWeaponId !== 'wooden_sword') {
+              mergedOther.equippedWeaponId = snap.equippedWeaponId;
+            }
+            if (mergedOther.currentRegionId === 'village' && snap.currentRegionId && snap.currentRegionId !== 'village') {
+              mergedOther.currentRegionId = snap.currentRegionId;
+            }
+          }
+          return sanitizeState(mergedOther);
+        }
+
+        const localIsNewer = (loc.updatedAt || 0) >= (srv.updatedAt || 0);
+        const honorLevel = Math.max(loc.honorLevel, srv.honorLevel, Number(snap?.honorLevel || 0));
+        const power = Math.max(loc.power, srv.power, Number(snap?.power || 1));
+        const gold = (loc.honorLevel === srv.honorLevel && loc.power === srv.power)
+          ? Math.max(loc.gold, srv.gold)
+          : (loc.honorLevel > srv.honorLevel || (loc.honorLevel === srv.honorLevel && loc.power > srv.power) ? loc.gold : srv.gold);
+        const totalClicks = Math.max(loc.totalClicks, srv.totalClicks);
+        const isVip = Boolean(loc.isVip || srv.isVip || isAdminAccount(targetUsername));
+        const ownedWeapons = Array.from(new Set([...loc.ownedWeapons, ...srv.ownedWeapons]));
+        const ownedPets = Array.from(new Set([...loc.ownedPets, ...srv.ownedPets]));
+
+        let equippedWeaponId = localIsNewer ? loc.equippedWeaponId : srv.equippedWeaponId;
+        if (equippedWeaponId === 'wooden_sword') {
+          if (loc.equippedWeaponId !== 'wooden_sword') equippedWeaponId = loc.equippedWeaponId;
+          else if (srv.equippedWeaponId !== 'wooden_sword') equippedWeaponId = srv.equippedWeaponId;
+          else if (snap?.equippedWeaponId && snap.equippedWeaponId !== 'wooden_sword') equippedWeaponId = snap.equippedWeaponId;
+        }
+
+        let currentRegionId = localIsNewer ? loc.currentRegionId : srv.currentRegionId;
+        if (currentRegionId === 'village') {
+          if (loc.currentRegionId !== 'village') currentRegionId = loc.currentRegionId;
+          else if (srv.currentRegionId !== 'village') currentRegionId = srv.currentRegionId;
+          else if (snap?.currentRegionId && snap.currentRegionId !== 'village') currentRegionId = snap.currentRegionId;
+        }
+
+        const equippedPetId = localIsNewer ? loc.equippedPetId : srv.equippedPetId;
+
+        return sanitizeState({
+          ...srv,
+          ...loc,
+          honorLevel,
+          power,
+          gold,
+          totalClicks,
+          isVip,
+          ownedWeapons,
+          ownedPets,
+          equippedWeaponId,
+          currentRegionId,
+          equippedPetId,
+          ownerUsername: targetUsername || loc.ownerUsername || srv.ownerUsername,
+          updatedAt: Math.max(loc.updatedAt || 0, srv.updatedAt || 0, Date.now())
+        });
+      }
+
+      function loadLocalState() {
+        try {
+          const raw = safeGetStorage(STORAGE_KEY);
+          return raw ? sanitizeState(JSON.parse(raw)) : defaultState();
+        } catch (e) { return defaultState(); }
+      }
+
+      let state = loadLocalState();
+      if (currentUsername || lastKnownUsername) {
+        recordUserRankSnapshot(currentUsername || lastKnownUsername, state);
+      }
+      let activeTab = 'regions';
+
+      setInterval(() => {
+        if (state.isVip && state.autoClickEnabled) {
+          if (!document.hidden) {
+            getAudioContext();
+            if (!bgmTimer && state.bgmEnabled) startBGM();
+          }
+          performHit();
+        }
+      }, 200);
+
+      function saveState(syncImmediately = false) {
+        state.updatedAt = Date.now();
+        if (currentUsername) state.ownerUsername = currentUsername;
+        safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+        if (currentUsername || state.ownerUsername) {
+          recordUserRankSnapshot(currentUsername || state.ownerUsername, state);
+        }
+        saveRevision += 1;
+        hasUnsavedChanges = true;
+        if (syncImmediately && authToken) syncSaveToServer(false);
+      }
+
+      function buildSavePayload() {
+        const encodedScore = encodeScoreWithMeta(state.power, state.honorLevel, state.currentRegionId, state.equippedWeaponId);
+        const snapshotState = {
+          ...state,
+          ownerUsername: currentUsername || state.ownerUsername || lastKnownUsername || null,
+          updatedAt: Date.now()
+        };
+        return {
+          gameId: GAME_ID,
+          saveData: snapshotState,
+          save_data: snapshotState,
+          score: encodedScore,
+          power: state.power,
+          honorLevel: state.honorLevel,
+          honor_level: state.honorLevel,
+          equippedWeaponId: state.equippedWeaponId,
+          equipped_weapon_id: state.equippedWeaponId,
+          weaponId: state.equippedWeaponId,
+          currentRegionId: state.currentRegionId,
+          current_region_id: state.currentRegionId,
+          regionId: state.currentRegionId,
+          equippedPetId: state.equippedPetId
+        };
+      }
+
+      async function syncSaveToServer(showNotification = false, useKeepalive = false) {
+        if (!authToken) return false;
+        const revAtSend = saveRevision;
+        if (currentUsername) recordUserRankSnapshot(currentUsername, state);
+        const payloadObj = buildSavePayload();
+        try {
+          isSyncInFlight = true;
+          const res = await apiFetch('/api/save', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(payloadObj),
+            keepalive: Boolean(useKeepalive)
+          });
+          if (res.status === 401 || res.status === 403) {
+            await handleLogout(true);
+            return false;
+          }
+          await res.json().catch(() => ({}));
+          if (res.ok) {
+            if (saveRevision === revAtSend) hasUnsavedChanges = false;
+            if (showNotification) showToast(`🟨 [${currentUsername}] 클라우드 서버에 데이터가 안전하게 저장되었습니다!`);
+            if (lastRankingPayload) renderRankingFromData(lastRankingPayload);
+            return true;
+          }
+        } catch (err) {
+        } finally {
+          isSyncInFlight = false;
+        }
+        return false;
+      }
+
+      function flushSaveOnExit() {
+        state.updatedAt = Date.now();
+        if (currentUsername) state.ownerUsername = currentUsername;
+        safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+        if (currentUsername || state.ownerUsername || lastKnownUsername) {
+          recordUserRankSnapshot(currentUsername || state.ownerUsername || lastKnownUsername, state);
+        }
+        if (authToken) syncSaveToServer(false, true);
+      }
+
+      window.addEventListener('beforeunload', flushSaveOnExit);
+      window.addEventListener('pagehide', flushSaveOnExit);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          flushSaveOnExit();
+        } else if (document.visibilityState === 'visible') {
+          if (state.bgmEnabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+          checkHourlyRankingRollover();
+        }
+      });
+
+      async function loadFromServer() {
+        if (!authToken) return false;
+        try {
+          const res = await apiFetch(`/api/load?gameId=${GAME_ID}&_t=${Date.now()}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` },
+            cache: 'no-store'
+          });
+          if (res.status === 401 || res.status === 403) {
+            await handleLogout(true);
+            return false;
+          }
+          const data = await res.json();
+          const rawServerSave = data?.saveData ?? data?.save_data ?? data?.data;
+          if (res.ok && rawServerSave) {
+            const parsedSave = typeof rawServerSave === 'string' ? JSON.parse(rawServerSave) : rawServerSave;
+            const decoded = decodeScoreMeta(data?.score || parsedSave?.power || 1);
+            const serverWithTopFields = {
+              ...(parsedSave || {}),
+              power: Math.max(Number(parsedSave?.power || 1), decoded.power),
+              honorLevel: Math.max(
+                Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0),
+                Number(data?.honorLevel ?? data?.honor_level ?? 0),
+                decoded.hasEncodedMeta ? decoded.honorLevel : 0
+              ),
+              equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || (decoded.hasEncodedMeta ? decoded.weaponId : 'wooden_sword'),
+              currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || (decoded.hasEncodedMeta ? decoded.regionId : 'village'),
+              isVip: Boolean(data?.isVip || parsedSave?.isVip)
+            };
+            const accountLocalBackup = getAccountSavedState(currentUsername);
+            const baseLocal = accountLocalBackup ? mergePlayerStates(state, accountLocalBackup, currentUsername) : state;
+            state = mergePlayerStates(baseLocal, serverWithTopFields, currentUsername);
+            safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+            recordUserRankSnapshot(currentUsername, state);
+            await syncSaveToServer(false);
+            updateUI();
+            if (state.bgmEnabled) startBGM();
+            return true;
+          } else if (res.ok) {
+            const accountLocalBackup = getAccountSavedState(currentUsername);
+            if (accountLocalBackup) state = mergePlayerStates(state, accountLocalBackup, currentUsername);
+            state.ownerUsername = currentUsername;
+            safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+            recordUserRankSnapshot(currentUsername, state);
+            await syncSaveToServer(false);
+            updateUI();
+            return true;
+          }
+        } catch (err) {
+          showToast('서버에서 데이터를 불러오지 못했습니다. 로컬 데이터를 유지합니다.');
+        }
+        return false;
+      }
+
+      const vipModal = document.getElementById('vipModal');
+      const vipCloseBtn = document.getElementById('vipCloseBtn');
+      const vipPaySubmitBtn = document.getElementById('vipPaySubmitBtn');
+      const vipPaySubmitBtnText = document.getElementById('vipPaySubmitBtnText');
+      const tossWidgetLoading = document.getElementById('tossWidgetLoading');
+
+      let tossWidgets = null;
+      let isTossWidgetRendered = false;
+
+      function openVipModal() {
+        vipModal.classList.remove('hidden');
+        vipModal.classList.add('flex');
+        if (state.isVip) {
+          tossWidgetLoading.classList.remove('hidden');
+          tossWidgetLoading.textContent = '👑 이미 VIP 영구 패키지가 활성화된 계정입니다! 모든 혜택을 무제한으로 이용하실 수 있습니다.';
+          vipPaySubmitBtn.disabled = true;
+          vipPaySubmitBtnText.textContent = '👑 VIP 영구 패키지 적용 완료';
+          return;
+        }
+        vipPaySubmitBtnText.textContent = '7,000원 결제하기';
+        initTossPaymentWidget();
+      }
+
+      async function initTossPaymentWidget() {
+        if (state.isVip) {
+          vipPaySubmitBtn.disabled = true;
+          vipPaySubmitBtnText.textContent = '👑 VIP 영구 패키지 적용 완료';
+          return;
+        }
+        if (isTossWidgetRendered && tossWidgets) {
+          vipPaySubmitBtn.disabled = false;
+          return;
+        }
+        if (typeof TossPayments === 'undefined') {
+          tossWidgetLoading.textContent = '⚠️ 토스페이먼츠 SDK를 불러오지 못했습니다. 네트워크를 확인해 주세요.';
+          return;
+        }
+        try {
+          tossWidgetLoading.classList.remove('hidden');
+          tossWidgetLoading.textContent = '토스페이먼츠 결제창을 불러오는 중입니다...';
+          vipPaySubmitBtn.disabled = true;
+
+          const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+          const customerKey = currentUsername
+            ? 'HERO_' + currentUsername.replace(/[^a-zA-Z0-9_-]/g, '_')
+            : TossPayments.ANONYMOUS;
+
+          tossWidgets = tossPayments.widgets({ customerKey });
+          await tossWidgets.setAmount({ currency: 'KRW', value: VIP_PRICE });
+          await Promise.all([
+            tossWidgets.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
+            tossWidgets.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' })
+          ]);
+
+          isTossWidgetRendered = true;
+          tossWidgetLoading.classList.add('hidden');
+          vipPaySubmitBtn.disabled = false;
+        } catch (err) {
+          console.error('Toss Widget Error:', err);
+          tossWidgetLoading.textContent = '⚠️ 결제 위젯 로드 중 오류가 발생했습니다.';
+        }
+      }
+
+      vipCloseBtn.addEventListener('click', () => {
+        vipModal.classList.add('hidden');
+        vipModal.classList.remove('flex');
+      });
+      vipModal.addEventListener('click', (e) => {
+        if (e.target === vipModal) {
+          vipModal.classList.add('hidden');
+          vipModal.classList.remove('flex');
+        }
+      });
+
+      vipPaySubmitBtn.addEventListener('click', async () => {
+        if (!tossWidgets) { showToast('결제 위젯이 아직 준비되지 않았습니다.'); return; }
+        vipPaySubmitBtn.disabled = true;
+        vipPaySubmitBtnText.textContent = '결제창 연결 중...';
+        try {
+          const orderId = 'VIP_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
+          await tossWidgets.requestPayment({
+            orderId,
+            orderName: '용사 키우기 VIP 패키지 (빛의검+초당5회자동클릭+비밀던젼)',
+            successUrl: baseUrl + '/payment-success.html',
+            failUrl: baseUrl + '/payment-fail.html',
+            customerName: currentUsername || '용사게스트'
+          });
+        } catch (error) {
+          if (error && error.code === 'USER_CANCEL') showToast('결제가 취소되었습니다.');
+          else showToast('결제 요청 중 오류가 발생했습니다: ' + (error.message || '다시 시도해 주세요'));
+        } finally {
+          vipPaySubmitBtn.disabled = false;
+          vipPaySubmitBtnText.textContent = '7,000원 결제하기';
+        }
+      });
+
+      const autoClickToggleBtn = document.getElementById('autoClickToggleBtn');
+      autoClickToggleBtn.addEventListener('click', () => {
+        if (!state.isVip) {
+          showToast('👑 VIP 가입후 사용하세요');
+          openVipModal();
+          return;
+        }
+        state.autoClickEnabled = !state.autoClickEnabled;
+        saveState(true);
+        updateUI();
+        if (state.autoClickEnabled) {
+          getAudioContext();
+          if (!bgmTimer && state.bgmEnabled) startBGM();
+          showToast('⚡ 자동클릭기 ON! (초당 5회 고속 타격)');
+        } else {
+          showToast('⏸️ 자동클릭기 OFF');
+        }
+      });
+
+      function getCurrentHourBucketKey(d = new Date()) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}-${hh}`;
+      }
+
+      function loadHourlyRankingCache() {
+        try {
+          const raw = safeGetStorage(HOURLY_RANK_CACHE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.hourKey === getCurrentHourBucketKey() && parsed.data) return parsed;
+        } catch (e) {}
+        return null;
+      }
+
+      function saveHourlyRankingCache(data) {
+        const hourKey = getCurrentHourBucketKey();
+        lastAggregatedHourKey = hourKey;
+        safeSetStorage(HOURLY_RANK_CACHE_KEY, JSON.stringify({ hourKey, aggregatedAt: Date.now(), data }));
+      }
+
+      function extractRankItemFields(item) {
+        let sd = item?.saveData ?? item?.save_data ?? item?.data ?? item?.metadata ?? {};
+        if (typeof sd === 'string') {
+          try { sd = JSON.parse(sd); } catch (e) { sd = {}; }
+        }
+
+        const itemName = item?.nickname || item?.maskedName || item?.username || item?.name || '익명 용사';
+        const maskedItemName = maskPhoneMiddle(itemName);
+        const snapshot = getUserRankSnapshot(itemName) || getUserRankSnapshot(maskedItemName);
+
+        const rawPowerVal = Number(item?.power ?? sd?.power ?? item?.score ?? 1);
+        const decodedMeta = decodeScoreMeta(rawPowerVal);
+
+        const isMe = Boolean(
+          authToken && currentUsername && (
+            item?.isMe ||
+            (item?.username && item.username === currentUsername) ||
+            (maskedItemName && maskedItemName === maskPhoneMiddle(currentUsername))
+          )
+        );
+
+        const approxSamePowerAsLocal = state.power >= 10000 && Math.abs(decodedMeta.power - state.power) <= Math.max(10000, state.power * 0.005);
+        const isLastLoggedOutUser = Boolean(
+          !authToken && (
+            (lastKnownUsername && maskedItemName && maskedItemName === maskPhoneMiddle(lastKnownUsername)) ||
+            (!lastKnownUsername && approxSamePowerAsLocal)
+          )
+        );
+
+        const powerCandidates = [
+          decodedMeta.power,
+          Number(sd?.power || 0),
+          Number(snapshot?.power || 0),
+          (isMe || isLastLoggedOutUser) ? state.power : 0
+        ].map(v => (Number.isFinite(v) ? Math.floor(v) : 0));
+        const power = Math.max(1, ...powerCandidates);
+        const inferred = inferStatsFromPower(power);
+
+        const explicitHonorCandidates = [
+          item?.honorLevel,
+          item?.honor_level,
+          sd?.honorLevel,
+          sd?.honor_level,
+          decodedMeta.hasEncodedMeta ? decodedMeta.honorLevel : null,
+          snapshot?.honorLevel,
+          (isMe || isLastLoggedOutUser) ? state.honorLevel : null
+        ].map(v => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Math.floor(Number(v)) : -1));
+        const maxExplicitHonor = Math.max(-1, ...explicitHonorCandidates);
+        const honorLevel = maxExplicitHonor > 0 ? maxExplicitHonor : (inferred.honorLevel > 0 ? inferred.honorLevel : Math.max(0, maxExplicitHonor));
+
+        const srvWeapon = item?.equippedWeaponId ?? item?.equipped_weapon_id ?? item?.weaponId ?? null;
+        const sdWeapon = sd?.equippedWeaponId ?? sd?.equipped_weapon_id ?? sd?.weaponId ?? null;
+        const encWeapon = decodedMeta.hasEncodedMeta ? decodedMeta.weaponId : null;
+        const snapWeapon = snapshot?.equippedWeaponId ?? ((isMe || isLastLoggedOutUser) ? state.equippedWeaponId : null);
+
+        let weaponId = 'wooden_sword';
+        if (isMe && WEAPONS.some(w => w.id === state.equippedWeaponId)) {
+          weaponId = state.equippedWeaponId;
+        } else {
+          const validWeapons = [sdWeapon, encWeapon, snapWeapon, srvWeapon].filter(id => WEAPONS.some(w => w.id === id));
+          const nonDefaultWeapon = validWeapons.find(id => id !== 'wooden_sword');
+          weaponId = nonDefaultWeapon || inferred.weaponId || validWeapons[0] || 'wooden_sword';
+        }
+
+        const srvRegion = item?.currentRegionId ?? item?.current_region_id ?? item?.regionId ?? null;
+        const sdRegion = sd?.currentRegionId ?? sd?.current_region_id ?? sd?.regionId ?? null;
+        const encRegion = decodedMeta.hasEncodedMeta ? decodedMeta.regionId : null;
+        const snapRegion = snapshot?.currentRegionId ?? ((isMe || isLastLoggedOutUser) ? state.currentRegionId : null);
+
+        let regionId = 'village';
+        if (isMe && REGIONS.some(r => r.id === state.currentRegionId)) {
+          regionId = state.currentRegionId;
+        } else {
+          const validRegions = [sdRegion, encRegion, snapRegion, srvRegion].filter(id => REGIONS.some(r => r.id === id));
+          const nonDefaultRegion = validRegions.find(id => id !== 'village');
+          regionId = nonDefaultRegion || inferred.regionId || validRegions[0] || 'village';
+        }
+
+        const petId = sd?.equippedPetId ?? snapshot?.equippedPetId ?? ((isMe || isLastLoggedOutUser) ? state.equippedPetId : inferred.petId);
+
+        return {
+          isMe,
+          isLastLoggedOutUser,
+          maskedName: maskedItemName || '익명 용사',
+          honorLevel,
+          power,
+          weaponId,
+          regionId,
+          petId
+        };
+      }
+
+      function renderRankingFromData(data) {
+        const listContainer = document.getElementById('rankingListContainer');
+        const rawRankings = Array.isArray(data?.rankings) ? [...data.rankings] : [];
+
+        const activeOrLastUser = currentUsername || lastKnownUsername;
+        if (activeOrLastUser) {
+          const targetMasked = maskPhoneMiddle(activeOrLastUser);
+          const existsInList = rawRankings.some(r => r?.isMe || maskPhoneMiddle(r?.maskedName || r?.username || '') === targetMasked);
+          if (!existsInList) {
+            const snap = getUserRankSnapshot(activeOrLastUser);
+            if (snap || authToken) {
+              rawRankings.push({
+                maskedName: targetMasked,
+                username: activeOrLastUser,
+                isMe: Boolean(authToken && currentUsername === activeOrLastUser),
+                honorLevel: snap ? snap.honorLevel : state.honorLevel,
+                power: snap ? snap.power : state.power,
+                score: snap ? snap.power : state.power,
+                equippedWeaponId: snap ? snap.equippedWeaponId : state.equippedWeaponId,
+                currentRegionId: snap ? snap.currentRegionId : state.currentRegionId
+              });
+            }
+          }
+        }
+
+        const normalizedRankings = rawRankings.map((item, idx) => ({
+          ...item,
+          ...extractRankItemFields(item),
+          originalRank: item.rank ?? (idx + 1)
+        }));
+
+        normalizedRankings.sort((a, b) => {
+          if (b.honorLevel !== a.honorLevel) return b.honorLevel - a.honorLevel;
+          return b.power - a.power;
+        });
+
+        normalizedRankings.forEach((item, idx) => { item.rank = idx + 1; });
+
+        const totalCount = Math.max(Number(data?.totalPlayers || 0), normalizedRankings.length);
+        const elTotalPlayers = document.getElementById('srvStatTotalPlayers');
+        if (elTotalPlayers) elTotalPlayers.textContent = `${totalCount.toLocaleString('ko-KR')}명 참전 중`;
+
+        listContainer.innerHTML = '';
+        if (normalizedRankings.length === 0) {
+          listContainer.innerHTML = `
+            <div class="text-center py-8 text-xs text-slate-400 bg-slate-950/60 rounded-xl border border-slate-800">
+              등록된 용사 기록이 없습니다. 우측 상단 <strong class="text-amber-300">[로그인]</strong> 후 첫 주인공이 되어보세요!
+            </div>
+          `;
+          return;
+        }
+
+        normalizedRankings.slice(0, 100).forEach((item) => {
+          const rankInfo = getRankInfo(item.power).current;
+
+          let rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-extrabold text-xs flex items-center justify-center shrink-0">${item.rank}</span>`;
+          let cardStyle = 'bg-slate-950/80 border-slate-800';
+
+          if (item.rank === 1) {
+            rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 font-black text-sm flex items-center justify-center shadow shrink-0">🥇</span>`;
+            cardStyle = 'bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 border-amber-500/60';
+          } else if (item.rank === 2) {
+            rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-200 to-slate-400 text-slate-950 font-black text-sm flex items-center justify-center shadow shrink-0">🥈</span>`;
+            cardStyle = 'bg-gradient-to-r from-slate-800/40 via-slate-950 to-slate-950 border-slate-400/50';
+          } else if (item.rank === 3) {
+            rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-400 to-amber-700 text-white font-black text-sm flex items-center justify-center shadow shrink-0">🥉</span>`;
+            cardStyle = 'bg-gradient-to-r from-orange-950/35 via-slate-950 to-slate-950 border-orange-500/45';
+          }
+
+          if (item.isMe || item.isLastLoggedOutUser) cardStyle += ' ring-1 ring-sky-400';
+
+          const badgeTag = item.isMe
+            ? '<span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold">나</span>'
+            : '';
+
+          const rowEl = document.createElement('div');
+          rowEl.className = `rounded-xl px-3.5 py-2.5 border ${cardStyle} flex items-center justify-between gap-2.5`;
+          rowEl.innerHTML = `
+            <div class="flex items-center gap-2.5 min-w-0">
+              ${rankBadgeHtml}
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs sm:text-sm font-extrabold text-slate-100 truncate">${maskPhoneMiddle(item.maskedName)}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-slate-800/90 text-slate-300 border border-slate-700 text-[10px] font-bold">Lv.${rankInfo.level} ${rankInfo.title}</span>
+                  ${badgeTag}
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+              <span class="text-xs sm:text-sm font-black text-amber-400 whitespace-nowrap">👑 명예 Lv.${item.honorLevel}</span>
+              <span class="text-xs sm:text-sm font-bold text-sky-300 whitespace-nowrap">⚡ ${formatNumber(item.power)} 파워</span>
+            </div>
+          `;
+          listContainer.appendChild(rowEl);
+        });
+      }
+
+      async function fetchAndRenderRanking(showToastMsg = false, forceServerFetch = false) {
+        const listContainer = document.getElementById('rankingListContainer');
+        if (currentUsername) recordUserRankSnapshot(currentUsername, state);
+
+        if (!forceServerFetch) {
+          const cachedHourly = loadHourlyRankingCache();
+          if (cachedHourly && cachedHourly.data) {
+            lastRankingPayload = cachedHourly.data;
+            renderRankingFromData(cachedHourly.data);
+            if (showToastMsg) showToast('🏆 현재 시간대(정각 기준) 공식 집계 전적을 표시합니다.');
+            return;
+          }
+        }
+
+        try {
+          const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+          const hourKey = getCurrentHourBucketKey();
+          const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}&limit=100&hourBucket=${encodeURIComponent(hourKey)}&_t=${Date.now()}`, {
+            headers,
+            cache: 'no-store'
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || '랭킹 로드 실패');
+
+          lastRankingPayload = data;
+          saveHourlyRankingCache(data);
+          renderRankingFromData(data);
+          if (showToastMsg) showToast('🏆 전체 서버 전적 현황을 최신 집계로 갱신했습니다!');
+        } catch (err) {
+          const cachedHourly = loadHourlyRankingCache();
+          if (cachedHourly && cachedHourly.data) {
+            lastRankingPayload = cachedHourly.data;
+            renderRankingFromData(cachedHourly.data);
+            return;
+          }
+          const snapMap = loadRankSnapshotsMap();
+          const uniqueByMasked = new Map();
+          Object.values(snapMap).forEach(entry => {
+            if (entry && entry.maskedName) uniqueByMasked.set(entry.maskedName, entry);
+          });
+          const localFallbackList = Array.from(uniqueByMasked.values());
+          if (localFallbackList.length > 0) {
+            renderRankingFromData({ rankings: localFallbackList, totalPlayers: localFallbackList.length });
+          } else {
+            listContainer.innerHTML = `
+              <div class="text-center py-6 text-xs text-rose-300 bg-rose-950/25 rounded-xl border border-rose-800/40">
+                랭킹 정보를 불러올 수 없습니다. 클라우드 서버 연결 상태를 확인해 주세요.
+              </div>
+            `;
+          }
+        }
+      }
+
+      async function syncAndRefreshRanking(showToastMsg = false, forceServerFetch = false) {
+        if (authToken && (hasUnsavedChanges || forceServerFetch)) await syncSaveToServer(false);
+        await fetchAndRenderRanking(showToastMsg, forceServerFetch);
+      }
+
+      async function checkHourlyRankingRollover() {
+        const currentHourKey = getCurrentHourBucketKey();
+        if (lastAggregatedHourKey && lastAggregatedHourKey !== currentHourKey) {
+          if (authToken) await syncSaveToServer(false);
+          await fetchAndRenderRanking(false, true);
+        }
+      }
+
+      setInterval(() => {
+        if (!document.hidden) checkHourlyRankingRollover();
+      }, 1000);
+
+      setInterval(() => {
+        if (authToken && hasUnsavedChanges && !isSyncInFlight && !document.hidden) syncSaveToServer(false);
+      }, 60000);
+
+      function updateAuthHeaderUI() {
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        if (!authToggleBtn) return;
+
+        if (authToken && currentUsername) {
+          authToggleBtn.textContent = state.isVip ? '👑 VIP 로그아웃' : '로그아웃';
+          authToggleBtn.className = state.isVip
+            ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
+            : 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+        } else {
+          authToggleBtn.textContent = '로그인';
+          authToggleBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+        }
+      }
+
+      async function handleLogout(expired = false) {
+        const loggingOutUser = currentUsername;
+        if (loggingOutUser) {
+          lastKnownUsername = loggingOutUser;
+          safeSetStorage(LAST_USER_KEY, loggingOutUser);
+          state.ownerUsername = loggingOutUser;
+          state.updatedAt = Date.now();
+          safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+          recordUserRankSnapshot(loggingOutUser, state);
+        }
+
+        if (!expired && authToken) await syncSaveToServer(false, true);
+
+        authToken = null;
+        currentUsername = null;
+        safeRemoveStorage(TOKEN_KEY);
+        safeRemoveStorage(USER_KEY);
+
+        updateAuthHeaderUI();
+        updateUI();
+        if (lastRankingPayload) renderRankingFromData(lastRankingPayload);
+        else await fetchAndRenderRanking(false, false);
+        showToast(expired ? '로그인 정보가 만료되었습니다. 마지막 플레이 기록은 보존됩니다.' : '안전하게 저장 후 로그아웃되었습니다.');
+      }
+
+      function getNextHonorCost(level = state.honorLevel) { return (level + 1) * HONOR_BASE_COST; }
+      function getHonorMultiplier() { return 1 + state.honorLevel * 0.15; }
+      function getEquippedWeapon() { return WEAPONS.find(w => w.id === state.equippedWeaponId) || WEAPONS[0]; }
+      function getEquippedPet() { return PETS.find(p => p.id === state.equippedPetId) || null; }
+      function getCurrentRegion() { return REGIONS.find(r => r.id === state.currentRegionId) || REGIONS[0]; }
+
+      function getRankInfo(power) {
+        let currentIdx = 0;
+        for (let i = 0; i < RANKS.length; i++) {
+          if (power >= RANKS[i].minPower) currentIdx = i;
+        }
+        return { current: RANKS[currentIdx], next: RANKS[currentIdx + 1] || null };
+      }
+
+      function getClickRewards() {
+        const weapon = getEquippedWeapon();
+        const region = getCurrentRegion();
+        const honorMult = getHonorMultiplier();
+        const powerGain = Math.max(1, Math.round(weapon.powerMult * honorMult));
+        const goldGain = Math.max(1, Math.round(region.goldMult * honorMult));
+        return { powerGain, goldGain };
+      }
+
+      function maskPhoneMiddle(name) {
+        const str = String(name || '');
+        const m = str.match(/^(01[016789])[-.\s]?(\d{3,4}|\*{3,4})[-.\s]?(\d{4}|\*{4})$/);
+        if (m) return `${m[1]}-****-${m[3]}`;
+        return str.replace(/(01[016789])[-.\s]?(\d{3,4})[-.\s]?(\d{4})/g, '$1-****-$3');
+      }
+
+      function formatNumber(num) {
+        const n = Number(num);
+        if (!Number.isFinite(n)) return '0';
+        if (n >= 1e24) return n.toExponential(2).replace('+', '');
+        if (n >= 1e20) return (n / 1e20).toFixed(2).replace(/\.00$/, '') + '해';
+        if (n >= 1e16) return (n / 1e16).toFixed(2).replace(/\.00$/, '') + '경';
+        if (n >= 1e12) return (n / 1e12).toFixed(2).replace(/\.00$/, '') + '조';
+        if (n >= 1e8) return (n / 1e8).toFixed(2).replace(/\.00$/, '') + '억';
+        if (n >= 1e4) return (n / 1e4).toFixed(1).replace(/\.0$/, '') + '만';
+        return Math.floor(n).toLocaleString('ko-KR');
+      }
+
+      let audioCtx = null;
+      let bgmTimer = null;
+      let bgmStep = 0;
+
+      function getAudioContext() {
+        if (!state.soundEnabled && !state.bgmEnabled) return null;
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        return audioCtx;
+      }
+
+      const BGM_PATTERNS = {
+        village: { notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 440.00, 349.23], bass: [130.81, 164.81], tempo: 320, type: 'sine' },
+        forest: { notes: [349.23, 440.00, 523.25, 587.33, 698.46, 587.33, 523.25, 440.00], bass: [174.61, 220.00], tempo: 290, type: 'triangle' },
+        desert: { notes: [293.66, 311.13, 392.00, 466.16, 392.00, 311.13, 293.66, 233.08], bass: [146.83, 155.56], tempo: 350, type: 'sawtooth' },
+        volcano: { notes: [220.00, 261.63, 329.63, 440.00, 523.25, 440.00, 329.63, 261.63], bass: [110.00, 130.81], tempo: 240, type: 'sawtooth' },
+        ice: { notes: [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 880.00, 783.99], bass: [261.63, 329.63], tempo: 280, type: 'sine' },
+        secret_dungeon: { notes: [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33], bass: [130.81, 196.00], tempo: 200, type: 'sawtooth' }
+      };
+
+      function startBGM() {
+        stopBGM();
+        if (!state.bgmEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const pattern = BGM_PATTERNS[state.currentRegionId] || BGM_PATTERNS.village;
+        bgmStep = 0;
+
+        bgmTimer = setInterval(() => {
+          if (!state.bgmEnabled || !audioCtx || document.hidden) return;
+          try {
+            const now = audioCtx.currentTime;
+            const freq = pattern.notes[bgmStep % pattern.notes.length];
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = pattern.type;
+            osc.frequency.setValueAtTime(freq, now);
+            const vol = state.currentRegionId === 'volcano' ? 0.05 : 0.07;
+            gain.gain.setValueAtTime(vol, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + (pattern.tempo / 1000) * 0.9);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + (pattern.tempo / 1000));
+
+            if (bgmStep % 4 === 0) {
+              const bassFreq = pattern.bass[(Math.floor(bgmStep / 4)) % pattern.bass.length];
+              const bassOsc = audioCtx.createOscillator();
+              const bassGain = audioCtx.createGain();
+              bassOsc.type = 'triangle';
+              bassOsc.frequency.setValueAtTime(bassFreq, now);
+              bassGain.gain.setValueAtTime(0.08, now);
+              bassGain.gain.exponentialRampToValueAtTime(0.0001, now + (pattern.tempo / 1000) * 1.8);
+              bassOsc.connect(bassGain);
+              bassGain.connect(audioCtx.destination);
+              bassOsc.start(now);
+              bassOsc.stop(now + (pattern.tempo / 1000) * 2);
+            }
+            bgmStep++;
+          } catch (e) {}
+        }, pattern.tempo);
+      }
+
+      function stopBGM() {
+        if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+      }
+
+      function playSlashSound(tier = 0) {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = tier >= 3 ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(260 + tier * 45 + Math.random() * 40, now);
+        osc.frequency.exponentialRampToValueAtTime(75, now + 0.11);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      }
+
+      function playPurchaseSound() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        [523.25, 659.25, 783.99].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          gain.gain.setValueAtTime(0.14, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.19);
+        });
+      }
+
+      function playHonorUpSound() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx === 4 ? 'triangle' : 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+          gain.gain.setValueAtTime(0.16, now + idx * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.36);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.055);
+          osc.stop(now + idx * 0.055 + 0.38);
+        });
+      }
+
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasWrapper = document.getElementById('canvasWrapper');
+      let canvasWidth = 800;
+      let canvasHeight = 380;
+
+      const anim = {
+        time: 0, heroDash: 0, swingProgress: 0, monsterHit: 0, hitFlash: 0, attackPattern: 0,
+        screenShake: 0, combo: 0, comboTimer: 0,
+        petCheerBoost: 0, petBubbleTimer: 0, petBubbleText: '용사님 화이팅!',
+        particles: [], floatingTexts: [], ambientParticles: [],
+        shockwaves: [], slashTrails: []
+      };
+
+      function resizeCanvas() {
+        const rect = canvasWrapper.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvasWidth = Math.max(300, rect.width);
+        canvasHeight = Math.max(260, rect.height);
+        canvas.width = Math.floor(canvasWidth * dpr);
+        canvas.height = Math.floor(canvasHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      for (let i = 0; i < 40; i++) {
+        anim.ambientParticles.push({
+          x: Math.random(), y: Math.random(),
+          size: 1.2 + Math.random() * 2.6,
+          speed: 0.03 + Math.random() * 0.09,
+          phase: Math.random() * Math.PI * 2,
+          twinkle: 1.5 + Math.random() * 3
+        });
+      }
+
+      function drawStars(count, maxYRatio, alphaScale = 1) {
+        for (let i = 0; i < count; i++) {
+          const sx = ((Math.sin(i * 127.1 + 31.7) * 0.5 + 0.5) * canvasWidth);
+          const sy = ((Math.sin(i * 269.5 + 183.3) * 0.5 + 0.5) * canvasHeight * maxYRatio);
+          const twinkle = (0.35 + 0.65 * Math.abs(Math.sin(anim.time * (1.2 + (i % 4) * 0.4) + i))) * alphaScale;
+          ctx.fillStyle = `rgba(248, 250, 252, ${twinkle.toFixed(2)})`;
+          const r = i % 5 === 0 ? 1.8 : 1.1;
+          ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      function drawEnvironment(region) {
+        const groundY = canvasHeight * 0.78;
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+        skyGrad.addColorStop(0, region.skyTop);
+        skyGrad.addColorStop(1, region.skyBottom);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        ctx.save();
+        if (region.id === 'village') {
+          drawStars(26, 0.55, 0.8);
+          const moonX = canvasWidth * 0.80, moonY = canvasHeight * 0.21;
+          const moonHalo = ctx.createRadialGradient(moonX, moonY, 12, moonX, moonY, 110);
+          moonHalo.addColorStop(0, 'rgba(254, 249, 195, 0.55)');
+          moonHalo.addColorStop(0.35, 'rgba(186, 230, 253, 0.16)');
+          moonHalo.addColorStop(1, 'rgba(15, 23, 42, 0)');
+          ctx.fillStyle = moonHalo;
+          ctx.beginPath(); ctx.arc(moonX, moonY, 110, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef9c3';
+          ctx.beginPath(); ctx.arc(moonX, moonY, 24, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.moveTo(0, groundY); ctx.lineTo(0, groundY - 68);
+          ctx.quadraticCurveTo(canvasWidth * 0.18, groundY - 125, canvasWidth * 0.38, groundY - 55);
+          ctx.quadraticCurveTo(canvasWidth * 0.62, groundY - 105, canvasWidth * 0.86, groundY - 48);
+          ctx.lineTo(canvasWidth, groundY - 78); ctx.lineTo(canvasWidth, groundY); ctx.closePath(); ctx.fill();
+        } else if (region.id === 'forest') {
+          for (let layer = 0; layer < 2; layer++) {
+            const count = layer === 0 ? 12 : 9;
+            ctx.fillStyle = layer === 0 ? 'rgba(6, 78, 59, 0.65)' : 'rgba(2, 44, 34, 0.88)';
+            for (let i = 0; i < count; i++) {
+              const tx = (canvasWidth / (count - 1)) * i + (layer * 18);
+              const th = (layer === 0 ? 130 : 105) + ((i * 37) % 45);
+              ctx.beginPath();
+              ctx.moveTo(tx, groundY - th); ctx.lineTo(tx - 38, groundY); ctx.lineTo(tx + 38, groundY);
+              ctx.closePath(); ctx.fill();
+            }
+          }
+        } else if (region.id === 'desert') {
+          const sunX = canvasWidth * 0.72, sunY = canvasHeight * 0.25;
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath(); ctx.arc(sunX, sunY, 30, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(120, 53, 15, 0.65)';
+          ctx.beginPath(); ctx.moveTo(canvasWidth * 0.08, groundY); ctx.lineTo(canvasWidth * 0.22, groundY - 110); ctx.lineTo(canvasWidth * 0.36, groundY); ctx.closePath(); ctx.fill();
+        } else if (region.id === 'volcano') {
+          const vX = canvasWidth * 0.70;
+          ctx.fillStyle = '#18181b';
+          ctx.beginPath(); ctx.moveTo(vX - 180, groundY); ctx.lineTo(vX - 40, groundY - 155); ctx.lineTo(vX + 40, groundY - 155); ctx.lineTo(vX + 190, groundY); ctx.closePath(); ctx.fill();
+        } else if (region.id === 'ice') {
+          drawStars(30, 0.5, 0.75);
+        } else if (region.id === 'secret_dungeon') {
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.35)';
+          ctx.beginPath(); ctx.moveTo(0, groundY); ctx.quadraticCurveTo(canvasWidth * 0.5, groundY - 85, canvasWidth, groundY); ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+
+        const groundGrad = ctx.createLinearGradient(0, groundY, 0, canvasHeight);
+        groundGrad.addColorStop(0, region.groundTop);
+        groundGrad.addColorStop(1, region.groundBottom);
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, groundY, canvasWidth, canvasHeight - groundY);
+
+        ctx.strokeStyle = region.accent;
+        ctx.globalAlpha = 0.55;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(canvasWidth, groundY); ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        anim.ambientParticles.forEach(p => {
+          p.y -= p.speed * 0.013 * (region.id === 'ice' ? -1 : 1);
+          if (p.y < 0) p.y = 0.78;
+          if (p.y > 0.78) p.y = 0.02;
+          const px = ((p.x + Math.sin(anim.time + p.phase) * 0.025 + 1) % 1) * canvasWidth;
+          const py = p.y * canvasHeight;
+          const alpha = 0.35 + 0.45 * Math.abs(Math.sin(anim.time * p.twinkle + p.phase));
+          ctx.fillStyle = region.id === 'ice' ? `rgba(224, 242, 254, ${alpha})` : region.id === 'volcano' ? `rgba(251, 146, 60, ${alpha})` : `rgba(254, 240, 138, ${alpha})`;
+          ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+
+      function drawCheerPet(baseX, groundY) {
+        const pet = getEquippedPet();
+        if (!pet) return;
+
+        const isFlying = pet.id === 'fairy_pixie' || pet.id === 'baby_dragon';
+        const baseHover = isFlying ? -26 : 0;
+        const hopSpeed = 6.5 + (anim.petCheerBoost > 0 ? 5.5 : 0);
+        const hopAmp = 9 + anim.petCheerBoost * 14;
+        const bounceY = -Math.abs(Math.sin(anim.time * hopSpeed)) * hopAmp;
+        const x = baseX + Math.sin(anim.time * 3.5) * 4;
+        const y = groundY + baseHover + bounceY;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.beginPath(); ctx.ellipse(x, groundY + 3, 20, 6, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.translate(x, y);
+
+        ctx.fillStyle = pet.bodyColor;
+        ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(-4, -24, 2.2, 0, Math.PI * 2); ctx.arc(6, -24, 2.2, 0, Math.PI * 2); ctx.fill();
+
+        const wave = Math.sin(anim.time * 12) * 10;
+        const pomY = -20 - (anim.petCheerBoost * 8);
+        [{ px: -17, py: pomY + wave * 0.6 }, { px: 19, py: pomY - wave * 0.6 }].forEach(pos => {
+          ctx.fillStyle = pet.pomColor;
+          ctx.beginPath(); ctx.arc(pos.px, pos.py, 6, 0, Math.PI * 2); ctx.fill();
+        });
+
+        const showBubble = anim.petBubbleTimer > 0 || (Math.sin(anim.time * 1.6) > 0.35);
+        if (showBubble) {
+          const msg = anim.petBubbleTimer > 0 ? anim.petBubbleText : pet.cheers[Math.floor(anim.time * 0.5) % pet.cheers.length];
+          ctx.font = '800 11px "Noto Sans KR", sans-serif';
+          const textW = Math.max(76, ctx.measureText(msg).width + 16);
+          const bx = -textW / 2 + 4, by = -68;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+          ctx.strokeStyle = pet.pomColor; ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.roundRect(bx, by, textW, 22, 8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fef08a'; ctx.textAlign = 'center';
+          ctx.fillText(msg, bx + textW / 2, by + 15);
+        }
+        ctx.restore();
+      }
+
+      function drawMonster(baseX, groundY, region) {
+        const hitShakeX = anim.monsterHit > 0 ? Math.sin(anim.monsterHit * 45) * 13 * anim.monsterHit : 0;
+        const hitScaleX = 1 + Math.sin(anim.monsterHit * Math.PI) * 0.15;
+        const hitScaleY = 1 - Math.sin(anim.monsterHit * Math.PI) * 0.11;
+        const breathe = Math.sin(anim.time * 3.2);
+        const x = baseX + hitShakeX;
+        const y = groundY;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath(); ctx.ellipse(x, y + 5, 52, 12, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.translate(x, y);
+        ctx.scale(hitScaleX, hitScaleY);
+
+        if (region.monsterType === 'scarecrow') {
+          ctx.fillStyle = '#78350f'; ctx.fillRect(-7, -124, 14, 124); ctx.fillRect(-52, -92, 104, 11);
+          ctx.fillStyle = '#1e3a8a'; ctx.fillRect(-26, -96, 52, 52);
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(0, -116, 23, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.ellipse(0, -134, 38, 8, -0.07, 0, Math.PI * 2); ctx.fill();
+        } else if (region.monsterType === 'boar') {
+          const bob = breathe * 3.5;
+          ctx.fillStyle = '#5c280b'; ctx.beginPath(); ctx.ellipse(8, -55 + bob, 52, 36, -0.06, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#451a03'; ctx.beginPath(); ctx.ellipse(-38, -48 + bob, 27, 23, 0.15, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(-40, -56 + bob, 4.5, 0, Math.PI * 2); ctx.fill();
+        } else if (region.monsterType === 'scorpion') {
+          const bob = breathe * 2.5;
+          ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.ellipse(4, -36 + bob, 42, 22, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#c084fc'; ctx.beginPath(); ctx.arc(0, -110 + bob, 12, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(-28, -40 + bob, 4, 0, Math.PI * 2); ctx.fill();
+        } else if (region.monsterType === 'phoenix') {
+          const hoverY = -64 + Math.sin(anim.time * 4.5) * 10;
+          ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.ellipse(0, hoverY, 26, 30, -0.25, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(-18, hoverY - 30, 14, 0, Math.PI * 2); ctx.fill();
+        } else if (region.monsterType === 'ice_dragon') {
+          const bob = breathe * 3.5;
+          ctx.fillStyle = '#0284c7'; ctx.beginPath(); ctx.ellipse(6, -48 + bob, 34, 38, -0.15, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.ellipse(-30, -104 + bob, 24, 13, -0.1, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#67e8f9'; ctx.beginPath(); ctx.arc(-34, -107 + bob, 4, 0, Math.PI * 2); ctx.fill();
+        } else {
+          const bob = breathe * 4.5;
+          ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.ellipse(8, -56 + bob, 40, 46, -0.18, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.ellipse(-30, -116 + bob, 26, 14, -0.1, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(-36, -118 + bob, 4, 0, Math.PI * 2); ctx.fill();
+        }
+
+        if (anim.hitFlash > 0) {
+          ctx.globalAlpha = anim.hitFlash * 0.65;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(0, -64, 52, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+      }
+
+      function drawHonorAura(x, y, honorLevel) {
+        if (honorLevel <= 0) return;
+        const density = Math.min(1, 0.25 + honorLevel * 0.12);
+        const pulse = 1 + Math.sin(anim.time * 4.5) * 0.06;
+        const baseRadius = (62 + Math.min(honorLevel, 12) * 5.5) * pulse;
+        ctx.save();
+        const outerGrad = ctx.createRadialGradient(x, y - 58, 8, x, y - 58, baseRadius * 1.3);
+        outerGrad.addColorStop(0, `rgba(254, 240, 138, ${0.42 * density})`);
+        outerGrad.addColorStop(0.45, `rgba(245, 158, 11, ${0.30 * density})`);
+        outerGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = outerGrad;
+        ctx.beginPath(); ctx.arc(x, y - 58, baseRadius * 1.3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function drawHero(baseX, groundY, weapon) {
+        const breathe = Math.sin(anim.time * 3.6) * 2.5;
+        const dashDist = anim.attackPattern === 2 ? 90 : anim.attackPattern === 1 ? 54 : 62;
+        const dashOffset = Math.sin(anim.heroDash * Math.PI) * dashDist;
+        const jumpY = anim.attackPattern === 1 ? -Math.sin(anim.heroDash * Math.PI) * 32 : 0;
+        const x = baseX + dashOffset;
+        const y = groundY + jumpY;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath(); ctx.ellipse(x, groundY + 3, 36, 10, 0, 0, Math.PI * 2); ctx.fill();
+        drawHonorAura(x, groundY, state.honorLevel);
+
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath(); ctx.moveTo(x - 8, y - 82 + breathe); ctx.lineTo(x - 48, y - 10); ctx.lineTo(x - 16, y - 10); ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(x - 14, y - 36, 11, 36);
+        ctx.fillRect(x + 4, y - 36, 11, 36);
+
+        ctx.save();
+        ctx.translate(x, y - 58 + breathe);
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath(); ctx.roundRect(-18, -24, 36, 44, 9); ctx.fill();
+
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath(); ctx.arc(2, -40, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath(); ctx.arc(2, -42, 17, Math.PI * 0.92, Math.PI * 2.08); ctx.closePath(); ctx.fill();
+
+        ctx.save();
+        ctx.translate(12, -10);
+        let swingAngle = -0.45 + Math.sin(anim.time * 3.6) * 0.06;
+        if (anim.swingProgress > 0) {
+          const s = Math.sin(anim.swingProgress * Math.PI);
+          swingAngle = anim.attackPattern === 1 ? 1.65 - s * 2.55 : -0.65 + s * 2.35;
+        }
+        ctx.rotate(swingAngle);
+
+        ctx.fillStyle = '#451a03'; ctx.fillRect(-3, -15, 6, 19);
+        ctx.fillStyle = weapon.guardColor; ctx.fillRect(-15, -19, 30, 6);
+        const bladeLength = 58 + weapon.tier * 8;
+        ctx.fillStyle = weapon.bladeColor;
+        ctx.fillRect(-5, -19 - bladeLength, 10, bladeLength);
+        ctx.restore();
+        ctx.restore();
+
+        if (anim.swingProgress > 0.12 && anim.swingProgress < 0.88) {
+          const slashAlpha = Math.sin(((anim.swingProgress - 0.12) / 0.76) * Math.PI);
+          ctx.save();
+          ctx.translate(x + 30, y - 60);
+          ctx.strokeStyle = weapon.slashColor;
+          ctx.globalAlpha = slashAlpha * 0.9;
+          ctx.lineWidth = 8 + weapon.tier * 2;
+          ctx.beginPath(); ctx.arc(0, 0, 62 + weapon.tier * 5, -0.95, 0.9); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      function updateAndDrawEffects(dt) {
+        for (let i = anim.shockwaves.length - 1; i >= 0; i--) {
+          const sw = anim.shockwaves[i];
+          sw.radius += sw.speed * dt;
+          sw.life -= dt * 3.2;
+          if (sw.life <= 0) { anim.shockwaves.splice(i, 1); continue; }
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, sw.life * 0.85);
+          ctx.strokeStyle = sw.color;
+          ctx.lineWidth = 3 * sw.life;
+          ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        }
+
+        for (let i = anim.particles.length - 1; i >= 0; i--) {
+          const p = anim.particles[i];
+          p.x += p.vx * dt; p.y += p.vy * dt;
+          if (p.shape !== 'honor') p.vy += 380 * dt;
+          p.rot += p.vRot * dt; p.life -= p.decay * dt;
+          if (p.life <= 0) { anim.particles.splice(i, 1); continue; }
+          ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+          ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+          if (p.shape === 'honor') { ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI * 2); ctx.fill(); }
+          else { ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); }
+          ctx.restore();
+        }
+
+        for (let i = anim.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = anim.floatingTexts[i];
+          ft.y += ft.vy * dt; ft.life -= dt * 1.15;
+          if (ft.life <= 0) { anim.floatingTexts.splice(i, 1); continue; }
+          ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, ft.life * 1.3));
+          ctx.font = '900 15px Inter, "Noto Sans KR", sans-serif'; ctx.textAlign = 'center';
+          ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(15, 23, 42, 0.9)';
+          ctx.strokeText(ft.text, ft.x, ft.y);
+          ctx.fillStyle = ft.color; ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+      }
+
+      function performHit(clientX = null, clientY = null) {
+        const weapon = getEquippedWeapon();
+        const region = getCurrentRegion();
+        const pet = getEquippedPet();
+        const { powerGain, goldGain } = getClickRewards();
+
+        state.power += powerGain;
+        state.gold += goldGain;
+        state.totalClicks += 1;
+
+        anim.attackPattern = (anim.attackPattern + 1) % 3;
+        anim.heroDash = 1.0;
+        anim.swingProgress = 0.01;
+        anim.monsterHit = 1.0;
+        anim.hitFlash = 1.0;
+        anim.screenShake = Math.min(9, 3 + weapon.tier * 0.9);
+        anim.combo += 1;
+        anim.comboTimer = 1.6;
+
+        if (pet) {
+          anim.petCheerBoost = 1.0;
+          if (anim.petBubbleTimer <= 0.2 || Math.random() < 0.35) {
+            anim.petBubbleText = pet.cheers[Math.floor(Math.random() * pet.cheers.length)];
+            anim.petBubbleTimer = 1.3;
+          }
+        }
+
+        if (!document.hidden) {
+          playSlashSound(weapon.tier);
+          const monsterX = canvasWidth * 0.72;
+          const monsterY = canvasHeight * 0.78 - 58;
+
+          if (anim.shockwaves.length < 15) {
+            anim.shockwaves.push({ x: monsterX, y: monsterY, radius: 12, speed: 240 + weapon.tier * 28, color: weapon.slashColor, life: 1.0 });
+          }
+
+          const spawnCount = Math.min(12 + weapon.tier * 2, Math.max(0, 180 - anim.particles.length));
+          for (let i = 0; i < spawnCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 100 + Math.random() * 230;
+            anim.particles.push({
+              x: monsterX + (Math.random() - 0.5) * 24, y: monsterY + (Math.random() - 0.5) * 32,
+              vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 95,
+              size: 4 + Math.random() * 4.5, color: i % 2 === 0 ? weapon.slashColor : region.accent,
+              shape: 'spark', rot: Math.random() * Math.PI, vRot: (Math.random() - 0.5) * 12,
+              life: 0.65 + Math.random() * 0.25, decay: 1.5
+            });
+          }
+
+          if (anim.floatingTexts.length < 30) {
+            let spawnX = monsterX + (Math.random() - 0.5) * 40;
+            let spawnY = monsterY - 28;
+            if (clientX !== null && clientY !== null) {
+              const rect = canvas.getBoundingClientRect();
+              spawnX = Math.max(60, Math.min(canvasWidth - 60, clientX - rect.left));
+              spawnY = Math.max(40, Math.min(canvasHeight - 40, clientY - rect.top));
+            }
+            anim.floatingTexts.push({
+              x: spawnX, y: spawnY, vy: -62,
+              text: `+${formatNumber(powerGain)} 파워  +${formatNumber(goldGain)} G`,
+              color: '#fde047', life: 1.0
+            });
+          }
+        }
+
+        saveState(false);
+        updateUI();
+      }
+
+      let toastTimeout = null;
+      function showToast(message) {
+        const box = document.getElementById('toastBox');
+        const msg = document.getElementById('toastMsg');
+        msg.textContent = message;
+        box.classList.remove('opacity-0', 'translate-y-2');
+        box.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          box.classList.remove('opacity-100', 'translate-y-0');
+          box.classList.add('opacity-0', 'translate-y-2');
+        }, 2300);
+      }
+
+      function updateUI() {
+        const weapon = getEquippedWeapon();
+        const pet = getEquippedPet();
+        const region = getCurrentRegion();
+        const { powerGain, goldGain } = getClickRewards();
+        const { current, next } = getRankInfo(state.power);
+        const honorCost = getNextHonorCost();
+        const canUpgradeHonor = state.gold >= honorCost;
+        const honorBonusPct = state.honorLevel * 15;
+
+        document.getElementById('goldDisplay').textContent = formatNumber(state.gold);
+        document.getElementById('honorDisplay').textContent = `명예 Lv.${state.honorLevel}`;
+        document.getElementById('honorBonusBadge').textContent = `보너스 +${honorBonusPct}%`;
+        document.getElementById('honorSubText').textContent =
+          state.honorLevel === 0 ? 'Lv.1 달성 시 황금 오오라 개방' : `오오라 농도 ${Math.min(100, 22 + state.honorLevel * 12)}% · 획득량 +${honorBonusPct}%`;
+        document.getElementById('honorCostText').textContent = `${formatNumber(honorCost)} G`;
+
+        const autoBtn = document.getElementById('autoClickToggleBtn');
+        const autoDot = document.getElementById('autoClickDot');
+        const autoLabel = document.getElementById('autoClickBtnLabel');
+        const autoSubLabel = document.getElementById('autoClickSubLabel');
+        if (state.isVip && state.autoClickEnabled) {
+          autoBtn.className = 'flex-[1] min-w-[78px] sm:min-w-[92px] py-2 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-emerald-950 hover:bg-emerald-900 border border-emerald-400/80 text-emerald-200 shadow-lg shadow-emerald-500/25 transition active:scale-95 flex flex-col items-center justify-center leading-tight cursor-pointer shrink-0';
+          autoDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping';
+          autoLabel.textContent = '자동 ON';
+          autoSubLabel.textContent = '초당 5회 작동';
+          autoSubLabel.className = 'text-[9px] text-emerald-300 font-bold mt-0.5';
+        } else if (state.isVip) {
+          autoBtn.className = 'flex-[1] min-w-[78px] sm:min-w-[92px] py-2 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-slate-950 hover:bg-slate-800 border border-amber-400/60 text-amber-200 shadow-md transition active:scale-95 flex flex-col items-center justify-center leading-tight cursor-pointer shrink-0';
+          autoDot.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+          autoLabel.textContent = '자동 OFF';
+          autoSubLabel.textContent = '초당 5회 대기';
+          autoSubLabel.className = 'text-[9px] text-slate-400 font-bold mt-0.5';
+        } else {
+          autoBtn.className = 'flex-[1] min-w-[78px] sm:min-w-[92px] py-2 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold bg-slate-950 hover:bg-purple-950/70 border border-purple-500/60 text-purple-200 shadow-md transition active:scale-95 flex flex-col items-center justify-center leading-tight cursor-pointer shrink-0';
+          autoDot.className = 'w-1.5 h-1.5 rounded-full bg-purple-400';
+          autoLabel.textContent = '자동 OFF';
+          autoSubLabel.textContent = '👑 VIP 5연타';
+          autoSubLabel.className = 'text-[9px] text-purple-300 font-bold mt-0.5';
+        }
+
+        const honorBtn = document.getElementById('honorUpgradeBtn');
+        if (canUpgradeHonor) {
+          honorBtn.disabled = false;
+          honorBtn.className = 'shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 hover:from-amber-300 hover:to-yellow-200 text-slate-950 shadow-lg shadow-amber-500/30 active:scale-95 transition flex flex-col items-center justify-center leading-tight cursor-pointer';
+        } else {
+          honorBtn.disabled = true;
+          honorBtn.className = 'shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-800/90 text-slate-500 border border-slate-700/80 cursor-not-allowed flex flex-col items-center justify-center leading-tight';
+        }
+
+        document.getElementById('rankDisplay').textContent = `Lv.${current.level} ${current.title}`;
+        document.getElementById('gainPerClickDisplay').textContent = `+${formatNumber(powerGain)} 파워 / +${formatNumber(goldGain)} G`;
+        document.getElementById('equippedWeaponDisplay').textContent = `${weapon.name} · ${pet ? pet.icon + pet.name : '펫 없음'}`;
+        document.getElementById('stageBadge').textContent = `훈련 지역: ${region.name} · 대상: ${region.monsterName}`;
+        document.getElementById('arenaRegionPill').textContent = `${region.icon} ${region.name}`;
+        document.getElementById('arenaMonsterPill').textContent = `🎯 ${region.monsterName}`;
+
+        const arenaPetPill = document.getElementById('arenaPetPill');
+        if (pet) {
+          arenaPetPill.classList.remove('hidden');
+          arenaPetPill.textContent = `${pet.icon} ${pet.name} 응원중`;
+        } else {
+          arenaPetPill.classList.add('hidden');
+        }
+
+        document.getElementById('trainBtnLabel').textContent = `${region.monsterName} 타격하기 (+${formatNumber(powerGain)} 파워)`;
+
+        if (next) {
+          const prevMin = current.minPower;
+          const span = Math.max(1, next.minPower - prevMin);
+          const pct = Math.max(3, Math.min(100, ((state.power - prevMin) / span) * 100));
+          document.getElementById('rankProgressBar').style.width = `${pct}%`;
+          document.getElementById('nextRankText').textContent = `다음 등급(Lv.${next.level} ${next.title})까지 ${formatNumber(Math.max(0, next.minPower - state.power))} 파워`;
+        } else {
+          document.getElementById('rankProgressBar').style.width = '100%';
+          document.getElementById('nextRankText').textContent = '최고 용사 등급(Lv.100) 달성!';
+        }
+
+        const bgmBtn = document.getElementById('bgmToggleBtn');
+        bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+        bgmBtn.className = state.bgmEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+        const soundBtn = document.getElementById('soundToggleBtn');
+        soundBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+        soundBtn.className = state.soundEnabled
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+        renderWeaponsPanel();
+        renderRegionsPanel();
+        renderPetsPanel();
+      }
+
+      function renderWeaponsPanel() {
+        const panel = document.getElementById('weaponsPanel');
+        panel.innerHTML = '';
+        WEAPONS.forEach(w => {
+          const owned = state.ownedWeapons.includes(w.id);
+          const equipped = state.equippedWeaponId === w.id;
+          const isVipOnly = w.isVipOnly === true;
+          const canBuy = !owned && state.gold >= w.cost && !isVipOnly;
+
+          let actionLabel = `구매 (${formatNumber(w.cost)} G)`;
+          if (isVipOnly) actionLabel = state.isVip ? '장착하기' : '👑 VIP 전용';
+
+          const card = document.createElement('div');
+          card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2.5 ${
+            equipped ? 'bg-amber-950/25 border-amber-500/60 shadow-md shadow-amber-500/10' : owned ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/60 border-slate-800/90'
+          }`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold text-slate-100 flex items-center gap-1">
+                  ${isVipOnly ? '👑 ' : ''}${w.name}
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  equipped ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : owned ? 'bg-slate-800 text-slate-300' : isVipOnly ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800/40' : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }">${equipped ? '장착 중' : owned ? '보유 중' : isVipOnly ? 'VIP 보물' : `Tier ${w.tier + 1}`}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">${w.desc}</p>
+              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/25">파워 +${w.powerMult}</span>
+              </div>
+            </div>
+            <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${
+              equipped ? 'bg-slate-800 text-amber-300 cursor-default' : (owned || (isVipOnly && state.isVip)) ? 'bg-sky-600 hover:bg-sky-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : canBuy ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
+            }">${equipped ? '현재 장착됨' : owned ? '장착하기' : isVipOnly && state.isVip ? '장착하기' : actionLabel}</button>
+          `;
+
+          card.querySelector('button').addEventListener('click', () => {
+            if (equipped) return;
+            if (isVipOnly) {
+              if (!state.isVip) { openVipModal(); return; }
+              if (!state.ownedWeapons.includes(w.id)) state.ownedWeapons.push(w.id);
+            }
+            if (owned || (isVipOnly && state.isVip)) {
+              state.equippedWeaponId = w.id;
+              saveState(true);
+              playPurchaseSound();
+              showToast(`⚔️ [${w.name}] 장착 완료!`);
+              updateUI();
+              return;
+            }
+            if (state.gold >= w.cost) {
+              state.gold -= w.cost;
+              state.ownedWeapons.push(w.id);
+              state.equippedWeaponId = w.id;
+              saveState(true);
+              playPurchaseSound();
+              showToast(`🎉 [${w.name}] 구매 및 장착 완료!`);
+              updateUI();
+            } else {
+              showToast(`골드가 부족합니다! (필요: ${formatNumber(w.cost)} G)`);
+            }
+          });
+          panel.appendChild(card);
+        });
+      }
+
+      function renderPetsPanel() {
+        const panel = document.getElementById('petsPanel');
+        if (!panel) return;
+        panel.innerHTML = '';
+
+        PETS.forEach(pet => {
+          const isVipOnly = pet.isVipOnly === true;
+          const unlocked = isVipOnly ? state.isVip : (state.honorLevel >= pet.reqHonor);
+          const equipped = state.equippedPetId === pet.id;
+
+          let actionLabel = unlocked ? '함께 응원하기' : `잠김 (명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')})`;
+          if (isVipOnly) actionLabel = state.isVip ? '함께 응원하기' : '👑 VIP 전용';
+
+          const card = document.createElement('div');
+          card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2.5 ${
+            equipped ? 'bg-pink-950/25 border-pink-500/60 shadow-md shadow-pink-500/10' : unlocked ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/60 border-slate-800/90 opacity-85'
+          }`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold text-slate-100 flex items-center gap-1.5">
+                  <span class="text-base">${pet.icon}</span>
+                  <span>${pet.name}</span>
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  equipped ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40' : unlocked ? 'bg-slate-800 text-slate-300' : isVipOnly ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800/40' : 'bg-amber-950/60 text-amber-300 border border-amber-700/40'
+                }">${equipped ? '응원 중' : unlocked ? '해금됨' : isVipOnly ? 'VIP 펫' : `명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')}`}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">${pet.desc}</p>
+              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-300 border border-pink-500/25">📣 "${pet.cheers[0]}"</span>
+              </div>
+            </div>
+            <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${
+              equipped ? 'bg-slate-800 hover:bg-slate-700 text-pink-300 cursor-pointer' : unlocked ? 'bg-pink-600 hover:bg-pink-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
+            }">${equipped ? '응원 쉬기 (해제)' : actionLabel}</button>
+          `;
+
+          card.querySelector('button').addEventListener('click', () => {
+            if (equipped) {
+              state.equippedPetId = null;
+              saveState(true);
+              showToast(`🐾 [${pet.name}]이(가) 잠시 휴식합니다.`);
+              updateUI();
+              return;
+            }
+            if (isVipOnly && !state.isVip) { openVipModal(); return; }
+            if (!unlocked) { showToast(`👑 명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')} 달성 시 해금됩니다!`); return; }
+            if (!state.ownedPets.includes(pet.id)) state.ownedPets.push(pet.id);
+            state.equippedPetId = pet.id;
+            anim.petCheerBoost = 1.0;
+            anim.petBubbleText = pet.cheers[0];
+            anim.petBubbleTimer = 2.0;
+            saveState(true);
+            playPurchaseSound();
+            showToast(`${pet.icon} [${pet.name}]이(가) 뒤에서 응원을 시작합니다!`);
+            updateUI();
+          });
+
+          panel.appendChild(card);
+        });
+      }
+
+      function renderRegionsPanel() {
+        const panel = document.getElementById('regionsPanel');
+        panel.innerHTML = '';
+        REGIONS.forEach(r => {
+          const isVipOnly = r.isVipOnly === true;
+          const unlocked = isVipOnly ? state.isVip : (state.power >= r.reqPower);
+          const active = state.currentRegionId === r.id;
+
+          let btnLabel = active ? '현재 훈련 지역' : unlocked ? '지역 이동하기' : `잠김 (${formatNumber(r.reqPower)} 파워 필요)`;
+          if (isVipOnly) btnLabel = active ? '비밀던젼 내부' : state.isVip ? '던젼 입장하기' : '👑 VIP 전용던젼';
+
+          const card = document.createElement('div');
+          card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2.5 ${
+            active ? 'bg-emerald-950/25 border-emerald-500/60 shadow-md shadow-emerald-500/10' : unlocked ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/50 border-slate-800/80 opacity-80'
+          }`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold text-slate-100">${r.icon} ${r.name}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  active ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : unlocked ? 'bg-slate-800 text-slate-300' : 'bg-rose-950/60 text-rose-300 border border-rose-800/50'
+                }">${active ? '훈련 중' : unlocked ? '입장 가능' : isVipOnly ? 'VIP 전용' : `필요 파워 ${formatNumber(r.reqPower)}`}</span>
+              </div>
+              <div class="text-[11px] font-bold text-amber-300/90 mt-1">출현 몬스터: ${r.monsterName}</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">${r.desc}</p>
+              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/25">골드 배율 x${r.goldMult}</span>
+              </div>
+            </div>
+            <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${
+              active ? 'bg-slate-800 text-emerald-300 cursor-default' : unlocked ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
+            }">${btnLabel}</button>
+          `;
+
+          card.querySelector('button').addEventListener('click', () => {
+            if (active) return;
+            if (isVipOnly) {
+              if (!state.isVip) { openVipModal(); return; }
+            } else {
+              if (!unlocked) { showToast(`파워가 부족합니다! (${formatNumber(r.reqPower)} 파워 필요)`); return; }
+            }
+            state.currentRegionId = r.id;
+            saveState(true);
+            playPurchaseSound();
+            if (state.bgmEnabled) startBGM();
+            showToast(`${r.icon} [${r.name}] 지역으로 이동했습니다! (${r.monsterName} 출현)`);
+            updateUI();
+          });
+          panel.appendChild(card);
+        });
+      }
+
+      const tabWeaponsBtn = document.getElementById('tabWeaponsBtn');
+      const tabRegionsBtn = document.getElementById('tabRegionsBtn');
+      const tabPetsBtn = document.getElementById('tabPetsBtn');
+      const tabRankingBtn = document.getElementById('tabRankingBtn');
+      const weaponsPanel = document.getElementById('weaponsPanel');
+      const regionsPanel = document.getElementById('regionsPanel');
+      const petsPanel = document.getElementById('petsPanel');
+      const rankingPanel = document.getElementById('rankingPanel');
+
+      function switchMainTab(tabName) {
+        activeTab = tabName;
+        const inactiveClass = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition whitespace-nowrap cursor-pointer';
+        tabWeaponsBtn.className = inactiveClass;
+        tabRegionsBtn.className = inactiveClass;
+        tabPetsBtn.className = inactiveClass;
+        tabRankingBtn.className = inactiveClass;
+
+        weaponsPanel.classList.add('hidden'); weaponsPanel.classList.remove('grid');
+        regionsPanel.classList.add('hidden'); regionsPanel.classList.remove('grid');
+        petsPanel.classList.add('hidden'); petsPanel.classList.remove('grid');
+        rankingPanel.classList.add('hidden'); rankingPanel.classList.remove('flex');
+
+        if (tabName === 'weapons') {
+          tabWeaponsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-amber-300 shadow transition whitespace-nowrap cursor-pointer';
+          weaponsPanel.classList.remove('hidden'); weaponsPanel.classList.add('grid');
+        } else if (tabName === 'regions') {
+          tabRegionsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-300 shadow transition whitespace-nowrap cursor-pointer';
+          regionsPanel.classList.remove('hidden'); regionsPanel.classList.add('grid');
+        } else if (tabName === 'pets') {
+          tabPetsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-pink-300 shadow transition whitespace-nowrap cursor-pointer';
+          petsPanel.classList.remove('hidden'); petsPanel.classList.add('grid');
+        } else if (tabName === 'ranking') {
+          tabRankingBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-sky-300 shadow transition whitespace-nowrap cursor-pointer';
+          rankingPanel.classList.remove('hidden'); rankingPanel.classList.add('flex');
+          syncAndRefreshRanking(false);
+        }
+      }
+
+      tabWeaponsBtn.addEventListener('click', () => switchMainTab('weapons'));
+      tabRegionsBtn.addEventListener('click', () => switchMainTab('regions'));
+      tabPetsBtn.addEventListener('click', () => switchMainTab('pets'));
+      tabRankingBtn.addEventListener('click', () => switchMainTab('ranking'));
+
+      document.getElementById('headerExitLobbyBtn')?.addEventListener('click', () => {
+        stopBGM();
+        window.location.href = 'https://02826k.github.io/aigameroom/';
+      });
+
+      canvasWrapper.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        getAudioContext();
+        if (!bgmTimer && state.bgmEnabled) startBGM();
+        performHit(e.clientX, e.clientY);
+      });
+
+      document.getElementById('trainActionBtn').addEventListener('click', () => {
+        getAudioContext();
+        if (!bgmTimer && state.bgmEnabled) startBGM();
+        performHit();
+      });
+
+      document.getElementById('honorUpgradeBtn').addEventListener('click', () => {
+        const cost = getNextHonorCost();
+        if (state.gold < cost) { showToast(`골드가 부족합니다! (필요: ${formatNumber(cost)} G)`); return; }
+        state.gold -= cost;
+        state.honorLevel += 1;
+        saveState(true);
+        playHonorUpSound();
+
+        const heroX = canvasWidth * 0.30;
+        const heroY = canvasHeight * 0.78 - 52;
+        for (let i = 0; i < 28; i++) {
+          const angle = (Math.PI * 2 * i) / 28;
+          const speed = 90 + Math.random() * 140;
+          anim.particles.push({
+            x: heroX, y: heroY, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 60,
+            size: 4 + Math.random() * 3.5, color: i % 2 === 0 ? '#fef08a' : '#f59e0b',
+            shape: 'honor', rot: 0, vRot: 0, life: 1.15, decay: 1.4
+          });
+        }
+        anim.screenShake = 6;
+        showToast(`👑 명예 Lv.${state.honorLevel} 달성! 오오라가 더욱 진해졌습니다!`);
+        updateUI();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !e.repeat) {
+          const authModal = document.getElementById('authModal');
+          if (!authModal.classList.contains('hidden') || !vipModal.classList.contains('hidden')) return;
+          e.preventDefault();
+          getAudioContext();
+          if (!bgmTimer && state.bgmEnabled) startBGM();
+          performHit();
+        }
+      });
+
+      document.getElementById('bgmToggleBtn').addEventListener('click', () => {
+        state.bgmEnabled = !state.bgmEnabled;
+        saveState(true); updateUI();
+        if (state.bgmEnabled) { startBGM(); showToast('🎵 배경음악이 켜졌습니다.'); }
+        else { stopBGM(); showToast('🔇 배경음악이 꺼졌습니다.'); }
+      });
+
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        saveState(true); updateUI();
+        if (state.soundEnabled) { playPurchaseSound(); showToast('🔊 효과음이 켜졌습니다.'); }
+        else { showToast('🔇 효과음이 꺼졌습니다.'); }
+      });
+
+      const authModal = document.getElementById('authModal');
+      const modeLoginBtn = document.getElementById('modeLoginBtn');
+      const modeRegisterBtn = document.getElementById('modeRegisterBtn');
+      const authSubmitBtn = document.getElementById('authSubmitBtn');
+      const authErrorMsg = document.getElementById('authErrorMsg');
+      const phoneInput = document.getElementById('authPhoneDigits');
+      const pinInput = document.getElementById('authPinCode');
+
+      document.getElementById('authToggleBtn').addEventListener('click', () => {
+        if (authToken) {
+          handleLogout(false);
+        } else {
+          setAuthMode(false);
+          authModal.classList.remove('hidden');
+          authModal.classList.add('flex');
+          setTimeout(() => phoneInput.focus(), 50);
+        }
+      });
+
+      phoneInput.addEventListener('input', (e) => {
+        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+        e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+      });
+
+      pinInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      });
+
+      function setAuthMode(register) {
+        isRegisterMode = register;
+        authErrorMsg.classList.add('hidden');
+        if (register) {
+          modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition';
+          modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition';
+          authSubmitBtn.textContent = '가입하고 현재 데이터 서버저장';
+        } else {
+          modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition';
+          modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition';
+          authSubmitBtn.textContent = '로그인 및 서버저장 연동';
+        }
+      }
+
+      document.getElementById('authCloseBtn').addEventListener('click', () => {
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+      });
+
+      modeLoginBtn.addEventListener('click', () => setAuthMode(false));
+      modeRegisterBtn.addEventListener('click', () => setAuthMode(true));
+
+      document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        authErrorMsg.classList.add('hidden');
+
+        const rawDigits = phoneInput.value.replace(/\D/g, '');
+        const pin = pinInput.value.trim();
+
+        if (rawDigits.length !== 8) {
+          authErrorMsg.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
+          authErrorMsg.classList.remove('hidden');
+          phoneInput.focus();
+          return;
+        }
+        if (!/^\d{4}$/.test(pin)) {
+          authErrorMsg.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
+          authErrorMsg.classList.remove('hidden');
+          pinInput.focus();
+          return;
+        }
+
+        const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
+        const endpoint = isRegisterMode ? '/api/register' : '/api/login';
+
+        if (isAdminAccount(fullPhoneId)) {
+          state.isVip = true;
+          if (!state.ownedWeapons.includes('light_sword')) state.ownedWeapons.push('light_sword');
+          if (!state.ownedPets.includes('gold_haetae')) state.ownedPets.push('gold_haetae');
+        }
+
+        const registerInitialState = { ...state, ownerUsername: fullPhoneId, updatedAt: Date.now() };
+        const encodedScore = encodeScoreWithMeta(state.power, state.honorLevel, state.currentRegionId, state.equippedWeaponId);
+        const payload = isRegisterMode
+          ? { username: fullPhoneId, password: pin, initialSaveData: registerInitialState, saveData: registerInitialState, score: encodedScore, power: state.power, honorLevel: state.honorLevel, equippedWeaponId: state.equippedWeaponId, currentRegionId: state.currentRegionId, gameId: GAME_ID }
+          : { username: fullPhoneId, password: pin, gameId: GAME_ID };
+
+        try {
+          const res = await apiFetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            authErrorMsg.textContent = data.error || '처리 중 오류가 발생했습니다.';
+            authErrorMsg.classList.remove('hidden');
+            return;
+          }
+
+          authToken = data.token;
+          currentUsername = data.username || fullPhoneId;
+          lastKnownUsername = currentUsername;
+          safeSetStorage(TOKEN_KEY, authToken);
+          safeSetStorage(USER_KEY, currentUsername);
+          safeSetStorage(LAST_USER_KEY, currentUsername);
+
+          if (!isRegisterMode) {
+            const rawLoginSave = data?.saveData ?? data?.save_data ?? data?.data;
+            if (rawLoginSave) {
+              const parsedSave = typeof rawLoginSave === 'string' ? JSON.parse(rawLoginSave) : rawLoginSave;
+              const decoded = decodeScoreMeta(data?.score || parsedSave?.power || 1);
+              const serverStateObj = {
+                ...(parsedSave || {}),
+                power: Math.max(Number(parsedSave?.power || 1), decoded.power),
+                honorLevel: Math.max(Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0), Number(data?.honorLevel ?? data?.honor_level ?? 0), decoded.hasEncodedMeta ? decoded.honorLevel : 0),
+                equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || (decoded.hasEncodedMeta ? decoded.weaponId : 'wooden_sword'),
+                currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || (decoded.hasEncodedMeta ? decoded.regionId : 'village'),
+                isVip: Boolean(data?.isVip || parsedSave?.isVip)
+              };
+              const accountBackup = getAccountSavedState(currentUsername);
+              const baseLocal = accountBackup ? mergePlayerStates(state, accountBackup, currentUsername) : state;
+              state = mergePlayerStates(baseLocal, serverStateObj, currentUsername);
+              safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+              recordUserRankSnapshot(currentUsername, state);
+              await syncSaveToServer(false);
+            } else {
+              await loadFromServer();
+            }
+          } else {
+            state = sanitizeState({ ...state, ownerUsername: currentUsername, updatedAt: Date.now() });
+            safeSetStorage(STORAGE_KEY, JSON.stringify(state));
+            recordUserRankSnapshot(currentUsername, state);
+            await syncSaveToServer(false);
+          }
+
+          isTossWidgetRendered = false;
+          updateAuthHeaderUI();
+          updateUI();
+          await fetchAndRenderRanking(false, true);
+          if (state.bgmEnabled) startBGM();
+
+          authModal.classList.add('hidden');
+          authModal.classList.remove('flex');
+          pinInput.value = '';
+          playPurchaseSound();
+
+          showToast(isRegisterMode ? `🟨 [${data.nickname || currentUsername}] 가입 완료!` : `🟨 [${data.nickname || currentUsername}] 로그인 완료!`);
+        } catch (err) {
+          authErrorMsg.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
+          authErrorMsg.classList.remove('hidden');
+        }
+      });
+
+      let lastTimestamp = 0;
+      function gameLoop(timestamp) {
+        const dt = lastTimestamp ? Math.min(0.05, (timestamp - lastTimestamp) / 1000) : 0.016;
+        lastTimestamp = timestamp;
+        anim.time += dt;
+
+        if (anim.heroDash > 0) anim.heroDash = Math.max(0, anim.heroDash - dt * 4.8);
+        if (anim.swingProgress > 0) {
+          anim.swingProgress += dt * 5.2;
+          if (anim.swingProgress >= 1) anim.swingProgress = 0;
+        }
+        if (anim.monsterHit > 0) anim.monsterHit = Math.max(0, anim.monsterHit - dt * 4.5);
+        if (anim.hitFlash > 0) anim.hitFlash = Math.max(0, anim.hitFlash - dt * 7.5);
+        if (anim.screenShake > 0) anim.screenShake = Math.max(0, anim.screenShake - dt * 28);
+        if (anim.petCheerBoost > 0) anim.petCheerBoost = Math.max(0, anim.petCheerBoost - dt * 2.8);
+        if (anim.petBubbleTimer > 0) anim.petBubbleTimer = Math.max(0, anim.petBubbleTimer - dt);
+
+        const comboBadge = document.getElementById('comboBadge');
+        if (anim.comboTimer > 0) {
+          anim.comboTimer -= dt;
+          if (anim.combo >= 2) {
+            comboBadge.classList.remove('opacity-0'); comboBadge.classList.add('opacity-100');
+            document.getElementById('comboCountText').textContent = `${anim.combo} COMBO`;
+            document.getElementById('comboBonusText').textContent =
+              anim.combo >= 30 ? '초고속 광폭 연타!' : anim.combo >= 10 ? '맹렬한 연속 공격!' : '연속 타격 중!';
+          }
+          if (anim.comboTimer <= 0) {
+            anim.combo = 0;
+            comboBadge.classList.remove('opacity-100'); comboBadge.classList.add('opacity-0');
+          }
+        }
+
+        ctx.save();
+        if (anim.screenShake > 0) {
+          ctx.translate((Math.random() - 0.5) * anim.screenShake, (Math.random() - 0.5) * anim.screenShake);
+        }
+
+        const region = getCurrentRegion();
+        const weapon = getEquippedWeapon();
+        const groundY = canvasHeight * 0.78;
+
+        drawEnvironment(region);
+        drawMonster(canvasWidth * 0.72, groundY, region);
+        drawCheerPet(canvasWidth * 0.14, groundY);
+        drawHero(canvasWidth * 0.30, groundY, weapon);
+        updateAndDrawEffects(dt);
+        ctx.restore();
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      async function initGame() {
+        resizeCanvas();
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('paymentKey') && params.get('orderId') && !state.isVip) {
+            state.isVip = true;
+            state = sanitizeState(state);
+            saveState(true);
+            showToast('👑 VIP 영구 패키지 결제가 완료되어 모든 혜택이 즉시 해금되었습니다!');
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }
+        } catch (e) {}
+
+        updateAuthHeaderUI();
+        updateUI();
+        requestAnimationFrame(gameLoop);
+
+        if (authToken) await loadFromServer();
+        await fetchAndRenderRanking(false, true);
+        setTimeout(() => {
+          if (state.bgmEnabled) startBGM();
+        }, 800);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGame);
+      } else {
+        initGame();
+      }
+    })();
+  </script>
+</body>
+</html>
