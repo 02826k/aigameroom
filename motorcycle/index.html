@@ -21,64 +21,69 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 .vip-btn-glow{animation:vp 2.2s infinite ease-in-out}
 @keyframes vp{0%,100%{box-shadow:0 0 8px rgba(168,85,247,.45)}50%{box-shadow:0 0 15px rgba(232,121,249,.8)}}
 #hudSpeed{font-variant-numeric:tabular-nums}
+#fullscreenMain:fullscreen{
+  max-width:100%!important;
+  width:100vw!important;
+  height:100dvh!important;
+  background:#0a0f1a!important;
+  padding:6px!important;
+  gap:6px!important;
+  overflow:hidden!important;
+}
+#fullscreenMain:fullscreen #viewportSection{
+  flex:1 1 0%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
 </style>
 </head>
-<body class="min-h-screen flex flex-col">
-<header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 sm:px-4 py-2 sticky top-0 z-30">
-<div class="max-w-5xl mx-auto flex flex-col gap-1.5">
-<div class="flex flex-wrap items-center justify-between gap-2">
-<div class="flex items-center gap-2 flex-wrap min-w-0">
-<span class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500/30 to-rose-600/30 border border-orange-400/40 flex items-center justify-center text-sm">🏍️</span>
-<h1 class="text-sm font-extrabold tracking-tight">오토바이 레이싱 <span class="text-orange-400">3D</span></h1>
-<span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300">👤 게스트</span>
-<button id="vipOpenBtn" type="button" class="vip-btn-glow px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-fuchsia-600 to-indigo-600 text-white border border-amber-300/70 cursor-pointer">👑 <span id="vipHeaderBtnLabel">VIP</span></button>
+<body class="min-h-dvh flex flex-col">
+<header class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 sm:px-4 py-1.5 sticky top-0 z-30 shrink-0">
+<div class="max-w-5xl mx-auto flex flex-col gap-1">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-xl bg-gradient-to-br from-orange-500/30 to-rose-600/30 border border-orange-400/40 flex items-center justify-center text-sm shrink-0">🏍️</span>
+<h1 class="text-sm sm:text-base font-extrabold tracking-tight truncate">오토바이 레이싱 <span class="text-orange-400">3D</span></h1>
 </div>
-<div class="flex items-center gap-1.5">
-<button id="serverSaveGoldBtn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-black bg-gradient-to-b from-amber-300 to-amber-600 text-slate-950 cursor-pointer"><span id="serverSaveBtnLabel">로그인</span></button>
-<button id="logoutBtn" type="button" class="hidden px-2 py-1 rounded-lg text-xs bg-slate-800 border border-slate-700 cursor-pointer">로그아웃</button>
+<button id="authHeaderBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">로그인</button>
 </div>
-</div>
-<div class="flex items-center justify-between gap-2 text-[11px] border-t border-slate-800/60 pt-1.5">
-<p id="syncStatusText" class="text-slate-400 truncate">로그인으로 전적 영구 저장</p>
-<div class="flex gap-1 shrink-0">
-<button id="bgmToggleBtn" type="button" class="px-2 py-1 rounded-md bg-indigo-950/80 border border-indigo-700/50 whitespace-nowrap cursor-pointer">🎵 배경음 ON</button>
-<button id="soundToggleBtn" type="button" class="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 whitespace-nowrap cursor-pointer">🔊 효과음 ON</button>
-<button id="resetOpenBtn" type="button" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold cursor-pointer">대기실로</button>
-</div>
+<div class="flex items-center justify-end gap-1.5 text-[11px] border-t border-slate-800/60 pt-1">
+<button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
+<button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
+<button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
 </div>
 </div>
 </header>
 
-<main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-2 flex flex-col gap-2">
-<!-- Status bar (1줄 통합) -->
-<section class="bg-slate-900/95 border border-orange-500/30 rounded-xl px-2 py-1.5 flex items-center justify-between gap-1.5 overflow-x-auto whitespace-nowrap">
-  <div class="flex items-center gap-1 shrink-0">
-    <span class="text-xs">🏁</span>
-    <span id="scoreDisplay" class="text-xs sm:text-sm font-black text-orange-400 tabular-nums">0 m</span>
-  </div>
-  <span class="text-slate-700 text-[10px]">|</span>
-  <div id="livesDisplay" class="text-xs sm:text-sm font-bold text-rose-400 shrink-0">❤️</div>
-  <button id="bgmChangeBtn" type="button" class="px-2 py-1 rounded-lg bg-indigo-950/90 hover:bg-indigo-900 active:scale-95 border border-indigo-500/60 text-[11px] font-extrabold text-indigo-200 transition cursor-pointer shrink-0">
-    🎵 <span id="bgmTrackDisplay">BGM 1</span>
-  </button>
-  <div id="speedDisplay" class="text-xs sm:text-sm font-extrabold text-cyan-300 tabular-nums shrink-0">0 km/h</div>
-  <span class="text-slate-700 text-[10px]">|</span>
-  <div id="timerDisplay" class="text-[11px] sm:text-xs font-extrabold text-amber-300 tabular-nums shrink-0">00:00</div>
-  <button id="startGameBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black bg-gradient-to-r from-orange-500 to-rose-600 text-slate-950 cursor-pointer active:scale-95 transition shrink-0">시작</button>
+<main id="fullscreenMain" class="flex-1 min-h-0 max-w-5xl w-full mx-auto px-2.5 sm:px-4 py-1.5 sm:py-2 flex flex-col gap-1.5 sm:gap-2">
+<!-- Status bar -->
+<section class="grid grid-cols-2 sm:grid-cols-9 gap-1.5 shrink-0">
+<div class="col-span-2 bg-slate-900/90 border border-orange-500/30 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2">
+<div>
+<div class="text-[10px] text-orange-300/80 font-bold">🏁 3분 완주 · 거리</div>
+<div id="scoreDisplay" class="text-sm sm:text-base font-black text-orange-400">0 m</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button id="startGameBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-black bg-gradient-to-r from-orange-500 to-rose-600 text-slate-950 cursor-pointer active:scale-95 transition">시작</button>
+</div>
+</div>
+<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between sm:block"><div class="text-[10px] text-slate-400">목숨</div><div id="livesDisplay" class="text-xs sm:text-sm font-bold text-rose-400">❤️</div></div>
+<button id="bgmChangeBtn" type="button" class="bg-slate-900/90 hover:bg-slate-800 border border-fuchsia-500/40 rounded-xl px-2.5 py-1.5 flex items-center justify-between sm:block text-left cursor-pointer active:scale-95 transition"><div class="text-[10px] text-slate-400">음악변경</div><div id="bgmTrackLabel" class="text-xs sm:text-sm font-extrabold text-fuchsia-300 whitespace-nowrap">🎵 BGM 1</div></button>
+<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between sm:block"><div class="text-[10px] text-slate-400">속도</div><div id="speedDisplay" class="text-xs sm:text-sm font-extrabold text-cyan-300 tabular-nums">0</div></div>
+<div class="col-span-1 sm:col-span-2 bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1"><div class="text-[10px] text-slate-400">타이머</div><div id="timerDisplay" class="text-xs sm:text-sm font-extrabold text-amber-300 tabular-nums">00:00 / 03:00</div></div>
+<div class="col-span-2 flex items-center justify-end gap-1 shrink-0">
+<button id="rankOpenBtn" type="button" class="px-2 py-1.5 rounded-lg text-[11px] font-black bg-slate-800 hover:bg-slate-700 border border-orange-400/50 text-orange-300 cursor-pointer active:scale-95 transition">🏆 RANK</button>
+<button id="fullscreenBtn" type="button" class="px-2 py-1.5 rounded-lg text-[11px] font-black bg-gradient-to-r from-orange-400 to-rose-500 text-slate-950 cursor-pointer active:scale-95 transition">⛶ 전체화면</button>
+</div>
 </section>
 
-<!-- 3D viewport (높이 확대) -->
-<section class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/50 bg-black h-[60dvh] min-h-[380px] max-h-[660px] sm:h-[min(68vh,660px)]">
+<!-- 3D viewport -->
+<section id="viewportSection" class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/50 bg-black flex-1 min-h-[260px]">
 <div id="viewport" class="absolute inset-0 cursor-pointer"></div>
-<div id="gameOverlay" class="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/65 via-transparent to-slate-950/90 p-2 sm:p-4 overflow-y-auto pointer-events-auto">
+<div id="gameOverlay" class="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/75 via-transparent to-slate-950/80 p-2 sm:p-3 overflow-y-auto pointer-events-auto">
 <div class="w-full min-h-full flex flex-col items-center justify-between gap-2">
-<div class="text-center pt-0.5">
-<div id="overlayTitle" class="text-lg sm:text-2xl font-black text-orange-400 tracking-tight drop-shadow">오토바이 레이싱</div>
-<p id="overlaySub" class="text-[10px] sm:text-xs text-slate-200/90 text-center px-2 drop-shadow">오토바이를 선택하고 차선을 피하며 질주하세요!</p>
-</div>
-
-<div class="w-full max-w-md flex flex-col items-center gap-2 mt-auto pb-1">
-<!-- Bike Selection (Left / Right) -->
+<div class="w-full max-w-md flex flex-col items-center">
 <div id="bikeSelectGrid" class="grid grid-cols-2 gap-2 w-full">
 <button id="bikeCard1" type="button" class="text-left rounded-xl p-2 sm:p-2.5 border-2 border-orange-400 bg-slate-900/85 hover:bg-slate-800/90 transition cursor-pointer relative shadow-lg min-w-0 backdrop-blur-sm">
 <div class="flex flex-wrap items-center justify-between gap-1 mb-0.5">
@@ -94,16 +99,24 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/50">2번 · 👑 VIP</span>
 <span id="bike2LockBadge" class="text-[10px] font-black text-amber-300">🔒 VIP 전용</span>
 </div>
-<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">⚡ 팬텀 GT</div>
-<div class="text-[10px] text-slate-400 leading-tight">VIP 전용 머신</div>
+<div class="text-xs sm:text-sm font-black text-white flex items-center gap-1">🏎️ 캄보르기니</div>
+<div class="text-[10px] text-slate-400 leading-tight">VIP 전용 오픈카</div>
 </button>
 </div>
+</div>
 
-<!-- VIP 3-Part Color Customizer (오토바이 / 하이바 / 몸색깔) -->
+<div id="overlayResultBox" class="hidden text-center bg-slate-950/80 border border-orange-500/40 rounded-xl px-4 py-2 backdrop-blur-sm">
+<div id="overlayTitle" class="text-lg sm:text-2xl font-black text-orange-400 tracking-tight drop-shadow">오토바이 레이싱</div>
+<p id="overlaySub" class="text-[10px] sm:text-xs text-slate-200/90 text-center px-2 drop-shadow"></p>
+</div>
+
+<div class="w-full max-w-md flex flex-col items-center gap-1.5">
+<button id="overlayActionBtn" type="button" class="w-full sm:w-auto px-8 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-rose-500 text-slate-950 font-black text-sm cursor-pointer shadow-lg active:scale-95 transition">레이스 시작</button>
+
 <div id="vipColorPanel" class="w-full rounded-xl border border-purple-500/40 bg-slate-950/85 backdrop-blur-sm p-2 flex flex-col gap-1.5 shadow-lg">
 <div class="flex items-center justify-between gap-1">
 <div class="flex items-center gap-1">
-<button type="button" data-part="bikeColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-fuchsia-600 text-white cursor-pointer">🏍️ 오토바이</button>
+<button type="button" data-part="bikeColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-fuchsia-600 text-white cursor-pointer">🏎️ 차량</button>
 <button type="button" data-part="helmetColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-slate-800 text-slate-300 cursor-pointer">🪖 헬멧</button>
 <button type="button" data-part="suitColor" class="color-part-tab px-2 py-1 rounded-lg text-[10px] font-black bg-slate-800 text-slate-300 cursor-pointer">🧥 몸색깔</button>
 </div>
@@ -111,8 +124,6 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 <div id="colorPaletteRow" class="grid grid-cols-6 gap-1"></div>
 </div>
-
-<button id="overlayActionBtn" type="button" class="w-full sm:w-auto px-8 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-rose-500 text-slate-950 font-black text-sm cursor-pointer shadow-lg active:scale-95 transition">레이스 시작</button>
 </div>
 </div>
 </div>
@@ -124,57 +135,51 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 <div id="fuelText" class="text-[9px] text-amber-100/80 font-bold tabular-nums">100%</div>
 </div>
-<!-- touch zones hint -->
-<div class="absolute bottom-2 left-0 right-0 z-10 pointer-events-none flex justify-center">
-<div class="text-[10px] text-white/75 bg-black/55 px-2.5 py-1 rounded-full max-w-[92%] text-center leading-tight"><span class="sm:hidden">화면 좌·우 터치 / 스와이프 / 하단 버튼으로 이동 · ⛽연료통</span><span class="hidden sm:inline">←→ 차선 · ↑가속 ↓감속 · Space 부스터 · ⛽연료통</span></div>
-</div>
 </section>
 
-<!-- Mobile / Touch Control Bar (2단: 1단 좌/우 이동, 2단 브레이크/부스터/가속) -->
-<section aria-label="주행 조작 버튼" class="flex flex-col gap-2 select-none">
-<div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-<button id="mobileLeftBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[54px] rounded-2xl bg-slate-900/95 border-2 border-sky-500/60 hover:border-sky-400 active:scale-95 active:bg-sky-950 text-sky-200 font-black text-base flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
-<span class="text-xl">◀</span><span>왼쪽 차선</span>
+<!-- Mobile / Touch Control Bar -->
+<section aria-label="주행 조작 버튼" class="flex flex-col gap-1.5 select-none shrink-0">
+<div class="grid grid-cols-2 gap-1.5 sm:gap-2">
+<button id="mobileLeftBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[48px] rounded-2xl bg-slate-900/95 border-2 border-sky-500/60 hover:border-sky-400 active:scale-95 active:bg-sky-950 text-sky-200 font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
+<span class="text-lg">◀</span><span>왼쪽 차선</span>
 </button>
-<button id="mobileRightBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[54px] rounded-2xl bg-slate-900/95 border-2 border-sky-500/60 hover:border-sky-400 active:scale-95 active:bg-sky-950 text-sky-200 font-black text-base flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
-<span>오른쪽 차선</span><span class="text-xl">▶</span>
-</button>
-</div>
-<div class="grid grid-cols-3 gap-2 sm:gap-2.5">
-<button id="mobileBrakeBtn" type="button" style="touch-action:none" class="w-full min-h-[50px] rounded-2xl bg-slate-900/95 border-2 border-rose-500/60 hover:border-rose-400 active:scale-95 text-rose-200 font-black text-sm flex items-center justify-center gap-1.5 shadow-lg transition cursor-pointer">
-<span class="text-base sm:text-lg">🛑</span><span>브레이크</span>
-</button>
-<button id="mobileBoostBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[50px] rounded-2xl bg-gradient-to-b from-cyan-500 to-sky-600 border-2 border-cyan-300/70 active:scale-95 text-slate-950 font-black text-sm flex items-center justify-center gap-1 shadow-lg shadow-cyan-500/20 transition cursor-pointer">
-<span class="text-base">⚡</span><span>부스터</span>
-</button>
-<button id="mobileAccelBtn" type="button" style="touch-action:none" class="w-full min-h-[50px] rounded-2xl bg-gradient-to-b from-orange-400 to-rose-500 border-2 border-orange-300/70 active:scale-95 text-slate-950 font-black text-sm flex items-center justify-center gap-1 shadow-lg shadow-orange-500/20 transition cursor-pointer">
-<span class="text-base">🔥</span><span>가속</span>
+<button id="mobileRightBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[48px] rounded-2xl bg-slate-900/95 border-2 border-sky-500/60 hover:border-sky-400 active:scale-95 active:bg-sky-950 text-sky-200 font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
+<span>오른쪽 차선</span><span class="text-lg">▶</span>
 </button>
 </div>
-</section>
-
-<section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2">
-<div class="flex justify-between items-center">
-<div>
-<div class="text-xs font-extrabold text-orange-300">🏆 명예의 전당</div>
-<div class="text-[10px] text-slate-400">종합점수 = 거리(m) + 최고속도×10 + 먹은 골드(G)</div>
+<div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+<button id="mobileBrakeBtn" type="button" style="touch-action:none" class="w-full min-h-[46px] rounded-2xl bg-slate-900/95 border-2 border-rose-500/60 hover:border-rose-400 active:scale-95 text-rose-200 font-black text-xs sm:text-sm flex items-center justify-center gap-1 shadow-lg transition cursor-pointer">
+<span>🛑</span><span>브레이크</span>
+</button>
+<button id="mobileBoostBtn" type="button" style="touch-action:manipulation" class="w-full min-h-[46px] rounded-2xl bg-gradient-to-b from-cyan-500 to-sky-600 border-2 border-cyan-300/70 active:scale-95 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1 shadow-lg shadow-cyan-500/20 transition cursor-pointer">
+<span>⚡</span><span>부스터</span>
+</button>
+<button id="mobileAccelBtn" type="button" style="touch-action:none" class="w-full min-h-[46px] rounded-2xl bg-gradient-to-b from-orange-400 to-rose-500 border-2 border-orange-300/70 active:scale-95 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+<span>🔥</span><span>가속</span>
+</button>
 </div>
-<button id="refreshRankingBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] bg-slate-800 border border-slate-700 cursor-pointer">새로고침</button>
-</div>
-<div class="rounded-lg border border-orange-500/25 px-3 py-2 flex justify-between text-[11px] bg-slate-950/80">
-<span class="text-slate-400">내 순위</span>
-<span id="myRankDetailText" class="font-bold text-orange-300">로그인 후 등록</span>
-</div>
-<div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto"></div>
-</section>
-
-<section class="bg-gradient-to-r from-slate-900 to-orange-950/20 border border-orange-500/30 rounded-xl p-3 flex justify-between items-center mb-3">
-<div class="flex items-center gap-2"><span class="text-lg">🏍️</span><span class="text-xs font-black text-orange-300">바로가기 설치</span></div>
-<button id="androidInstallBtn" type="button" class="px-3 py-2 rounded-lg bg-orange-500 text-slate-950 text-xs font-black cursor-pointer"><span id="androidInstallBtnText">설치</span></button>
 </section>
 </main>
 
-<div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
+<!-- TOP 10 랭킹 모달 -->
+<div id="motoRankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div class="bg-slate-900 border border-orange-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-sm sm:text-base font-black text-orange-300">🏆 오토바이 레이싱 TOP 10</h2>
+<p class="text-[10px] text-slate-400">종합점수 = 거리(m) + 최고속도×10 + 골드(G)</p>
+</div>
+<button id="motoRankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
+</div>
+<div class="rounded-xl bg-slate-950/90 border border-orange-500/30 px-3 py-2 flex items-center justify-between text-xs">
+<span class="text-slate-300 font-semibold">내 최고 점수</span>
+<span id="myRankDetailText" class="font-black text-orange-300">0 점</span>
+</div>
+<div id="rankingListContainer" class="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto text-xs text-slate-400">기록을 불러오는 중...</div>
+</div>
+</div>
+
+<div id="toastBox" class="pointer-events-none fixed top-3 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 -translate-y-2">
 <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-orange-500/50 text-xs font-bold text-orange-200 shadow-xl">알림</div>
 </div>
 
@@ -191,10 +196,7 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
 <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl max-h-[90dvh] overflow-y-auto">
 <div class="flex items-center justify-between mb-2">
-<div class="flex items-center gap-2">
-<span class="text-lg">🟨</span>
-<h2 class="text-base font-extrabold text-amber-300">서버 저장 계정</h2>
-</div>
+<div class="flex items-center gap-2"><span class="text-lg">🟨</span><h2 class="text-base font-extrabold text-amber-300">서버 저장 계정</h2></div>
 <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1 cursor-pointer">✕</button>
 </div>
 <p class="text-xs text-slate-400 leading-relaxed mb-4">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 간편하게 서버에 데이터를 영구 저장하세요.</p>
@@ -220,13 +222,24 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 </div>
 
-<div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5">
-<h2 class="font-extrabold mb-2">초기화</h2>
-<p class="text-xs text-slate-400 mb-4">기록을 모두 지울까요?</p>
-<div class="flex justify-end gap-2">
-<button id="resetCancelBtn" type="button" class="px-3 py-2 rounded-xl text-xs bg-slate-800 cursor-pointer">취소</button>
-<button id="resetConfirmBtn" type="button" class="px-3 py-2 rounded-xl text-xs bg-rose-600 cursor-pointer">초기화</button>
+<!-- VIP 차량 안내 모달 -->
+<div id="vipAlertModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div class="bg-slate-900 border-2 border-amber-400/60 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
+<div class="text-2xl mb-1.5">👑</div>
+<h3 class="text-sm font-black text-amber-300 mb-1">VIP 차량입니다</h3>
+<p class="text-xs text-slate-300 mb-4">캄보르기니는 VIP 회원 전용 차량입니다.<br/>로비에서 VIP 가입 후 이용할 수 있습니다.</p>
+<button id="vipAlertConfirmBtn" type="button" class="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 shadow cursor-pointer">확인</button>
+</div>
+</div>
+
+<!-- 로그아웃 확인 모달 -->
+<div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center">
+<h3 class="text-sm font-black text-slate-100 mb-1.5">로그아웃</h3>
+<p class="text-xs text-slate-400 mb-4">로그아웃 하시겠습니까?</p>
+<div class="flex gap-2">
+<button id="logoutCancelBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">취소</button>
+<button id="logoutConfirmBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white cursor-pointer">로그아웃</button>
 </div>
 </div>
 </div>
@@ -234,7 +247,6 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 <script type="module">
 import * as THREE from 'three';
 
-// ===== Shared app state (login/ranking) =====
 const GAME_ID = 'moto_racing_3d_v1';
 const CLOUD = 'https://02826k.duckdns.org';
 const local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -242,14 +254,45 @@ const API = local ? '' : CLOUD;
 const TOSS_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
 const VIP_PRICE = 7000;
 const STORAGE = 'moto_racing_3d_save_v1';
-const TOKEN_KEY = 'moto_racing_3d_jwt';
-const USER_KEY = 'moto_racing_3d_user';
+const TOKEN_KEYS = ['hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'gongdaegong_jwt_token', 'aigameroom_jwt_token', 'moto_racing_3d_jwt'];
+const USER_KEYS = ['hero_clicker_username', 'gongdaegong_username', 'aigameroom_username', 'moto_racing_3d_user'];
+const VIP_KEY = 'hero_clicker_is_vip';
+const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
 const FINISH_TIME_SEC = 180;
 const LANES = [-3.2, 0, 3.2];
 
-let authToken = localStorage.getItem(TOKEN_KEY);
-let currentUsername = localStorage.getItem(USER_KEY);
+let authToken = null;
+let currentUsername = null;
 let isRegisterMode = false;
+
+function loadSharedAuth() {
+  authToken = null;
+  currentUsername = null;
+  try {
+    for (const k of TOKEN_KEYS) {
+      const v = localStorage.getItem(k);
+      if (v) { authToken = v; break; }
+    }
+    for (const k of USER_KEYS) {
+      const v = localStorage.getItem(k);
+      if (v) { currentUsername = v; break; }
+    }
+  } catch {}
+}
+function saveSharedAuth(token, username, isVip) {
+  try {
+    if (token) {
+      TOKEN_KEYS.forEach(k => localStorage.setItem(k, token));
+      if (username) USER_KEYS.forEach(k => localStorage.setItem(k, username));
+      if (isVip) localStorage.setItem(VIP_KEY, 'true');
+    } else {
+      TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
+      USER_KEYS.forEach(k => localStorage.removeItem(k));
+      localStorage.removeItem(VIP_KEY);
+    }
+  } catch {}
+}
+loadSharedAuth();
 
 function maskPhoneMiddle(name) {
   const str = String(name || '');
@@ -272,11 +315,11 @@ const COLOR_OPTIONS = [
   { id: 'rainbow', label: '무지개', hex: 0xff0080, css: 'linear-gradient(135deg,#ef4444,#eab308,#22c55e,#3b82f6,#a855f7)' }
 ];
 const COLOR_IDS = new Set(COLOR_OPTIONS.map(c => c.id));
-const defState = () => ({ highScore: 0, gold: 200, soundEnabled: true, bgmEnabled: true, isVip: false, selectedBike: 1, bikeColor: 'default', helmetColor: 'default', suitColor: 'default', bestTimeSec: null, maxSpeedKmh: 0, bestRunGold: 0, bestTotalScore: 0 });
+const defState = () => ({ highScore: 0, gold: 200, soundEnabled: true, bgmEnabled: true, isVip: localStorage.getItem(VIP_KEY) === 'true', selectedBike: 1, bikeColor: 'default', helmetColor: 'default', suitColor: 'default', bestTimeSec: null, maxSpeedKmh: 0, bestRunGold: 0, bestTotalScore: 0 });
 function sanitize(p) {
   const b = defState();
   if (!p || typeof p !== 'object') return b;
-  const isVip = !!p.isVip;
+  const isVip = !!p.isVip || localStorage.getItem(VIP_KEY) === 'true';
   const rawBike = p.selectedBike === 2 ? 2 : 1;
   return {
     highScore: typeof p.highScore === 'number' && p.highScore >= 0 ? Math.floor(p.highScore) : 0,
@@ -284,10 +327,10 @@ function sanitize(p) {
     soundEnabled: typeof p.soundEnabled === 'boolean' ? p.soundEnabled : true,
     bgmEnabled: typeof p.bgmEnabled === 'boolean' ? p.bgmEnabled : true,
     isVip,
-    selectedBike: isVip ? rawBike : 1,
-    bikeColor: isVip && COLOR_IDS.has(p.bikeColor) ? p.bikeColor : 'default',
-    helmetColor: isVip && COLOR_IDS.has(p.helmetColor) ? p.helmetColor : 'default',
-    suitColor: isVip && COLOR_IDS.has(p.suitColor) ? p.suitColor : 'default',
+    selectedBike: rawBike,
+    bikeColor: COLOR_IDS.has(p.bikeColor) ? p.bikeColor : 'default',
+    helmetColor: COLOR_IDS.has(p.helmetColor) ? p.helmetColor : 'default',
+    suitColor: COLOR_IDS.has(p.suitColor) ? p.suitColor : 'default',
     bestTimeSec: typeof p.bestTimeSec === 'number' && p.bestTimeSec > 0 ? Math.round(p.bestTimeSec * 10) / 10 : null,
     maxSpeedKmh: typeof p.maxSpeedKmh === 'number' && p.maxSpeedKmh >= 0 ? Math.floor(p.maxSpeedKmh) : 0,
     bestRunGold: typeof p.bestRunGold === 'number' && p.bestRunGold >= 0 ? Math.floor(p.bestRunGold) : 0,
@@ -310,7 +353,6 @@ async function syncSave(show) {
     });
     if (res.status === 401 || res.status === 403) { handleLogout(true); return; }
     if (res.ok) {
-      document.getElementById('syncStatusText').textContent = '클라우드 저장 완료';
       if (show) showToast('🟨 저장 완료!');
       fetchRank();
     }
@@ -324,6 +366,7 @@ async function loadServer() {
     const d = await res.json();
     if (res.ok && d.saveData) {
       state = sanitize({ ...d.saveData, isVip: !!(d.isVip || d.saveData?.isVip) });
+      saveSharedAuth(authToken, currentUsername, state.isVip);
       localStorage.setItem(STORAGE, JSON.stringify(state));
       applySelectedBikeMesh();
       updateUI();
@@ -331,25 +374,14 @@ async function loadServer() {
   } catch {}
 }
 
-// Audio (./bgm.mp3, ./bgm2.mp3, ./bgm3.mp3 ... 자동 순환 + Web Audio synth fallback)
-let audioCtx = null, bgmTimer = null, bgmStep = 0, bgmAudio = null;
-let bgmIndex = 1, bgmLoadSeq = 0;
+let audioCtx = null, bgmTimer = null, bgmStep = 0, bgmAudio = null, bgmFileFailed = false;
 const notes = [196, 247, 294, 392, 349, 294, 247, 220];
-
-function getBgmPath(idx) {
-  return idx <= 1 ? './bgm.mp3' : `./bgm${idx}.mp3`;
-}
-function updateBgmTrackUI() {
-  const el = document.getElementById('bgmTrackDisplay');
-  if (el) el.textContent = `BGM ${bgmIndex}`;
-}
 function getAC() {
   if (!audioCtx) { const C = window.AudioContext || window.webkitAudioContext; if (C) audioCtx = new C(); }
   if (audioCtx?.state === 'suspended') audioCtx.resume().catch(() => {});
   return audioCtx;
 }
 function startSynthBGM() {
-  if (bgmTimer) return;
   const ctx = getAC(); if (!ctx) return;
   bgmStep = 0;
   bgmTimer = setInterval(() => {
@@ -362,55 +394,50 @@ function startSynthBGM() {
     } catch {}
   }, 200);
 }
-function playBgmTrack(idx, notify = false, isWrapFallback = false) {
-  stopBGM();
-  bgmIndex = idx;
-  updateBgmTrackUI();
-  if (!state.bgmEnabled) return;
-
-  const seq = ++bgmLoadSeq;
-  const src = getBgmPath(idx);
-  const audio = new Audio(src);
-  audio.loop = true;
-  audio.volume = 0.45;
-  bgmAudio = audio;
-
-  audio.addEventListener('error', () => {
-    if (seq !== bgmLoadSeq) return;
-    if (idx > 1 && !isWrapFallback) {
-      playBgmTrack(1, notify, true);
-    } else if (state.bgmEnabled && !bgmTimer) {
-      startSynthBGM();
+const BGM_FILES = ['./bgm.mp3', './bgm2.mp3', './bgm3.mp3'];
+let bgmIndex = 0;
+function updateBgmLabel() {
+  const el = document.getElementById('bgmTrackLabel');
+  if (el) el.textContent = '🎵 BGM ' + (bgmIndex + 1);
+}
+function playBgmFile(idx) {
+  try {
+    if (bgmAudio) { try { bgmAudio.pause(); } catch {} }
+    const a = new Audio(BGM_FILES[idx]);
+    a.loop = true; a.volume = 0.45;
+    bgmAudio = a;
+    let failed = false;
+    const onFail = () => {
+      if (failed || bgmAudio !== a) return;
+      failed = true;
+      if (idx > 0) {
+        bgmIndex = 0; updateBgmLabel();
+        if (state.bgmEnabled) playBgmFile(0);
+      } else {
+        bgmFileFailed = true; bgmAudio = null;
+        if (state.bgmEnabled && !bgmTimer) startSynthBGM();
+      }
+    };
+    a.addEventListener('error', onFail);
+    const p = a.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(err => {
+        if (bgmAudio !== a) return;
+        if (err && err.name === 'NotSupportedError') onFail();
+        else if (state.bgmEnabled && !bgmTimer) startSynthBGM();
+      });
     }
-  });
-
-  if (notify) {
-    audio.addEventListener('playing', () => {
-      if (seq !== bgmLoadSeq) return;
-      showToast(`🎵 BGM ${bgmIndex} (${idx === 1 ? 'bgm.mp3' : 'bgm' + idx + '.mp3'})`);
-    }, { once: true });
-  }
-
-  const p = audio.play();
-  if (p && typeof p.catch === 'function') {
-    p.catch(() => {});
-  }
+  } catch { bgmFileFailed = true; startSynthBGM(); }
 }
 function startBGM() {
-  playBgmTrack(bgmIndex, false, false);
+  stopBGM();
+  if (!state.bgmEnabled) return;
+  if (bgmIndex === 0 && bgmFileFailed) { startSynthBGM(); return; }
+  playBgmFile(bgmIndex);
 }
 function stopBGM() {
-  bgmLoadSeq++;
   if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
   if (bgmAudio) { try { bgmAudio.pause(); } catch {} }
-}
-function switchNextBGM() {
-  if (!state.bgmEnabled) {
-    state.bgmEnabled = true;
-    saveState(true);
-    updateUI();
-  }
-  playBgmTrack(bgmIndex + 1, true, false);
 }
 function playSound(t) {
   if (!state.soundEnabled) return;
@@ -429,7 +456,6 @@ function playSound(t) {
   }
 }
 
-// ===== THREE.JS SCENE =====
 const viewport = document.getElementById('viewport');
 const gameOverlayEl = document.getElementById('gameOverlay');
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -445,7 +471,6 @@ scene.fog = new THREE.FogExp2(0x0a0f1a, 0.018);
 const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
 camera.position.set(0, 4.5, 8);
 
-// Lights
 const amb = new THREE.AmbientLight(0x4060a0, 0.45);
 scene.add(amb);
 const sun = new THREE.DirectionalLight(0xffe0c0, 1.1);
@@ -463,12 +488,10 @@ const neonR = new THREE.PointLight(0x22d3ee, 0.6, 30);
 neonR.position.set(6, 2, -5);
 scene.add(neonR);
 
-// Day/night cycle
 let dayPhase = 0.35;
 const hemi = new THREE.HemisphereLight(0x87ceeb, 0x1a1a2e, 0.35);
 scene.add(hemi);
 
-// Road strip
 const roadGroup = new THREE.Group();
 scene.add(roadGroup);
 const ROAD_LEN = 40;
@@ -483,13 +506,53 @@ function makeRoadSeg(z) {
   road.receiveShadow = true;
   g.add(road);
   const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 1 });
-  [-1, 1].forEach(side => {
-    const s = new THREE.Mesh(new THREE.PlaneGeometry(8, ROAD_LEN), shoulderMat);
-    s.rotation.x = -Math.PI / 2;
-    s.position.set(side * 10, -0.01, 0);
-    s.receiveShadow = true;
-    g.add(s);
-  });
+  const rightShoulder = new THREE.Mesh(new THREE.PlaneGeometry(10, ROAD_LEN), shoulderMat);
+  rightShoulder.rotation.x = -Math.PI / 2;
+  rightShoulder.position.set(11, -0.01, 0);
+  rightShoulder.receiveShadow = true;
+  g.add(rightShoulder);
+
+  const leftShoulder = new THREE.Mesh(new THREE.PlaneGeometry(8, ROAD_LEN), shoulderMat);
+  leftShoulder.rotation.x = -Math.PI / 2;
+  leftShoulder.position.set(-22, -0.01, 0);
+  leftShoulder.receiveShadow = true;
+  g.add(leftShoulder);
+
+  // 왼쪽 중앙분리대 가드레일 + 반대편 차선 도로(시각용)
+  const oppRoad = new THREE.Mesh(
+    new THREE.PlaneGeometry(10.5, ROAD_LEN),
+    new THREE.MeshStandardMaterial({ color: 0x172030, roughness: 0.92, metalness: 0.08 })
+  );
+  oppRoad.rotation.x = -Math.PI / 2;
+  oppRoad.position.set(-12.5, -0.005, 0);
+  oppRoad.receiveShadow = true;
+  g.add(oppRoad);
+
+  const oppDashMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
+  for (let d = -ROAD_LEN / 2 + 1; d < ROAD_LEN / 2; d += 4) {
+    const dl = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.2), oppDashMat);
+    dl.rotation.x = -Math.PI / 2;
+    dl.position.set(-12.5, 0.015, d);
+    g.add(dl);
+  }
+  const oppOuterEdge = new THREE.Mesh(new THREE.PlaneGeometry(0.16, ROAD_LEN), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+  oppOuterEdge.rotation.x = -Math.PI / 2;
+  oppOuterEdge.position.set(-17.6, 0.02, 0);
+  g.add(oppOuterEdge);
+
+  const railMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.75, roughness: 0.35 });
+  const postMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.5, roughness: 0.6 });
+  const railBeam = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.24, ROAD_LEN), railMat);
+  railBeam.position.set(-6.5, 0.55, 0);
+  g.add(railBeam);
+  const railStripe = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, ROAD_LEN), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
+  railStripe.position.set(-6.5, 0.55, 0);
+  g.add(railStripe);
+  for (let pz = -ROAD_LEN / 2 + 2; pz < ROAD_LEN / 2; pz += 5) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.7, 0.14), postMat);
+    post.position.set(-6.5, 0.35, pz);
+    g.add(post);
+  }
   const lineMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
   for (let i = -1; i <= 1; i += 2) {
     for (let d = -ROAD_LEN / 2 + 1; d < ROAD_LEN / 2; d += 4) {
@@ -516,219 +579,241 @@ for (let i = 0; i < ROAD_SEGS; i++) {
   roadSegs.push(seg);
 }
 
-// City skyline
 const cityGroup = new THREE.Group();
 scene.add(cityGroup);
-for (let i = 0; i < 40; i++) {
-  const h = 4 + Math.random() * 14;
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(2 + Math.random() * 3, h, 2 + Math.random() * 3),
-    new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x0ea5e9, emissiveIntensity: Math.random() * 0.15 })
-  );
-  const side = Math.random() < 0.5 ? -1 : 1;
-  box.position.set(side * (14 + Math.random() * 18), h / 2, -Math.random() * 180);
+let lightsOverride = null, lastNightFlag = false;
+const cityMats = [];
+const winCv = document.createElement('canvas'); winCv.width = winCv.height = 64;
+{ const x = winCv.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, 64, 64);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) if (Math.random() < 0.55) { x.fillStyle = ['#ffe9a8', '#fff3c4', '#bae6fd', '#fde68a'][Math.floor(Math.random() * 4)]; x.fillRect(i * 16 + 4, j * 16 + 4, 8, 9); } }
+const winTex = new THREE.CanvasTexture(winCv);
+for (let i = 0; i < 46; i++) {
+  const w = 2.5 + Math.random() * 3.5, d = 2.5 + Math.random() * 3.5, h = 5 + Math.random() * (Math.random() < 0.25 ? 30 : 18);
+  const tex = winTex.clone(); tex.needsUpdate = true; tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(Math.max(1, Math.round(w * 0.8)), Math.max(1, Math.round(h * 0.4))); tex.offset.set(Math.random(), Math.random());
+  const mat = new THREE.MeshStandardMaterial({ color: [0x1e293b, 0x273449, 0x1f2937, 0x312e81][i % 4], emissive: 0xffe0a0, emissiveMap: tex, emissiveIntensity: 0.2 });
+  cityMats.push(mat);
+  const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  const side = i % 2 ? 1 : -1;
+  box.position.set(side > 0 ? 18 + Math.random() * 18 : -(29 + Math.random() * 18), h / 2, -Math.random() * 180);
+  if (h > 20) { const an = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.5, 5), new THREE.MeshBasicMaterial({ color: 0xff3344 })); an.position.y = h / 2 + 1.25; box.add(an); }
   cityGroup.add(box);
 }
 
-// Stars
+const propsGroup = new THREE.Group(); scene.add(propsGroup);
+const lampPoleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.5 });
+const lampHeadMat = new THREE.MeshBasicMaterial({ color: 0x6b7280 });
+const lampPoolMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5b3a1e, roughness: 0.9 });
+const leafMats = [0x14532d, 0x166534, 0x1a4d2e].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 }));
+function addProp(o, x, z, span) { o.position.set(x, 0, z); o.userData.span = span; propsGroup.add(o); }
+function makeLamp(side) {
+  const g = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 5.2, 8), lampPoleMat); pole.position.y = 2.6; g.add(pole);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.08, 0.08), lampPoleMat); arm.position.set(-side * 0.7, 5.15, 0); g.add(arm);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.22), lampHeadMat); head.position.set(-side * 1.4, 5.08, 0); g.add(head);
+  const pool = new THREE.Mesh(new THREE.CircleGeometry(3, 20), lampPoolMat); pool.rotation.x = -Math.PI / 2; pool.scale.set(1, 1.6, 1); pool.position.set(-side * 1.4, 0.03, 0); g.add(pool);
+  return g;
+}
+function makeTree() {
+  const g = new THREE.Group();
+  const t = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 1.6, 6), trunkMat); t.position.y = 0.8; g.add(t);
+  const lm = leafMats[Math.floor(Math.random() * 3)];
+  [[1.25, 2.0, 2.3], [0.95, 1.7, 3.4], [0.62, 1.4, 4.4]].forEach(([r, hh, y]) => { const c = new THREE.Mesh(new THREE.ConeGeometry(r, hh, 7), lm); c.position.y = y; g.add(c); });
+  g.scale.setScalar(0.8 + Math.random() * 0.6);
+  return g;
+}
+function makeSignTex(name, sub, bg, fg, emoji) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const x = c.getContext('2d');
+  x.fillStyle = bg; x.fillRect(0, 0, 512, 256); x.strokeStyle = fg; x.lineWidth = 10; x.strokeRect(10, 10, 492, 236);
+  x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = '120px sans-serif'; x.fillText(emoji, 92, 132);
+  x.font = '900 76px "Noto Sans KR", sans-serif'; x.fillText(name, 320, 100);
+  x.font = '700 36px "Noto Sans KR", sans-serif'; x.fillText(sub, 320, 182);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const SHOPS = [
+  ['빅버거', '24시간 드라이브스루', '#c8102e', '#ffd400', '🍔'], ['치킨나라', '바삭 · 치킨 · 맥주', '#ffb300', '#7f1d1d', '🍗'],
+  ['피자랜드', '갓 구운 화덕피자', '#166534', '#fef9c3', '🍕'], ['달빛카페', 'COFFEE & DESSERT', '#1e3a8a', '#fde68a', '☕'],
+  ['24 마트', 'CONVENIENCE', '#0f766e', '#ffffff', '🛒'], ['라멘천국', '진한 국물 · 24H', '#7c2d12', '#fde68a', '🍜']
+];
+function makeShop(d, side) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 4.5), new THREE.MeshStandardMaterial({ color: 0x334155 })); body.position.y = 1.5; g.add(body);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.5), new THREE.MeshBasicMaterial({ color: 0xfff3c4 }));
+  face.position.set(-side * 2.52, 1.4, 0); face.rotation.y = -side * Math.PI / 2; g.add(face);
+  const awn = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.18, 4.6), new THREE.MeshBasicMaterial({ color: d[2] })); awn.position.set(-side * 2.9, 2.5, 0); g.add(awn);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 8, 8), lampPoleMat); pole.position.set(-side * 1.5, 4, 3.4); g.add(pole);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 2.2), new THREE.MeshBasicMaterial({ map: makeSignTex(...d), side: THREE.DoubleSide })); sign.position.set(-side * 1.5, 8.6, 3.4); g.add(sign);
+  return g;
+}
+for (let i = 0; i < 8; i++) { addProp(makeLamp(1), 6.7, -i * 20 - 5, 160); addProp(makeLamp(-1), -6.7, -i * 20 - 15, 160); }
+for (let i = 0; i < 14; i++) { addProp(makeTree(), 8.5 + Math.random() * 5, -Math.random() * 150, 160); addProp(makeTree(), -(19 + Math.random() * 5), -Math.random() * 150, 160); }
+SHOPS.forEach((d, i) => { const side = i % 2 ? -1 : 1; addProp(makeShop(d, side), side > 0 ? 11.5 : -22, -40 - i * 80, 480); });
+
 const starGeo = new THREE.BufferGeometry();
 const starPos = new Float32Array(600);
 for (let i = 0; i < 600; i++) starPos[i] = (Math.random() - 0.5) * 200;
 starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
 scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, sizeAttenuation: true })));
 
-// Build realistic sport motorcycle + human rider
 function createBike(variant = 1) {
   const root = new THREE.Group();
   const isVipBike = variant === 2;
+  const neonHex = isVipBike ? 0xe879f9 : 0x22d3ee;
+  const M = o => new THREE.MeshStandardMaterial(o);
 
-  const paintMat = new THREE.MeshStandardMaterial({
-    color: isVipBike ? 0x6d28d9 : 0xf97316,
-    metalness: isVipBike ? 0.72 : 0.55,
-    roughness: isVipBike ? 0.22 : 0.32
+  const paintMat = new THREE.MeshPhysicalMaterial({
+    color: isVipBike ? 0x6d28d9 : 0xf97316, metalness: 0.65, roughness: 0.2,
+    clearcoat: 1, clearcoatRoughness: 0.05, side: THREE.DoubleSide
   });
-  const accentMat = new THREE.MeshStandardMaterial({
-    color: isVipBike ? 0xfbbf24 : 0xef4444,
-    metalness: 0.75,
-    roughness: 0.25,
-    emissive: isVipBike ? 0x78350f : 0x000000,
-    emissiveIntensity: 0.35
-  });
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.45 });
-  const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.25, roughness: 0.7 });
-  const chromeMat = new THREE.MeshStandardMaterial({ color: isVipBike ? 0xfde68a : 0xd1d5db, metalness: 0.9, roughness: 0.18 });
-  const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.92, metalness: 0.05 });
-  const glassMat = new THREE.MeshStandardMaterial({
-    color: isVipBike ? 0x1e1b4b : 0x0ea5e9,
-    transparent: true,
-    opacity: 0.55,
-    metalness: 0.85,
-    roughness: 0.1
-  });
+  const accentMat = M({ color: isVipBike ? 0xfbbf24 : 0xef4444, metalness: 0.75, roughness: 0.25, emissive: isVipBike ? 0x78350f : 0x000000, emissiveIntensity: 0.35 });
+  const frameMat = M({ color: 0x1e293b, metalness: 0.6, roughness: 0.45 });
+  const darkMat = M({ color: 0x0f172a, metalness: 0.25, roughness: 0.7 });
+  const chromeMat = M({ color: isVipBike ? 0xfde68a : 0xd1d5db, metalness: 0.95, roughness: 0.12 });
+  const goldMat = M({ color: 0xfbbf24, metalness: 0.9, roughness: 0.2 });
+  const tireMat = M({ color: 0x111827, roughness: 0.92, metalness: 0.05 });
+  const glassMat = M({ color: isVipBike ? 0x1e1b4b : 0x0ea5e9, transparent: true, opacity: 0.5, metalness: 0.85, roughness: 0.1 });
+  const neonMat = new THREE.MeshBasicMaterial({ color: neonHex });
+  const headlightMat = new THREE.MeshBasicMaterial({ color: isVipBike ? 0xe0f2fe : 0xfef08a });
 
-  const wheelPositions = [
-    { z: -0.68, r: 0.29, tube: 0.085 },
-    { z: 0.58, r: 0.30, tube: 0.105 }
-  ];
-  wheelPositions.forEach((wp, idx) => {
-    const tire = new THREE.Mesh(new THREE.TorusGeometry(wp.r, wp.tube, 12, 24), tireMat);
-    tire.rotation.y = Math.PI / 2;
-    tire.position.set(0, wp.r + 0.04, wp.z);
-    tire.castShadow = true;
-    root.add(tire);
+  // 옆모습(z,y) 윤곽을 압출해서 매끈한 카울/탱크를 만든다
+  const ext = (pts, depth, mat, bevel = 0.02) => {
+    const s = new THREE.Shape();
+    pts.forEach((p, i) => (i ? s.lineTo(p[0], p[1]) : s.moveTo(p[0], p[1])));
+    const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3, curveSegments: 8 });
+    g.translate(0, 0, -depth / 2);
+    g.rotateY(-Math.PI / 2);
+    const m = new THREE.Mesh(g, mat);
+    m.castShadow = true;
+    root.add(m);
+    return m;
+  };
 
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(wp.r * 0.62, wp.r * 0.62, 0.10, 14), chromeMat);
-    rim.rotation.z = Math.PI / 2;
-    rim.position.set(0, wp.r + 0.04, wp.z);
-    root.add(rim);
-
-    const disc = new THREE.Mesh(new THREE.CylinderGeometry(wp.r * 0.45, wp.r * 0.45, 0.13, 12), frameMat);
-    disc.rotation.z = Math.PI / 2;
-    disc.position.set(0, wp.r + 0.04, wp.z);
-    root.add(disc);
+  // 바퀴: 네온 림 + 스포크 + 브레이크 디스크 (달릴 때 회전)
+  const wheels = [];
+  [{ z: -0.68, r: 0.29, tube: 0.085 }, { z: 0.58, r: 0.30, tube: 0.125 }].forEach((wp, idx) => {
+    const cy = wp.r + 0.04;
+    const wg = new THREE.Group();
+    wg.position.set(0, cy, wp.z);
+    const tire = new THREE.Mesh(new THREE.TorusGeometry(wp.r, wp.tube, 16, 40), tireMat);
+    tire.rotation.y = Math.PI / 2; tire.castShadow = true; wg.add(tire);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(wp.r * 0.78, 0.018, 8, 40), neonMat);
+    ring.rotation.y = Math.PI / 2; wg.add(ring);
+    for (let k = 0; k < 3; k++) {
+      const sp = new THREE.Mesh(new THREE.BoxGeometry(0.035, wp.r * 1.56, 0.045), chromeMat);
+      sp.rotation.x = k * Math.PI / 3; wg.add(sp);
+    }
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.12, 12), goldMat);
+    hub.rotation.z = Math.PI / 2; wg.add(hub);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(wp.r * 0.55, wp.r * 0.55, 0.012, 24), chromeMat);
+    disc.rotation.z = Math.PI / 2; disc.position.x = 0.05; wg.add(disc);
+    root.add(wg); wheels.push(wg);
 
     const fender = new THREE.Mesh(
-      new THREE.CylinderGeometry(wp.r + 0.11, wp.r + 0.11, 0.20, 12, 1, true, -Math.PI * 0.38, Math.PI * 0.76),
+      new THREE.CylinderGeometry(wp.r + 0.09, wp.r + 0.09, wp.tube * 2 + 0.04, 16, 1, true, -Math.PI * 0.38, Math.PI * 0.76),
       paintMat
     );
     fender.rotation.z = Math.PI / 2;
     fender.rotation.x = idx === 0 ? -0.35 : 0.45;
-    fender.position.set(0, wp.r + 0.04, wp.z);
+    fender.position.set(0, cy, wp.z);
     root.add(fender);
   });
+  root.userData.wheels = wheels;
 
-  const engine = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.56), frameMat);
-  engine.position.set(0, 0.40, -0.05);
-  engine.castShadow = true;
+  // 엔진 + 스윙암
+  const engine = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.30, 0.42), frameMat);
+  engine.position.set(0, 0.40, -0.02);
   root.add(engine);
-
-  const bellyPan = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.16, 0.68), darkMat);
-  bellyPan.position.set(0, 0.26, -0.06);
-  root.add(bellyPan);
-
   [-0.13, 0.13].forEach(x => {
     const arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.56), frameMat);
     arm.position.set(x, 0.34, 0.32);
     root.add(arm);
   });
 
-  const tank = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.25, 0.52), paintMat);
-  tank.position.set(0, 0.72, -0.18);
-  tank.rotation.x = -0.14;
-  tank.castShadow = true;
-  root.add(tank);
+  // 카울/탱크/테일/시트
+  ext([[-0.78, 0.62], [-0.66, 0.80], [-0.50, 0.98], [-0.36, 0.98], [-0.30, 0.80], [-0.38, 0.52], [-0.66, 0.50]], 0.24, paintMat);
+  ext([[-0.40, 0.84], [-0.30, 0.90], [0.02, 0.88], [0.10, 0.80], [0.0, 0.66], [-0.36, 0.64]], 0.30, paintMat);
+  ext([[-0.58, 0.48], [-0.34, 0.62], [0.10, 0.58], [0.18, 0.30], [-0.20, 0.26], [-0.46, 0.34]], 0.36, paintMat);
+  ext([[-0.50, 0.50], [-0.30, 0.58], [0.05, 0.54], [0.04, 0.50], [-0.30, 0.52], [-0.50, 0.45]], 0.40, accentMat, 0.005);
+  ext([[0.06, 0.74], [0.14, 0.80], [0.50, 0.90], [0.78, 0.86], [0.80, 0.78], [0.50, 0.66], [0.10, 0.64]], 0.26, paintMat);
+  ext([[-0.02, 0.74], [0.12, 0.80], [0.38, 0.84], [0.40, 0.78], [0.10, 0.68]], 0.28, darkMat, 0.01);
 
-  [-0.19, 0.19].forEach(x => {
-    const sideFairing = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.62), paintMat);
-    sideFairing.position.set(x, 0.55, -0.28);
-    sideFairing.rotation.y = x < 0 ? 0.08 : -0.08;
-    root.add(sideFairing);
+  // 역방향 포크(골드) + 트리플 클램프
+  const fork = new THREE.Group();
+  fork.position.set(0, 0.56, -0.56);
+  fork.rotation.x = 0.38;
+  [-0.12, 0.12].forEach(x => {
+    const up = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.34, 10), goldMat);
+    up.position.set(x, 0.15, 0); fork.add(up);
+    const low = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.36, 8), chromeMat);
+    low.position.set(x, -0.14, 0); fork.add(low);
+  });
+  const clamp = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.04, 0.08), darkMat);
+  clamp.position.set(0, 0.30, 0); fork.add(clamp);
+  root.add(fork);
+  const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.10), accentMat);
+  caliper.position.set(0.075, 0.30, -0.57);
+  root.add(caliper);
 
-    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.06, 0.48), accentMat);
-    stripe.position.set(x, 0.62, -0.26);
-    root.add(stripe);
+  // 핸들, 그립, 미러
+  const handlebar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.66, 8), frameMat);
+  handlebar.rotation.z = Math.PI / 2;
+  handlebar.position.set(0, 0.85, -0.38);
+  root.add(handlebar);
+  [-0.30, 0.30].forEach(x => {
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.13, 8), darkMat);
+    grip.rotation.z = Math.PI / 2; grip.position.set(x, 0.85, -0.37); root.add(grip);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.14, 6), frameMat);
+    stem.position.set(x * 0.9, 0.93, -0.42); stem.rotation.z = x < 0 ? 0.4 : -0.4; root.add(stem);
+    const mh = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.05, 0.04), accentMat);
+    mh.position.set(x * 1.05, 0.99, -0.42); root.add(mh);
   });
 
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.26, 0.38), paintMat);
-  nose.position.set(0, 0.74, -0.52);
-  nose.rotation.x = 0.28;
-  nose.castShadow = true;
-  root.add(nose);
-
-  const headlightMat = new THREE.MeshBasicMaterial({ color: isVipBike ? 0xe0f2fe : 0xfef08a });
-  const headlight = new THREE.Mesh(
-    new THREE.BoxGeometry(0.24, 0.09, 0.06),
-    headlightMat
-  );
-  headlight.position.set(0, 0.70, -0.71);
-  root.add(headlight);
+  // 윈드스크린 + LED 헤드라이트 + 네온 DRL
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.22, 0.02), glassMat);
+  windshield.position.set(0, 1.06, -0.40);
+  windshield.rotation.x = 0.9;
+  root.add(windshield);
+  [-0.075, 0.075].forEach(x => {
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.04, 0.04), headlightMat);
+    hl.position.set(x, 0.73, -0.745); hl.rotation.x = 0.6; root.add(hl);
+  });
+  const drl = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.015, 0.03), neonMat);
+  drl.position.set(0, 0.79, -0.70); drl.rotation.x = 0.6; root.add(drl);
 
   const bikeSpot = new THREE.SpotLight(isVipBike ? 0xe0f2fe : 0xfef9c3, 0, 38, Math.PI / 5.5, 0.45, 1.2);
   bikeSpot.position.set(0, 0.72, -0.74);
   bikeSpot.target.position.set(0, 0.1, -18);
   root.add(bikeSpot);
   root.add(bikeSpot.target);
-
   const headBeam = new THREE.Mesh(
     new THREE.ConeGeometry(1.4, 8.5, 14, 1, true),
-    new THREE.MeshBasicMaterial({
-      color: isVipBike ? 0xbae6fd : 0xfef08a,
-      transparent: true,
-      opacity: 0.14,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    })
+    new THREE.MeshBasicMaterial({ color: isVipBike ? 0xbae6fd : 0xfef08a, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false })
   );
   headBeam.rotation.x = Math.PI / 2;
   headBeam.position.set(0, 0.55, -5.0);
   headBeam.visible = false;
   root.add(headBeam);
 
-  root.userData.isVipBike = isVipBike;
-  root.userData.paintMat = paintMat;
-  root.userData.headlightMat = headlightMat;
-  root.userData.bikeSpot = bikeSpot;
-  root.userData.headBeam = headBeam;
-
-  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.04), glassMat);
-  windshield.position.set(0, 0.90, -0.46);
-  windshield.rotation.x = 0.65;
-  root.add(windshield);
-
-  [-0.12, 0.12].forEach(x => {
-    const fork = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.026, 0.64, 8), chromeMat);
-    fork.position.set(x, 0.56, -0.56);
-    fork.rotation.x = -0.38;
-    root.add(fork);
-  });
-
-  const handlebar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.66, 8), frameMat);
-  handlebar.rotation.z = Math.PI / 2;
-  handlebar.position.set(0, 0.85, -0.38);
-  root.add(handlebar);
-
-  [-0.30, 0.30].forEach(x => {
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.13, 8), darkMat);
-    grip.rotation.z = Math.PI / 2;
-    grip.position.set(x, 0.85, -0.37);
-    root.add(grip);
-
-    const mirrorStem = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.14, 6), frameMat);
-    mirrorStem.position.set(x * 0.9, 0.93, -0.42);
-    mirrorStem.rotation.z = x < 0 ? 0.4 : -0.4;
-    root.add(mirrorStem);
-
-    const mirrorHead = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.05, 0.04), darkMat);
-    mirrorHead.position.set(x * 1.05, 0.99, -0.42);
-    root.add(mirrorHead);
-  });
-
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.10, 0.44), darkMat);
-  seat.position.set(0, 0.68, 0.18);
-  root.add(seat);
-
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.40), paintMat);
-  tail.position.set(0, 0.74, 0.46);
-  tail.rotation.x = -0.22;
-  root.add(tail);
-
-  const taillight = new THREE.Mesh(
-    new THREE.BoxGeometry(0.20, 0.06, 0.05),
-    new THREE.MeshBasicMaterial({ color: 0xff2244 })
-  );
-  taillight.position.set(0, 0.75, 0.66);
+  // 테일라이트
+  const tailMatP = new THREE.MeshBasicMaterial({ color: 0x7a1220 });
+  root.userData.tailMat = tailMatP;
+  const taillight = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.03), tailMatP);
+  taillight.position.set(0, 0.80, 0.83);
   root.add(taillight);
 
+  // 머플러 + 부스터 불꽃
   const flames = [];
   [-0.17, 0.17].forEach(x => {
     const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.052, 0.56, 10), chromeMat);
     pipe.rotation.x = Math.PI / 2 - 0.16;
     pipe.position.set(x, 0.40, 0.44);
     root.add(pipe);
-
     const flame = new THREE.Mesh(
       new THREE.ConeGeometry(0.09, 0.52, 8),
-      new THREE.MeshBasicMaterial({ color: isVipBike ? 0xe879f9 : 0x22d3ee, transparent: true, opacity: 0.85 })
+      new THREE.MeshBasicMaterial({ color: neonHex, transparent: true, opacity: 0.85 })
     );
     flame.rotation.x = Math.PI / 2;
     flame.position.set(x, 0.44, 0.88);
@@ -738,14 +823,11 @@ function createBike(variant = 1) {
   });
   root.userData.flames = flames;
 
-  if (isVipBike) {
-    const glow = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.03, 0.9),
-      new THREE.MeshBasicMaterial({ color: 0xd946ef })
-    );
-    glow.position.set(0, 0.19, -0.02);
-    root.add(glow);
-  }
+  root.userData.isVipBike = isVipBike;
+  root.userData.paintMat = paintMat;
+  root.userData.headlightMat = headlightMat;
+  root.userData.bikeSpot = bikeSpot;
+  root.userData.headBeam = headBeam;
 
   const rider = new THREE.Group();
   const suitMat = new THREE.MeshStandardMaterial({
@@ -795,6 +877,9 @@ function createBike(variant = 1) {
   const visor = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.085, 0.12), visorMat);
   visor.position.set(0, 1.23, -0.25);
   rider.add(visor);
+  const helmetStripe = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.02, 0.26), accentMat);
+  helmetStripe.position.set(0, 1.395, -0.14);
+  rider.add(helmetStripe);
 
   [-1, 1].forEach(side => {
     const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.18, 4, 8), jacketMat);
@@ -839,14 +924,197 @@ function createBike(variant = 1) {
 }
 
 const bike1Mesh = createBike(1);
-const bike2Mesh = createBike(2);
+function createVipLamborghini() {
+  const root = new THREE.Group();
+  const paintMat = new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.72, roughness: 0.22 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.35, roughness: 0.65 });
+  const alloyMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.22 });
+  const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.92, metalness: 0.05 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.45, metalness: 0.85, roughness: 0.12 });
+
+  // Lower chassis / front splitter / side skirts
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.76, 0.22, 3.65), darkMat);
+  chassis.position.set(0, 0.24, 0);
+  chassis.castShadow = true;
+  root.add(chassis);
+
+  // Wedge front hood (sloped low nose)
+  const hood = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.28, 1.35), paintMat);
+  hood.position.set(0, 0.44, -1.05);
+  hood.rotation.x = 0.16;
+  hood.castShadow = true;
+  root.add(hood);
+
+  // Side body panels & doors
+  [-0.78, 0.78].forEach(x => {
+    const side = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.42, 2.2), paintMat);
+    side.position.set(x, 0.48, 0.05);
+    side.castShadow = true;
+    root.add(side);
+
+    const intake = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.24, 0.55), darkMat);
+    intake.position.set(x * 1.12, 0.50, 0.42);
+    root.add(intake);
+
+    // Side mirrors
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.09, 0.12), paintMat);
+    mirror.position.set(x * 1.24, 0.72, -0.45);
+    root.add(mirror);
+  });
+
+  // Rear engine deck & Spyder twin buttresses
+  const rearDeck = new THREE.Mesh(new THREE.BoxGeometry(1.70, 0.36, 1.25), paintMat);
+  rearDeck.position.set(0, 0.54, 1.12);
+  rearDeck.castShadow = true;
+  root.add(rearDeck);
+
+  const engineLouvers = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.06, 0.85), darkMat);
+  engineLouvers.position.set(0, 0.73, 1.18);
+  root.add(engineLouvers);
+
+  [-0.56, 0.56].forEach(x => {
+    const buttress = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.72), paintMat);
+    buttress.position.set(x, 0.78, 0.72);
+    buttress.rotation.x = -0.25;
+    root.add(buttress);
+  });
+
+  // Raked Spyder windshield & frame
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.46, 0.05), glassMat);
+  windshield.position.set(0, 0.78, -0.50);
+  windshield.rotation.x = 0.95;
+  root.add(windshield);
+  [-0.75, 0.75].forEach(x => {
+    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.48, 0.07), darkMat);
+    pillar.position.set(x, 0.78, -0.50);
+    pillar.rotation.x = 0.95;
+    root.add(pillar);
+  });
+
+  const header = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.05, 0.07), darkMat);
+  header.position.set(0, 0.914, -0.314); header.rotation.x = 0.95; root.add(header);
+  [-0.88, 0.88].forEach(x => {
+    const mir = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 0.1), paintMat);
+    mir.position.set(x, 0.80, -0.42); root.add(mir);
+  });
+
+  // Open-top cockpit interior + 2 sport seats
+  const cockpitFloor = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.12, 1.15), darkMat);
+  cockpitFloor.position.set(0, 0.34, 0.05);
+  root.add(cockpitFloor);
+
+  [-0.36, 0.36].forEach(x => {
+    const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.46, 0.14), darkMat);
+    seatBack.position.set(x, 0.62, 0.34);
+    seatBack.rotation.x = -0.2;
+    root.add(seatBack);
+  });
+
+  // Driver inside left seat (helmet + racing suit)
+  const suitMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.2 });
+  const jacketMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.55, metalness: 0.25 });
+  const helmetMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.65, roughness: 0.2 });
+  const driverTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.24, 4, 8), jacketMat);
+  driverTorso.position.set(-0.36, 0.64, 0.20);
+  driverTorso.rotation.x = 0.25;
+  root.add(driverTorso);
+  const driverHelmet = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), helmetMat);
+  driverHelmet.position.set(-0.36, 0.90, 0.16);
+  root.add(driverHelmet);
+  const driverVisor = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.07, 0.10), new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.9, roughness: 0.1 }));
+  driverVisor.position.set(-0.36, 0.90, 0.06);
+  root.add(driverVisor);
+
+  // 4 Sport Wheels
+  [[-0.86, 0.30, -1.12], [0.86, 0.30, -1.12], [-0.88, 0.32, 1.10], [0.88, 0.32, 1.10]].forEach(p => {
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(p[1], p[1], 0.24, 16), tireMat);
+    tire.rotation.z = Math.PI / 2;
+    tire.position.set(...p);
+    tire.castShadow = true;
+    root.add(tire);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(p[1] * 0.66, p[1] * 0.66, 0.25, 10), alloyMat);
+    rim.rotation.z = Math.PI / 2;
+    rim.position.set(...p);
+    root.add(rim);
+  });
+
+  // Front LED headlights + night spot beam
+  const headlightMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
+  [-0.58, 0.58].forEach(x => {
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.045, 0.07), headlightMat);
+    hl.rotation.z = x < 0 ? -0.14 : 0.14;
+    hl.position.set(x, 0.46, -1.76);
+    root.add(hl);
+  });
+  const mkSpot = x => {
+    const sp = new THREE.SpotLight(0xe0f2fe, 0, 42, Math.PI / 7, 0.5, 1.2);
+    sp.position.set(x, 0.5, -1.8);
+    sp.target.position.set(x, 0.1, -20);
+    root.add(sp); root.add(sp.target);
+    return sp;
+  };
+  const mkBeam = x => {
+    const bm = new THREE.Mesh(
+      new THREE.ConeGeometry(0.85, 9.5, 14, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false })
+    );
+    bm.rotation.x = Math.PI / 2;
+    bm.position.set(x, 0.45, -6.5);
+    bm.visible = false;
+    root.add(bm);
+    return bm;
+  };
+  const bikeSpot = mkSpot(-0.58), bikeSpot2 = mkSpot(0.58);
+  const headBeam = mkBeam(-0.58), headBeam2 = mkBeam(0.58);
+
+  // Rear Y-shaped LED taillights & twin exhaust flames
+  const tailMat = new THREE.MeshBasicMaterial({ color: 0x7a1220 });
+  [-0.58, 0.58].forEach(x => {
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), tailMat);
+    tl.position.set(x, 0.56, 1.78);
+    root.add(tl);
+  });
+  const rearDiffuser = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.18, 0.14), darkMat);
+  rearDiffuser.position.set(0, 0.28, 1.76);
+  root.add(rearDiffuser);
+
+  const flames = [];
+  [-0.32, 0.32].forEach(x => {
+    const flame = new THREE.Mesh(
+      new THREE.ConeGeometry(0.11, 0.6, 8),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 })
+    );
+    flame.rotation.x = Math.PI / 2;
+    flame.position.set(x, 0.30, 2.05);
+    flame.visible = false;
+    root.add(flame);
+    flames.push(flame);
+  });
+
+  root.userData.isVipBike = true;
+  root.userData.isSupercar = true;
+  root.userData.paintMat = paintMat;
+  root.userData.helmetMat = helmetMat;
+  root.userData.jacketMat = jacketMat;
+  root.userData.suitMat = suitMat;
+  root.userData.headlightMat = headlightMat;
+  root.userData.bikeSpot = bikeSpot;
+  root.userData.tailMat = tailMat;
+  root.userData.headBeam = headBeam;
+  root.userData.bikeSpot2 = bikeSpot2;
+  root.userData.headBeam2 = headBeam2;
+  root.userData.flames = flames;
+  return root;
+}
+
+const bike2Mesh = createVipLamborghini();
 let player = state.selectedBike === 2 && state.isVip ? bike2Mesh : bike1Mesh;
 player.position.set(0, 0, 0);
 scene.add(player);
 
 function applyColorToMat(mat, colorId, defaultHex, defaultMetal, defaultRough) {
   if (!mat) return;
-  if (!state.isVip || !colorId || colorId === 'default') {
+  if (!colorId || colorId === 'default') {
     mat.color.setHex(defaultHex);
     mat.metalness = defaultMetal;
     mat.roughness = defaultRough;
@@ -859,18 +1127,27 @@ function applyColorToMat(mat, colorId, defaultHex, defaultMetal, defaultRough) {
   mat.roughness = opt.rough ?? (opt.id === 'gold' ? 0.16 : 0.25);
 }
 
-function applyBikeCustomColors() {
-  [bike1Mesh, bike2Mesh].forEach(bk => {
-    const vipB = !!bk.userData.isVipBike;
-    applyColorToMat(bk.userData.paintMat, state.bikeColor, vipB ? 0x6d28d9 : 0xf97316, vipB ? 0.72 : 0.55, vipB ? 0.22 : 0.32);
-    applyColorToMat(bk.userData.helmetMat, state.helmetColor, vipB ? 0x0f172a : 0x0ea5e9, 0.65, 0.22);
-    applyColorToMat(bk.userData.jacketMat, state.suitColor, vipB ? 0x4c1d95 : 0x334155, 0.25, 0.55);
-    applyColorToMat(bk.userData.suitMat, state.suitColor, vipB ? 0x1e1b4b : 0x1e293b, 0.2, 0.65);
-  });
+function applyBikeCustomColors(forceBasicRed = false) {
+  if (forceBasicRed) {
+    applyColorToMat(bike1Mesh.userData.paintMat, 'default', 0xef4444, 0.55, 0.32);
+    applyColorToMat(bike1Mesh.userData.helmetMat, 'default', 0xef4444, 0.65, 0.22);
+    applyColorToMat(bike1Mesh.userData.jacketMat, 'default', 0x334155, 0.25, 0.55);
+    applyColorToMat(bike1Mesh.userData.suitMat, 'default', 0x1e293b, 0.2, 0.65);
+  } else {
+    applyColorToMat(bike1Mesh.userData.paintMat, state.bikeColor, 0xef4444, 0.55, 0.32);
+    applyColorToMat(bike1Mesh.userData.helmetMat, state.helmetColor, 0x0ea5e9, 0.65, 0.22);
+    applyColorToMat(bike1Mesh.userData.jacketMat, state.suitColor, 0x334155, 0.25, 0.55);
+    applyColorToMat(bike1Mesh.userData.suitMat, state.suitColor, 0x1e293b, 0.2, 0.65);
+  }
+
+  applyColorToMat(bike2Mesh.userData.paintMat, state.bikeColor, 0xeab308, 0.72, 0.22);
+  applyColorToMat(bike2Mesh.userData.helmetMat, state.helmetColor, 0xf8fafc, 0.65, 0.22);
+  applyColorToMat(bike2Mesh.userData.jacketMat, state.suitColor, 0x334155, 0.25, 0.55);
+  applyColorToMat(bike2Mesh.userData.suitMat, state.suitColor, 0x1e293b, 0.2, 0.65);
 }
 
 function applySelectedBikeMesh() {
-  const want = state.selectedBike === 2 && state.isVip ? bike2Mesh : bike1Mesh;
+  const want = state.selectedBike === 2 ? bike2Mesh : bike1Mesh;
   if (player !== want) {
     want.position.copy(player.position);
     want.rotation.copy(player.rotation);
@@ -881,7 +1158,6 @@ function applySelectedBikeMesh() {
   applyBikeCustomColors();
 }
 
-// Overlay show/hide helper
 function setOverlayVisible(visible) {
   if (visible) {
     gameOverlayEl.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -892,7 +1168,6 @@ function setOverlayVisible(visible) {
   }
 }
 
-// Traffic pool (Cars + Buses)
 const carPool = [];
 const busPool = [];
 const coinPool = [];
@@ -915,9 +1190,12 @@ function createCar(color) {
   glass.position.set(0, 0.85, 0.5); g.add(glass);
   const lightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
   g.userData.headlightMat = lightMat;
+  const tailMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
   [-0.5, 0.5].forEach(x => {
     const l = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.12, 0.08), lightMat);
     l.position.set(x, 0.4, 1.62); g.add(l);
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.12, 0.08), tailMat);
+    tl.position.set(x, 0.44, -1.62); g.add(tl);
   });
   [[-0.55, 0.22, 1.1], [0.55, 0.22, 1.1], [-0.55, 0.22, -1.1], [0.55, 0.22, -1.1]].forEach(p => {
     const w = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.18, 10), new THREE.MeshStandardMaterial({ color: 0x111 }));
@@ -937,14 +1215,12 @@ function createBus(bodyColor = 0x2563eb) {
   body.position.y = 1.28;
   body.castShadow = true;
   g.add(body);
-
   const roof = new THREE.Mesh(
     new THREE.BoxGeometry(1.98, 0.14, 6.24),
     new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 })
   );
   roof.position.y = 2.28;
   g.add(roof);
-
   [-1.2, 1.2].forEach(z => {
     const ac = new THREE.Mesh(
       new THREE.BoxGeometry(1.1, 0.18, 1.0),
@@ -953,28 +1229,24 @@ function createBus(bodyColor = 0x2563eb) {
     ac.position.set(0, 2.42, z);
     g.add(ac);
   });
-
   const sideWinMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.65, roughness: 0.2 });
   [-0.985, 0.985].forEach(x => {
     const winStrip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.72, 5.5), sideWinMat);
     winStrip.position.set(x, 1.56, 0);
     g.add(winStrip);
   });
-
   const frontGlass = new THREE.Mesh(
     new THREE.BoxGeometry(1.75, 0.85, 0.06),
     new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.55, metalness: 0.8 })
   );
   frontGlass.position.set(0, 1.58, 3.10);
   g.add(frontGlass);
-
   const destSign = new THREE.Mesh(
     new THREE.BoxGeometry(1.1, 0.18, 0.05),
     new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
   );
   destSign.position.set(0, 2.12, 3.11);
   g.add(destSign);
-
   const headMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
   g.userData.headlightMat = headMat;
   const tailMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
@@ -986,7 +1258,6 @@ function createBus(bodyColor = 0x2563eb) {
     tl.position.set(x, 0.62, -3.11);
     g.add(tl);
   });
-
   [[-0.86, 0.34, 1.95], [0.86, 0.34, 1.95], [-0.86, 0.34, -1.95], [0.86, 0.34, -1.95]].forEach(p => {
     const w = new THREE.Mesh(
       new THREE.CylinderGeometry(0.34, 0.34, 0.24, 12),
@@ -996,7 +1267,6 @@ function createBus(bodyColor = 0x2563eb) {
     w.position.set(...p);
     g.add(w);
   });
-
   g.visible = false;
   scene.add(g);
   return g;
@@ -1039,7 +1309,6 @@ for (let i = 0; i < 4; i++) busPool.push(createBus([0x2563eb, 0x16a34a, 0xdc2626
 for (let i = 0; i < 8; i++) coinPool.push(createCoin());
 for (let i = 0; i < 6; i++) fuelPool.push(createFuelCan());
 
-// Game vars
 let running = false;
 let distance = 0, lives = 1, elapsedTime = 0, runMaxSpeed = 0, runGold = 0;
 let isCleared = false, overlayLockUntil = 0;
@@ -1077,12 +1346,61 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+window.addEventListener('orientationchange', () => { setTimeout(resize, 120); setTimeout(resize, 350); });
 if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resize).observe(viewport);
 resize();
 
+// Portrait-only Fullscreen
+const fullscreenMain = document.getElementById('fullscreenMain');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+function lockPortrait() {
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('portrait').catch(() => {});
+  }
+}
+fullscreenBtn.onclick = async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await fullscreenMain.requestFullscreen();
+      lockPortrait();
+    } else {
+      lockPortrait();
+      await document.exitFullscreen();
+    }
+  } catch {
+    showToast('이 브라우저에서는 전체화면을 지원하지 않습니다.');
+  }
+  setTimeout(resize, 100);
+  setTimeout(resize, 300);
+};
+document.addEventListener('fullscreenchange', () => {
+  const isFs = Boolean(document.fullscreenElement);
+  fullscreenBtn.textContent = isFs ? '✕ 축소' : '⛶ 전체화면';
+  lockPortrait();
+  setTimeout(resize, 100);
+  setTimeout(resize, 300);
+});
+
+const vipAlertModal = document.getElementById('vipAlertModal');
+document.getElementById('vipAlertConfirmBtn').onclick = () => {
+  vipAlertModal.classList.add('hidden');
+  vipAlertModal.classList.remove('flex');
+};
+vipAlertModal.onclick = (e) => {
+  if (e.target === vipAlertModal) {
+    vipAlertModal.classList.add('hidden');
+    vipAlertModal.classList.remove('flex');
+  }
+};
+
 function startGame() {
+  if (!state.isVip && state.selectedBike === 2) {
+    vipAlertModal.classList.remove('hidden');
+    vipAlertModal.classList.add('flex');
+    return;
+  }
   applySelectedBikeMesh();
+  if (!state.isVip) applyBikeCustomColors(true);
   distance = 0; lives = state.isVip ? 3 : 1; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false;
   speed = 12; boostT = 0; invuln = 0; nearMissCd = 0; crashFlash = 0;
   fuel = FUEL_MAX; lowFuelWarned = false; throttle = 0; keysUD.up = false; keysUD.down = false;
@@ -1098,6 +1416,7 @@ function startGame() {
   spawnT = 1.2; coinSpawnT = 2; fuelSpawnT = 3.5;
   running = true;
   if (state.bgmEnabled) startBGM();
+  document.getElementById('overlayResultBox').classList.add('hidden');
   setOverlayVisible(false);
   updateUI();
 }
@@ -1125,6 +1444,7 @@ function finishGameWithReason(titleText) {
   if (runGold > state.bestRunGold) { state.bestRunGold = runGold; changed = true; }
   if (runTotal > state.bestTotalScore) { state.bestTotalScore = runTotal; changed = true; }
   if (changed) saveState(true);
+  document.getElementById('overlayResultBox').classList.remove('hidden');
   document.getElementById('overlayTitle').textContent = titleText;
   document.getElementById('overlaySub').textContent = `종합 ${runTotal.toLocaleString()}점 (거리 ${d.toLocaleString()}m · 최고 ${runMaxSpeed}km/h · 골드 +${runGold.toLocaleString()}G)`;
   document.getElementById('overlayActionBtn').textContent = '다시 레이스';
@@ -1179,12 +1499,12 @@ function spawnCar() {
 
   mesh.visible = true;
   mesh.position.set(LANES[li], 0, spawnZ);
-  mesh.rotation.y = 0;
+  mesh.rotation.y = Math.PI;
   activeCars.push({
     mesh,
     lane: li,
     z: spawnZ,
-    speed: (isBus ? 6 : 8) + Math.random() * 6 + Math.min(1, elapsedTime / FINISH_TIME_SEC) * 8,
+    speed: (isBus ? 7 : 9) + Math.random() * 5 + Math.min(1, elapsedTime / FINISH_TIME_SEC) * 4,
     halfLen: isBus ? 3.25 : 1.85,
     halfWidth: isBus ? 1.25 : 1.15
   });
@@ -1206,15 +1526,7 @@ function spawnFuel() {
   activeFuels.push({ mesh, lane: li, z: mesh.position.z });
 }
 
-// Bike selection handlers
 function selectBike(num) {
-  if (num === 2 && !state.isVip) {
-    showToast('👑 2번 오토바이는 VIP 전용입니다!');
-    vipM.classList.remove('hidden');
-    vipM.classList.add('flex');
-    initToss();
-    return;
-  }
   state.selectedBike = num === 2 ? 2 : 1;
   applySelectedBikeMesh();
   saveState(true);
@@ -1249,19 +1561,12 @@ function renderColorPalette() {
   COLOR_OPTIONS.forEach(c => {
     const b = document.createElement('button');
     b.type = 'button';
-    const sel = state.isVip && curVal === c.id;
+    const sel = curVal === c.id;
     b.className = (c.id === 'rainbow' ? 'col-span-2 ' : '') + 'w-full flex items-center justify-center gap-1 px-1 py-1 rounded-lg border text-[10px] font-bold cursor-pointer transition active:scale-95 ' + (
       sel ? 'border-white bg-slate-800 text-white ring-1 ring-amber-300' : 'border-slate-700 bg-slate-900/90 text-slate-300 hover:border-slate-500'
     );
     b.innerHTML = `<span class="w-3 h-3 rounded-full border border-white/40 shrink-0" style="background:${c.css}"></span><span>${c.label}</span>`;
     b.onclick = () => {
-      if (!state.isVip) {
-        showToast('👑 색상 변경은 VIP 전용입니다!');
-        vipM.classList.remove('hidden');
-        vipM.classList.add('flex');
-        initToss();
-        return;
-      }
       state[activeColorPart] = c.id;
       applyBikeCustomColors();
       saveState(true);
@@ -1277,7 +1582,7 @@ function updateBikeSelectUI() {
   const c2 = document.getElementById('bikeCard2');
   const b1 = document.getElementById('bike1SelectedBadge');
   const b2 = document.getElementById('bike2LockBadge');
-  const sel = state.isVip ? state.selectedBike : 1;
+  const sel = state.selectedBike === 2 ? 2 : 1;
 
   if (sel === 1) {
     c1.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-orange-400 bg-slate-900/95 hover:bg-slate-800/95 transition cursor-pointer relative shadow-lg ring-2 ring-orange-400/30 min-w-0';
@@ -1289,27 +1594,25 @@ function updateBikeSelectUI() {
     b1.className = 'text-[10px] font-bold text-slate-400';
   }
 
-  if (!state.isVip) {
-    c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-slate-700/80 bg-slate-900/75 hover:border-purple-500/60 transition cursor-pointer relative shadow-lg opacity-90 min-w-0';
-    b2.textContent = '🔒 VIP 전용';
-    b2.className = 'text-[10px] font-black text-amber-300';
-  } else if (sel === 2) {
+  if (sel === 2) {
     c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-fuchsia-400 bg-slate-900/95 hover:bg-slate-800/95 transition cursor-pointer relative shadow-lg ring-2 ring-fuchsia-400/35 min-w-0';
-    b2.textContent = '✔ 선택됨';
-    b2.className = 'text-[10px] font-black text-emerald-300';
+    b2.textContent = state.isVip ? '✔ 선택됨' : '✔ 미리보기 (VIP)';
+    b2.className = state.isVip ? 'text-[10px] font-black text-emerald-300' : 'text-[10px] font-black text-amber-300';
   } else {
     c2.className = 'text-left rounded-xl p-2 sm:p-3 border-2 border-slate-700 bg-slate-900/85 hover:border-fuchsia-400/60 transition cursor-pointer relative shadow-lg min-w-0';
-    b2.textContent = '👑 선택 가능';
-    b2.className = 'text-[10px] font-bold text-fuchsia-300';
+    b2.textContent = state.isVip ? '👑 선택 가능' : '🔒 VIP 전용';
+    b2.className = state.isVip ? 'text-[10px] font-bold text-fuchsia-300' : 'text-[10px] font-black text-amber-300';
   }
 }
 
-// Input (Keyboard + Viewport Tap & Swipe + Dedicated Left/Right Buttons)
+const motoRankModal = document.getElementById('motoRankModal');
+const logoutConfirmModal = document.getElementById('logoutConfirmModal');
 function isModalOpen() {
-  return !authM.classList.contains('hidden') || !vipM.classList.contains('hidden') || !resetM.classList.contains('hidden');
+  return !authM.classList.contains('hidden') || !vipM.classList.contains('hidden') || !motoRankModal.classList.contains('hidden') || !logoutConfirmModal.classList.contains('hidden') || !vipAlertModal.classList.contains('hidden');
 }
 window.addEventListener('keydown', e => {
   if (isModalOpen()) return;
+  if ((e.key === 'r' || e.key === 'R') && !e.repeat) lightsOverride = !(lightsOverride === null ? lastNightFlag : lightsOverride);
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { changeLane(-1); e.preventDefault(); }
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { changeLane(1); e.preventDefault(); }
   if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
@@ -1331,9 +1634,7 @@ window.addEventListener('keyup', e => {
   if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keysUD.down = false;
 });
 
-// Viewport Tap & Horizontal Swipe support for Mobile
 let swipeStartX = null;
-let swipeStartY = null;
 let swipeMoved = false;
 
 viewport.addEventListener('pointerdown', e => {
@@ -1342,10 +1643,8 @@ viewport.addEventListener('pointerdown', e => {
     return;
   }
   swipeStartX = e.clientX;
-  swipeStartY = e.clientY;
   swipeMoved = false;
 });
-
 viewport.addEventListener('pointermove', e => {
   if (!running || swipeStartX === null || swipeMoved) return;
   const dx = e.clientX - swipeStartX;
@@ -1354,7 +1653,6 @@ viewport.addEventListener('pointermove', e => {
     swipeMoved = true;
   }
 });
-
 viewport.addEventListener('pointerup', e => {
   if (!running || swipeStartX === null) return;
   if (!swipeMoved) {
@@ -1362,13 +1660,10 @@ viewport.addEventListener('pointerup', e => {
     changeLane((e.clientX - r.left) < r.width * 0.5 ? -1 : 1);
   }
   swipeStartX = null;
-  swipeStartY = null;
   swipeMoved = false;
 });
-
 viewport.addEventListener('pointercancel', () => {
   swipeStartX = null;
-  swipeStartY = null;
   swipeMoved = false;
 });
 
@@ -1378,20 +1673,11 @@ document.getElementById('startGameBtn').onclick = () => {
 };
 document.getElementById('overlayActionBtn').onclick = () => startGame();
 
-// Dedicated Left / Right Lane Buttons
 const mobileLeftBtn = document.getElementById('mobileLeftBtn');
 const mobileRightBtn = document.getElementById('mobileRightBtn');
+mobileLeftBtn.addEventListener('pointerdown', e => { e.preventDefault(); changeLane(-1); });
+mobileRightBtn.addEventListener('pointerdown', e => { e.preventDefault(); changeLane(1); });
 
-mobileLeftBtn.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  changeLane(-1);
-});
-mobileRightBtn.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  changeLane(1);
-});
-
-// Below-screen touch/mouse controls (Brake, Accel, Booster)
 const mobileBrakeBtn = document.getElementById('mobileBrakeBtn');
 const mobileAccelBtn = document.getElementById('mobileAccelBtn');
 const mobileBoostBtn = document.getElementById('mobileBoostBtn');
@@ -1420,7 +1706,6 @@ window.addEventListener('blur', () => {
   mobileBrakeBtn.classList.remove('bg-rose-600/40', 'ring-2', 'ring-rose-400', 'scale-95');
   mobileAccelBtn.classList.remove('brightness-110', 'ring-2', 'ring-amber-200', 'scale-95');
 });
-
 mobileBoostBtn.addEventListener('pointerdown', e => {
   e.preventDefault();
   if (!running) return;
@@ -1430,7 +1715,6 @@ mobileBoostBtn.addEventListener('pointerdown', e => {
   }
 });
 
-// Main loop
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
@@ -1481,6 +1765,7 @@ function animate() {
       seg.position.z += speed * dt;
       if (seg.position.z > ROAD_LEN) seg.position.z -= ROAD_SEGS * ROAD_LEN;
     });
+    propsGroup.children.forEach(o => { o.position.z += speed * dt; if (o.position.z > 12) o.position.z -= o.userData.span; });
     cityGroup.children.forEach(b => {
       b.position.z += speed * dt * 0.3;
       if (b.position.z > 20) b.position.z -= 200;
@@ -1488,8 +1773,10 @@ function animate() {
 
     laneX += (targetLaneX - laneX) * Math.min(1, dt * 10);
     player.position.x = laneX;
-    player.rotation.z = (targetLaneX - laneX) * -0.08;
+    player.rotation.z = (targetLaneX - laneX) * (player.userData.isSupercar ? -0.08 : -0.2);
+    if (player.userData.wheels) player.userData.wheels.forEach(w => { w.rotation.x -= speed * dt * 0.35; });
     player.rotation.x = -speed * 0.002;
+    if (player.userData.tailMat) player.userData.tailMat.color.setHex(keysUD.down ? 0xff3b4d : 0x7a1220);
     if (player.userData.flames) {
       player.userData.flames.forEach(fl => {
         fl.visible = boostT > 0;
@@ -1512,8 +1799,8 @@ function animate() {
 
     for (let i = activeCars.length - 1; i >= 0; i--) {
       const c = activeCars[i];
-      c.z += (speed + c.speed) * dt * 0.35;
-      if (c.z > 2) c.z += speed * dt * 0.8;
+      c.z += (speed - c.speed) * dt * 0.72;
+      if (c.z < -95) { c.mesh.visible = false; activeCars.splice(i, 1); continue; }
       c.mesh.position.z = c.z;
       c.mesh.position.x = LANES[c.lane];
       if (c.z > 22) { c.mesh.visible = false; activeCars.splice(i, 1); continue; }
@@ -1531,7 +1818,6 @@ function animate() {
         playSound('coin');
         showToast('💨 아슬아슬! +' + b + 'G');
         saveState(false);
-        updateGoldDisplay();
       }
     }
 
@@ -1552,7 +1838,6 @@ function animate() {
         c.mesh.visible = false;
         activeCoins.splice(i, 1);
         saveState(false);
-        updateGoldDisplay();
       }
     }
 
@@ -1589,6 +1874,7 @@ function animate() {
       if (runTotal > state.bestTotalScore) state.bestTotalScore = runTotal;
       state.bestTimeSec = FINISH_TIME_SEC;
       saveState(true);
+      document.getElementById('overlayResultBox').classList.remove('hidden');
       document.getElementById('overlayTitle').textContent = '🏆 3분 완주 성공!';
       document.getElementById('overlaySub').textContent = `종합 ${runTotal.toLocaleString()}점 · 거리 ${d.toLocaleString()}m · 최고 ${runMaxSpeed}km/h · 골드 +${runGold.toLocaleString()}G`;
       document.getElementById('overlayActionBtn').textContent = '처음부터';
@@ -1615,7 +1901,7 @@ function animate() {
     });
   }
 
-  if (state.isVip) {
+  if (!running || state.isVip) {
     const hue = (clock.elapsedTime * 0.35) % 1;
     if (state.bikeColor === 'rainbow' && player.userData.paintMat) player.userData.paintMat.color.setHSL(hue, 0.9, 0.55);
     if (state.helmetColor === 'rainbow' && player.userData.helmetMat) player.userData.helmetMat.color.setHSL((hue + 0.33) % 1, 0.9, 0.55);
@@ -1631,7 +1917,6 @@ function animate() {
 }
 animate();
 
-function updateGoldDisplay() {}
 function updateUILive() {
   document.getElementById('scoreDisplay').textContent = Math.floor(distance).toLocaleString() + ' m';
   document.getElementById('speedDisplay').textContent = Math.floor(speed * 4.5) + ' km/h';
@@ -1658,9 +1943,7 @@ function updateUILive() {
   if (fTitle) {
     fTitle.className = 'text-[9px] font-bold tracking-wide ' + (pct <= 20 && running ? 'text-rose-400' : 'text-amber-200/90');
   }
-  if (fWrap) {
-    fWrap.classList.toggle('animate-pulse', pct <= 20 && running);
-  }
+  if (fWrap) fWrap.classList.toggle('animate-pulse', pct <= 20 && running);
   const boostBtn = document.getElementById('mobileBoostBtn');
   if (boostBtn) {
     const canBoost = running && boostT <= 0 && fuel > 5;
@@ -1684,21 +1967,12 @@ function updateDayNight(phase) {
   const nightCol = new THREE.Color(0x0a0f1a);
   const dawnCol = new THREE.Color(0xff8c5a);
   let sky = nightCol.clone();
-  if (phase > 0.2 && phase < 0.35) {
-    const t = (phase - 0.2) / 0.15;
-    sky = nightCol.clone().lerp(dawnCol, t);
-  } else if (phase >= 0.35 && phase < 0.45) {
-    const t = (phase - 0.35) / 0.1;
-    sky = dawnCol.clone().lerp(dayCol, t);
-  } else if (phase >= 0.45 && phase < 0.65) {
-    sky = dayCol.clone();
-  } else if (phase >= 0.65 && phase < 0.8) {
-    const t = (phase - 0.65) / 0.15;
-    sky = dayCol.clone().lerp(dawnCol, t);
-  } else if (phase >= 0.8 && phase < 0.9) {
-    const t = (phase - 0.8) / 0.1;
-    sky = dawnCol.clone().lerp(nightCol, t);
-  }
+  if (phase > 0.2 && phase < 0.35) sky = nightCol.clone().lerp(dawnCol, (phase - 0.2) / 0.15);
+  else if (phase >= 0.35 && phase < 0.45) sky = dawnCol.clone().lerp(dayCol, (phase - 0.35) / 0.1);
+  else if (phase >= 0.45 && phase < 0.65) sky = dayCol.clone();
+  else if (phase >= 0.65 && phase < 0.8) sky = dayCol.clone().lerp(dawnCol, (phase - 0.65) / 0.15);
+  else if (phase >= 0.8 && phase < 0.9) sky = dawnCol.clone().lerp(nightCol, (phase - 0.8) / 0.1);
+
   scene.fog.color.copy(sky);
   scene.fog.density = 0.012 + night * 0.012;
   renderer.setClearColor(sky);
@@ -1706,107 +1980,141 @@ function updateDayNight(phase) {
   amb.color.set(night > 0.5 ? 0x304080 : 0xfff0e0);
   hemi.intensity = 0.15 + day * 0.4;
   neonL.intensity = 0.5 + night * 1.2;
+  cityMats.forEach(m => { m.emissiveIntensity = 0.12 + night * 1.0; });
+  lampHeadMat.color.setHex(night > 0.25 ? 0xfff1b8 : 0x6b7280);
+  lampPoolMat.opacity = night * 0.3;
   neonR.intensity = 0.3 + night * 0.8;
   sun.color.set(night > 0.3 ? 0x8899cc : 0xffe0c0);
 
   const isNightNow = elev < 0.08;
+  lastNightFlag = isNightNow;
+  const playerLights = lightsOverride === null ? isNightNow : lightsOverride;
   [bike1Mesh, bike2Mesh].forEach(bk => {
-    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = isNightNow ? 3.5 : 0;
-    if (bk.userData.headBeam) bk.userData.headBeam.visible = isNightNow;
+    if (bk.userData.bikeSpot) bk.userData.bikeSpot.intensity = playerLights ? 3.5 : 0;
+    if (bk.userData.headBeam) bk.userData.headBeam.visible = playerLights;
+    if (bk.userData.bikeSpot2) bk.userData.bikeSpot2.intensity = playerLights ? 3.5 : 0;
+    if (bk.userData.headBeam2) bk.userData.headBeam2.visible = playerLights;
     if (bk.userData.headlightMat) {
       bk.userData.headlightMat.color.setHex(
-        isNightNow ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
+        playerLights ? (bk.userData.isVipBike ? 0xe0f2fe : 0xfef08a) : 0x475569
       );
     }
   });
-  carPool.forEach(c => {
-    if (c.userData.headlightMat) c.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155);
-  });
-  busPool.forEach(b => {
-    if (b.userData.headlightMat) b.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155);
-  });
+  carPool.forEach(c => { if (c.userData.headlightMat) c.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
+  busPool.forEach(b => { if (b.userData.headlightMat) b.userData.headlightMat.color.setHex(isNightNow ? 0xfef08a : 0x334155); });
 }
+
 function updateUI() {
-  updateGoldDisplay();
-  updateBgmTrackUI();
-  document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP중' : 'VIP';
-  document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
-  document.getElementById('bgmToggleBtn').textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+  const sfxBtn = document.getElementById('soundToggleBtn');
+  sfxBtn.textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+  sfxBtn.className = state.soundEnabled
+    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
+  const bgmBtn = document.getElementById('bgmToggleBtn');
+  bgmBtn.textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+  bgmBtn.className = state.bgmEnabled
+    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
+    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
+
   updateBikeSelectUI();
   renderColorPalette();
   updateUILive();
-  const b = document.getElementById('userBadge'), s = document.getElementById('syncStatusText');
-  const loginBtn = document.getElementById('serverSaveGoldBtn'), lo = document.getElementById('logoutBtn');
-  if (authToken && currentUsername) {
-    b.textContent = '📱 ' + maskPhoneMiddle(currentUsername) + (state.isVip ? ' 👑' : '');
-    b.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300';
-    s.textContent = '클라우드 연동 중';
-    loginBtn.classList.add('hidden');
-    lo.classList.remove('hidden');
-  } else {
-    b.textContent = '👤 게스트';
-    b.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300';
-    s.textContent = '로그인으로 전적 영구 저장';
-    loginBtn.classList.remove('hidden');
-    lo.classList.add('hidden');
+
+  const authBtn = document.getElementById('authHeaderBtn');
+  if (authBtn) {
+    if (authToken) {
+      authBtn.textContent = state.isVip ? '👑 VIP 로그아웃' : '로그아웃';
+      authBtn.className = state.isVip
+        ? 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white border border-amber-300/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0'
+        : 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+    } else {
+      authBtn.textContent = '로그인';
+      authBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0';
+    }
   }
 }
+
+let toastTimer = null;
 function showToast(m) {
   const box = document.getElementById('toastBox');
   document.getElementById('toastMsg').textContent = m;
-  box.classList.remove('opacity-0', 'translate-y-2');
+  box.classList.remove('opacity-0', '-translate-y-2');
   box.classList.add('opacity-100', 'translate-y-0');
-  setTimeout(() => { box.classList.add('opacity-0', 'translate-y-2'); box.classList.remove('opacity-100', 'translate-y-0'); }, 2000);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    box.classList.add('opacity-0', '-translate-y-2');
+    box.classList.remove('opacity-100', 'translate-y-0');
+  }, 1900);
 }
 
-// Ranking / auth / vip / reset
 document.getElementById('soundToggleBtn').onclick = () => { state.soundEnabled = !state.soundEnabled; saveState(true); updateUI(); };
+document.getElementById('bgmChangeBtn').onclick = () => {
+  bgmIndex = (bgmIndex + 1) % BGM_FILES.length;
+  updateBgmLabel();
+  if (!state.bgmEnabled) { state.bgmEnabled = true; saveState(true); updateUI(); }
+  startBGM();
+};
 document.getElementById('bgmToggleBtn').onclick = () => {
   state.bgmEnabled = !state.bgmEnabled; saveState(true); updateUI();
   if (state.bgmEnabled) startBGM(); else stopBGM();
 };
-document.getElementById('bgmChangeBtn').onclick = switchNextBGM;
-document.getElementById('refreshRankingBtn').onclick = fetchRank;
+
+document.getElementById('rankOpenBtn').onclick = () => {
+  fetchRank();
+  motoRankModal.classList.remove('hidden');
+  motoRankModal.classList.add('flex');
+};
+document.getElementById('motoRankCloseBtn').onclick = () => {
+  motoRankModal.classList.add('hidden');
+  motoRankModal.classList.remove('flex');
+};
+motoRankModal.onclick = (e) => {
+  if (e.target === motoRankModal) {
+    motoRankModal.classList.add('hidden');
+    motoRankModal.classList.remove('flex');
+  }
+};
+
 async function fetchRank() {
   const box = document.getElementById('rankingListContainer'), my = document.getElementById('myRankDetailText');
+  if (my) my.textContent = `${(state.bestTotalScore || 0).toLocaleString()} 점`;
   try {
     const h = authToken ? { Authorization: 'Bearer ' + authToken } : {};
-    const res = await fetch(API + '/api/ranking?gameId=' + GAME_ID, { headers: h });
+    const res = await fetch(API + '/api/ranking?gameId=' + GAME_ID + '&_t=' + Date.now(), { headers: h });
     const d = await res.json();
     if (!res.ok) throw 0;
-    if (d.myRank) {
-      my.textContent = `${d.totalPlayers}명 중 ${d.myRank.rank}위 · 종합 ${(state.bestTotalScore || d.myRank.score || 0).toLocaleString()}점`;
-    } else if (authToken) {
-      my.textContent = '서버저장 시 순위 반영';
-    } else {
-      my.textContent = '로그인 후 등록';
+    if (d.myRank && my) {
+      my.textContent = `${(d.myRank.score || state.bestTotalScore || 0).toLocaleString()} 점 (${d.myRank.rank}위)`;
+    }
+    const list = (d.rankings || []).slice(0, 10);
+    if (list.length === 0) {
+      box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">아직 등록된 순위가 없습니다.</div>';
+      return;
     }
     box.innerHTML = '';
-    (d.rankings || []).forEach(it => {
+    list.forEach(it => {
       const dist = it.highScore ?? it.saveData?.highScore ?? (it.isMe ? state.highScore : 0);
       const maxSpd = it.maxSpeedKmh ?? it.saveData?.maxSpeedKmh ?? (it.isMe ? state.maxSpeedKmh : 0);
       const rGold = it.bestRunGold ?? it.saveData?.bestRunGold ?? (it.isMe ? state.bestRunGold : 0);
-      const tSec = it.bestTimeSec ?? it.saveData?.bestTimeSec ?? (it.isMe ? state.bestTimeSec : null);
       const parts = [];
       if (dist > 0) parts.push('📏 ' + dist.toLocaleString() + 'm');
       if (maxSpd > 0) parts.push('🚀 ' + maxSpd + 'km/h');
       if (rGold > 0) parts.push('🪙 ' + rGold.toLocaleString() + 'G');
-      parts.push(typeof tSec === 'number' && tSec > 0 ? '⏱️ 완주' : '⏱️ 주행중');
       const r = document.createElement('div');
-      r.className = 'rounded-lg px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-[11px]' + (it.isMe ? ' ring-1 ring-sky-400' : '');
+      r.className = 'rounded-xl px-3 py-2 border bg-slate-950 border-slate-800 flex items-center justify-between gap-2 text-xs' + (it.isMe ? ' border-orange-400/60' : '');
       r.innerHTML =
         '<div class="min-w-0">' +
-          '<div class="font-bold text-slate-100 truncate">' + it.rank + '. ' + maskPhoneMiddle(it.maskedName) + (it.isMe ? ' <span class="text-sky-300 text-[10px]">(나)</span>' : '') + '</div>' +
-          '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + parts.join(' · ') + '</div>' +
+          '<div class="font-bold text-slate-100 truncate">' + it.rank + '위 ' + maskPhoneMiddle(it.maskedName) + (it.isMe ? ' <span class="text-orange-300 text-[10px]">(나)</span>' : '') + '</div>' +
+          (parts.length ? '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + parts.join(' · ') + '</div>' : '') +
         '</div>' +
         '<span class="font-black text-orange-400 shrink-0">' + (it.score || 0).toLocaleString() + ' 점</span>';
       box.appendChild(r);
     });
-  } catch { box.innerHTML = '<div class="text-center text-[11px] text-slate-500 py-3">랭킹 대기 중</div>'; }
+  } catch { box.innerHTML = '<div class="text-center text-xs text-slate-500 py-4">랭킹 대기 중</div>'; }
 }
 
 const vipM = document.getElementById('vipModal');
-document.getElementById('vipOpenBtn').onclick = () => { vipM.classList.remove('hidden'); vipM.classList.add('flex'); initToss(); };
 document.getElementById('vipCloseBtn').onclick = () => { vipM.classList.add('hidden'); vipM.classList.remove('flex'); };
 async function initToss() {
   if (typeof TossPayments === 'undefined') return;
@@ -1841,13 +2149,24 @@ function setAuthMode(register) {
     sb.textContent = '로그인 및 서버저장 연동';
   }
 }
-document.getElementById('serverSaveGoldBtn').onclick = () => {
-  if (authToken) syncSave(true);
-  else {
+document.getElementById('authHeaderBtn').onclick = () => {
+  if (authToken) {
+    logoutConfirmModal.classList.remove('hidden');
+    logoutConfirmModal.classList.add('flex');
+  } else {
     setAuthMode(false);
     authM.classList.remove('hidden'); authM.classList.add('flex');
     setTimeout(() => phone.focus(), 50);
   }
+};
+document.getElementById('logoutCancelBtn').onclick = () => {
+  logoutConfirmModal.classList.add('hidden');
+  logoutConfirmModal.classList.remove('flex');
+};
+document.getElementById('logoutConfirmBtn').onclick = () => {
+  logoutConfirmModal.classList.add('hidden');
+  logoutConfirmModal.classList.remove('flex');
+  handleLogout(false);
 };
 document.getElementById('authCloseBtn').onclick = () => { authM.classList.add('hidden'); authM.classList.remove('flex'); };
 document.getElementById('modeLoginBtn').onclick = () => setAuthMode(false);
@@ -1858,45 +2177,33 @@ document.getElementById('authForm').onsubmit = async e => {
   e.preventDefault();
   const errEl = document.getElementById('authErrorMsg');
   errEl.classList.add('hidden');
-
   const raw = phone.value.replace(/\D/g, '');
   const pinVal = pin.value.trim();
   if (raw.length !== 8) {
     errEl.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
-    errEl.classList.remove('hidden');
-    phone.focus();
-    return;
+    errEl.classList.remove('hidden'); phone.focus(); return;
   }
   if (!/^\d{4}$/.test(pinVal)) {
     errEl.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
-    errEl.classList.remove('hidden');
-    pin.focus();
-    return;
+    errEl.classList.remove('hidden'); pin.focus(); return;
   }
-
   const id = '010-' + raw.slice(0, 4) + '-' + raw.slice(4);
   const payload = isRegisterMode
     ? { username: id, password: pinVal, initialSaveData: state, gameId: GAME_ID }
     : { username: id, password: pinVal, gameId: GAME_ID };
-
   try {
     const res = await fetch(API + (isRegisterMode ? '/api/register' : '/api/login'), {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
     const d = await res.json();
     if (!res.ok) {
       errEl.textContent = d.error || '로그인/가입 처리 중 오류가 발생했습니다.';
-      errEl.classList.remove('hidden');
-      return;
+      errEl.classList.remove('hidden'); return;
     }
     authToken = d.token; currentUsername = d.username;
-    localStorage.setItem(TOKEN_KEY, authToken); localStorage.setItem(USER_KEY, currentUsername);
-
     if (!isRegisterMode) {
       if (d.saveData) {
         state = sanitize({ ...(d.saveData || {}), isVip: Boolean(d.isVip || d.saveData?.isVip) });
-        localStorage.setItem(STORAGE, JSON.stringify(state));
         if (state.isVip) await syncSave(false);
       } else {
         if (d.isVip) state.isVip = true;
@@ -1906,9 +2213,9 @@ document.getElementById('authForm').onsubmit = async e => {
     } else {
       if (d.isVip) state.isVip = true;
       state = sanitize(state);
-      localStorage.setItem(STORAGE, JSON.stringify(state));
     }
-
+    saveSharedAuth(authToken, currentUsername, state.isVip);
+    localStorage.setItem(STORAGE, JSON.stringify(state));
     applySelectedBikeMesh();
     authM.classList.add('hidden'); authM.classList.remove('flex');
     pin.value = '';
@@ -1920,61 +2227,33 @@ document.getElementById('authForm').onsubmit = async e => {
     errEl.classList.remove('hidden');
   }
 };
-document.getElementById('logoutBtn').onclick = () => handleLogout(false);
 function handleLogout(exp) {
   authToken = null; currentUsername = null;
-  localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY);
+  saveSharedAuth(null, null, false);
   state.isVip = false; state.selectedBike = 1; applySelectedBikeMesh(); updateUI(); fetchRank();
-  showToast(exp ? '만료' : '로그아웃');
+  showToast(exp ? '만료' : '로그아웃되었습니다.');
 }
 
-const resetM = document.getElementById('resetModal');
-document.getElementById('resetOpenBtn').onclick = () => {
-  running = false;
-  isCleared = false;
-  stopBGM();
-  activeCars.forEach(c => { c.mesh.visible = false; });
-  activeCars.length = 0;
-  activeCoins.forEach(c => { c.mesh.visible = false; });
-  activeCoins.length = 0;
-  activeFuels.forEach(f => { f.mesh.visible = false; });
-  activeFuels.length = 0;
-  applySelectedBikeMesh();
-  document.getElementById('overlayTitle').textContent = '오토바이 레이싱';
-  document.getElementById('overlaySub').textContent = '오토바이를 선택하고 차선을 피하며 질주하세요!';
-  document.getElementById('overlayActionBtn').textContent = '레이스 시작';
-  setOverlayVisible(true);
-  updateUI();
-};
-document.getElementById('resetCancelBtn').onclick = () => { resetM.classList.add('hidden'); resetM.classList.remove('flex'); };
-document.getElementById('resetConfirmBtn').onclick = () => {
-  state = defState(); distance = 0; lives = 1; speed = 0; elapsedTime = 0; runMaxSpeed = 0; runGold = 0; isCleared = false; running = false; stopBGM();
-  applySelectedBikeMesh();
-  setOverlayVisible(true);
-  document.getElementById('overlayTitle').textContent = '오토바이 레이싱';
-  document.getElementById('overlaySub').textContent = '오토바이를 선택하고 차선을 피하며 질주하세요!';
-  document.getElementById('overlayActionBtn').textContent = '레이스 시작';
-  saveState(true); updateUI();
-  resetM.classList.add('hidden'); resetM.classList.remove('flex');
-  showToast('🔄 초기화');
+document.getElementById('headerExitLobbyBtn').onclick = () => {
+  window.location.href = LOBBY_URL;
 };
 
-let deferred = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
-document.getElementById('androidInstallBtn').onclick = async () => {
-  if (deferred) { deferred.prompt(); await deferred.userChoice; deferred = null; document.getElementById('androidInstallBtnText').textContent = '완료'; return; }
-  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    showToast('📲 브라우저 메뉴(⋮) → [홈 화면에 추가]를 눌러주세요!');
-    return;
+['pageshow', 'focus', 'storage'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    loadSharedAuth();
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
+    applySelectedBikeMesh();
+    updateUI();
+  });
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    loadSharedAuth();
+    state.isVip = Boolean(authToken && localStorage.getItem(VIP_KEY) === 'true');
+    applySelectedBikeMesh();
+    updateUI();
   }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['[InternetShortcut]\\r\\nURL=' + location.href + '\\r\\n'], { type: 'text/plain' }));
-  a.download = '오토바이레이싱3D.url'; a.click();
-  document.getElementById('androidInstallBtnText').textContent = '완료';
-};
+});
 
 updateUI();
 if (authToken) loadServer();
