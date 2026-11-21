@@ -174,51 +174,6 @@
     </div>
   </div>
 
-  <!-- AI게임장 통합 로그인 / 회원가입 모달 -->
-  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-xs bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-5 shadow-2xl text-center">
-      <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-2xl">
-        🔐
-      </div>
-      <h3 class="text-lg font-black text-amber-300 mb-3">AI게임장 통합 계정</h3>
-
-      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-3">
-        <button type="button" id="modeLoginBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">
-          기존 계정 로그인
-        </button>
-        <button type="button" id="modeRegisterBtn" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
-          간편 회원가입
-        </button>
-      </div>
-
-      <div class="space-y-2.5 text-left">
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 ml-1">휴대폰 번호 (010 제외 8자리)</label>
-          <div class="flex items-center gap-1.5 mt-1">
-            <span class="px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black text-amber-400">010-</span>
-            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="9" placeholder="1234-5678" class="flex-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-wider focus:outline-none focus:border-amber-400" />
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 ml-1">비밀번호 (숫자 4자리)</label>
-          <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full mt-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold text-white tracking-widest text-center focus:outline-none focus:border-amber-400" />
-        </div>
-      </div>
-
-      <div id="loginMsg" class="text-[11px] font-bold text-rose-400 mt-3 hidden"></div>
-
-      <div class="flex gap-2 mt-4">
-        <button type="button" id="closeLoginBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">
-          닫기
-        </button>
-        <button type="button" id="confirmLoginBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-black text-slate-950 shadow-lg shadow-amber-500/20 transition active:scale-95 cursor-pointer">
-          로그인
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- VIP 전용 기능 안내 모달 -->
   <div id="vipNoticeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="w-full max-w-xs bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl text-center">
@@ -264,6 +219,11 @@
     }
 
     const GAME_ID = 'zombie_survival';
+    const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
+    function goLobbyAuth(mode = 'login') {
+      const returnTo = encodeURIComponent(window.location.href);
+      window.location.href = `${LOBBY_URL}?auth=${encodeURIComponent(mode)}&returnTo=${returnTo}`;
+    }
     const ADMIN_VIP_PHONES = [];
     const TOKEN_KEY = 'hero_clicker_jwt_token';
     const USER_KEY = 'hero_clicker_username';
@@ -311,7 +271,6 @@
       bestStage: 1,
       serverSaveData: null
     };
-    let isRegisterMode = false;
 
     function isAdminAccount(username) {
       return Boolean(username && ADMIN_VIP_PHONES.includes(username.trim()));
@@ -772,177 +731,11 @@
       }
     }
 
-    const loginModal = document.getElementById('loginModal');
-    const phoneInputEl = document.getElementById('phoneInput');
-    const pinInputEl = document.getElementById('pinInput');
-    const modeLoginBtn = document.getElementById('modeLoginBtn');
-    const modeRegisterBtn = document.getElementById('modeRegisterBtn');
-    const confirmLoginBtn = document.getElementById('confirmLoginBtn');
-
-    function setAuthMode(register) {
-      isRegisterMode = register;
-      document.getElementById('loginMsg').classList.add('hidden');
-      if (register) {
-        modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-        modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-        confirmLoginBtn.textContent = '회원가입';
-      } else {
-        modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-        modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-        confirmLoginBtn.textContent = '로그인';
-      }
-    }
-
-    modeLoginBtn.onclick = () => setAuthMode(false);
-    modeRegisterBtn.onclick = () => setAuthMode(true);
-
-    phoneInputEl.addEventListener('input', (e) => {
-      const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-      e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
-    });
-    pinInputEl.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-    });
-
     document.getElementById('authToggleBtn').onclick = () => {
       if (userState.loggedIn && userState.username) {
         if (confirm('로그아웃 하시겠습니까?')) handleLogout();
       } else {
-        setAuthMode(false);
-        loginModal.classList.remove('hidden');
-        loginModal.classList.add('flex');
-        setTimeout(() => phoneInputEl.focus(), 50);
-      }
-    };
-    document.getElementById('closeLoginBtn').onclick = () => {
-      loginModal.classList.add('hidden');
-      loginModal.classList.remove('flex');
-    };
-
-    confirmLoginBtn.onclick = async () => {
-      const rawDigits = phoneInputEl.value.replace(/\D/g, '');
-      const pin = pinInputEl.value.trim();
-      const msgEl = document.getElementById('loginMsg');
-
-      if (rawDigits.length !== 8) {
-        msgEl.textContent = '휴대폰 뒷자리 8자리 숫자를 정확히 입력해주세요.';
-        msgEl.classList.remove('hidden');
-        return;
-      }
-      if (!/^\d{4}$/.test(pin)) {
-        msgEl.textContent = '4자리 숫자 비밀번호를 입력해주세요.';
-        msgEl.classList.remove('hidden');
-        return;
-      }
-
-      const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
-      const endpoint = isRegisterMode ? '/api/register' : '/api/login';
-
-      confirmLoginBtn.disabled = true;
-      confirmLoginBtn.textContent = '확인 중...';
-      msgEl.classList.add('hidden');
-
-      const initialSave = {
-        power: 1,
-        gold: 0,
-        honorLevel: 0,
-        totalClicks: 0,
-        ownedWeapons: ['wooden_sword'],
-        equippedWeaponId: 'wooden_sword',
-        currentRegionId: 'village',
-        soundEnabled: true,
-        bgmEnabled: true,
-        isVip: isAdminAccount(fullPhoneId),
-        autoClickEnabled: false,
-        stage,
-        zombieSurvival: { score, stage }
-      };
-
-      const payload = isRegisterMode
-        ? { username: fullPhoneId, password: pin, initialSaveData: initialSave }
-        : { username: fullPhoneId, password: pin };
-
-      try {
-        const res = await apiFetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          msgEl.textContent = result.error || result.message || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
-          msgEl.classList.remove('hidden');
-          return;
-        }
-
-        userState.loggedIn = true;
-        userState.token = result.token;
-        userState.username = result.username || fullPhoneId;
-        userState.phone = '010' + rawDigits;
-        userState.pin = pin;
-        userState.serverSaveData = result.saveData || initialSave;
-        userState.isVip = Boolean(
-          result.isVip || userState.serverSaveData.isVip || isAdminAccount(userState.username)
-        );
-        userState.bestScore = Math.max(userState.bestScore, Number(userState.serverSaveData?.zombieSurvival?.score || 0));
-        userState.bestStage = Math.max(userState.bestStage, Number(userState.serverSaveData?.zombieSurvival?.stage || userState.serverSaveData?.stage || 1));
-
-        syncSharedAuth(userState.token, userState.username, userState.isVip);
-
-        if (userState.isVip && !userState.serverSaveData.isVip) {
-          await syncUserToServer();
-        }
-
-        loginModal.classList.add('hidden');
-        loginModal.classList.remove('flex');
-        pinInputEl.value = '';
-        applyVipUI();
-        showToast(`🟨 [${userState.username}] 로그인 완료!`);
-        fetchAndRenderRanking();
-      } catch (err) {
-        const localAccounts = JSON.parse(localStorage.getItem('aigame_shared_accounts') || '{}');
-        if (!isRegisterMode && localAccounts[fullPhoneId]) {
-          if (localAccounts[fullPhoneId].pin !== pin) {
-            msgEl.textContent = '❌ 비밀번호가 일치하지 않습니다!';
-            msgEl.classList.remove('hidden');
-            return;
-          }
-          userState.isVip = Boolean(localAccounts[fullPhoneId].isVip || isAdminAccount(fullPhoneId));
-        } else {
-          const existingVip = Boolean(localAccounts[fullPhoneId]?.isVip || isAdminAccount(fullPhoneId));
-          localAccounts[fullPhoneId] = { pin, isVip: existingVip };
-          localStorage.setItem('aigame_shared_accounts', JSON.stringify(localAccounts));
-          userState.isVip = existingVip;
-        }
-
-        try {
-          const heroRaw = localStorage.getItem('hero_clicker_rpg_save_v1');
-          if (heroRaw) {
-            const heroSave = JSON.parse(heroRaw);
-            if (heroSave.isVip) userState.isVip = true;
-            else if (userState.isVip) {
-              heroSave.isVip = true;
-              localStorage.setItem('hero_clicker_rpg_save_v1', JSON.stringify(heroSave));
-            }
-          }
-        } catch (e) {}
-
-        userState.loggedIn = true;
-        userState.username = fullPhoneId;
-        userState.phone = '010' + rawDigits;
-        userState.pin = pin;
-        localStorage.setItem(USER_KEY, userState.username);
-        if (userState.isVip) localStorage.setItem('hero_clicker_is_vip', 'true');
-
-        loginModal.classList.add('hidden');
-        loginModal.classList.remove('flex');
-        pinInputEl.value = '';
-        applyVipUI();
-        showToast(`🟨 [${userState.username}] 로그인 완료!`);
-      } finally {
-        confirmLoginBtn.disabled = false;
-        confirmLoginBtn.textContent = isRegisterMode ? '회원가입' : '로그인';
+        goLobbyAuth('login');
       }
     };
 
