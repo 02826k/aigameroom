@@ -9,7 +9,6 @@
   <link rel="manifest" href="./manifest.json" />
   <title>케트리스 — 블록 퍼즐 아케이드</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://js.tosspayments.com/v2/standard"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -313,72 +312,6 @@
     </div>
   </div>
 
-  <!-- VIP 결제 모달 -->
-  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-5 max-h-[90dvh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="font-black text-amber-300">👑 VIP 7,000원</h2>
-        <button id="vipCloseBtn" type="button" class="cursor-pointer text-slate-400 hover:text-slate-200 px-2 py-1 font-bold">✕</button>
-      </div>
-      <ul class="text-xs text-slate-300 space-y-1.5 mb-3">
-        <li>⏳ 케트리스 하단 <strong>VIP 3초 슬로우</strong> 버튼 해금 (판당 3회 · 3초간 매우 천천히 진행)</li>
-        <li>👑 통합 계정 전 게임 VIP 혜택 동시 적용</li>
-      </ul>
-      <div id="tossWidgetLoading" class="text-xs text-center text-slate-500 py-3">결제 로딩...</div>
-      <div id="toss-payment-method"></div>
-      <div id="toss-agreement"></div>
-      <button id="vipPaySubmitBtn" type="button" disabled class="w-full mt-3 py-3 rounded-xl bg-amber-400 text-slate-950 font-black disabled:bg-slate-700 disabled:text-slate-400 cursor-pointer">결제</button>
-    </div>
-  </div>
-
-  <!-- 통합 계정 로그인 / 회원가입 모달 -->
-  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🟨</span>
-          <h2 class="text-base font-extrabold text-amber-300">통합 게임 계정 연동</h2>
-        </div>
-        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1 cursor-pointer">✕</button>
-      </div>
-      <p class="text-xs text-slate-400 leading-relaxed mb-4">
-        휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 로그인하면 모든 게임의 점수와 랭킹이 통합 관리됩니다.
-      </p>
-
-      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-4">
-        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer">
-          기존 계정 로그인
-        </button>
-        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer">
-          간편 회원가입
-        </button>
-      </div>
-
-      <form id="authForm" class="flex flex-col gap-3.5">
-        <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">아이디 (휴대폰 번호 뒷 8자리)</label>
-          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 focus-within:border-amber-400 overflow-hidden">
-            <span class="px-3 py-2.5 bg-slate-900 text-amber-300 font-extrabold text-sm border-r border-slate-800 select-none">010 -</span>
-            <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678 (숫자 8자리)"
-              class="w-full px-3 py-2.5 bg-transparent text-sm font-bold tracking-wider text-slate-100 focus:outline-none" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1.5">비밀번호 (숫자 4자리)</label>
-          <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 입력"
-            class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none focus:border-amber-400" />
-        </div>
-
-        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
-
-        <button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition mt-0.5 cursor-pointer">
-          로그인 및 점수 연동
-        </button>
-      </form>
-    </div>
-  </div>
-
   <script>
     (() => {
       // ==========================================
@@ -606,21 +539,25 @@
       // ==========================================
       const GAME_ID = 'ketris';
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+      const API_BASE_URL = CLOUD_API_URL;
+      const LOBBY_AUTH_BASE = 'https://02826k.github.io/aigameroom/';
 
       const TOKEN_KEY = 'hero_clicker_jwt_token';
       const USER_KEY = 'hero_clicker_username';
       const LOCAL_BEST_KEY = 'ketris_local_best_v1';
       const LOCAL_VIP_KEY = 'ketris_vip_v1';
-      const TOSS_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-      const VIP_PRICE = 7000;
-
       const ALL_TOKEN_KEYS = [TOKEN_KEY, 'abuse_jwt_token', 'sky2026_jwt_token', 'aigameroom_jwt_token'];
       const ALL_USER_KEYS = [USER_KEY, 'abuse_username', 'sky2026_username', 'aigameroom_username'];
+      const ALL_NICK_KEYS = ['aigameroom_nickname', 'hero_clicker_nickname'];
+      function goLobbyAuth(mode = 'login') {
+        window.location.href = `${LOBBY_AUTH_BASE}?auth=${encodeURIComponent(mode)}&returnTo=${encodeURIComponent(window.location.href)}`;
+      }
       function readSharedAuth() {
-        let t = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('aigameroom_jwt_token') || null;
-        let u = localStorage.getItem(USER_KEY) || localStorage.getItem('aigameroom_username') || null;
+        let t = null, u = null;
+        try {
+          for (const k of ALL_TOKEN_KEYS) { if (!t) t = localStorage.getItem(k); }
+          for (const k of ALL_USER_KEYS) { if (!u) u = localStorage.getItem(k); }
+        } catch (e) {}
         return { t, u };
       }
       function syncSharedAuth(t, u, vipFlag) {
@@ -632,6 +569,7 @@
           } else {
             ALL_TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
             ALL_USER_KEYS.forEach((k) => localStorage.removeItem(k));
+            ALL_NICK_KEYS.forEach((k) => localStorage.removeItem(k));
             localStorage.removeItem('hero_clicker_is_vip');
           }
         } catch (e) {}
@@ -729,11 +667,13 @@
               localStorage.setItem(LOCAL_BEST_KEY, String(bestScore));
             }
             if (data.saveData?.bestLines) bestLines = data.saveData.bestLines;
-            if (data.isVip || data.saveData?.isVip) {
-              isVip = true;
-              try { localStorage.setItem(LOCAL_VIP_KEY, 'true'); } catch {}
-              updateAuthHeaderUI();
-            }
+            isVip = Boolean(data.isVip);
+            try {
+              localStorage.setItem(LOCAL_VIP_KEY, String(isVip));
+              localStorage.setItem('hero_clicker_is_vip', String(isVip));
+              if (data.nickname) ALL_NICK_KEYS.forEach((k) => localStorage.setItem(k, data.nickname));
+            } catch {}
+            updateAuthHeaderUI();
           }
         } catch (e) {}
       }
@@ -863,41 +803,16 @@
         }
       }
 
-      // 인증 모달 제어
-      const authModal = document.getElementById('authModal');
-      const modeLoginBtn = document.getElementById('modeLoginBtn');
-      const modeRegisterBtn = document.getElementById('modeRegisterBtn');
-      const authSubmitBtn = document.getElementById('authSubmitBtn');
-      const authErrorMsg = document.getElementById('authErrorMsg');
-      const phoneInput = document.getElementById('authPhoneDigits');
-      const pinInput = document.getElementById('authPinCode');
-
+      // 통합 인증 & 랭킹 모달 제어
       function openAuthModal() {
-        setAuthMode(false);
-        authModal.classList.remove('hidden');
-        authModal.classList.add('flex');
-        setTimeout(() => phoneInput.focus(), 50);
-      }
-
-      function setAuthMode(register) {
-        isRegisterMode = register;
-        authErrorMsg.classList.add('hidden');
-        if (register) {
-          modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-          modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-          authSubmitBtn.textContent = '가입하고 최고 점수 서버저장';
-        } else {
-          modeLoginBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition cursor-pointer';
-          modeRegisterBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition cursor-pointer';
-          authSubmitBtn.textContent = '로그인 및 최고 점수 연동';
-        }
+        goLobbyAuth('login');
       }
 
       document.getElementById('authHeaderBtn').addEventListener('click', () => {
         if (authToken && currentUsername) {
           if (confirm('로그아웃 하시겠습니까?')) handleLogout(false);
         } else {
-          openAuthModal();
+          goLobbyAuth('login');
         }
       });
 
@@ -915,88 +830,6 @@
         if (e.target === rankModal) {
           rankModal.classList.add('hidden');
           rankModal.classList.remove('flex');
-        }
-      });
-      document.getElementById('authCloseBtn').addEventListener('click', () => {
-        authModal.classList.add('hidden');
-        authModal.classList.remove('flex');
-      });
-      modeLoginBtn.addEventListener('click', () => setAuthMode(false));
-      modeRegisterBtn.addEventListener('click', () => setAuthMode(true));
-
-      phoneInput.addEventListener('input', (e) => {
-        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-        e.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
-      });
-      pinInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-      });
-
-      document.getElementById('authForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        authErrorMsg.classList.add('hidden');
-
-        const rawDigits = phoneInput.value.replace(/\D/g, '');
-        const pin = pinInput.value.trim();
-
-        if (rawDigits.length !== 8) {
-          authErrorMsg.textContent = '휴대폰 번호 뒷 8자리 숫자를 모두 입력해 주세요.';
-          authErrorMsg.classList.remove('hidden');
-          return;
-        }
-        if (!/^\d{4}$/.test(pin)) {
-          authErrorMsg.textContent = '비밀번호는 숫자 4자리로 입력해 주세요.';
-          authErrorMsg.classList.remove('hidden');
-          return;
-        }
-
-        const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
-        const endpoint = isRegisterMode ? '/api/register' : '/api/login';
-        const currentBest = Math.max(score, bestScore);
-
-        const payload = isRegisterMode
-          ? { username: fullPhoneId, password: pin, gameId: GAME_ID, initialSaveData: { bestScore: currentBest, bestLines } }
-          : { username: fullPhoneId, password: pin, gameId: GAME_ID };
-
-        try {
-          const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-
-          if (!res.ok) {
-            authErrorMsg.textContent = data.error || '처리 중 오류가 발생했습니다.';
-            authErrorMsg.classList.remove('hidden');
-            return;
-          }
-
-          authToken = data.token;
-          currentUsername = data.username;
-          syncSharedAuth(authToken, currentUsername, Boolean(data.isVip || data.saveData?.isVip));
-
-          if (data.isVip || data.saveData?.isVip) {
-            isVip = true;
-            try { localStorage.setItem(LOCAL_VIP_KEY, 'true'); } catch {}
-          }
-          const serverBest = data.saveData?.bestScore || 0;
-          if (serverBest > bestScore) {
-            bestScore = serverBest;
-            localStorage.setItem(LOCAL_BEST_KEY, String(bestScore));
-          } else if (currentBest > serverBest) {
-            await saveScoreToServer(currentBest, bestLines, false);
-          }
-
-          updateAuthHeaderUI();
-          fetchAndRenderRanking(false);
-          authModal.classList.add('hidden');
-          authModal.classList.remove('flex');
-          pinInput.value = '';
-          showToast(`🟨 [${currentUsername}] 통합 계정 연동 완료!`);
-        } catch (err) {
-          authErrorMsg.textContent = '클라우드 서버와 연결할 수 없습니다.';
-          authErrorMsg.classList.remove('hidden');
         }
       });
 
@@ -1047,37 +880,13 @@
       let slowTickTimer = null;
       let slowUsesLeft = 3;
       const SLOW_DROP_MS = 1600;
-      const vipModal = document.getElementById('vipModal');
       const vipSlowBtn = document.getElementById('vipSlowBtn');
       const vipSlowBtnLabel = document.getElementById('vipSlowBtnLabel');
-      let tossInited = false;
 
       function openVipModal() {
-        vipModal.classList.remove('hidden');
-        vipModal.classList.add('flex');
-        initToss();
+        goLobbyAuth('vip');
       }
       document.getElementById('vipOpenBtn')?.addEventListener('click', openVipModal);
-      document.getElementById('vipCloseBtn').addEventListener('click', () => {
-        vipModal.classList.add('hidden');
-        vipModal.classList.remove('flex');
-      });
-
-      async function initToss() {
-        if (tossInited || typeof TossPayments === 'undefined') return;
-        tossInited = true;
-        try {
-          const tp = TossPayments(TOSS_KEY);
-          const w = tp.widgets({ customerKey: TossPayments.ANONYMOUS });
-          await w.setAmount({ currency: 'KRW', value: VIP_PRICE });
-          await Promise.all([
-            w.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
-            w.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' })
-          ]);
-          document.getElementById('tossWidgetLoading').classList.add('hidden');
-          document.getElementById('vipPaySubmitBtn').disabled = false;
-        } catch { tossInited = false; }
-      }
 
       function isSlowActive() {
         return Date.now() < slowUntil;
@@ -1406,7 +1215,7 @@
       }
 
       document.addEventListener('keydown', (e) => {
-        if (!authModal.classList.contains('hidden') || !vipModal.classList.contains('hidden')) return;
+        if (!rankModal.classList.contains('hidden')) return;
         if (gameOver || !currentPiece) return;
         if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '].includes(e.key)) {
           e.preventDefault();
