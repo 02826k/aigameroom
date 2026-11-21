@@ -49,27 +49,26 @@ html,body{margin:0;max-width:100%;overflow-x:hidden}body{font-family:'Noto Sans 
 </div>
 </header>
 
-<main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-3 flex flex-col gap-3">
-<!-- Status bar -->
-<section class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-<div class="col-span-2 sm:col-span-2 bg-slate-900/90 border border-orange-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
-<div>
-<div class="text-[10px] text-orange-300/80 font-bold">🏁 3분 완주 · 주행 거리</div>
-<div id="scoreDisplay" class="text-base sm:text-lg font-black text-orange-400">0 m</div>
-</div>
-<button id="startGameBtn" type="button" class="px-3 py-2 rounded-lg text-xs font-black bg-gradient-to-r from-orange-500 to-rose-600 text-slate-950 cursor-pointer active:scale-95 transition">레이스 시작</button>
-</div>
-<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2"><div class="text-[10px] text-slate-400">목숨</div><div id="livesDisplay" class="text-sm font-bold text-rose-400">❤️</div></div>
-<button id="bgmChangeBtn" type="button" class="bg-slate-900/90 hover:bg-slate-800 active:scale-95 border border-indigo-500/50 rounded-xl px-3 py-2 text-left transition cursor-pointer">
-<div class="text-[10px] text-indigo-300 font-bold">🎵 음악변경</div>
-<div id="bgmTrackDisplay" class="text-sm font-extrabold text-indigo-200 truncate">BGM 1</div>
-</button>
-<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2"><div class="text-[10px] text-slate-400">속도</div><div id="speedDisplay" class="text-sm font-extrabold text-cyan-300 tabular-nums">0</div></div>
-<div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2"><div class="text-[10px] text-slate-400">타이머</div><div id="timerDisplay" class="text-sm font-extrabold text-amber-300 tabular-nums">00:00</div></div>
+<main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-2 flex flex-col gap-2">
+<!-- Status bar (1줄 통합) -->
+<section class="bg-slate-900/95 border border-orange-500/30 rounded-xl px-2 py-1.5 flex items-center justify-between gap-1.5 overflow-x-auto whitespace-nowrap">
+  <div class="flex items-center gap-1 shrink-0">
+    <span class="text-xs">🏁</span>
+    <span id="scoreDisplay" class="text-xs sm:text-sm font-black text-orange-400 tabular-nums">0 m</span>
+  </div>
+  <span class="text-slate-700 text-[10px]">|</span>
+  <div id="livesDisplay" class="text-xs sm:text-sm font-bold text-rose-400 shrink-0">❤️</div>
+  <button id="bgmChangeBtn" type="button" class="px-2 py-1 rounded-lg bg-indigo-950/90 hover:bg-indigo-900 active:scale-95 border border-indigo-500/60 text-[11px] font-extrabold text-indigo-200 transition cursor-pointer shrink-0">
+    🎵 <span id="bgmTrackDisplay">BGM 1</span>
+  </button>
+  <div id="speedDisplay" class="text-xs sm:text-sm font-extrabold text-cyan-300 tabular-nums shrink-0">0 km/h</div>
+  <span class="text-slate-700 text-[10px]">|</span>
+  <div id="timerDisplay" class="text-[11px] sm:text-xs font-extrabold text-amber-300 tabular-nums shrink-0">00:00</div>
+  <button id="startGameBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black bg-gradient-to-r from-orange-500 to-rose-600 text-slate-950 cursor-pointer active:scale-95 transition shrink-0">시작</button>
 </section>
 
-<!-- 3D viewport -->
-<section class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/50 bg-black h-[52dvh] min-h-[340px] max-h-[560px] sm:h-[min(62vh,560px)]">
+<!-- 3D viewport (높이 확대) -->
+<section class="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/50 bg-black h-[60dvh] min-h-[380px] max-h-[660px] sm:h-[min(68vh,660px)]">
 <div id="viewport" class="absolute inset-0 cursor-pointer"></div>
 <div id="gameOverlay" class="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/65 via-transparent to-slate-950/90 p-2 sm:p-4 overflow-y-auto pointer-events-auto">
 <div class="w-full min-h-full flex flex-col items-center justify-between gap-2">
@@ -379,7 +378,6 @@ function playBgmTrack(idx, notify = false, isWrapFallback = false) {
   audio.addEventListener('error', () => {
     if (seq !== bgmLoadSeq) return;
     if (idx > 1 && !isWrapFallback) {
-      // 다음 번호 파일이 없으면 bgm.mp3 (BGM 1)로 복귀
       playBgmTrack(1, notify, true);
     } else if (state.bgmEnabled && !bgmTimer) {
       startSynthBGM();
@@ -395,9 +393,7 @@ function playBgmTrack(idx, notify = false, isWrapFallback = false) {
 
   const p = audio.play();
   if (p && typeof p.catch === 'function') {
-    p.catch(() => {
-      // 자동재생 제한 등일 때 에러 이벤트가 아니면 대기, 에러는 위 error 리스너에서 처리
-    });
+    p.catch(() => {});
   }
 }
 function startBGM() {
