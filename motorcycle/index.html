@@ -923,6 +923,17 @@ function createBike(variant = 1) {
   return root;
 }
 
+// 가속/부스터로 차체가 숙여져도 라이트는 항상 수평으로 앞을 비추게 보정
+function levelLights(root) {
+  const th = root.rotation.x, cs = Math.cos(-th), sn = Math.sin(-th), u = root.userData;
+  const rot = o => {
+    if (!o.userData.base) o.userData.base = o.position.clone();
+    const b = o.userData.base;
+    o.position.set(b.x, b.y * cs - b.z * sn, b.y * sn + b.z * cs);
+  };
+  [u.bikeSpot, u.bikeSpot2].forEach(sp => { if (sp) rot(sp.target); });
+  [u.headBeam, u.headBeam2].forEach(bm => { if (bm) { rot(bm); bm.rotation.x = Math.PI / 2 - th; } });
+}
 const bike1Mesh = createBike(1);
 function createVipLamborghini() {
   const root = new THREE.Group();
@@ -1776,6 +1787,7 @@ function animate() {
     player.rotation.z = (targetLaneX - laneX) * (player.userData.isSupercar ? -0.08 : -0.2);
     if (player.userData.wheels) player.userData.wheels.forEach(w => { w.rotation.x -= speed * dt * 0.35; });
     player.rotation.x = -speed * 0.002;
+    levelLights(player);
     if (player.userData.tailMat) player.userData.tailMat.color.setHex(keysUD.down ? 0xff3b4d : 0x7a1220);
     if (player.userData.flames) {
       player.userData.flames.forEach(fl => {
