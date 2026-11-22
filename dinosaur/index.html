@@ -28,14 +28,53 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
+    body.fs-lock {
+      overflow: hidden !important;
+      height: 100dvh !important;
+    }
     #gameCanvas { touch-action: pan-y; }
     .pixel-art { image-rendering: pixelated; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
     ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.75); border-radius: 9999px; }
-    .biome-card-active {
-      box-shadow: 0 0 0 2px #fde047, 0 0 12px rgba(250, 204, 21, 0.6);
-      transform: translateY(-1px);
+
+    /* 전체화면: 게임화면 ~ 탑승버튼까지 표시 */
+    #fullscreenStage {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    #fullscreenStage:fullscreen,
+    #fullscreenStage.is-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      background: #020617 !important;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px !important;
+      gap: 8px !important;
+      z-index: 60 !important;
+      overflow: hidden !important;
+    }
+    #fullscreenStage:fullscreen #gameStageSection,
+    #fullscreenStage.is-fullscreen #gameStageSection {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+    }
+    #fullscreenStage:fullscreen #canvasWrapper,
+    #fullscreenStage.is-fullscreen #canvasWrapper {
+      height: 100% !important;
+      flex: 1 1 0% !important;
+    }
+    #fullscreenStage:fullscreen #fsExitOverlayBtn,
+    #fullscreenStage.is-fullscreen #fsExitOverlayBtn {
+      display: inline-flex !important;
+    }
+
+    .biome-pill-active {
+      box-shadow: 0 0 0 1.5px #fde047, 0 0 8px rgba(250, 204, 21, 0.75);
+      opacity: 1 !important;
     }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.35); }
@@ -85,26 +124,30 @@
 
   <!-- Main -->
   <main id="mainWrap" class="flex-1 max-w-3xl w-full mx-auto px-2 sm:px-4 py-2 flex flex-col gap-2">
-    <!-- HUD: 주인공 파워 + 선택 공룡 + 이중 에너지바 -->
+    <!-- HUD: 주인공 파워 | 선택 공룡(이름 크게) | 도감·RANK·전체화면 + 이중 에너지바 -->
     <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 shadow-xl flex flex-col gap-2">
       <div class="grid grid-cols-3 gap-2">
-        <div class="rounded-xl bg-slate-950/90 border border-amber-500/40 px-2.5 py-1.5">
+        <!-- 1. 주인공 파워 -->
+        <div class="rounded-xl bg-slate-950/90 border border-amber-500/40 px-2.5 py-1.5 flex flex-col justify-center">
           <div class="text-[10px] font-bold text-slate-400">⚡ 주인공 파워</div>
           <div id="hudHeroPower" class="text-sm sm:text-base font-black text-amber-300 tabular-nums truncate">0</div>
           <div id="hudPowerRate" class="text-[10px] font-bold text-emerald-400">+0 / 초</div>
         </div>
+        <!-- 2. 선택 공룡 (PWR 삭제, 이름 크게) -->
         <div class="rounded-xl bg-slate-950/90 border border-sky-500/40 px-2 py-1.5 flex items-center gap-2 min-w-0">
           <img id="hudDinoThumb" src="" alt="선택 공룡" class="w-10 h-10 rounded-lg border border-slate-700 bg-slate-900 object-cover pixel-art shrink-0" />
           <div class="min-w-0">
             <div class="text-[10px] font-bold text-slate-400">🦖 선택 공룡</div>
-            <div id="hudDinoPower" class="text-xs sm:text-sm font-black text-sky-300 tabular-nums truncate">PWR 10</div>
-            <div id="hudDinoName" class="text-[10px] font-bold text-slate-300 truncate">콤프소그나투스</div>
+            <div id="hudDinoName" class="text-sm sm:text-base font-black text-sky-300 truncate leading-tight">콤프소그나투스</div>
           </div>
         </div>
-        <div class="rounded-xl bg-slate-950/90 border border-fuchsia-500/40 px-2.5 py-1.5">
-          <div class="text-[10px] font-bold text-slate-400">🔥 현재 활동</div>
-          <div id="hudActivity" class="text-xs sm:text-sm font-black text-fuchsia-300 truncate">런닝머신</div>
-          <div id="hudCombo" class="text-[10px] font-bold text-amber-200">부스터 x1.0</div>
+        <!-- 3. RANK · 전체화면 + 아래로 전체도감 -->
+        <div class="rounded-xl bg-slate-950/90 border border-slate-700/80 p-1.5 flex flex-col justify-center gap-1">
+          <div class="grid grid-cols-2 gap-1">
+            <button id="rankOpenBtn" type="button" class="py-1 px-1 rounded-lg text-[10px] font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 transition active:scale-95 cursor-pointer whitespace-nowrap">🏆 RANK</button>
+            <button id="fullscreenBtn" type="button" class="py-1 px-1 rounded-lg text-[10px] font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 transition active:scale-95 cursor-pointer whitespace-nowrap">⛶ 전체화면</button>
+          </div>
+          <button id="codexOpenBtn" type="button" class="w-full py-1 px-1.5 rounded-lg text-[10px] sm:text-[11px] font-black bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">📖 전체도감 (<span id="headerCodexCount">1</span>/90)</button>
         </div>
       </div>
 
@@ -131,78 +174,73 @@
       </div>
     </section>
 
-    <!-- 3D WebGL 게임 무대 -->
-    <section class="relative flex flex-col bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl">
-      <div id="canvasWrapper" class="relative w-full h-[330px] sm:h-[390px] bg-slate-950 cursor-grab active:cursor-grabbing overflow-hidden">
-        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
-        <div id="ridingBadge" class="pointer-events-none hidden absolute top-2 right-2.5 px-2.5 py-1 rounded-lg bg-orange-950/90 border border-orange-400/70 text-[10px] font-black text-orange-200">
-          🦖 3D 공룡 탑승 중 (이중 에너지 소모)
-        </div>
-        <div id="vipBuckBanner" class="pointer-events-none hidden absolute inset-x-4 top-1/2 -translate-y-1/2 z-20 flex justify-center">
-          <div class="px-4 py-2 rounded-xl bg-rose-950/95 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-black shadow-2xl text-center">
-            ⚠️ 파워 부족! 공룡이 날뛰며 곧 하차됩니다!
+    <!-- 전체화면 대상 영역: 게임화면 ~ 탑승버튼까지 -->
+    <div id="fullscreenStage">
+      <!-- 3D WebGL 게임 무대 -->
+      <section id="gameStageSection" class="relative flex flex-col bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl">
+        <div id="canvasWrapper" class="relative w-full h-[330px] sm:h-[390px] bg-slate-950 cursor-grab active:cursor-grabbing overflow-hidden">
+          <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+          <!-- 배경 변경 버튼 (게임화면 왼쪽 상단 작게 표시) -->
+          <div id="biomeStrip" class="absolute top-2 left-2 z-10 flex flex-wrap items-center gap-1 max-w-[78%] sm:max-w-[75%]"></div>
+
+          <!-- 전체화면 종료 버튼 (전체화면 시에만 우측 상단 표시) -->
+          <button id="fsExitOverlayBtn" type="button" class="hidden absolute top-2 right-2 z-20 px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-lg active:scale-95 cursor-pointer">✕ 축소</button>
+
+          <div id="ridingBadge" class="pointer-events-none hidden absolute top-10 right-2.5 px-2.5 py-1 rounded-lg bg-orange-950/90 border border-orange-400/70 text-[10px] font-black text-orange-200">
+            🦖 공룡 탑승 중 (이중 에너지 소모)
+          </div>
+          <div id="vipBuckBanner" class="pointer-events-none hidden absolute inset-x-4 top-1/2 -translate-y-1/2 z-20 flex justify-center">
+            <div class="px-4 py-2 rounded-xl bg-rose-950/95 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-black shadow-2xl text-center">
+              ⚠️ 파워 부족! 공룡이 날뛰며 곧 하차됩니다!
+            </div>
+          </div>
+
+          <!-- 우측 하단 3D 컨트롤 (확대/축소 + 무한 포효 토글 + 시점 초기화) -->
+          <div class="absolute bottom-2 right-2.5 flex items-center gap-1 z-10">
+            <button id="zoomInBtn" type="button" title="확대" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-black active:scale-95 transition cursor-pointer">+</button>
+            <button id="zoomOutBtn" type="button" title="축소" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-black active:scale-95 transition cursor-pointer">-</button>
+            <button id="roarBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-amber-400/60 text-amber-300 text-[11px] font-black shadow-lg active:scale-95 transition cursor-pointer">🔊 포효</button>
+            <button id="camResetBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-bold active:scale-95 transition cursor-pointer">🎥</button>
           </div>
         </div>
-        <div class="absolute bottom-2 right-2.5 flex items-center gap-1 z-10">
-          <button id="zoomInBtn" type="button" title="확대" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-black active:scale-95 transition cursor-pointer">+</button>
-          <button id="zoomOutBtn" type="button" title="축소" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-black active:scale-95 transition cursor-pointer">-</button>
-          <button id="roarBtn" type="button" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 text-[11px] font-black shadow-lg active:scale-95 transition cursor-pointer">🔊 포효</button>
-          <button id="camResetBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-bold active:scale-95 transition cursor-pointer">🎥</button>
+      </section>
+
+      <!-- 훈련기구 4종 + 액션 3종 (전체화면에 포함됨!) -->
+      <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2 shadow-xl flex flex-col gap-2 shrink-0">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" id="trainingGrid">
+          <button data-train="treadmill" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
+            <div class="text-xs font-black text-sky-300">🏃 런닝머신</div>
+          </button>
+          <button data-train="pushup" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
+            <div class="text-xs font-black text-emerald-300">🤸 팔굽혀펴기</div>
+          </button>
+          <button data-train="desk" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
+            <div class="text-xs font-black text-amber-300">📚 책상 공부</div>
+          </button>
+          <button data-train="rodeo" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
+            <div class="text-xs font-black text-rose-300">🐂 스프링 로데오</div>
+          </button>
         </div>
-        <div id="canvasDinoLabel" class="pointer-events-none absolute bottom-2 left-2.5 px-2.5 py-1 rounded-lg bg-slate-950/75 border border-amber-400/40 text-[11px] font-black text-amber-300">
-          콤프소그나투스 · PWR 10
+
+        <div class="grid grid-cols-3 gap-2">
+          <button id="powerBoosterBtn" type="button" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-black text-xs sm:text-sm shadow-lg border border-slate-600 cursor-pointer">
+            ⚡ 파워부스터 OFF
+          </button>
+          <button id="restBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-700 hover:brightness-110 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border border-emerald-200/60 cursor-pointer">
+            🛌 에너지 회복
+          </button>
+          <button id="dismountOrRideBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 hover:brightness-110 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg border border-amber-200/80 cursor-pointer">
+            🦖 탑승
+          </button>
         </div>
-      </div>
-    </section>
-
-    <!-- 8대 바이옴 전환 바 (캔버스 아래 이동 · 설명/선택됨/이동/스크롤바 삭제 · 좌우 대칭 자동조절) -->
-    <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2 shadow-xl">
-      <div id="biomeStrip" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5"></div>
-    </section>
-
-    <!-- 도감/RANK/전체화면 + 훈련기구 4종(설명 삭제) + 액션 3종 -->
-    <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 shadow-xl flex flex-col gap-2">
-      <!-- 도감 · RANK · 전체화면 -->
-      <div class="grid grid-cols-3 gap-1.5">
-        <button id="codexOpenBtn" type="button" class="py-2 px-2 rounded-xl text-xs font-black bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">📖 도감 (<span id="headerCodexCount">1</span>/90)</button>
-        <button id="rankOpenBtn" type="button" class="py-2 px-2 rounded-xl text-xs font-black bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 transition active:scale-95 cursor-pointer whitespace-nowrap">🏆 RANK</button>
-        <button id="fullscreenBtn" type="button" class="py-2 px-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 transition active:scale-95 cursor-pointer whitespace-nowrap">⛶ 전체화면</button>
-      </div>
-
-      <!-- 훈련기구 4종 (아래 설명 삭제, 깔끔한 단일 행) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" id="trainingGrid">
-        <button data-train="treadmill" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
-          <div class="text-xs font-black text-sky-300">🏃 런닝머신</div>
-        </button>
-        <button data-train="pushup" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
-          <div class="text-xs font-black text-emerald-300">🤸 팔굽혀펴기</div>
-        </button>
-        <button data-train="desk" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
-          <div class="text-xs font-black text-amber-300">📚 책상 공부</div>
-        </button>
-        <button data-train="rodeo" type="button" class="train-btn py-2.5 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 text-center transition active:scale-95 cursor-pointer">
-          <div class="text-xs font-black text-rose-300">🐂 스프링 로데오</div>
-        </button>
-      </div>
-
-      <!-- 하단 메인 액션 버튼 (파워부스터 ON/OFF · 에너지 회복 · 탑승) -->
-      <div class="grid grid-cols-3 gap-2">
-        <button id="powerBoosterBtn" type="button" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-black text-xs sm:text-sm shadow-lg border border-slate-600 cursor-pointer">
-          ⚡ 파워부스터 OFF
-        </button>
-        <button id="restBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-700 hover:brightness-110 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border border-emerald-200/60 cursor-pointer">
-          🛌 에너지 회복
-        </button>
-        <button id="dismountOrRideBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 hover:brightness-110 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg border border-amber-200/80 cursor-pointer">
-          🦖 탑승
-        </button>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- 가장 아래 섹션: 즐겨찾기 10종 -->
     <section class="bg-slate-900/95 border border-amber-500/30 rounded-2xl p-2.5 shadow-xl mb-4">
       <div class="flex items-center justify-between mb-2">
-        <span id="favoriteSectionTitle" class="text-xs font-black text-amber-300">⭐ 즐겨찾기 공룡 (2 / 10종)</span>
+        <span id="favoriteSectionTitle" class="text-xs font-black text-amber-300">⭐ 즐겨찾기 공룡 (3 / 10종)</span>
         <button id="openCodexQuickBtn" type="button" class="text-[11px] font-bold text-sky-300 hover:text-sky-200 cursor-pointer">📖 도감에서 별표시 등록 →</button>
       </div>
       <div id="favoriteDinoGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-1.5"></div>
@@ -215,7 +253,7 @@
       <div class="flex items-center justify-between gap-2">
         <div>
           <h2 class="text-sm sm:text-base font-black text-emerald-300">📖 실존 공룡 도감 (90종)</h2>
-          <p id="codexProgressText" class="text-[11px] text-slate-400">해금 진행도: 1 / 90종 · 즐겨찾기 2 / 10종</p>
+          <p id="codexProgressText" class="text-[11px] text-slate-400">해금 진행도: 1 / 90종 · 즐겨찾기 3 / 10종</p>
         </div>
         <button id="codexCloseBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
       </div>
@@ -246,14 +284,13 @@
     </div>
   </div>
 
-  <!-- TOP 10 랭킹 모달 (본인 랭크 최상단 + 그 아래 TOP 10, 별명 & 파워 표시) -->
+  <!-- TOP 10 랭킹 모달 (본인 랭크 최상단 + 그 아래 TOP 10) -->
   <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-2.5">
       <div class="flex items-center justify-between">
         <h2 class="text-sm sm:text-base font-black text-amber-300">🏆 공룡타기 TOP 10</h2>
         <button id="rankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">✕</button>
       </div>
-      <!-- 본인 랭크 최상단 고정 -->
       <div id="myRankCard" class="rounded-xl border-2 border-amber-400/70 bg-amber-950/40 px-3 py-2.5 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
           <span id="myRankPos" class="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 text-[11px] font-black shrink-0">내 순위</span>
@@ -362,7 +399,7 @@
         { id: 'jungle', name: '정글', border: '#0d9488', skyTop: '#0f766e', skyBot: '#5eead4', groundTop: '#047857', groundBot: '#064e3b', fog: 0x062c2b, keyCol: 0xccfbf1, rimCol: 0x38bdf8, glowCol: 0x14b8a6, particleCol: 0x67e8f9 },
         { id: 'snow', name: '눈', border: '#64748b', skyTop: '#0f172a', skyBot: '#94a3b8', groundTop: '#cbd5e1', groundBot: '#64748b', fog: 0x1e293b, keyCol: 0xe0f2fe, rimCol: 0x38bdf8, glowCol: 0x93c5fd, particleCol: 0xf8fafc },
         { id: 'giant_forest', name: '거대한 숲', border: '#3f6212', skyTop: '#142608', skyBot: '#365314', groundTop: '#3b2b1a', groundBot: '#1c1917', fog: 0x141f0b, keyCol: 0xbef264, rimCol: 0x4ade80, glowCol: 0x84cc16, particleCol: 0xd9f99d },
-        { id: 'abyss', name: 'Abyss Ocean', border: '#1d4ed8', skyTop: '#020617', skyBot: '#0c4a6e', groundTop: '#0f172a', groundBot: '#020617', fog: 0x04152e, keyCol: 0x38bdf8, rimCol: 0x22d3ee, glowCol: 0x0ea5e9, particleCol: 0x67e8f9 },
+        { id: 'abyss', name: '수중', border: '#1d4ed8', skyTop: '#020617', skyBot: '#0c4a6e', groundTop: '#0f172a', groundBot: '#020617', fog: 0x04152e, keyCol: 0x38bdf8, rimCol: 0x22d3ee, glowCol: 0x0ea5e9, particleCol: 0x67e8f9 },
         { id: 'volcano', name: '화산', border: '#b45309', skyTop: '#140305', skyBot: '#7c2d12', groundTop: '#290d07', groundBot: '#120503', fog: 0x1c0907, keyCol: 0xffb878, rimCol: 0x4aa8ff, glowCol: 0xff6a10, particleCol: 0xff8a30 }
       ];
 
@@ -479,7 +516,7 @@
 
       const MAX_FAVORITES = 10;
       const TRAINING_CONFIG = {
-        treadmill: { id: 'treadmill', name: '런닝머신', baseRate: 4.5, label: '🏃 런닝머신 질주 중' },
+        treadmill: { id: 'treadmill', name: '런닝머신', baseRate: 4.5, label: '🏃 런닝머신 질주 중 (최대 에너지 상승!)' },
         pushup: { id: 'pushup', name: '팔굽혀펴기', baseRate: 5.2, label: '🤸 매트 팔굽혀펴기 중' },
         desk: { id: 'desk', name: '책상 공부', baseRate: 4.8, label: '📚 책상 공부 중' },
         rodeo: { id: 'rodeo', name: '스프링 로데오', baseRate: 6.0, label: '🐂 스프링 로데오 훈련 중' }
@@ -501,6 +538,7 @@
         bgmEnabled: true,
         soundEnabled: true,
         powerBoosterOn: false,
+        roarLoopOn: false,
         isVip: false
       };
 
@@ -513,6 +551,7 @@
           if (!Array.isArray(state.unlockedIds) || state.unlockedIds.length === 0) state.unlockedIds = ['dino_1'];
           if (!Array.isArray(state.favoriteIds)) state.favoriteIds = ['dino_1', 'dino_39', 'dino_80'];
           if (!state.dinoEnergies || typeof state.dinoEnergies !== 'object') state.dinoEnergies = {};
+          if (typeof state.heroMaxEnergy !== 'number' || state.heroMaxEnergy < 100) state.heroMaxEnergy = 100;
         }
       } catch (e) {}
 
@@ -617,6 +656,7 @@
             if (data.saveData) {
               const sd = typeof data.saveData === 'string' ? JSON.parse(data.saveData) : data.saveData;
               if (typeof sd.heroPower === 'number') state.heroPower = Math.max(state.heroPower, sd.heroPower);
+              if (typeof sd.heroMaxEnergy === 'number') state.heroMaxEnergy = Math.max(state.heroMaxEnergy, sd.heroMaxEnergy);
               if (typeof sd.bestDistance === 'number') state.bestDistance = Math.max(state.bestDistance, sd.bestDistance);
               if (Array.isArray(sd.favoriteIds) && sd.favoriteIds.length) state.favoriteIds = sd.favoriteIds.filter(id => DINOS.some(d => d.id === id)).slice(0, MAX_FAVORITES);
             }
@@ -630,7 +670,6 @@
         return maskPhoneMiddle(currentNickname || currentUsername || '게스트');
       }
 
-      // 랭킹 모달: 본인 랭크 최상단(별명 + 파워) + 그 아래 TOP 10(별명 + 파워)
       async function fetchRanking() {
         const listEl = document.getElementById('rankingListContainer');
         const myPosEl = document.getElementById('myRankPos');
@@ -746,7 +785,7 @@
       function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
 
       // ============================================================
-      // 3. Three.js 3D 엔진 (각룡류 전면 재설계 + 트리케라톱스 초고디테일 + 케라토사우루스 뿔 + 데이노케이루스 전용 모델)
+      // 3. Three.js 3D 엔진
       // ============================================================
       const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
       const canvasEl = document.getElementById('gameCanvas');
@@ -777,28 +816,21 @@
 
       scene.add(new THREE.HemisphereLight(0xfff0dd, 0x1a1a2e, 0.65));
       const keyLight = new THREE.DirectionalLight(0xfff3d6, 1.45);
-      keyLight.position.set(8, 13, 9);
-      keyLight.castShadow = true;
+      keyLight.position.set(8, 13, 9); keyLight.castShadow = true;
       keyLight.shadow.mapSize.set(1024, 1024);
       Object.assign(keyLight.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 42 });
-      keyLight.shadow.bias = -0.0005;
-      scene.add(keyLight);
+      keyLight.shadow.bias = -0.0005; scene.add(keyLight);
       const rimLight = new THREE.DirectionalLight(0x4aa8ff, 0.95);
-      rimLight.position.set(-8, 6, -9);
-      scene.add(rimLight);
+      rimLight.position.set(-8, 6, -9); scene.add(rimLight);
       const accentLight = new THREE.PointLight(0xff6a10, 1.8, 18);
-      accentLight.position.set(0, 1.2, 0);
-      scene.add(accentLight);
-      const mouthLight = new THREE.PointLight(0xff7a20, 0, 10);
-      scene.add(mouthLight);
+      accentLight.position.set(0, 1.2, 0); scene.add(accentLight);
+      const mouthLight = new THREE.PointLight(0xff7a20, 0, 10); scene.add(mouthLight);
 
       function makeCanvasTex(w, h, drawFn, rx = 1, ry = 1) {
-        const c = document.createElement('canvas');
-        c.width = w; c.height = h;
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
         drawFn(c.getContext('2d'), w, h);
         const t = new THREE.CanvasTexture(c);
-        t.wrapS = t.wrapT = THREE.RepeatWrapping;
-        t.repeat.set(rx, ry);
+        t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry);
         return t;
       }
       function drawCracks(g, w, h, n, seedStart = 7) {
@@ -806,13 +838,10 @@
         const rs = () => ((sd = Math.imul(sd, 1664525) + 1013904223 >>> 0) / 4294967296);
         for (let i = 0; i < n; i++) {
           let x = rs() * w, y = rs() * h, a = rs() * 6.28;
-          g.lineWidth = 1 + rs() * 2.6;
-          g.beginPath(); g.moveTo(x, y);
+          g.lineWidth = 1 + rs() * 2.6; g.beginPath(); g.moveTo(x, y);
           const m = 8 + rs() * 14;
           for (let k = 0; k < m; k++) {
-            a += (rs() - 0.5) * 1.25;
-            x += Math.cos(a) * (10 + rs() * 20);
-            y += Math.sin(a) * (10 + rs() * 20);
+            a += (rs() - 0.5) * 1.25; x += Math.cos(a) * (10 + rs() * 20); y += Math.sin(a) * (10 + rs() * 20);
             g.lineTo(x, y);
           }
           g.stroke();
@@ -868,15 +897,13 @@
         new THREE.CircleGeometry(46, 64),
         new THREE.MeshStandardMaterial({ color: 0x4d7c0f, roughness: 0.9 })
       );
-      floorMesh.rotation.x = -Math.PI / 2; floorMesh.receiveShadow = true;
-      scene.add(floorMesh);
+      floorMesh.rotation.x = -Math.PI / 2; floorMesh.receiveShadow = true; scene.add(floorMesh);
 
       const arenaRing = new THREE.Mesh(
         new THREE.TorusGeometry(6.8, 0.06, 8, 96),
         new THREE.MeshBasicMaterial({ color: 0x84cc16, transparent: true, opacity: 0.75 })
       );
-      arenaRing.rotation.x = Math.PI / 2; arenaRing.position.y = 0.03;
-      scene.add(arenaRing);
+      arenaRing.rotation.x = Math.PI / 2; arenaRing.position.y = 0.03; scene.add(arenaRing);
 
       const envGroup = new THREE.Group(); scene.add(envGroup);
 
@@ -904,8 +931,7 @@
           new THREE.RingGeometry(0.9, 1.0, 48),
           new THREE.MeshBasicMaterial({ color: 0xff9a40, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
         );
-        m.rotation.x = -Math.PI / 2; m.position.y = 0.08; m.visible = false;
-        scene.add(m);
+        m.rotation.x = -Math.PI / 2; m.position.y = 0.08; m.visible = false; scene.add(m);
         return { m, t: -1 };
       });
 
@@ -914,14 +940,10 @@
           const ch = envGroup.children.pop();
           if (ch.geometry) ch.geometry.dispose();
         }
-        skyUniforms.uTop.value.set(biome.skyTop);
-        skyUniforms.uBot.value.set(biome.skyBot);
-        scene.background.set(biome.skyTop);
-        scene.fog.color.setHex(biome.fog);
-        keyLight.color.setHex(biome.keyCol);
-        rimLight.color.setHex(biome.rimCol);
-        accentLight.color.setHex(biome.glowCol);
-        arenaRing.material.color.setHex(biome.glowCol);
+        skyUniforms.uTop.value.set(biome.skyTop); skyUniforms.uBot.value.set(biome.skyBot);
+        scene.background.set(biome.skyTop); scene.fog.color.setHex(biome.fog);
+        keyLight.color.setHex(biome.keyCol); rimLight.color.setHex(biome.rimCol);
+        accentLight.color.setHex(biome.glowCol); arenaRing.material.color.setHex(biome.glowCol);
         pMat.color.setHex(biome.particleCol);
 
         const fTex = makeCanvasTex(512, 512, (g, w, h) => {
@@ -1002,20 +1024,15 @@
         }
       }
 
-      // ============================================================
-      // 3D 공룡 빌더 (각룡류·트리케라톱스·케라토사우루스·데이노케이루스 정밀 조각)
-      // ============================================================
-      const dinoRoot = new THREE.Group();
-      scene.add(dinoRoot);
+      // 3D 공룡 빌더
+      const dinoRoot = new THREE.Group(); scene.add(dinoRoot);
       let dinoRig = null;
       const SG_LOW = new THREE.SphereGeometry(1, 20, 14);
 
       function addMesh(geo, mat, x, y, z, parent, sx, sy, sz) {
-        const o = new THREE.Mesh(geo, mat);
-        o.position.set(x, y, z);
+        const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z);
         if (sx !== undefined) o.scale.set(sx, sy, sz);
-        o.castShadow = true;
-        (parent || dinoRoot).add(o);
+        o.castShadow = true; (parent || dinoRoot).add(o);
         return o;
       }
       function addLimb(a, b, r1, r2, mat, parent) {
@@ -1023,28 +1040,23 @@
         const o = new THREE.Mesh(new THREE.CylinderGeometry(r2, r1, L, 10), mat);
         o.position.copy(a).addScaledVector(d, 0.5);
         o.quaternion.setFromUnitVectors(V3(0, 1, 0), d.normalize());
-        o.castShadow = true;
-        (parent || dinoRoot).add(o);
+        o.castShadow = true; (parent || dinoRoot).add(o);
         return o;
       }
-      // 곡선형 뿔 빌더 (트리케라톱스·펜타케라톱스·토로사우루스용 고품질 뿔)
       function addCurvedHorn(pts, rBase, rTip, mat, parent) {
         const curve = new THREE.CatmullRomCurve3(pts);
         const segs = 16, rg = 10;
         const g = new THREE.TubeGeometry(curve, segs, 1, rg, false);
         const pa = g.attributes.position;
         for (let i = 0; i <= segs; i++) {
-          const u = i / segs, c = curve.getPointAt(u);
-          const r = rBase * (1 - u) + rTip * u;
+          const u = i / segs, c = curve.getPointAt(u), r = rBase * (1 - u) + rTip * u;
           for (let j = 0; j <= rg; j++) {
             const n = i * (rg + 1) + j;
             pa.setXYZ(n, c.x + (pa.getX(n) - c.x) * r, c.y + (pa.getY(n) - c.y) * r, c.z + (pa.getZ(n) - c.z) * r);
           }
         }
         g.computeVertexNormals();
-        const m = new THREE.Mesh(g, mat);
-        m.castShadow = true;
-        parent.add(m);
+        const m = new THREE.Mesh(g, mat); m.castShadow = true; parent.add(m);
         return m;
       }
 
@@ -1052,26 +1064,15 @@
         while (dinoRoot.children.length > 0) dinoRoot.remove(dinoRoot.children[0]);
         const skin = getDinoSkinMat(dino);
         const accentMat = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(dino.accent),
-          emissive: new THREE.Color(dino.accent),
-          emissiveIntensity: 0.45,
-          roughness: 0.45,
-          flatShading: true
+          color: new THREE.Color(dino.accent), emissive: new THREE.Color(dino.accent),
+          emissiveIntensity: 0.45, roughness: 0.45, flatShading: true
         });
-        const darkTrimMat = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(dino.color).multiplyScalar(0.55),
-          roughness: 0.55,
-          metalness: 0.1
-        });
+        const darkTrimMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(dino.color).multiplyScalar(0.55), roughness: 0.55, metalness: 0.1 });
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffd040 });
         const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
         const bt = dino.bodyType;
-        const isTricera = dino.id === 'dino_39';
-        const isProto = dino.id === 'dino_21';
-        const isStyraco = dino.id === 'dino_37';
-        const isPenta = dino.id === 'dino_38';
-        const isPachyRhino = dino.id === 'dino_45';
-        const isToro = dino.id === 'dino_89';
+        const isTricera = dino.id === 'dino_39', isProto = dino.id === 'dino_21', isStyraco = dino.id === 'dino_37';
+        const isPenta = dino.id === 'dino_38', isPachyRhino = dino.id === 'dino_45', isToro = dino.id === 'dino_89';
 
         let sp, radFn, scaleFactor = 0.72, riderAnchor = V3(0.3, 2.5, 0);
         if (bt === 'sauropod') {
@@ -1079,17 +1080,14 @@
           radFn = u => u < 0.52 ? 0.1 + 0.92 * Math.pow(u / 0.52, 1.1) : 1.02 - 0.72 * Math.pow((u - 0.52) / 0.48, 0.9);
           scaleFactor = 0.62; riderAnchor = V3(0.2, 3.3, 0);
         } else if (bt === 'ceratopsian') {
-          // 각룡류 전용 육중한 4족 척추 (목이 깔끔하게 프릴 뒤로 이어짐)
           sp = [[-4.4, 1.05, 0], [-3.0, 1.45, 0], [-1.6, 1.95, 0], [-0.2, 2.25, 0], [0.9, 2.25, 0], [1.75, 2.1, 0], [2.35, 1.98, 0], [2.75, 1.92, 0], [3.05, 1.88, 0]];
           radFn = u => u < 0.52 ? 0.12 + 0.95 * Math.pow(u / 0.52, 1.05) : 1.07 - 0.45 * Math.pow((u - 0.52) / 0.48, 1.0);
-          scaleFactor = isProto ? 0.64 : isTricera ? 0.8 : 0.75;
-          riderAnchor = V3(0.2, 3.15, 0);
+          scaleFactor = isProto ? 0.64 : isTricera ? 0.8 : 0.75; riderAnchor = V3(0.2, 3.15, 0);
         } else if (bt === 'stegosaur' || bt === 'ankylosaur') {
           sp = [[-4.6, 0.9, 0], [-3.0, 1.5, 0], [-1.4, 2.0, 0], [0.0, 2.25, 0], [1.2, 2.15, 0], [2.1, 2.05, 0], [2.7, 2.0, 0], [3.0, 1.95, 0], [3.2, 1.9, 0]];
           radFn = u => u < 0.55 ? 0.12 + 0.88 * Math.pow(u / 0.55, 1.1) : 1.0 - 0.45 * Math.pow((u - 0.55) / 0.45, 1.1);
           scaleFactor = 0.74; riderAnchor = V3(0.1, 2.95, 0);
         } else if (bt === 'deinocheirus' || bt === 'therizino') {
-          // 데이노케이루스 & 테리지노사우루스 전용: 긴 목 + 육중한 엉덩이 + 혹/깃털 체형
           sp = [[-4.8, 1.2, 0], [-3.2, 1.75, 0], [-1.6, 2.35, 0], [-0.2, 2.75, 0], [0.9, 3.05, 0], [1.7, 3.55, 0], [2.3, 4.35, 0], [2.75, 4.95, 0], [3.2, 5.2, 0]];
           radFn = u => u < 0.48 ? 0.12 + 0.95 * Math.pow(u / 0.48, 1.1) : 1.07 - 0.72 * Math.pow((u - 0.48) / 0.52, 0.95);
           scaleFactor = 0.7; riderAnchor = V3(0.1, 3.7, 0);
@@ -1102,54 +1100,36 @@
           radFn = u => u < 0.5 ? 0.08 + 0.52 * (u / 0.5) : 0.6 - 0.34 * ((u - 0.5) / 0.5);
           scaleFactor = 0.76; riderAnchor = V3(0.0, 3.65, 0);
         } else {
-          // theropod_large / theropod_small / ceratosaurus / spino / ornithopod / pachy
           sp = [[-5.4, 0.7, 0], [-3.8, 1.4, 0], [-2.1, 2.0, 0], [-0.6, 2.45, 0], [0.7, 2.65, 0], [1.7, 3.0, 0], [2.4, 3.7, 0], [2.9, 4.35, 0], [3.35, 4.7, 0]];
           radFn = u => u < 0.62 ? 0.05 + 0.82 * Math.pow(u / 0.62, 1.25) : 0.87 - 0.47 * Math.pow((u - 0.62) / 0.38, 1.1);
           scaleFactor = bt === 'theropod_small' ? 0.62 : 0.72; riderAnchor = V3(0.3, 3.35, 0);
         }
 
         const bodyMesh = new THREE.Mesh(new THREE.BufferGeometry(), skin);
-        bodyMesh.castShadow = true;
-        dinoRoot.add(bodyMesh);
+        bodyMesh.castShadow = true; dinoRoot.add(bodyMesh);
 
-        // ---------- 머리 & 아래턱 ----------
-        const head = new THREE.Group();
-        dinoRoot.add(head);
-        const jaw = new THREE.Group();
-        head.add(jaw);
+        const head = new THREE.Group(); dinoRoot.add(head);
+        const jaw = new THREE.Group(); head.add(jaw);
 
         if (bt === 'ceratopsian') {
-          // 각룡류 전용 정밀 3D 두개골 + 방패 프릴 + 곡선 뿔 (깨짐 완전 해결!)
           const frillW = isToro ? 1.65 : isTricera ? 1.55 : isPenta ? 1.5 : isProto ? 1.05 : 1.35;
           const frillH = isToro ? 1.55 : isPenta ? 1.6 : isTricera ? 1.42 : isProto ? 0.95 : 1.3;
 
-          // 두개골 본체 + 넓은 주둥이 + 앵무새 부리
           addMesh(SG_LOW, skin, 0.45, 0.05, 0, head, 0.95, 0.68, 0.66);
           addMesh(SG_LOW, skin, 1.25, -0.06, 0, head, 0.78, 0.48, 0.48);
-          // 앵무새 모양 상부 부리
-          const beak = addMesh(new THREE.ConeGeometry(0.32, 0.65, 8), darkTrimMat, 1.92, -0.2, 0, head);
-          beak.rotation.z = -1.9;
-          // 하부 턱 + 아래 부리
+          addMesh(new THREE.ConeGeometry(0.32, 0.65, 8), darkTrimMat, 1.92, -0.2, 0, head).rotation.z = -1.9;
           jaw.position.set(0.45, -0.32, 0);
           addMesh(SG_LOW, skin, 0.72, -0.05, 0, jaw, 0.78, 0.2, 0.36);
 
-          // 정면으로 펼쳐지는 방패형 프릴 (YZ 평면에 펼쳐지고 살짝 뒤로 기울어짐!)
           const frillGroup = new THREE.Group();
-          frillGroup.position.set(-0.22, 0.52, 0);
-          frillGroup.rotation.z = 0.42; // 뒤로 우아하게 젖혀짐
-          head.add(frillGroup);
-
-          // 프릴 메인 방패판 (두툼한 타원 원반)
-          const shield = addMesh(SG_LOW, skin, 0, 0.35, 0, frillGroup, 0.18, frillH * 0.68, frillW * 0.72);
-          // 프릴 장식 무늬/테두리 (트리케라톱스는 이중 장갑 방패 + 골판 링!)
+          frillGroup.position.set(-0.22, 0.52, 0); frillGroup.rotation.z = 0.42; head.add(frillGroup);
+          addMesh(SG_LOW, skin, 0, 0.35, 0, frillGroup, 0.18, frillH * 0.68, frillW * 0.72);
           addMesh(SG_LOW, accentMat, 0.06, 0.38, 0, frillGroup, 0.14, frillH * 0.52, frillW * 0.56);
           if (isTricera) {
-            // 트리케라톱스 전용: 눈두덩 장갑 융기 + 방패 중앙 능선 + 목 보호 칼라
             addMesh(SG_LOW, darkTrimMat, 0.1, 0.35, 0, frillGroup, 0.16, frillH * 0.62, 0.18);
             addMesh(SG_LOW, darkTrimMat, -0.15, 0.05, 0, head, 0.45, 0.78, 0.78);
           }
 
-          // 프릴 가장자리 뿔/돌기 (부채꼴 방사형으로 깔끔하게 배치!)
           const rimCount = isStyraco ? 7 : isTricera ? 11 : 9;
           for (let i = 0; i < rimCount; i++) {
             const ang = -Math.PI * 0.62 + (i / (rimCount - 1)) * (Math.PI * 1.24);
@@ -1158,25 +1138,20 @@
             const spLen = isStyraco ? (0.85 + Math.cos(ang) * 0.35) : isTricera ? 0.34 : isProto ? 0.16 : 0.28;
             const spRad = isStyraco ? 0.13 : isTricera ? 0.12 : 0.09;
             const rimSpike = addMesh(new THREE.ConeGeometry(spRad, spLen, 6), isTricera ? toothMat : accentMat, 0.02, ry, rz, frillGroup);
-            rimSpike.rotation.x = ang;
-            rimSpike.rotation.z = -0.15;
+            rimSpike.rotation.x = ang; rimSpike.rotation.z = -0.15;
           }
 
-          // 눈 + 동공 + 눈썹 장갑
           [-1, 1].forEach(s => {
             addMesh(SG_LOW, darkTrimMat, 0.72, 0.38, s * 0.52, head, 0.32, 0.14, 0.18);
             addMesh(new THREE.SphereGeometry(0.11, 12, 10), eyeMat, 0.76, 0.24, s * 0.56, head);
             addMesh(new THREE.SphereGeometry(0.055, 8, 8), pupilMat, 0.82, 0.24, s * 0.62, head);
-            // 뺨 뿔 (펜타케라톱스·트리케라톱스)
             if (isPenta || isTricera || isToro) {
               const cheek = addMesh(new THREE.ConeGeometry(0.1, isPenta ? 0.58 : 0.34, 6), toothMat, 0.35, -0.18, s * 0.65, head);
               cheek.rotation.x = s * 1.25; cheek.rotation.z = -0.3;
             }
           });
 
-          // 종별 뿔 조각!
           if (isTricera || isPenta || isToro) {
-            // 2개의 길고 우아하게 휘어진 눈썹 뿔 (곡선 튜브)
             const hornLen = isTricera ? 1.85 : isToro ? 1.65 : 1.55;
             [-1, 1].forEach(s => {
               addCurvedHorn([
@@ -1186,35 +1161,21 @@
                 V3(0.65 + hornLen, 0.96, s * 0.46)
               ], isTricera ? 0.17 : 0.14, 0.025, toothMat, head);
             });
-            // 코 뿔 (두툼하고 날카롭게 위로 솟음)
-            addCurvedHorn([
-              V3(1.52, 0.14, 0),
-              V3(1.68, 0.42, 0),
-              V3(1.78, isTricera ? 0.78 : 0.62, 0)
-            ], isTricera ? 0.14 : 0.11, 0.02, toothMat, head);
+            addCurvedHorn([V3(1.52, 0.14, 0), V3(1.68, 0.42, 0), V3(1.78, isTricera ? 0.78 : 0.62, 0)], isTricera ? 0.14 : 0.11, 0.02, toothMat, head);
           } else if (isStyraco) {
-            // 스티라코사우루스: 거대한 단일 코뿔
             addCurvedHorn([V3(1.42, 0.15, 0), V3(1.62, 0.65, 0), V3(1.72, 1.25, 0)], 0.16, 0.025, toothMat, head);
           } else if (isPachyRhino) {
-            // 파키리노사우루스: 코 위 거대한 뼈 혹(Boss)
             addMesh(SG_LOW, hornTipMat, 1.48, 0.28, 0, head, 0.52, 0.34, 0.42);
           }
-          // 프로토케라톱스는 뿔 없이 깔끔한 코 능선만
-          if (isProto) {
-            addMesh(SG_LOW, darkTrimMat, 1.42, 0.16, 0, head, 0.36, 0.16, 0.16);
-          }
+          if (isProto) addMesh(SG_LOW, darkTrimMat, 1.42, 0.16, 0, head, 0.36, 0.16, 0.16);
         } else if (bt === 'deinocheirus') {
-          // 데이노케이루스 전용 머리: 길고 납작한 오리주둥이 + 작은 턱 볏
           addMesh(SG_LOW, skin, 0.35, 0.05, 0, head, 0.72, 0.44, 0.42);
-          addMesh(SG_LOW, accentMat, 1.25, -0.04, 0, head, 0.92, 0.22, 0.46); // 넓은 오리주둥이
+          addMesh(SG_LOW, accentMat, 1.25, -0.04, 0, head, 0.92, 0.22, 0.46);
           jaw.position.set(0.35, -0.22, 0);
           addMesh(SG_LOW, skin, 0.82, -0.04, 0, jaw, 0.85, 0.14, 0.38);
-          addMesh(SG_LOW, darkTrimMat, 0.72, -0.22, 0, jaw, 0.28, 0.16, 0.18); // 턱 혹
-          [-1, 1].forEach(s => {
-            addMesh(new THREE.SphereGeometry(0.09, 10, 8), eyeMat, 0.62, 0.22, s * 0.34, head);
-          });
+          addMesh(SG_LOW, darkTrimMat, 0.72, -0.22, 0, jaw, 0.28, 0.16, 0.18);
+          [-1, 1].forEach(s => { addMesh(new THREE.SphereGeometry(0.09, 10, 8), eyeMat, 0.62, 0.22, s * 0.34, head); });
         } else {
-          // 일반 수각류 / 케라토사우루스 / 테리지노 / 용각류 / 익룡 / 해양파충류 / 검룡 / 곡룡 / 조각류 / 후두류
           const isSmallHead = bt === 'sauropod' || bt === 'stegosaur' || bt === 'ankylosaur' || bt === 'therizino';
           const hScale = isSmallHead ? 0.64 : bt === 'pterosaur' ? 0.72 : 1.0;
 
@@ -1226,49 +1187,37 @@
             if (bt === 'theropod_large' || bt === 'theropod_small' || bt === 'ceratosaurus' || bt === 'spino' || bt === 'marine') {
               const tb = new THREE.ConeGeometry(0.065 * hScale, 0.19 * hScale, 5);
               for (let k = 0; k < 7; k++) {
-                const tMesh = addMesh(tb, toothMat, (0.72 + k * 0.19) * hScale, -0.44 * hScale, s * (0.32 - k * 0.015) * hScale, head);
-                tMesh.rotation.z = Math.PI;
+                addMesh(tb, toothMat, (0.72 + k * 0.19) * hScale, -0.44 * hScale, s * (0.32 - k * 0.015) * hScale, head).rotation.z = Math.PI;
               }
             }
           });
 
-          // 케라토사우루스 전용: 상징적인 큰 코뿔 + 눈썹 뿔 2개!
           if (bt === 'ceratosaurus') {
-            const noseBlade = addMesh(new THREE.ConeGeometry(0.18, 0.78, 6), toothMat, 1.65, 0.48, 0, head, 1.35, 1.0, 0.45);
-            noseBlade.rotation.z = -0.22;
+            addMesh(new THREE.ConeGeometry(0.18, 0.78, 6), toothMat, 1.65, 0.48, 0, head, 1.35, 1.0, 0.45).rotation.z = -0.22;
             [-1, 1].forEach(s => {
               const browHorn = addMesh(new THREE.ConeGeometry(0.11, 0.42, 6), accentMat, 0.78, 0.56, s * 0.34, head);
               browHorn.rotation.z = -0.15; browHorn.rotation.x = s * 0.25;
             });
           } else if (dino.id === 'dino_29') {
-            // 카르노타우루스: 황소 같은 쌍뿔
-            [-1, 1].forEach(s => {
-              const bullHorn = addMesh(new THREE.ConeGeometry(0.12, 0.58, 6), toothMat, 0.68, 0.58, s * 0.42, head);
-              bullHorn.rotation.x = s * 0.55;
-            });
+            [-1, 1].forEach(s => { addMesh(new THREE.ConeGeometry(0.12, 0.58, 6), toothMat, 0.68, 0.58, s * 0.42, head).rotation.x = s * 0.55; });
           } else if (bt === 'pachy') {
             addMesh(SG_LOW, accentMat, 0.45, 0.52, 0, head, 0.85, 0.55, 0.68);
           } else if (bt === 'pterosaur') {
-            const crest = addMesh(new THREE.ConeGeometry(0.28, 1.35, 6), accentMat, -0.2, 0.55, 0, head);
-            crest.rotation.z = 1.15;
+            addMesh(new THREE.ConeGeometry(0.28, 1.35, 6), accentMat, -0.2, 0.55, 0, head).rotation.z = 1.15;
           } else if (bt === 'ornithopod') {
-            const crest = addMesh(new THREE.CylinderGeometry(0.12, 0.18, 0.95, 8), accentMat, -0.1, 0.48, 0, head);
-            crest.rotation.z = 0.9;
+            addMesh(new THREE.CylinderGeometry(0.12, 0.18, 0.95, 8), accentMat, -0.1, 0.48, 0, head).rotation.z = 0.9;
           }
 
           jaw.position.set(0.32 * hScale, -0.36 * hScale, 0);
           addMesh(SG_LOW, skin, 0.88 * hScale, -0.05 * hScale, 0, jaw, 0.98 * hScale, 0.15 * hScale, 0.32 * hScale);
         }
 
-        // ---------- 다리 / 팔 / 날개 / 지느러미 ----------
         const legs = [], wings = [];
         if (bt === 'pterosaur') {
           [-1, 1].forEach(s => {
-            const wGrp = new THREE.Group();
-            wGrp.position.set(0.2, 3.25, s * 0.45);
+            const wGrp = new THREE.Group(); wGrp.position.set(0.2, 3.25, s * 0.45);
             const wMesh = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 4.6), skin);
-            wMesh.position.set(0, 0, s * 2.3); wMesh.castShadow = true;
-            wGrp.add(wMesh); dinoRoot.add(wGrp);
+            wMesh.position.set(0, 0, s * 2.3); wMesh.castShadow = true; wGrp.add(wMesh); dinoRoot.add(wGrp);
             wings.push({ grp: wGrp, side: s });
           });
         } else if (bt === 'marine') {
@@ -1284,26 +1233,20 @@
           const legH = bt === 'sauropod' ? 2.4 : bt === 'ceratopsian' ? 1.85 : 1.7;
           hipXs.forEach((hx, hi) => {
             [-1, 1].forEach(s => {
-              const lGrp = new THREE.Group();
-              lGrp.position.set(hx, legH, s * (bt === 'ceratopsian' ? 0.9 : 0.82));
-              // 근육질 상단 + 하단 다리 + 발굽/발톱
+              const lGrp = new THREE.Group(); lGrp.position.set(hx, legH, s * (bt === 'ceratopsian' ? 0.9 : 0.82));
               addMesh(SG_LOW, skin, 0, -0.25, 0, lGrp, 0.52, 0.65, 0.45);
               addLimb(V3(0, -0.2, 0), V3(0, -legH + 0.12, 0), 0.4, 0.3, skin, lGrp);
               addMesh(SG_LOW, skin, 0.12, -legH + 0.14, 0, lGrp, 0.42, 0.18, 0.38);
               if (isTricera) {
-                [-0.14, 0, 0.14].forEach(oz => {
-                  addMesh(new THREE.ConeGeometry(0.08, 0.24, 5), hornTipMat, 0.48, -legH + 0.1, oz, lGrp).rotation.z = -1.4;
-                });
+                [-0.14, 0, 0.14].forEach(oz => { addMesh(new THREE.ConeGeometry(0.08, 0.24, 5), hornTipMat, 0.48, -legH + 0.1, oz, lGrp).rotation.z = -1.4; });
               }
               dinoRoot.add(lGrp);
               legs.push({ grp: lGrp, phase: (hi === 0 ? 0 : Math.PI) + (s > 0 ? 0 : Math.PI) });
             });
           });
         } else {
-          // 2족 보행
           [-1, 1].forEach(s => {
-            const lGrp = new THREE.Group();
-            lGrp.position.set(-0.2, 2.15, s * 0.78);
+            const lGrp = new THREE.Group(); lGrp.position.set(-0.2, 2.15, s * 0.78);
             addMesh(SG_LOW, skin, 0.1, -0.1, 0, lGrp, 0.85, 1.05, 0.55);
             addLimb(V3(0, 0, 0), V3(0.75, -0.85, 0), 0.48, 0.32, skin, lGrp);
             addLimb(V3(0.75, -0.85, 0), V3(0.1, -1.5, 0), 0.32, 0.22, skin, lGrp);
@@ -1313,16 +1256,12 @@
             legs.push({ grp: lGrp, phase: s > 0 ? 0 : Math.PI });
 
             if (bt === 'deinocheirus' || bt === 'therizino') {
-              // 데이노케이루스 & 테리지노사우루스: 거대한 긴 앞팔 + 3개의 초대형 낫 발톱!
-              const shoulder = V3(1.15, 3.05, s * 0.88);
-              const elbow = V3(1.85, 2.15, s * 1.08);
-              const wrist = V3(2.85, 1.75, s * 0.92);
+              const shoulder = V3(1.15, 3.05, s * 0.88), elbow = V3(1.85, 2.15, s * 1.08), wrist = V3(2.85, 1.75, s * 0.92);
               addLimb(shoulder, elbow, 0.24, 0.18, skin, dinoRoot);
               addLimb(elbow, wrist, 0.18, 0.13, skin, dinoRoot);
               [-0.14, 0, 0.14].forEach(oz => {
                 const clawLen = bt === 'therizino' ? 1.15 : 0.72;
-                const cl = addMesh(new THREE.ConeGeometry(0.075, clawLen, 6), toothMat, wrist.x + 0.38, wrist.y - 0.18, wrist.z + oz, dinoRoot);
-                cl.rotation.z = -2.05;
+                addMesh(new THREE.ConeGeometry(0.075, clawLen, 6), toothMat, wrist.x + 0.38, wrist.y - 0.18, wrist.z + oz, dinoRoot).rotation.z = -2.05;
               });
             } else {
               addLimb(V3(1.75, 2.75, s * 0.6), V3(2.35, 2.1, s * 0.52), 0.14, 0.09, skin, dinoRoot);
@@ -1330,42 +1269,31 @@
           });
         }
 
-        // ---------- 등 장식 (각룡류는 뾰족 가시 제거, 데이노케이루스는 등 혹 돛 + 꼬리 깃털!) ----------
         const spikes = [];
         if (bt === 'deinocheirus') {
-          // 데이노케이루스 상징: 등 중앙 높은 혹(돛) + 꼬리 끝 깃털 부채
           for (let i = 0; i < 8; i++) {
-            const u = 0.25 + (i / 8) * 0.35;
-            const h = 0.55 + Math.sin((i / 7) * Math.PI) * 1.25;
+            const u = 0.25 + (i / 8) * 0.35, h = 0.55 + Math.sin((i / 7) * Math.PI) * 1.25;
             const o = new THREE.Mesh(new THREE.BoxGeometry(0.42, h, 0.26), accentMat);
-            o.castShadow = true; o.userData = { u, h };
-            dinoRoot.add(o); spikes.push(o);
+            o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
           }
-          addMesh(SG_LOW, accentMat, -4.9, 1.2, 0, dinoRoot, 0.9, 0.45, 0.25); // 꼬리 깃털 부채
+          addMesh(SG_LOW, accentMat, -4.9, 1.2, 0, dinoRoot, 0.9, 0.45, 0.25);
         } else if (bt === 'ceratopsian') {
-          // 트리케라톱스만 등 중앙에 아주 낮은 장갑 돌기(Osteoderms)
           if (isTricera) {
             for (let i = 0; i < 7; i++) {
               const u = 0.22 + (i / 7) * 0.45;
               const o = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), darkTrimMat);
-              o.scale.set(1.3, 0.65, 0.9);
-              o.userData = { u, h: 0.12 };
-              dinoRoot.add(o); spikes.push(o);
+              o.scale.set(1.3, 0.65, 0.9); o.userData = { u, h: 0.12 }; dinoRoot.add(o); spikes.push(o);
             }
           }
         } else {
           const spikeCount = bt === 'spino' ? 14 : bt === 'stegosaur' ? 10 : bt === 'ankylosaur' ? 12 : 10;
           for (let i = 0; i < spikeCount; i++) {
             const u = 0.15 + (i / spikeCount) * 0.62;
-            const h = bt === 'spino'
-              ? 0.6 + Math.sin((i / spikeCount) * Math.PI) * 1.65
-              : bt === 'stegosaur'
-                ? 0.55 + Math.sin((i / spikeCount) * Math.PI) * 0.85
-                : 0.26 + Math.sin((i / spikeCount) * Math.PI) * 0.35;
+            const h = bt === 'spino' ? 0.6 + Math.sin((i / spikeCount) * Math.PI) * 1.65
+              : bt === 'stegosaur' ? 0.55 + Math.sin((i / spikeCount) * Math.PI) * 0.85
+              : 0.26 + Math.sin((i / spikeCount) * Math.PI) * 0.35;
             const geo = bt === 'stegosaur' ? new THREE.BoxGeometry(0.45, h, 0.1) : new THREE.ConeGeometry(bt === 'spino' ? 0.22 : 0.14, h, 6);
-            const o = new THREE.Mesh(geo, accentMat);
-            o.castShadow = true; o.userData = { u, h };
-            dinoRoot.add(o); spikes.push(o);
+            const o = new THREE.Mesh(geo, accentMat); o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
           }
         }
 
@@ -1404,8 +1332,7 @@
           }
         }
         g.computeVertexNormals();
-        bodyMesh.geometry.dispose();
-        bodyMesh.geometry = g;
+        bodyMesh.geometry.dispose(); bodyMesh.geometry = g;
 
         const P = curve.getPointAt(1);
         head.position.set(P.x + 0.04, P.y - 0.03, P.z);
@@ -1451,8 +1378,7 @@
         new THREE.TorusGeometry(0.85, 0.04, 8, 32),
         new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6 })
       );
-      heroAuraRing.rotation.x = Math.PI / 2; heroAuraRing.position.y = 0.08;
-      heroGroup.add(heroAuraRing);
+      heroAuraRing.rotation.x = Math.PI / 2; heroAuraRing.position.y = 0.08; heroGroup.add(heroAuraRing);
 
       const equipRoot = new THREE.Group(); scene.add(equipRoot);
 
@@ -1571,7 +1497,7 @@
         }
       }
 
-      // 3D 카메라 오빗 (마우스 휠 스크롤 완벽 허용)
+      // 3D 카메라 오빗
       let camYaw = 0.25, camPitch = 0.26, camDist = 11.5;
       let isDragging = false, dragDist = 0, lastPtr = { x: 0, y: 0 };
 
@@ -1600,7 +1526,7 @@
       function resize3D() {
         const rect = canvasWrapper.getBoundingClientRect();
         const w = Math.max(300, rect.width || 680);
-        const h = Math.max(280, rect.height || 360);
+        const h = Math.max(220, rect.height || 360);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
@@ -1608,11 +1534,22 @@
       }
       window.addEventListener('resize', resize3D);
 
+      // 포효 애니메이션 & 무한 반복 토글
       let roarTimer = -1, roarWaved = false;
       function triggerRoar(withSound = true) {
         if (roarTimer >= 0 && roarTimer < 1.2) return;
         roarTimer = 0; roarWaved = false;
         if (withSound) playSfx('roar');
+      }
+      function updateRoarButtonUI() {
+        const btn = document.getElementById('roarBtn');
+        if (state.roarLoopOn) {
+          btn.textContent = '🔊 포효 ON';
+          btn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-[11px] font-black shadow-lg active:scale-95 transition cursor-pointer';
+        } else {
+          btn.textContent = '🔊 포효';
+          btn.className = 'px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-amber-400/60 text-amber-300 text-[11px] font-black shadow-lg active:scale-95 transition cursor-pointer';
+        }
       }
 
       // ============================================================
@@ -1661,7 +1598,7 @@
       }
 
       // ============================================================
-      // 5. 8대 바이옴 버튼 (선택됨/이동 삭제, 좌우 대칭 자동조절) & 즐겨찾기 10종
+      // 5. 8대 바이옴 소형 오버레이 버튼 (게임화면 왼쪽 상단) & 즐겨찾기 10종
       // ============================================================
       function renderBiomeStrip() {
         const strip = document.getElementById('biomeStrip');
@@ -1670,19 +1607,18 @@
           const active = state.currentBiome === b.id;
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `relative h-11 rounded-xl overflow-hidden border-2 transition cursor-pointer flex items-center justify-center px-1 ${active ? 'biome-card-active' : 'opacity-85 hover:opacity-100'}`;
+          btn.className = `px-2 py-0.5 rounded-lg border text-[9px] sm:text-[10px] font-black text-white transition cursor-pointer shadow ${active ? 'biome-pill-active' : 'opacity-80 hover:opacity-100'}`;
           btn.style.borderColor = active ? '#fde047' : b.border;
-          btn.style.background = `linear-gradient(180deg, ${b.skyTop} 0%, ${b.skyBot} 55%, ${b.groundTop} 55%, ${b.groundBot} 100%)`;
-          btn.innerHTML = `<span class="relative z-10 text-[10px] sm:text-[11px] font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] leading-tight text-center">${b.name}</span>`;
-          btn.addEventListener('click', () => {
+          btn.style.background = `linear-gradient(180deg, ${b.skyTop}dd 0%, ${b.groundTop}ee 100%)`;
+          btn.textContent = b.name;
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             getAudioContext();
             state.currentBiome = b.id;
             buildBiomeEnvironment(b);
             playSfx('tap');
             renderBiomeStrip();
-            updateHud();
             persistState(false);
-            showToast(`🌍 배경이 [${b.name}]으로 변경되었습니다!`);
           });
           strip.appendChild(btn);
         });
@@ -1792,19 +1728,19 @@
       // ============================================================
       let vipBuckTimer = 0;
 
-      function startTraining(trainId) {
+      function startTraining(trainId, silent = false) {
         getAudioContext();
         vipBuckTimer = 0;
         document.getElementById('vipBuckBanner').classList.add('hidden');
         state.mode = 'train';
         state.activeTraining = trainId;
         state.ridingDinoId = null;
-        playSfx('tap');
+        if (!silent) playSfx('tap');
         updateTrainingButtons();
         renderFavoriteDinos();
         updateHud();
         persistState(false);
-        showToast(`${TRAINING_CONFIG[trainId].label}`);
+        if (!silent) showToast(`${TRAINING_CONFIG[trainId].label}`);
       }
 
       function mountDino(dinoId) {
@@ -2015,7 +1951,7 @@
             playSfx('tap');
             document.getElementById('codexModal').classList.add('hidden');
             document.getElementById('codexModal').classList.remove('flex');
-            showToast(`🤝 3D ${d.name}이(가) 훈련 옆에 동행합니다!`);
+            showToast(`🤝 ${d.name}이(가) 훈련 옆에 동행합니다!`);
           });
           card.querySelector('.codex-ride-btn').addEventListener('click', () => {
             if (!unlocked) {
@@ -2078,8 +2014,9 @@
         document.getElementById('hudPowerRate').textContent = `+${formatPower(getCurrentPowerRate())} / 초`;
         document.getElementById('heroRankBadge').textContent = getHeroRank(state.heroPower);
 
-        const heroPct = Math.max(0, Math.min(100, (state.heroEnergy / state.heroMaxEnergy) * 100));
-        document.getElementById('heroEnergyText').textContent = `${Math.round(state.heroEnergy)} / ${state.heroMaxEnergy}`;
+        const maxE = Math.max(100, state.heroMaxEnergy);
+        const heroPct = Math.max(0, Math.min(100, (state.heroEnergy / maxE) * 100));
+        document.getElementById('heroEnergyText').textContent = `${Math.floor(state.heroEnergy).toLocaleString('ko-KR')} / ${Math.floor(maxE).toLocaleString('ko-KR')}`;
         const hBar = document.getElementById('heroEnergyBar');
         hBar.style.width = heroPct + '%';
         hBar.className = `h-full transition-all duration-150 ${heroPct < 25 ? 'bg-rose-500' : heroPct < 55 ? 'bg-amber-400' : 'bg-gradient-to-r from-cyan-400 to-emerald-400'}`;
@@ -2092,30 +2029,23 @@
 
         const thumbEl = document.getElementById('hudDinoThumb');
         if (thumbEl.src !== activeDino.sprite) thumbEl.src = activeDino.sprite;
-        document.getElementById('hudDinoPower').textContent = `PWR ${formatPower(activeDino.power)}`;
         document.getElementById('hudDinoName').textContent = activeDino.name;
-        document.getElementById('canvasDinoLabel').textContent = `${activeDino.name} · PWR ${formatPower(activeDino.power)}`;
         document.getElementById('dinoEnergyText').textContent = `${Math.round(dE)} / ${activeDino.maxEnergy}`;
         const dBar = document.getElementById('dinoEnergyBar');
         dBar.style.width = dPct + '%';
         dBar.className = `h-full transition-all duration-150 ${dPct < 25 ? 'bg-rose-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`;
 
         if (state.mode === 'ride' && state.ridingDinoId) {
-          document.getElementById('hudActivity').textContent = '🦖 공룡 탑승';
           ridingBadge.classList.remove('hidden');
           rideBtn.textContent = '⬇️ 하차';
         } else {
-          document.getElementById('hudActivity').textContent =
-            state.mode === 'train' ? TRAINING_CONFIG[state.activeTraining].name :
-            state.mode === 'rest' ? '🛌 에너지 휴식 중' : '대기 중';
           ridingBadge.classList.add('hidden');
           rideBtn.textContent = '🦖 탑승';
         }
-        document.getElementById('hudCombo').textContent = `부스터 x${comboMul.toFixed(1)}${state.powerBoosterOn ? ' (ON)' : ''}`;
       }
 
       // ============================================================
-      // 9. 메인 3D 게임 루프
+      // 9. 메인 3D 게임 루프 (런닝머신 시 최대 에너지 증가 + 무한 포효 루프!)
       // ============================================================
       const clock = new THREE.Clock();
       let uiTick = 0, saveTick = 0, boosterTick = 0;
@@ -2158,7 +2088,14 @@
 
         if (state.mode === 'train') {
           state.heroPower += getCurrentPowerRate() * comboMul * dt;
-          state.heroEnergy = Math.min(state.heroMaxEnergy, state.heroEnergy + 4.5 * vipRegen * dt);
+          // 런닝머신 훈련 시 주인공 최대 에너지(100/100+)가 실제로 계속 성장!
+          if (state.activeTraining === 'treadmill') {
+            const staminaGain = 1.4 * comboMul * dt;
+            state.heroMaxEnergy += staminaGain;
+            state.heroEnergy = Math.min(state.heroMaxEnergy, state.heroEnergy + staminaGain + 4.5 * vipRegen * dt);
+          } else {
+            state.heroEnergy = Math.min(state.heroMaxEnergy, state.heroEnergy + 4.5 * vipRegen * dt);
+          }
           DINOS.forEach(d => {
             if (typeof state.dinoEnergies[d.id] === 'number' && state.dinoEnergies[d.id] < d.maxEnergy) {
               setDinoEnergy(d, state.dinoEnergies[d.id] + 8 * vipRegen * dt);
@@ -2187,16 +2124,21 @@
             }
           }
         } else {
-          const rate = state.mode === 'rest' ? 24 : 9;
+          const rate = state.mode === 'rest' ? Math.max(24, state.heroMaxEnergy * 0.22) : Math.max(9, state.heroMaxEnergy * 0.08);
           state.heroEnergy = Math.min(state.heroMaxEnergy, state.heroEnergy + rate * vipRegen * dt);
           DINOS.forEach(d => {
             if (typeof state.dinoEnergies[d.id] === 'number' && state.dinoEnergies[d.id] < d.maxEnergy) {
-              setDinoEnergy(d, state.dinoEnergies[d.id] + rate * 1.4 * vipRegen * dt);
+              setDinoEnergy(d, state.dinoEnergies[d.id] + 24 * vipRegen * dt);
             }
           });
         }
 
         checkUnlocks();
+
+        // 무한 반복 포효 체크
+        if (state.roarLoopOn && roarTimer < 0) {
+          triggerRoar(true);
+        }
 
         let rAmt = 0;
         if (roarTimer >= 0) {
@@ -2209,7 +2151,10 @@
             const w = shockWaves.find(q => q.t < 0);
             if (w) { w.t = 0; w.m.position.set(dinoRoot.position.x, 0.1, dinoRoot.position.z); }
           }
-          if (x > 2.1) roarTimer = -1;
+          if (x > 2.15) {
+            roarTimer = -1;
+            if (state.roarLoopOn) triggerRoar(true);
+          }
         }
 
         updateDinoBody(t, rAmt, state.mode === 'ride');
@@ -2256,26 +2201,47 @@
       }
 
       // ============================================================
-      // 10. 이벤트 바인딩
+      // 10. 이벤트 바인딩 & 전체화면 (게임화면 ~ 탑승버튼까지!)
       // ============================================================
       document.getElementById('powerBoosterBtn').addEventListener('click', () => {
         getAudioContext();
         state.powerBoosterOn = !state.powerBoosterOn;
+        if (state.powerBoosterOn) {
+          // 파워부스터를 누르면 자동으로 런닝머신 탑승!
+          startTraining('treadmill', true);
+          showToast('⚡ 파워부스터 ON! 자동으로 런닝머신 훈련을 시작합니다.');
+        } else {
+          showToast('⚡ 파워부스터 OFF');
+        }
         persistState(false);
         updatePowerBoosterUI();
         updateHud();
         playSfx('tap');
-        showToast(state.powerBoosterOn ? '⚡ 파워부스터 ON! 자동으로 파워가 올라갑니다.' : '⚡ 파워부스터 OFF');
       });
+
       document.getElementById('restBtn').addEventListener('click', startRest);
       document.getElementById('dismountOrRideBtn').addEventListener('click', () => {
         if (state.mode === 'ride') dismountDino('⬇️ 공룡에서 하차했습니다.');
         else mountDino(state.selectedDinoId || 'dino_1');
       });
-      document.getElementById('roarBtn').addEventListener('click', () => { getAudioContext(); triggerRoar(true); });
-      document.getElementById('camResetBtn').addEventListener('click', () => { camYaw = 0.25; camPitch = 0.26; camDist = 11.5; });
-      document.getElementById('zoomInBtn').addEventListener('click', () => { camDist = Math.max(6.5, camDist - 1.5); });
-      document.getElementById('zoomOutBtn').addEventListener('click', () => { camDist = Math.min(20, camDist + 1.5); });
+
+      document.getElementById('roarBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        getAudioContext();
+        state.roarLoopOn = !state.roarLoopOn;
+        updateRoarButtonUI();
+        persistState(false);
+        if (state.roarLoopOn) {
+          triggerRoar(true);
+          showToast('🔊 무한 포효 ON!');
+        } else {
+          showToast('🔊 무한 포효 OFF');
+        }
+      });
+
+      document.getElementById('camResetBtn').addEventListener('click', (e) => { e.stopPropagation(); camYaw = 0.25; camPitch = 0.26; camDist = 11.5; });
+      document.getElementById('zoomInBtn').addEventListener('click', (e) => { e.stopPropagation(); camDist = Math.max(6.5, camDist - 1.5); });
+      document.getElementById('zoomOutBtn').addEventListener('click', (e) => { e.stopPropagation(); camDist = Math.min(20, camDist + 1.5); });
 
       document.querySelectorAll('.train-btn').forEach(btn => {
         btn.addEventListener('click', () => startTraining(btn.getAttribute('data-train')));
@@ -2364,13 +2330,43 @@
       document.getElementById('soundToggleBtn').addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled; persistState(false); updateAudioButtons();
       });
+
+      // 전체화면: #fullscreenStage (게임화면 ~ 탑승버튼까지!)
+      const fullscreenStage = document.getElementById('fullscreenStage');
       const fsBtn = document.getElementById('fullscreenBtn');
-      fsBtn.addEventListener('click', () => {
-        if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-        else document.documentElement.requestFullscreen?.().catch(() => {});
-      });
+      const fsExitBtn = document.getElementById('fsExitOverlayBtn');
+      const isFsActive = () => Boolean(document.fullscreenElement) || fullscreenStage.classList.contains('is-fullscreen');
+
+      function updateFullscreenUi(active) {
+        fsBtn.textContent = active ? '✕ 축소' : '⛶ 전체화면';
+        document.body.classList.toggle('fs-lock', active);
+        setTimeout(resize3D, 60);
+      }
+      async function toggleFullscreen() {
+        if (isFsActive()) {
+          if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch (e) {} }
+          fullscreenStage.classList.remove('is-fullscreen');
+          updateFullscreenUi(false);
+        } else {
+          if (fullscreenStage.requestFullscreen) {
+            try { await fullscreenStage.requestFullscreen(); updateFullscreenUi(true); return; } catch (e) {}
+          }
+          fullscreenStage.classList.add('is-fullscreen');
+          updateFullscreenUi(true);
+        }
+      }
+      fsBtn.addEventListener('click', toggleFullscreen);
+      fsExitBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
       document.addEventListener('fullscreenchange', () => {
-        fsBtn.textContent = document.fullscreenElement ? '✕ 축소' : '⛶ 전체화면';
+        const active = Boolean(document.fullscreenElement);
+        if (!active) fullscreenStage.classList.remove('is-fullscreen');
+        updateFullscreenUi(active);
+      });
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && fullscreenStage.classList.contains('is-fullscreen') && !document.fullscreenElement) {
+          fullscreenStage.classList.remove('is-fullscreen');
+          updateFullscreenUi(false);
+        }
       });
 
       window.addEventListener('load', () => {
@@ -2380,6 +2376,7 @@
         updateAudioButtons();
         updateHeaderUI();
         updatePowerBoosterUI();
+        updateRoarButtonUI();
         renderBiomeStrip();
         renderFavoriteDinos();
         updateTrainingButtons();
