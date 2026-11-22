@@ -857,6 +857,72 @@
         }
       });
 
+      // ==========================================
+      // 💳 Android WebView (AndroidBilling) 결제 콜백
+      // ==========================================
+      let pendingAndroidVip = null;
+
+      function resetVipPayButton() {
+        vipPaySubmitBtn.disabled = false;
+        vipPaySubmitBtnText.textContent = 'Google Play로 7,000원 결제하기';
+      }
+
+      window.onAndroidBillingSuccess = async (productId, purchaseToken) => {
+        const reqInfo = pendingAndroidVip;
+        pendingAndroidVip = null;
+        if (!reqInfo) {
+          resetVipPayButton();
+          return;
+        }
+        vipPaySubmitBtnText.textContent = '결제 영수증 확인 중...';
+        try {
+          const verifyRes = await fetch(`${API_BASE_URL}/api/vip/google-verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: reqInfo.fullPhoneId,
+              pin: reqInfo.pin,
+              nickname: reqInfo.vipNick,
+              productId: productId || GOOGLE_PLAY_SKU,
+              purchaseToken: purchaseToken
+            })
+          });
+
+          const data = await verifyRes.json().catch(() => ({}));
+          if (verifyRes.ok && data.token) {
+            authToken = data.token;
+            currentUsername = reqInfo.fullPhoneId;
+            currentNickname = data.nickname || reqInfo.vipNick;
+            isVipUser = true;
+            syncAuthStorage(authToken, currentUsername, true, currentNickname);
+            updateHeaderAuthBtn();
+            syncVipModalState();
+            renderList(searchInput.value);
+            vipModal.classList.add('hidden');
+            showToast('👑 Google Play 결제 완료! VIP가 즉시 적용되었습니다!');
+            redirectBackIfNeeded();
+          } else {
+            showToast(data.message || '⚠️ 결제 검증에 실패했습니다.');
+          }
+        } catch (err) {
+          showToast('⚠️ 서버 영수증 검증 중 오류가 발생했습니다.');
+        } finally {
+          resetVipPayButton();
+        }
+      };
+
+      window.onAndroidBillingCancel = () => {
+        pendingAndroidVip = null;
+        resetVipPayButton();
+        showToast('결제가 취소되었습니다.');
+      };
+
+      window.onAndroidBillingError = (msg) => {
+        pendingAndroidVip = null;
+        resetVipPayButton();
+        showToast(msg || '⚠️ 결제 처리 중 오류가 발생했습니다.');
+      };
+
       vipPaySubmitBtn.addEventListener('click', async () => {
         const vipNick = vipNicknameInput.value.trim();
         const rawDigits = phoneInput.value.replace(/\D/g, '');
@@ -883,12 +949,29 @@
           return;
         }
 
+        const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
+
+        // 1) Android WebView 앱 환경 (AndroidBilling 브릿지)
+        if (window.AndroidBilling && typeof window.AndroidBilling.startVipPurchase === 'function') {
+          pendingAndroidVip = { fullPhoneId, pin, vipNick };
+          vipPaySubmitBtn.disabled = true;
+          vipPaySubmitBtnText.textContent = 'Google Play 결제창 여는 중...';
+          try {
+            window.AndroidBilling.startVipPurchase(GOOGLE_PLAY_SKU);
+          } catch (err) {
+            pendingAndroidVip = null;
+            resetVipPayButton();
+            showToast('⚠️ 결제창을 여는 중 오류가 발생했습니다.');
+          }
+          return;
+        }
+
+        // 2) TWA 환경 폴백
         if (!('getDigitalGoodsService' in window)) {
           showToast('⚠️ Google Play 스토어에서 설치한 앱에서만 결제가 가능합니다.');
           return;
         }
 
-        const fullPhoneId = `010-${rawDigits.slice(0, 4)}-${rawDigits.slice(4)}`;
         vipPaySubmitBtn.disabled = true;
         vipPaySubmitBtnText.textContent = 'Google Play 결제창 여는 중...';
 
@@ -949,8 +1032,7 @@
           if (err && err.name === 'AbortError') showToast('결제가 취소되었습니다.');
           else showToast('⚠️ Google Play 스토어 앱 환경인지 확인해 주세요.');
         } finally {
-          vipPaySubmitBtn.disabled = false;
-          vipPaySubmitBtnText.textContent = 'Google Play로 7,000원 결제하기';
+          resetVipPayButton();
         }
       });
 
