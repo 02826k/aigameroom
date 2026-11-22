@@ -196,6 +196,9 @@
             </div>
           </div>
 
+          <!-- 좌측 하단 전체도감 버튼 -->
+          <button id="canvasCodexBtn" type="button" class="absolute bottom-2 left-2.5 z-10 px-2.5 py-1 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white text-[11px] font-black shadow-lg active:scale-95 transition cursor-pointer whitespace-nowrap">📖 전체도감 (<span id="canvasCodexCount">1</span>/90)</button>
+
           <!-- 우측 하단 3D 컨트롤 (확대/축소 + 무한 포효 토글 + 시점 초기화) -->
           <div class="absolute bottom-2 right-2.5 flex items-center gap-1 z-10">
             <button id="zoomInBtn" type="button" title="확대" class="px-2 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-[11px] font-black active:scale-95 transition cursor-pointer">+</button>
@@ -235,20 +238,9 @@
           </button>
         </div>
       </section>
-    </div>
-
-    <!-- 가장 아래 섹션: 즐겨찾기 10종 -->
-    <section class="bg-slate-900/95 border border-amber-500/30 rounded-2xl p-2.5 shadow-xl mb-4">
-      <div class="flex items-center justify-between mb-2">
-        <span id="favoriteSectionTitle" class="text-xs font-black text-amber-300">⭐ 즐겨찾기 공룡 (3 / 10종)</span>
-        <button id="openCodexQuickBtn" type="button" class="text-[11px] font-bold text-sky-300 hover:text-sky-200 cursor-pointer">📖 도감에서 별표시 등록 →</button>
-      </div>
-      <div id="favoriteDinoGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-1.5"></div>
-    </section>
-  </main>
 
   <!-- 실존 공룡 도감 모달 -->
-  <div id="codexModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3">
+  <div id="codexModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3">
     <div class="bg-slate-900 border-2 border-emerald-500/40 rounded-2xl max-w-3xl w-full max-h-[88dvh] p-4 shadow-2xl flex flex-col gap-2.5">
       <div class="flex items-center justify-between gap-2">
         <div>
@@ -284,6 +276,40 @@
     </div>
   </div>
 
+  <!-- VIP 전용 안내 모달 -->
+  <div id="vipGateModal" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border-2 border-purple-400/60 rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl">
+      <div class="text-2xl mb-2">👑</div>
+      <h2 class="text-sm font-black text-amber-300 mb-2">VIP 전용 기능</h2>
+      <p class="text-xs sm:text-sm font-bold text-slate-100 mb-5">VIP 가입후 모든 공룡을 해금해 보세요</p>
+      <div class="flex flex-col gap-2">
+        <button id="vipGateGoBtn" type="button" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/60 shadow cursor-pointer active:scale-95">
+          👑 VIP 가입하러 가기
+        </button>
+        <button id="vipGateConfirmBtn" type="button" class="w-full py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer active:scale-95">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-[80] opacity-0 transition-all duration-200 translate-y-2">
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs sm:text-sm font-bold text-sky-200 shadow-2xl whitespace-nowrap">알림</div>
+  </div>
+
+    </div>
+
+    <!-- 가장 아래 섹션: 즐겨찾기 10종 -->
+    <section class="bg-slate-900/95 border border-amber-500/30 rounded-2xl p-2.5 shadow-xl mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <span id="favoriteSectionTitle" class="text-xs font-black text-amber-300">⭐ 즐겨찾기 공룡 (3 / 10종)</span>
+        <button id="openCodexQuickBtn" type="button" class="text-[11px] font-bold text-sky-300 hover:text-sky-200 cursor-pointer">📖 도감에서 별표시 등록 →</button>
+      </div>
+      <div id="favoriteDinoGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-1.5"></div>
+    </section>
+  </main>
+
   <!-- TOP 10 랭킹 모달 (본인 랭크 최상단 + 그 아래 TOP 10) -->
   <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-2.5">
@@ -306,23 +332,6 @@
     </div>
   </div>
 
-  <!-- VIP 전용 안내 모달 -->
-  <div id="vipGateModal" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border-2 border-purple-400/60 rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl">
-      <div class="text-2xl mb-2">👑</div>
-      <h2 class="text-sm font-black text-amber-300 mb-2">VIP 전용 기능</h2>
-      <p class="text-xs sm:text-sm font-bold text-slate-100 mb-5">VIP 가입후 모든 공룡을 해금해 보세요</p>
-      <div class="flex flex-col gap-2">
-        <button id="vipGateGoBtn" type="button" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-amber-200 border border-amber-300/60 shadow cursor-pointer active:scale-95">
-          👑 VIP 가입하러 가기
-        </button>
-        <button id="vipGateConfirmBtn" type="button" class="w-full py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer active:scale-95">
-          닫기
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- 로그아웃 모달 -->
   <div id="logoutModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 shadow-2xl">
@@ -333,11 +342,6 @@
         <button id="logoutConfirmBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white cursor-pointer">로그아웃</button>
       </div>
     </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-[80] opacity-0 transition-all duration-200 translate-y-2">
-    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs sm:text-sm font-bold text-sky-200 shadow-2xl whitespace-nowrap">알림</div>
   </div>
 
   <script>
@@ -1840,6 +1844,8 @@
 
       function updateCodexHeader() {
         document.getElementById('headerCodexCount').textContent = getUnlockedCount();
+        const cCount = document.getElementById('canvasCodexCount');
+        if (cCount) cCount.textContent = getUnlockedCount();
         document.getElementById('codexProgressText').textContent =
           `해금 진행도: ${getUnlockedCount()} / ${DINOS.length}종${isUserVip() ? ' (👑 VIP 전 종 해금)' : ''} · ⭐ 즐겨찾기 ${state.favoriteIds.length} / ${MAX_FAVORITES}종`;
       }
@@ -2282,6 +2288,9 @@
         renderCodexGrid(); codexModal.classList.remove('hidden'); codexModal.classList.add('flex');
       }
       document.getElementById('codexOpenBtn').addEventListener('click', openCodex);
+      const canvasCodexBtn = document.getElementById('canvasCodexBtn');
+      canvasCodexBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+      canvasCodexBtn.addEventListener('click', (e) => { e.stopPropagation(); openCodex(); });
       document.getElementById('openCodexQuickBtn').addEventListener('click', openCodex);
       document.getElementById('codexCloseBtn').addEventListener('click', () => {
         codexModal.classList.add('hidden'); codexModal.classList.remove('flex');
