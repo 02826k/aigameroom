@@ -1096,7 +1096,7 @@
     };
 
     // ==========================================
-    // 2. VIP생존본능 (자동 회피) 토글
+    // 2. VIP생존본능 (자동 회피 + 자동 강화) 토글
     // ==========================================
     const autoDodgeBtn = document.getElementById('autoDodgeBtn');
     function updateAutoDodgeUI() {
@@ -1129,7 +1129,13 @@
       }
       userState.autoDodge = !userState.autoDodge;
       updateAutoDodgeUI();
-      showToast(userState.autoDodge ? '🛡️ VIP생존본능 (자동 회피) ON' : '🛡️ VIP생존본능 OFF');
+      showToast(userState.autoDodge ? '🛡️ VIP생존본능 (자동 회피/강화) ON' : '🛡️ VIP생존본능 OFF');
+
+      // 업그레이드 선택 창이 열려 있었다면 즉시 첫 번째 활성 옵션 자동 선택
+      if (userState.autoDodge && gameState === 'UPGRADE') {
+        const firstEnabledBtn = document.querySelector('#upgradeOptions button:not(:disabled)');
+        if (firstEnabledBtn) firstEnabledBtn.click();
+      }
     };
     updateAutoDodgeUI();
 
@@ -1292,7 +1298,7 @@
         updateStageUI();
         gameState = 'PLAY';
         startSpawner();
-      }, 1800);
+      }, 1000);
     }
 
     function getAutoDodgeVelocity() {
@@ -1530,11 +1536,6 @@
       document.getElementById('levelVal').textContent = player.level;
       updateStageUI();
 
-      gameState = 'UPGRADE';
-      const modal = document.getElementById('upgradeModal');
-      const container = document.getElementById('upgradeOptions');
-      container.innerHTML = '';
-
       const isMultiMax = player.multiShotLevel >= MAX_UPGRADE_STEP;
       const isRapidMax = player.rapidLevel >= MAX_UPGRADE_STEP;
 
@@ -1602,6 +1603,33 @@
       ];
 
       const picked = options.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+      // VIP생존본능 ON 상태면 멈추지 않고 자동 선택
+      if (userState.isVip && userState.autoDodge) {
+        const available = picked.filter(opt => !opt.isMax);
+        const priority = (player.hp / player.maxHp < 0.55)
+          ? ['heal', 'multi', 'rapid', 'damage', 'grenade']
+          : ['multi', 'rapid', 'damage', 'heal', 'grenade'];
+
+        let chosen = null;
+        for (const id of priority) {
+          chosen = available.find(opt => opt.id === id);
+          if (chosen) break;
+        }
+        if (!chosen) chosen = available[0];
+
+        if (chosen) {
+          chosen.action();
+          showToast(`🤖 VIP 자동강화: ${chosen.title}`);
+        }
+        gameState = 'PLAY';
+        return;
+      }
+
+      gameState = 'UPGRADE';
+      const modal = document.getElementById('upgradeModal');
+      const container = document.getElementById('upgradeOptions');
+      container.innerHTML = '';
 
       picked.forEach(opt => {
         const btn = document.createElement('button');
