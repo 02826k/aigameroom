@@ -427,7 +427,7 @@
         ['알로사우루스', 'Allosaurus', '수각류', '쥐라기 후기', '쥐라기', '육식', 4600, 142, 44000, 'theropod_large', '#047857', '#34d399'],
         ['프로토케라톱스', 'Protoceratops', '각룡류', '백악기 후기', '백악기', '초식', 6000, 145, 58000, 'ceratopsian', '#d97706', '#fde68a'],
         ['오비랩터', 'Oviraptor', '수각류', '백악기 후기', '백악기', '잡식', 7800, 148, 76000, 'oviraptor', '#ea580c', '#fed7aa'],
-        ['벨로시랩터', 'Velociraptor', '수각류', '백악기 후기', '백악기', '육식', 10200, 152, 98000, 'theropod_small', '#f59e0b', '#fef3c7'],
+        ['벨로시랩터', 'Velociraptor', '수각류', '백악기 후기', '백악기', '육식', 10200, 152, 98000, 'velociraptor', '#f59e0b', '#fef3c7'],
         ['데이노니쿠스', 'Deinonychus', '수각류', '백악기 전기', '백악기', '육식', 13500, 156, 130000, 'theropod_small', '#b45309', '#fbbf24'],
         ['유타랩터', 'Utahraptor', '수각류', '백악기 전기', '백악기', '육식', 17500, 160, 170000, 'theropod_small', '#c2410c', '#fdba74'],
         ['모노니쿠스', 'Mononykus', '수각류', '백악기 후기', '백악기', '잡식', 22500, 164, 220000, 'mononykus', '#eab308', '#fef08a'],
@@ -1426,6 +1426,28 @@
           sp = [[-5.2, 1.35, 0], [-3.6, 1.75, 0], [-2.0, 2.15, 0], [-0.5, 2.5, 0], [0.7, 2.75, 0], [1.5, 3.45, 0], [2.05, 4.35, 0], [2.45, 5.15, 0], [2.85, 5.45, 0]];
           radFn = u => u < 0.52 ? 0.06 + 0.68 * Math.pow(u / 0.52, 1.2) : 0.74 - 0.48 * Math.pow((u - 0.52) / 0.48, 0.9);
           scaleFactor = 0.64; riderAnchor = V3(0.15, 3.18, 0);
+        } else if (bt === 'velociraptor') {
+          // #23 Velociraptor: sleek horizontal-balanced predatory dromaeosaur stance
+          sp = [[-5.8, 2.05, 0], [-4.2, 2.18, 0], [-2.5, 2.3, 0], [-0.8, 2.48, 0], [0.55, 2.65, 0], [1.45, 2.98, 0], [2.15, 3.62, 0], [2.65, 4.18, 0], [3.18, 4.35, 0]];
+          radFn = u => u < 0.42 ? 0.08 + 0.34 * Math.pow(u / 0.42, 1.15) : u < 0.65 ? 0.42 + 0.36 * Math.sin(((u - 0.42) / 0.23) * Math.PI * 0.65) : 0.72 - 0.44 * Math.pow((u - 0.65) / 0.35, 0.95);
+          scaleFactor = 0.68; riderAnchor = V3(0.12, 3.05, 0);
+        } else if (bt === 'velociraptor') {
+          // #23 Velociraptor: dramatic multi-layered diamond feathered tail plume (visible from every angle)
+          const vStripeMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.58 });
+          tailClub = new THREE.Group();
+          const outerFan = makeFeatherFan(9, 2.05, 0.28, 1.05, vStripeMat, accentMat);
+          outerFan.rotation.y = Math.PI;
+          outerFan.rotation.x = 0.22;
+          tailClub.add(outerFan);
+          const outerFan2 = makeFeatherFan(7, 1.8, 0.24, 0.85, accentMat, vStripeMat);
+          outerFan2.rotation.y = Math.PI;
+          outerFan2.rotation.x = -0.22;
+          tailClub.add(outerFan2);
+          const innerFan = makeFeatherFan(5, 1.4, 0.22, 0.5, skin, accentMat);
+          innerFan.position.set(0.22, 0.06, 0);
+          innerFan.rotation.y = Math.PI;
+          tailClub.add(innerFan);
+          dinoRoot.add(tailClub);
         } else if (bt === 'microraptor' || bt === 'oviraptor' || bt === 'mononykus') {
           sp = [[-4.8, 1.15, 0], [-3.4, 1.6, 0], [-1.9, 2.05, 0], [-0.5, 2.4, 0], [0.65, 2.65, 0], [1.45, 3.15, 0], [2.0, 3.78, 0], [2.4, 4.28, 0], [2.75, 4.5, 0]];
           radFn = u => u < 0.56 ? 0.06 + 0.64 * Math.pow(u / 0.56, 1.15) : 0.7 - 0.42 * Math.pow((u - 0.56) / 0.44, 1.0);
@@ -1562,6 +1584,49 @@
           [-1, 1].forEach(s => {
             addMesh(new THREE.SphereGeometry(0.18, 12, 10), eyeMat, 0.72, 0.16, s * 0.42, head);
             addMesh(new THREE.SphereGeometry(0.1, 8, 8), pupilMat, 0.8, 0.16, s * 0.52, head);
+          });
+        } else if (bt === 'velociraptor') {
+          // #23 Velociraptor: high-detail upturned slender raptor skull, brow ridges, slit eyes, upper+lower teeth, feathered nape crest
+          const raptorDarkMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.6 });
+          const raptorClawMat = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.3, metalness: 0.22 });
+          // Sculpted cranium + cheek bone
+          addMesh(SG_LOW, skin, 0.35, 0.06, 0, head, 0.78, 0.48, 0.44);
+          // Slightly upturned slender predatory snout
+          const snoutUp = addMesh(SG_LOW, skin, 1.25, -0.02, 0, head, 1.08, 0.28, 0.3);
+          snoutUp.rotation.z = 0.06;
+          // Snout tip + dark dorsal nasal stripe + nostrils
+          addMesh(SG_LOW, raptorDarkMat, 1.18, 0.16, 0, head, 0.95, 0.1, 0.18).rotation.z = 0.05;
+          [-1, 1].forEach(s => {
+            addMesh(SG_LOW, raptorClawMat, 1.88, 0.04, s * 0.14, head, 0.1, 0.06, 0.05);
+            // Fierce sculpted supraorbital brow ridge
+            const brow = addMesh(SG_LOW, raptorDarkMat, 0.68, 0.34, s * 0.32, head, 0.42, 0.11, 0.14);
+            brow.rotation.z = -0.14;
+            // Glowing amber raptor eye + sharp vertical black slit pupil
+            addMesh(new THREE.SphereGeometry(0.115, 12, 10), eyeMat, 0.72, 0.18, s * 0.34, head);
+            addMesh(new THREE.BoxGeometry(0.035, 0.15, 0.04), pupilMat, 0.79, 0.18, s * 0.425, head);
+            // Razor-sharp curved upper jaw teeth (8 per side)
+            const tbU = new THREE.ConeGeometry(0.042, 0.17, 5);
+            for (let k = 0; k < 8; k++) {
+              const tMesh = addMesh(tbU, toothMat, 0.72 + k * 0.185, -0.22 + k * 0.008, s * (0.22 - k * 0.012), head);
+              tMesh.rotation.z = Math.PI - 0.18;
+            }
+          });
+          // Sweeping feathered head/nape crest plume (layered)
+          for (let f = 0; f < 5; f++) {
+            const pl = addMesh(new THREE.ConeGeometry(0.085 - f * 0.008, 0.68 - f * 0.05, 5), f % 2 === 0 ? accentMat : raptorDarkMat, -0.15 - f * 0.08, 0.38 - f * 0.06, 0, head);
+            pl.rotation.z = 1.08 + f * 0.1;
+            pl.scale.set(0.65, 1.0, 0.38);
+          }
+          // Articulated lower jaw with chin trim + lower teeth
+          jaw.position.set(0.28, -0.24, 0);
+          addMesh(SG_LOW, skin, 0.92, -0.05, 0, jaw, 1.02, 0.14, 0.24);
+          addMesh(SG_LOW, accentMat, 0.88, -0.13, 0, jaw, 0.85, 0.08, 0.18);
+          [-1, 1].forEach(s => {
+            const tbL = new THREE.ConeGeometry(0.035, 0.13, 5);
+            for (let k = 0; k < 6; k++) {
+              const tL = addMesh(tbL, toothMat, 0.52 + k * 0.2, 0.07, s * (0.16 - k * 0.01), jaw);
+              tL.rotation.z = -0.15;
+            }
           });
         } else if (bt === 'oviraptor') {
           // Toothless curved parrot beak + tall rounded head crest
@@ -1791,7 +1856,7 @@
         } else {
           // Bipedal dinosaurs (theropods, ornithopods, ornithomimids, prosauropod, microraptor, oviraptor, mononykus)
           const slenderLegs = bt === 'ornithomimid' || bt === 'microraptor' || bt === 'mononykus';
-          const legScale = slenderLegs ? 0.72 : 1.0;
+          const legScale = slenderLegs ? 0.72 : bt === 'velociraptor' ? 0.82 : 1.0;
           [-1, 1].forEach(s => {
             const lGrp = new THREE.Group(); lGrp.position.set(-0.2, 2.15, s * (slenderLegs ? 0.62 : 0.78));
             addMesh(SG_LOW, skin, 0.1, -0.1, 0, lGrp, 0.85 * legScale, 1.05 * legScale, 0.55 * legScale);
@@ -1799,6 +1864,24 @@
             addLimb(V3(0.75, -0.85, 0), V3(0.1, -1.5, 0), 0.3 * legScale, 0.2 * legScale, skin, lGrp);
             addLimb(V3(0.1, -1.5, 0), V3(0.75, -2.02, 0), 0.2 * legScale, 0.16 * legScale, skin, lGrp);
             addMesh(SG_LOW, clawMat, 1.0, -2.02, 0, lGrp, 0.56 * legScale, 0.15, 0.3 * legScale);
+            // #23 Velociraptor: muscular thigh stripe, 3-toed raptor foot & iconic raised sickle killing claw!
+            if (bt === 'velociraptor') {
+              const sickMat = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.28, metalness: 0.25 });
+              const stripeMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.65 });
+              addMesh(SG_LOW, stripeMat, 0.15, -0.05, s * 0.26, lGrp, 0.52, 0.22, 0.16);
+              addMesh(SG_LOW, stripeMat, 0.35, -0.45, s * 0.18, lGrp, 0.38, 0.18, 0.14);
+              // Forward toes with sharp claws
+              [0, s * 0.18].forEach(tz => {
+                addMesh(new THREE.ConeGeometry(0.055, 0.32, 5), sickMat, 1.32, -2.02, tz, lGrp).rotation.z = -1.48;
+              });
+              // Iconic hyper-extended curved sickle killing claw on the inner toe (-s side)!
+              addCurvedHorn([
+                V3(0.92, -1.94, -s * 0.18),
+                V3(1.18, -1.62, -s * 0.22),
+                V3(1.52, -1.68, -s * 0.2),
+                V3(1.66, -1.98, -s * 0.18)
+              ], 0.085, 0.014, sickMat, lGrp);
+            }
             // #42 Microraptor hindlimb feather wings (4-winged dinosaur!)
             if (bt === 'microraptor') {
               const legWing = makeFeatherFan(5, 1.35, 0.16, 0.85, accentMat, darkTrimMat);
@@ -1816,6 +1899,28 @@
               [-0.14, 0, 0.14].forEach(oz => {
                 const clawLen = bt === 'therizino' ? 1.15 : 0.72;
                 addMesh(new THREE.ConeGeometry(0.075, clawLen, 6), toothMat, wrist.x + 0.38, wrist.y - 0.18, wrist.z + oz, dinoRoot).rotation.z = -2.05;
+              });
+            } else if (bt === 'velociraptor') {
+              // #23 Velociraptor: predatory bent feathered forelimbs with 3 curved slashing claws
+              const vClawMat = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.28, metalness: 0.25 });
+              const vDarkMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.62 });
+              const sh = V3(1.18, 2.75, s * 0.56), el = V3(1.68, 2.15, s * 0.68), wr = V3(2.38, 2.02, s * 0.58);
+              addLimb(sh, el, 0.15, 0.11, skin, dinoRoot);
+              addLimb(el, wr, 0.11, 0.08, skin, dinoRoot);
+              // Layered forearm plumage fan
+              const armPlume = makeFeatherFan(6, 1.05, 0.16, 0.68, accentMat, vDarkMat);
+              armPlume.position.set(1.75, 2.12, s * 0.68);
+              armPlume.rotation.z = -0.82;
+              armPlume.rotation.y = s * 0.25;
+              dinoRoot.add(armPlume);
+              // 3 curved raptorial hand claws
+              [-0.08, 0, 0.08].forEach((cz, ci) => {
+                const cLen = ci === 1 ? 0.44 : 0.35;
+                addCurvedHorn([
+                  V3(wr.x, wr.y, wr.z + cz),
+                  V3(wr.x + cLen * 0.65, wr.y - cLen * 0.15, wr.z + cz),
+                  V3(wr.x + cLen * 0.85, wr.y - cLen * 0.68, wr.z + cz)
+                ], 0.042, 0.008, vClawMat, dinoRoot);
               });
             } else if (bt === 'microraptor') {
               // Feathered forelimb wings that flap gently
@@ -1886,6 +1991,16 @@
             const u = 0.18 + (i / 12) * 0.55;
             const h = 0.42 + Math.sin((i / 11) * Math.PI) * 0.68;
             const o = new THREE.Mesh(new THREE.BoxGeometry(0.32, h, 0.14), accentMat);
+            o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
+          }
+        } else if (bt === 'velociraptor') {
+          // #23 Velociraptor: sleek swept dorsal plumage & tiger-stripe chevron markings along neck & back
+          const vStripeMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.62 });
+          for (let i = 0; i < 11; i++) {
+            const u = 0.28 + (i / 10) * 0.58;
+            const h = 0.18 + Math.sin((i / 10) * Math.PI) * 0.22;
+            const o = new THREE.Mesh(new THREE.ConeGeometry(0.08, h, 5), i % 2 === 0 ? vStripeMat : accentMat);
+            o.scale.set(1.4, 1.0, 0.35);
             o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
           }
         } else if (bt === 'ceratopsian') {
@@ -2185,7 +2300,10 @@
       equipRoot.add(eqTreadmill);
 
       const eqPushup = new THREE.Group();
-      addMesh(new THREE.BoxGeometry(2.8, 0.12, 1.4), new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.8 }), 0, 0.06, 0, eqPushup);
+      addMesh(new THREE.BoxGeometry(3.2, 0.1, 1.5), new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.78 }), 0, 0.05, 0, eqPushup);
+      addMesh(new THREE.BoxGeometry(2.96, 0.02, 1.28), new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.82 }), 0, 0.105, 0, eqPushup);
+      const matRoll = addMesh(new THREE.CylinderGeometry(0.13, 0.13, 1.5, 12), new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.75 }), -1.55, 0.13, 0, eqPushup);
+      matRoll.rotation.x = Math.PI / 2;
       equipRoot.add(eqPushup);
 
       const eqDesk = new THREE.Group();
@@ -2262,11 +2380,11 @@
             hArmL.rotation.z = -sw * 0.75; hArmR.rotation.z = sw * 0.75;
             heroBody.position.y = Math.abs(Math.sin(t * 14)) * 0.14;
           } else if (state.activeTraining === 'pushup') {
-            heroGroup.position.set(-2.9, 0.15, 0.4); heroGroup.rotation.set(0, 0, 0);
-            const lift = (Math.sin(t * 7) * 0.5 + 0.5) * 0.45;
-            heroBody.rotation.z = -Math.PI * 0.46 + lift * 0.25;
-            heroBody.position.set(0.2, 0.35 + lift * 0.4, 0);
-            hArmL.rotation.z = 1.45 - lift * 0.5; hArmR.rotation.z = 1.45 - lift * 0.5;
+            heroGroup.position.set(-2.9, 0.11, 0.4); heroGroup.rotation.set(0, 0, 0);
+            const lift = (Math.sin(t * 7) * 0.5 + 0.5) * 0.42;
+            heroBody.rotation.z = -Math.PI * 0.44 + lift * 0.22;
+            heroBody.position.set(-0.98, 0.2 + lift * 0.32, 0);
+            hArmL.rotation.z = 1.42 - lift * 0.45; hArmR.rotation.z = 1.42 - lift * 0.45;
           } else if (state.activeTraining === 'desk') {
             heroGroup.position.set(-3.5, 0, 0.4); heroGroup.rotation.set(0, 0, 0);
             heroBody.position.y = -0.15;
