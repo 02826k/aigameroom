@@ -226,12 +226,9 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2">
           <button id="powerBoosterBtn" type="button" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-black text-xs sm:text-sm shadow-lg border border-slate-600 cursor-pointer">
             ⚡ 파워부스터 OFF
-          </button>
-          <button id="restBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-700 hover:brightness-110 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg border border-emerald-200/60 cursor-pointer">
-            🛌 에너지 회복
           </button>
           <button id="dismountOrRideBtn" type="button" class="py-2.5 px-3 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 hover:brightness-110 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg border border-amber-200/80 cursor-pointer">
             🦖 탑승
@@ -410,9 +407,9 @@
       const RAW_DINOS = [
         ['콤프소그나투스', 'Compsognathus', '수각류', '쥐라기 후기', '쥐라기', '육식', 10, 60, 0, 'theropod_small', '#84cc16', '#ecfccb'],
         ['히프실로포돈', 'Hypsilophodon', '조각류', '백악기 전기', '백악기', '초식', 18, 65, 30, 'ornithopod', '#22c55e', '#bbf7d0'],
-        ['갈리미무스', 'Gallimimus', '수각류', '백악기 후기', '백악기', '잡식', 28, 72, 80, 'theropod_small', '#eab308', '#fef08a'],
+        ['갈리미무스', 'Gallimimus', '수각류', '백악기 후기', '백악기', '잡식', 28, 72, 80, 'ornithomimid', '#eab308', '#fef08a'],
         ['드리오사우루스', 'Dryosaurus', '조각류', '쥐라기 후기', '쥐라기', '초식', 42, 75, 160, 'ornithopod', '#10b981', '#a7f3d0'],
-        ['오르니토미무스', 'Ornithomimus', '수각류', '백악기 후기', '백악기', '잡식', 60, 80, 280, 'theropod_small', '#f59e0b', '#fde68a'],
+        ['오르니토미무스', 'Ornithomimus', '수각류', '백악기 후기', '백악기', '잡식', 60, 80, 280, 'ornithomimid', '#f59e0b', '#fde68a'],
         ['마이아사우라', 'Maiasaura', '조각류', '백악기 후기', '백악기', '초식', 85, 85, 450, 'ornithopod', '#65a30d', '#d9f99d'],
         ['이구아노돈', 'Iguanodon', '조각류', '백악기 전기', '백악기', '초식', 120, 90, 700, 'ornithopod', '#16a34a', '#86efac'],
         ['파라사우롤로푸스', 'Parasaurolophus', '조각류', '백악기 후기', '백악기', '초식', 170, 95, 1050, 'ornithopod', '#0ea5e9', '#bae6fd'],
@@ -420,7 +417,7 @@
         ['에드몬토사우루스', 'Edmontosaurus', '조각류', '백악기 후기', '백악기', '초식', 310, 105, 2200, 'ornithopod', '#84cc16', '#fef08a'],
         ['에오랍토르', 'Eoraptor', '수각류', '트라이아스기', '트라이아스기', '잡식', 420, 108, 3000, 'theropod_small', '#22c55e', '#dcfce7'],
         ['코엘로피시스', 'Coelophysis', '수각류', '트라이아스기', '트라이아스기', '육식', 550, 110, 4200, 'theropod_small', '#10b981', '#d1fae5'],
-        ['플라테오사우루스', 'Plateosaurus', '용각류', '트라이아스기', '트라이아스기', '초식', 720, 115, 5800, 'sauropod', '#4d7c0f', '#bef264'],
+        ['플라테오사우루스', 'Plateosaurus', '용각류', '트라이아스기', '트라이아스기', '초식', 720, 115, 5800, 'prosauropod', '#4d7c0f', '#bef264'],
         ['후양고사우루스', 'Huayangosaurus', '검룡류', '쥐라기 중기', '쥐라기', '초식', 950, 118, 7800, 'stegosaur', '#15803d', '#86efac'],
         ['켄트로사우루스', 'Kentrosaurus', '검룡류', '쥐라기 후기', '쥐라기', '초식', 1250, 122, 10500, 'stegosaur', '#059669', '#6ee7b7'],
         ['투오지앙고사우루스', 'Tuojiangosaurus', '검룡류', '쥐라기 후기', '쥐라기', '초식', 1600, 125, 14000, 'stegosaur', '#0d9488', '#5eead4'],
@@ -429,11 +426,11 @@
         ['파키케팔로사우루스', 'Pachycephalosaurus', '후두류', '백악기 후기', '백악기', '잡식', 3500, 136, 33000, 'pachy', '#b45309', '#fde68a'],
         ['알로사우루스', 'Allosaurus', '수각류', '쥐라기 후기', '쥐라기', '육식', 4600, 142, 44000, 'theropod_large', '#047857', '#34d399'],
         ['프로토케라톱스', 'Protoceratops', '각룡류', '백악기 후기', '백악기', '초식', 6000, 145, 58000, 'ceratopsian', '#d97706', '#fde68a'],
-        ['오비랩터', 'Oviraptor', '수각류', '백악기 후기', '백악기', '잡식', 7800, 148, 76000, 'theropod_small', '#ea580c', '#fed7aa'],
+        ['오비랩터', 'Oviraptor', '수각류', '백악기 후기', '백악기', '잡식', 7800, 148, 76000, 'oviraptor', '#ea580c', '#fed7aa'],
         ['벨로시랩터', 'Velociraptor', '수각류', '백악기 후기', '백악기', '육식', 10200, 152, 98000, 'theropod_small', '#f59e0b', '#fef3c7'],
         ['데이노니쿠스', 'Deinonychus', '수각류', '백악기 전기', '백악기', '육식', 13500, 156, 130000, 'theropod_small', '#b45309', '#fbbf24'],
         ['유타랩터', 'Utahraptor', '수각류', '백악기 전기', '백악기', '육식', 17500, 160, 170000, 'theropod_small', '#c2410c', '#fdba74'],
-        ['모노니쿠스', 'Mononykus', '수각류', '백악기 후기', '백악기', '잡식', 22500, 164, 220000, 'theropod_small', '#eab308', '#fef08a'],
+        ['모노니쿠스', 'Mononykus', '수각류', '백악기 후기', '백악기', '잡식', 22500, 164, 220000, 'mononykus', '#eab308', '#fef08a'],
         ['사이카니아', 'Saichania', '곡룡류', '백악기 후기', '백악기', '초식', 29000, 168, 285000, 'ankylosaur', '#a16207', '#fde047'],
         ['타르보사우루스', 'Tarbosaurus', '수각류', '백악기 후기', '백악기', '육식', 38000, 174, 370000, 'theropod_large', '#dc2626', '#fbbf24'],
         ['카르노타우루스', 'Carnotaurus', '수각류', '백악기 후기', '백악기', '육식', 49000, 178, 480000, 'theropod_large', '#b91c1c', '#fca5a5'],
@@ -449,7 +446,7 @@
         ['트리케라톱스', 'Triceratops', '각룡류', '백악기 후기', '백악기', '초식', 590000, 228, 5800000, 'ceratopsian', '#10b981', '#fef08a'],
         ['스피노사우루스', 'Spinosaurus', '수각류', '백악기 후기', '백악기', '육식', 760000, 236, 7500000, 'spino', '#0284c7', '#f97316'],
         ['시노사우롭테릭스', 'Sinosauropteryx', '수각류', '백악기 전기', '백악기', '육식', 960000, 240, 9500000, 'theropod_small', '#38bdf8', '#e0f2fe'],
-        ['미크로랩터', 'Microraptor', '수각류', '백악기 전기', '백악기', '육식', 1220000, 244, 12000000, 'pterosaur', '#0ea5e9', '#bae6fd'],
+        ['미크로랩터', 'Microraptor', '수각류', '백악기 전기', '백악기', '육식', 1220000, 244, 12000000, 'microraptor', '#0ea5e9', '#bae6fd'],
         ['트로오돈', 'Troodon', '수각류', '백악기 후기', '백악기', '잡식', 1550000, 248, 15200000, 'theropod_small', '#6366f1', '#c7d2fe'],
         ['레엘리나사우라', 'Leaellynasaura', '조각류', '백악기 전기', '백악기', '초식', 1960000, 252, 19200000, 'ornithopod', '#60a5fa', '#dbeafe'],
         ['파키리노사우루스', 'Pachyrhinosaurus', '각룡류', '백악기 후기', '백악기', '초식', 2480000, 258, 24500000, 'ceratopsian', '#3b82f6', '#bfdbfe'],
@@ -468,12 +465,12 @@
         ['드레드노투스', 'Dreadnoughtus', '용각류', '백악기 후기', '백악기', '초식', 56000000, 355, 550000000, 'sauropod', '#14532d', '#bbf7d0'],
         ['파타고티탄', 'Patagotitan', '용각류', '백악기 후기', '백악기', '초식', 72000000, 365, 700000000, 'sauropod', '#365314', '#bef264'],
         ['아르젠티노사우루스', 'Argentinosaurus', '용각류', '백악기 후기', '백악기', '초식', 92000000, 380, 900000000, 'sauropod', '#84cc16', '#fef08a'],
-        ['이크티오사우루스', 'Ichthyosaurus', '해양파충류', '쥐라기 전기', '쥐라기', '육식', 118000000, 388, 1150000000, 'marine', '#0ea5e9', '#bae6fd'],
+        ['이크티오사우루스', 'Ichthyosaurus', '해양파충류', '쥐라기 전기', '쥐라기', '육식', 118000000, 388, 1150000000, 'ichthyosaur', '#0ea5e9', '#bae6fd'],
         ['노토사우루스', 'Nothosaurus', '해양파충류', '트라이아스기', '트라이아스기', '육식', 150000000, 396, 1480000000, 'marine', '#0284c7', '#7dd3fc'],
-        ['플레시오사우루스', 'Plesiosaurus', '해양파충류', '쥐라기 전기', '쥐라기', '육식', 192000000, 405, 1900000000, 'marine', '#0369a1', '#38bdf8'],
-        ['아르켈론', 'Archelon', '해양파충류', '백악기 후기', '백악기', '잡식', 245000000, 415, 2400000000, 'marine', '#0891b2', '#67e8f9'],
-        ['엘라스모사우루스', 'Elasmosaurus', '해양파충류', '백악기 후기', '백악기', '육식', 315000000, 425, 3100000000, 'marine', '#0e7490', '#22d3ee'],
-        ['쇼니사우루스', 'Shonisaurus', '해양파충류', '트라이아스기', '트라이아스기', '육식', 405000000, 435, 4000000000, 'marine', '#155e75', '#a5f3fc'],
+        ['플레시오사우루스', 'Plesiosaurus', '해양파충류', '쥐라기 전기', '쥐라기', '육식', 192000000, 405, 1900000000, 'plesiosaur', '#0369a1', '#38bdf8'],
+        ['아르켈론', 'Archelon', '해양파충류', '백악기 후기', '백악기', '잡식', 245000000, 415, 2400000000, 'archelon', '#0891b2', '#67e8f9'],
+        ['엘라스모사우루스', 'Elasmosaurus', '해양파충류', '백악기 후기', '백악기', '육식', 315000000, 425, 3100000000, 'plesiosaur', '#0e7490', '#22d3ee'],
+        ['쇼니사우루스', 'Shonisaurus', '해양파충류', '트라이아스기', '트라이아스기', '육식', 405000000, 435, 4000000000, 'ichthyosaur', '#155e75', '#a5f3fc'],
         ['크로노사우루스', 'Kronosaurus', '해양파충류', '백악기 전기', '백악기', '육식', 520000000, 448, 5100000000, 'marine', '#1d4ed8', '#93c5fd'],
         ['리오플레우로돈', 'Liopleurodon', '해양파충류', '쥐라기 중기', '쥐라기', '육식', 670000000, 460, 6600000000, 'marine', '#1e40af', '#60a5fa'],
         ['틸로사우루스', 'Tylosaurus', '해양파충류', '백악기 후기', '백악기', '육식', 860000000, 475, 8500000000, 'marine', '#1e3a8a', '#38bdf8'],
@@ -1286,20 +1283,99 @@
         const skin = getDinoSkinMat(dino);
         const accentMat = new THREE.MeshStandardMaterial({
           color: new THREE.Color(dino.accent), emissive: new THREE.Color(dino.accent),
-          emissiveIntensity: 0.45, roughness: 0.45, flatShading: true
+          emissiveIntensity: 0.42, roughness: 0.45, flatShading: true
         });
         const darkTrimMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(dino.color).multiplyScalar(0.55), roughness: 0.55, metalness: 0.1 });
+        const wingMemMat = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(dino.accent).lerp(new THREE.Color(dino.color), 0.45),
+          roughness: 0.62, side: THREE.DoubleSide
+        });
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffd040 });
         const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
         const bt = dino.bodyType;
-        const isTricera = dino.id === 'dino_39', isProto = dino.id === 'dino_21', isStyraco = dino.id === 'dino_37';
-        const isPenta = dino.id === 'dino_38', isPachyRhino = dino.id === 'dino_45', isToro = dino.id === 'dino_89';
+        const id = dino.id;
+
+        // Specific species flags
+        const isTricera = id === 'dino_39', isProto = id === 'dino_21', isStyraco = id === 'dino_37';
+        const isPenta = id === 'dino_38', isPachyRhino = id === 'dino_45', isToro = id === 'dino_89';
+        const isIguanodon = id === 'dino_7', isParasaur = id === 'dino_8', isCorytho = id === 'dino_9';
+        const isDuckbill = id === 'dino_6' || id === 'dino_10', isLeaellyna = id === 'dino_44';
+        const isDilo = id === 'dino_31', isBaryonyx = id === 'dino_32', isSuchomimus = id === 'dino_33';
+        const isCryo = id === 'dino_46', isAmarga = id === 'dino_55';
+        const isElasmo = id === 'dino_65', isShoni = id === 'dino_66';
+        const isNodo = id === 'dino_71', isEdmontonia = id === 'dino_72';
+        const isDimorpho = id === 'dino_81', isRhampho = id === 'dino_82', isPterodact = id === 'dino_83';
+        const isPteranodon = id === 'dino_84', isTapejara = id === 'dino_85', isTropeo = id === 'dino_86';
+        const isHatzego = id === 'dino_87', isQuetzal = id === 'dino_88';
+        const isAzhdarchid = isHatzego || isQuetzal;
+        const isMosasaur = id === 'dino_69' || id === 'dino_70';
+
+        // Helper: sculpted tapered flipper mesh
+        function makeFlipper(len, wid, thick, mat) {
+          const shape = new THREE.Shape();
+          shape.moveTo(0, -wid * 0.35);
+          shape.quadraticCurveTo(len * 0.35, -wid * 0.62, len, 0);
+          shape.quadraticCurveTo(len * 0.38, wid * 0.48, 0, wid * 0.35);
+          shape.closePath();
+          const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: true, bevelThickness: thick * 0.35, bevelSize: thick * 0.3, bevelSegments: 2 });
+          geo.rotateX(Math.PI / 2);
+          geo.translate(0, thick * 0.5, 0);
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.castShadow = true;
+          return mesh;
+        }
+
+        // Helper: sculpted pterosaur membrane wing (pointing along +Z for side=+1, -Z for side=-1)
+        function makePterosaurWing(span, chord, side) {
+          const grp = new THREE.Group();
+          const shape = new THREE.Shape();
+          shape.moveTo(0, 0);
+          shape.lineTo(chord * 0.45, span * 0.38);
+          shape.lineTo(chord * 0.12, span);
+          shape.quadraticCurveTo(-chord * 0.35, span * 0.52, -chord * 0.72, span * 0.1);
+          shape.lineTo(-chord * 0.55, 0);
+          shape.closePath();
+          const geo = new THREE.ShapeGeometry(shape);
+          geo.rotateX(side > 0 ? Math.PI / 2 : -Math.PI / 2);
+          const mem = new THREE.Mesh(geo, wingMemMat);
+          mem.castShadow = true;
+          grp.add(mem);
+          // Leading-edge wing spar bones (arm + elongated 4th finger)
+          addLimb(V3(0, 0.04, 0), V3(chord * 0.42, 0.04, side * span * 0.38), 0.11, 0.08, skin, grp);
+          addLimb(V3(chord * 0.42, 0.04, side * span * 0.38), V3(chord * 0.12, 0.04, side * span), 0.075, 0.03, darkTrimMat, grp);
+          // Small wrist wing claws
+          [-0.08, 0.04].forEach(ox => {
+            const cl = addMesh(new THREE.ConeGeometry(0.04, 0.22, 5), toothMat, chord * 0.46 + ox, 0.02, side * span * 0.38, grp);
+            cl.rotation.z = -1.2;
+          });
+          return grp;
+        }
+
+        // Helper: layered feather fan (for microraptor / oviraptor / mononykus)
+        function makeFeatherFan(count, len, wid, spread, mat1, mat2) {
+          const g = new THREE.Group();
+          for (let i = 0; i < count; i++) {
+            const frac = count > 1 ? (i / (count - 1) - 0.5) : 0;
+            const ang = frac * spread;
+            const flen = len * (1 - Math.abs(frac) * 0.28);
+            const f = new THREE.Mesh(new THREE.BoxGeometry(flen, 0.04, wid), i % 2 === 0 ? mat1 : mat2);
+            f.position.set(Math.cos(ang) * flen * 0.48, 0, Math.sin(ang) * flen * 0.48);
+            f.rotation.y = -ang;
+            f.castShadow = true;
+            g.add(f);
+          }
+          return g;
+        }
 
         let sp, radFn, scaleFactor = 0.72, riderAnchor = V3(0.3, 2.5, 0);
         if (bt === 'sauropod') {
           sp = [[-5.6, 1.0, 0], [-3.6, 1.8, 0], [-1.6, 2.4, 0], [0.2, 2.8, 0], [1.6, 3.0, 0], [2.4, 4.1, 0], [3.0, 5.4, 0], [3.4, 6.5, 0], [3.9, 6.9, 0]];
           radFn = u => u < 0.52 ? 0.1 + 0.92 * Math.pow(u / 0.52, 1.1) : 1.02 - 0.72 * Math.pow((u - 0.52) / 0.48, 0.9);
           scaleFactor = 0.62; riderAnchor = V3(0.2, 3.3, 0);
+        } else if (bt === 'prosauropod') {
+          sp = [[-5.0, 0.85, 0], [-3.4, 1.5, 0], [-1.8, 2.15, 0], [-0.4, 2.55, 0], [0.85, 2.9, 0], [1.75, 3.55, 0], [2.4, 4.35, 0], [2.85, 5.0, 0], [3.3, 5.25, 0]];
+          radFn = u => u < 0.5 ? 0.08 + 0.82 * Math.pow(u / 0.5, 1.1) : 0.9 - 0.58 * Math.pow((u - 0.5) / 0.5, 0.95);
+          scaleFactor = 0.68; riderAnchor = V3(0.1, 3.4, 0);
         } else if (bt === 'ceratopsian') {
           sp = [[-4.4, 1.05, 0], [-3.0, 1.45, 0], [-1.6, 1.95, 0], [-0.2, 2.25, 0], [0.9, 2.25, 0], [1.75, 2.1, 0], [2.35, 1.98, 0], [2.75, 1.92, 0], [3.05, 1.88, 0]];
           radFn = u => u < 0.52 ? 0.12 + 0.95 * Math.pow(u / 0.52, 1.05) : 1.07 - 0.45 * Math.pow((u - 0.52) / 0.48, 1.0);
@@ -1312,22 +1388,91 @@
           sp = [[-4.8, 1.2, 0], [-3.2, 1.75, 0], [-1.6, 2.35, 0], [-0.2, 2.75, 0], [0.9, 3.05, 0], [1.7, 3.55, 0], [2.3, 4.35, 0], [2.75, 4.95, 0], [3.2, 5.2, 0]];
           radFn = u => u < 0.48 ? 0.12 + 0.95 * Math.pow(u / 0.48, 1.1) : 1.07 - 0.72 * Math.pow((u - 0.48) / 0.52, 0.95);
           scaleFactor = 0.7; riderAnchor = V3(0.1, 3.7, 0);
+        } else if (bt === 'archelon') {
+          sp = [[-2.5, 1.75, 0], [-1.8, 1.9, 0], [-1.0, 2.0, 0], [-0.2, 2.05, 0], [0.6, 2.05, 0], [1.3, 2.0, 0], [1.9, 2.0, 0], [2.4, 2.08, 0], [2.85, 2.12, 0]];
+          radFn = u => u < 0.2 ? 0.14 + u * 1.4 : u < 0.72 ? 0.45 + Math.sin((u - 0.2) / 0.52 * Math.PI) * 0.38 : 0.36;
+          scaleFactor = 0.78; riderAnchor = V3(0.0, 2.88, 0);
+        } else if (bt === 'plesiosaur') {
+          if (isElasmo) {
+            sp = [[-3.6, 1.85, 0], [-2.4, 2.0, 0], [-1.1, 2.1, 0], [0.1, 2.1, 0], [1.3, 2.35, 0], [2.3, 3.25, 0], [3.1, 4.45, 0], [3.8, 5.55, 0], [4.55, 6.15, 0]];
+          } else {
+            sp = [[-3.8, 1.85, 0], [-2.5, 2.0, 0], [-1.2, 2.12, 0], [0.1, 2.15, 0], [1.25, 2.35, 0], [2.15, 3.05, 0], [2.85, 3.95, 0], [3.45, 4.65, 0], [4.05, 5.05, 0]];
+          }
+          radFn = u => u < 0.36 ? 0.1 + 0.85 * Math.pow(u / 0.36, 1.05) : u < 0.52 ? 0.95 - 0.52 * ((u - 0.36) / 0.16) : 0.43 - 0.22 * ((u - 0.52) / 0.48);
+          scaleFactor = isElasmo ? 0.66 : 0.72; riderAnchor = V3(-0.35, 2.95, 0);
+        } else if (bt === 'ichthyosaur') {
+          sp = [[-4.8, 1.95, 0], [-3.4, 2.0, 0], [-2.0, 2.08, 0], [-0.5, 2.18, 0], [0.8, 2.2, 0], [1.9, 2.15, 0], [2.7, 2.08, 0], [3.3, 2.04, 0], [3.75, 2.02, 0]];
+          radFn = u => u < 0.55 ? 0.08 + 0.86 * Math.pow(u / 0.55, 0.95) : 0.94 - 0.58 * Math.pow((u - 0.55) / 0.45, 1.15);
+          scaleFactor = isShoni ? 0.78 : 0.7; riderAnchor = V3(0.25, 2.92, 0);
         } else if (bt === 'marine') {
           sp = [[-5.4, 1.8, 0], [-3.6, 1.9, 0], [-1.8, 2.05, 0], [-0.2, 2.15, 0], [1.1, 2.15, 0], [2.1, 2.1, 0], [2.9, 2.05, 0], [3.4, 2.0, 0], [3.8, 2.0, 0]];
           radFn = u => u < 0.58 ? 0.08 + 0.78 * Math.pow(u / 0.58, 1.05) : 0.86 - 0.52 * Math.pow((u - 0.58) / 0.42, 1.1);
           scaleFactor = 0.72; riderAnchor = V3(0.2, 2.85, 0);
         } else if (bt === 'pterosaur') {
-          sp = [[-2.6, 2.8, 0], [-1.8, 2.9, 0], [-1.0, 3.0, 0], [-0.2, 3.1, 0], [0.6, 3.2, 0], [1.2, 3.4, 0], [1.7, 3.65, 0], [2.1, 3.85, 0], [2.4, 4.0, 0]];
-          radFn = u => u < 0.5 ? 0.08 + 0.52 * (u / 0.5) : 0.6 - 0.34 * ((u - 0.5) / 0.5);
-          scaleFactor = 0.76; riderAnchor = V3(0.0, 3.65, 0);
+          if (isAzhdarchid) {
+            sp = [[-1.6, 2.9, 0], [-1.0, 3.0, 0], [-0.4, 3.12, 0], [0.25, 3.22, 0], [0.95, 3.45, 0], [1.65, 3.95, 0], [2.35, 4.55, 0], [3.05, 5.15, 0], [3.75, 5.55, 0]];
+            radFn = u => u < 0.35 ? 0.14 + 0.44 * (u / 0.35) : u < 0.55 ? 0.58 - 0.3 * ((u - 0.35) / 0.2) : 0.28 - 0.08 * ((u - 0.55) / 0.45);
+            scaleFactor = 0.8; riderAnchor = V3(0.0, 3.68, 0);
+          } else if (isDimorpho || isRhampho) {
+            sp = [[-4.0, 2.65, 0], [-2.8, 2.8, 0], [-1.6, 2.95, 0], [-0.4, 3.1, 0], [0.55, 3.2, 0], [1.2, 3.42, 0], [1.75, 3.68, 0], [2.15, 3.9, 0], [2.45, 4.05, 0]];
+            radFn = u => u < 0.45 ? 0.05 + 0.48 * Math.pow(u / 0.45, 1.35) : 0.53 - 0.28 * ((u - 0.45) / 0.55);
+            scaleFactor = 0.72; riderAnchor = V3(0.05, 3.6, 0);
+          } else {
+            sp = [[-1.7, 2.95, 0], [-1.1, 3.05, 0], [-0.45, 3.15, 0], [0.2, 3.22, 0], [0.8, 3.32, 0], [1.35, 3.55, 0], [1.85, 3.85, 0], [2.25, 4.1, 0], [2.6, 4.28, 0]];
+            radFn = u => u < 0.42 ? 0.1 + 0.48 * (u / 0.42) : 0.58 - 0.32 * ((u - 0.42) / 0.58);
+            scaleFactor = 0.76; riderAnchor = V3(0.05, 3.68, 0);
+          }
+        } else if (bt === 'ornithomimid') {
+          sp = [[-5.2, 1.35, 0], [-3.6, 1.75, 0], [-2.0, 2.15, 0], [-0.5, 2.5, 0], [0.7, 2.75, 0], [1.5, 3.45, 0], [2.05, 4.35, 0], [2.45, 5.15, 0], [2.85, 5.45, 0]];
+          radFn = u => u < 0.52 ? 0.06 + 0.68 * Math.pow(u / 0.52, 1.2) : 0.74 - 0.48 * Math.pow((u - 0.52) / 0.48, 0.9);
+          scaleFactor = 0.64; riderAnchor = V3(0.15, 3.18, 0);
+        } else if (bt === 'microraptor' || bt === 'oviraptor' || bt === 'mononykus') {
+          sp = [[-4.8, 1.15, 0], [-3.4, 1.6, 0], [-1.9, 2.05, 0], [-0.5, 2.4, 0], [0.65, 2.65, 0], [1.45, 3.15, 0], [2.0, 3.78, 0], [2.4, 4.28, 0], [2.75, 4.5, 0]];
+          radFn = u => u < 0.56 ? 0.06 + 0.64 * Math.pow(u / 0.56, 1.15) : 0.7 - 0.42 * Math.pow((u - 0.56) / 0.44, 1.0);
+          scaleFactor = bt === 'oviraptor' ? 0.62 : 0.56; riderAnchor = V3(0.15, 3.0, 0);
         } else {
-          sp = [[-5.4, 0.7, 0], [-3.8, 1.4, 0], [-2.1, 2.0, 0], [-0.6, 2.45, 0], [0.7, 2.65, 0], [1.7, 3.0, 0], [2.4, 3.7, 0], [2.9, 4.35, 0], [3.35, 4.7, 0]];
+          const tailExt = isLeaellyna ? -6.2 : -5.4;
+          sp = [[tailExt, 0.7, 0], [-3.8, 1.4, 0], [-2.1, 2.0, 0], [-0.6, 2.45, 0], [0.7, 2.65, 0], [1.7, 3.0, 0], [2.4, 3.7, 0], [2.9, 4.35, 0], [3.35, 4.7, 0]];
           radFn = u => u < 0.62 ? 0.05 + 0.82 * Math.pow(u / 0.62, 1.25) : 0.87 - 0.47 * Math.pow((u - 0.62) / 0.38, 1.1);
-          scaleFactor = bt === 'theropod_small' ? 0.62 : 0.72; riderAnchor = V3(0.3, 3.35, 0);
+          scaleFactor = (bt === 'theropod_small' || isLeaellyna) ? 0.62 : 0.72; riderAnchor = V3(0.3, 3.35, 0);
         }
 
         const bodyMesh = new THREE.Mesh(new THREE.BufferGeometry(), skin);
         bodyMesh.castShadow = true; dinoRoot.add(bodyMesh);
+
+        // Archelon sea-turtle carapace & plastron
+        if (bt === 'archelon') {
+          const shellGrp = new THREE.Group();
+          shellGrp.position.set(0.05, 2.05, 0);
+          // Main broad oval domed carapace
+          addMesh(SG_LOW, darkTrimMat, 0, 0.22, 0, shellGrp, 2.25, 0.68, 1.82);
+          addMesh(SG_LOW, skin, 0, 0.28, 0, shellGrp, 2.05, 0.58, 1.62);
+          // Central dorsal keel ridge + lateral rib ridges
+          addMesh(SG_LOW, accentMat, 0, 0.74, 0, shellGrp, 1.78, 0.16, 0.22);
+          [-0.9, -0.3, 0.3, 0.9].forEach(rx => {
+            addMesh(SG_LOW, darkTrimMat, rx, 0.46, 0, shellGrp, 0.16, 0.22, 1.48);
+          });
+          // Flat pale plastron underside
+          addMesh(SG_LOW, accentMat, 0, -0.22, 0, shellGrp, 1.9, 0.18, 1.38);
+          dinoRoot.add(shellGrp);
+        }
+
+        // Nodosaurus & Edmontonia lateral shoulder/flank armor spikes (ankylosaur group without tail club)
+        if (bt === 'ankylosaur' && (isNodo || isEdmontonia)) {
+          [-1, 1].forEach(s => {
+            // Shoulder spikes (Edmontonia has huge forward-sweeping twin shoulder spikes)
+            const shLen = isEdmontonia ? 1.45 : 0.85;
+            const sh1 = addMesh(new THREE.ConeGeometry(0.16, shLen, 6), toothMat, 1.65, 2.1, s * 1.05, dinoRoot);
+            sh1.rotation.x = s * 1.45; sh1.rotation.z = isEdmontonia ? -0.52 : -0.25;
+            const sh2 = addMesh(new THREE.ConeGeometry(0.14, shLen * 0.82, 6), toothMat, 0.95, 2.15, s * 1.08, dinoRoot);
+            sh2.rotation.x = s * 1.5; sh2.rotation.z = isEdmontonia ? -0.35 : -0.1;
+            // Flank spikes along sides
+            [-0.1, -1.1, -2.0].forEach((fx, idx) => {
+              const fl = addMesh(new THREE.ConeGeometry(0.12, 0.62 - idx * 0.1, 6), accentMat, fx, 2.0 - idx * 0.18, s * (0.98 - idx * 0.15), dinoRoot);
+              fl.rotation.x = s * 1.48;
+            });
+          });
+        }
 
         const head = new THREE.Group(); dinoRoot.add(head);
         const jaw = new THREE.Group(); head.add(jaw);
@@ -1396,19 +1541,119 @@
           addMesh(SG_LOW, skin, 0.82, -0.04, 0, jaw, 0.85, 0.14, 0.38);
           addMesh(SG_LOW, darkTrimMat, 0.72, -0.22, 0, jaw, 0.28, 0.16, 0.18);
           [-1, 1].forEach(s => { addMesh(new THREE.SphereGeometry(0.09, 10, 8), eyeMat, 0.62, 0.22, s * 0.34, head); });
+        } else if (bt === 'archelon') {
+          // Sea turtle head with hooked beak
+          addMesh(SG_LOW, skin, 0.35, 0.06, 0, head, 0.68, 0.48, 0.52);
+          addMesh(new THREE.ConeGeometry(0.28, 0.62, 8), darkTrimMat, 0.96, -0.02, 0, head).rotation.z = -1.75;
+          jaw.position.set(0.25, -0.22, 0);
+          addMesh(SG_LOW, accentMat, 0.45, -0.02, 0, jaw, 0.52, 0.16, 0.36);
+          [-1, 1].forEach(s => {
+            addMesh(new THREE.SphereGeometry(0.11, 10, 8), eyeMat, 0.58, 0.22, s * 0.42, head);
+            addMesh(new THREE.SphereGeometry(0.055, 8, 8), pupilMat, 0.64, 0.22, s * 0.47, head);
+          });
+        } else if (bt === 'ichthyosaur') {
+          // Dolphin-like sleek head, huge eyes, long narrow pointed rostrum
+          addMesh(SG_LOW, skin, 0.45, 0.04, 0, head, 0.85, 0.54, 0.52);
+          const snout = addMesh(new THREE.ConeGeometry(0.24, 2.05, 8), skin, 1.82, -0.02, 0, head);
+          snout.rotation.z = -Math.PI / 2;
+          jaw.position.set(0.42, -0.22, 0);
+          const lJaw = addMesh(new THREE.ConeGeometry(0.18, 1.85, 8), accentMat, 1.25, 0, 0, jaw);
+          lJaw.rotation.z = -Math.PI / 2;
+          [-1, 1].forEach(s => {
+            addMesh(new THREE.SphereGeometry(0.18, 12, 10), eyeMat, 0.72, 0.16, s * 0.42, head);
+            addMesh(new THREE.SphereGeometry(0.1, 8, 8), pupilMat, 0.8, 0.16, s * 0.52, head);
+          });
+        } else if (bt === 'oviraptor') {
+          // Toothless curved parrot beak + tall rounded head crest
+          addMesh(SG_LOW, skin, 0.32, 0.05, 0, head, 0.58, 0.48, 0.42);
+          const beak = addMesh(new THREE.ConeGeometry(0.28, 0.62, 8), darkTrimMat, 0.88, -0.08, 0, head);
+          beak.rotation.z = -1.85;
+          // Tall rounded cassowary-style crest
+          addMesh(SG_LOW, accentMat, 0.52, 0.55, 0, head, 0.52, 0.58, 0.16);
+          jaw.position.set(0.28, -0.24, 0);
+          addMesh(SG_LOW, darkTrimMat, 0.42, -0.02, 0, jaw, 0.42, 0.16, 0.28);
+          [-1, 1].forEach(s => {
+            addMesh(new THREE.SphereGeometry(0.09, 10, 8), eyeMat, 0.55, 0.18, s * 0.34, head);
+            addMesh(new THREE.SphereGeometry(0.045, 8, 8), pupilMat, 0.6, 0.18, s * 0.39, head);
+          });
+        } else if (bt === 'ornithomimid' || bt === 'mononykus') {
+          // Small bird-like ostrich head with slender toothless beak
+          const hs = bt === 'mononykus' ? 0.55 : 0.64;
+          addMesh(SG_LOW, skin, 0.3 * hs, 0.04, 0, head, 0.72 * hs, 0.48 * hs, 0.44 * hs);
+          const bk = addMesh(new THREE.ConeGeometry(0.2 * hs, 1.15 * hs, 8), accentMat, 1.12 * hs, -0.04 * hs, 0, head);
+          bk.rotation.z = -Math.PI / 2;
+          jaw.position.set(0.25 * hs, -0.2 * hs, 0);
+          addMesh(SG_LOW, skin, 0.62 * hs, -0.02 * hs, 0, jaw, 0.65 * hs, 0.11 * hs, 0.26 * hs);
+          [-1, 1].forEach(s => {
+            addMesh(new THREE.SphereGeometry(0.11 * hs, 10, 8), eyeMat, 0.52 * hs, 0.18 * hs, s * 0.36 * hs, head);
+            addMesh(new THREE.SphereGeometry(0.055 * hs, 8, 8), pupilMat, 0.58 * hs, 0.18 * hs, s * 0.42 * hs, head);
+          });
+        } else if (bt === 'pterosaur') {
+          // Individualized pterosaur skulls & crests (#81 - #88)
+          const hScale = isAzhdarchid ? 0.85 : 0.72;
+          addMesh(SG_LOW, skin, 0.35 * hScale, 0.02, 0, head, 0.82 * hScale, 0.48 * hScale, 0.46 * hScale);
+
+          if (isDimorpho) {
+            // #81 Dimorphodon: deep rounded puffin-like snout, no crest
+            addMesh(SG_LOW, accentMat, 1.15 * hScale, 0.04 * hScale, 0, head, 0.92 * hScale, 0.54 * hScale, 0.34 * hScale);
+            jaw.position.set(0.32 * hScale, -0.26 * hScale, 0);
+            addMesh(SG_LOW, skin, 0.85 * hScale, -0.04 * hScale, 0, jaw, 0.92 * hScale, 0.2 * hScale, 0.28 * hScale);
+          } else if (isTapejara) {
+            // #85 Tapejara: giant tall front sail crest + down-curved beak
+            const bk = addMesh(new THREE.ConeGeometry(0.26 * hScale, 1.35 * hScale, 7), darkTrimMat, 1.25 * hScale, -0.14 * hScale, 0, head);
+            bk.rotation.z = -1.78;
+            addMesh(SG_LOW, accentMat, 0.85 * hScale, 0.95 * hScale, 0, head, 0.78 * hScale, 1.15 * hScale, 0.1 * hScale);
+            addMesh(SG_LOW, skin, 0.2 * hScale, 0.55 * hScale, 0, head, 0.52 * hScale, 0.62 * hScale, 0.12 * hScale);
+            jaw.position.set(0.3 * hScale, -0.26 * hScale, 0);
+            addMesh(SG_LOW, darkTrimMat, 0.75 * hScale, -0.1 * hScale, 0, jaw, 0.78 * hScale, 0.16 * hScale, 0.24 * hScale);
+          } else {
+            // Long tapered spear beak
+            const beakLen = isAzhdarchid ? 2.55 : isPteranodon ? 1.95 : 1.55;
+            const bk = addMesh(new THREE.ConeGeometry(0.22 * hScale, beakLen * hScale, 8), accentMat, (0.75 + beakLen * 0.45) * hScale, -0.04 * hScale, 0, head);
+            bk.rotation.z = -Math.PI / 2;
+            jaw.position.set(0.3 * hScale, -0.24 * hScale, 0);
+            const lj = addMesh(new THREE.ConeGeometry(0.16 * hScale, beakLen * 0.92 * hScale, 8), skin, (0.45 + beakLen * 0.42) * hScale, -0.02 * hScale, 0, jaw);
+            lj.rotation.z = -Math.PI / 2;
+
+            if (isPteranodon) {
+              // #84 Pteranodon: classic long swept-back dagger crest
+              const cr = addMesh(new THREE.ConeGeometry(0.24 * hScale, 1.85 * hScale, 6), accentMat, -0.45 * hScale, 0.48 * hScale, 0, head);
+              cr.rotation.z = 1.28;
+            } else if (isPterodact) {
+              // #83 Pterodactylus: small soft rounded crest
+              addMesh(SG_LOW, accentMat, 0.05 * hScale, 0.42 * hScale, 0, head, 0.48 * hScale, 0.26 * hScale, 0.14 * hScale);
+            } else if (isTropeo) {
+              // #86 Tropeognathus: rounded keel crests on upper AND lower jaw tips
+              addMesh(SG_LOW, accentMat, 1.82 * hScale, 0.24 * hScale, 0, head, 0.48 * hScale, 0.34 * hScale, 0.1 * hScale);
+              addMesh(SG_LOW, accentMat, 1.52 * hScale, -0.22 * hScale, 0, jaw, 0.42 * hScale, 0.28 * hScale, 0.1 * hScale);
+            } else if (isAzhdarchid) {
+              // #87 Hatzegopteryx & #88 Quetzalcoatlus: low sagittal beak ridge crest
+              addMesh(SG_LOW, darkTrimMat, 0.95 * hScale, 0.34 * hScale, 0, head, 0.85 * hScale, 0.28 * hScale, 0.12 * hScale);
+            }
+          }
+          [-1, 1].forEach(s => {
+            addMesh(new THREE.SphereGeometry(0.1 * hScale, 10, 8), eyeMat, 0.65 * hScale, 0.18 * hScale, s * 0.38 * hScale, head);
+            addMesh(new THREE.SphereGeometry(0.05 * hScale, 8, 8), pupilMat, 0.71 * hScale, 0.18 * hScale, s * 0.43 * hScale, head);
+          });
         } else {
-          const isSmallHead = bt === 'sauropod' || bt === 'stegosaur' || bt === 'ankylosaur' || bt === 'therizino';
-          const hScale = isSmallHead ? 0.64 : bt === 'pterosaur' ? 0.72 : 1.0;
+          const isSmallHead = bt === 'sauropod' || bt === 'prosauropod' || bt === 'stegosaur' || bt === 'ankylosaur' || bt === 'therizino';
+          const isLongCrocSnout = isBaryonyx || isSuchomimus || bt === 'spino';
+          const hScale = bt === 'plesiosaur' ? 0.52 : bt === 'microraptor' ? 0.62 : isSmallHead ? 0.64 : 1.0;
+          const snoutLen = isLongCrocSnout ? 1.52 : isDuckbill ? 1.15 : 0.95;
+          const snoutWid = isDuckbill ? 0.56 : isLongCrocSnout ? 0.3 : 0.4;
 
           addMesh(SG_LOW, skin, 0.45 * hScale, 0, 0, head, 1.0 * hScale, 0.58 * hScale, 0.58 * hScale);
-          addMesh(SG_LOW, skin, 1.38 * hScale, -0.1 * hScale, 0, head, (bt === 'pterosaur' ? 1.55 : 0.95) * hScale, 0.34 * hScale, 0.4 * hScale);
+          addMesh(SG_LOW, isDuckbill ? accentMat : skin, (0.9 + snoutLen * 0.5) * hScale, -0.1 * hScale, 0, head, snoutLen * hScale, (isLongCrocSnout ? 0.26 : 0.34) * hScale, snoutWid * hScale);
 
+          const eyeRad = isLeaellyna ? 0.16 * hScale : 0.1 * hScale;
           [-1, 1].forEach(s => {
-            addMesh(new THREE.SphereGeometry(0.1 * hScale, 12, 10), eyeMat, 0.92 * hScale, 0.28 * hScale, s * 0.46 * hScale, head);
-            if (bt === 'theropod_large' || bt === 'theropod_small' || bt === 'ceratosaurus' || bt === 'spino' || bt === 'marine') {
-              const tb = new THREE.ConeGeometry(0.065 * hScale, 0.19 * hScale, 5);
-              for (let k = 0; k < 7; k++) {
-                addMesh(tb, toothMat, (0.72 + k * 0.19) * hScale, -0.44 * hScale, s * (0.32 - k * 0.015) * hScale, head).rotation.z = Math.PI;
+            addMesh(new THREE.SphereGeometry(eyeRad, 12, 10), eyeMat, 0.92 * hScale, 0.28 * hScale, s * 0.46 * hScale, head);
+            if (isLeaellyna) addMesh(new THREE.SphereGeometry(eyeRad * 0.55, 8, 8), pupilMat, 0.99 * hScale, 0.28 * hScale, s * 0.54 * hScale, head);
+            if (bt === 'theropod_large' || bt === 'theropod_small' || bt === 'microraptor' || bt === 'ceratosaurus' || bt === 'spino' || bt === 'marine' || bt === 'plesiosaur') {
+              const tb = new THREE.ConeGeometry(0.062 * hScale, 0.19 * hScale, 5);
+              const tCount = isLongCrocSnout ? 9 : 7;
+              for (let k = 0; k < tCount; k++) {
+                addMesh(tb, toothMat, (0.72 + k * 0.19) * hScale, -0.4 * hScale, s * (snoutWid * 0.72 - k * 0.012) * hScale, head).rotation.z = Math.PI;
               }
             }
           });
@@ -1419,35 +1664,113 @@
               const browHorn = addMesh(new THREE.ConeGeometry(0.11, 0.42, 6), accentMat, 0.78, 0.56, s * 0.34, head);
               browHorn.rotation.z = -0.15; browHorn.rotation.x = s * 0.25;
             });
-          } else if (dino.id === 'dino_29') {
+          } else if (id === 'dino_29') {
+            // Carnotaurus bull horns
             [-1, 1].forEach(s => { addMesh(new THREE.ConeGeometry(0.12, 0.58, 6), toothMat, 0.68, 0.58, s * 0.42, head).rotation.x = s * 0.55; });
+          } else if (isDilo) {
+            // #31 Dilophosaurus: twin parallel half-moon thin crests
+            [-1, 1].forEach(s => {
+              addMesh(SG_LOW, accentMat, 1.12, 0.44, s * 0.2, head, 0.72, 0.42, 0.07);
+            });
+          } else if (isCryo) {
+            // #46 Cryolophosaurus: transverse fan-shaped ("Elvis") brow crest
+            const cryoCrest = addMesh(new THREE.BoxGeometry(0.14, 0.58, 0.92), accentMat, 0.78, 0.62, 0, head);
+            cryoCrest.rotation.z = -0.25;
+            addMesh(SG_LOW, accentMat, 0.78, 0.88, 0, head, 0.12, 0.22, 0.52);
           } else if (bt === 'pachy') {
             addMesh(SG_LOW, accentMat, 0.45, 0.52, 0, head, 0.85, 0.55, 0.68);
-          } else if (bt === 'pterosaur') {
-            addMesh(new THREE.ConeGeometry(0.28, 1.35, 6), accentMat, -0.2, 0.55, 0, head).rotation.z = 1.15;
+          } else if (bt === 'microraptor') {
+            // Feathered head tuft (no pterosaur horn)
+            addMesh(SG_LOW, accentMat, 0.05, 0.34, 0, head, 0.42, 0.16, 0.24);
           } else if (bt === 'ornithopod') {
-            addMesh(new THREE.CylinderGeometry(0.12, 0.18, 0.95, 8), accentMat, -0.1, 0.48, 0, head).rotation.z = 0.9;
+            if (isParasaur) {
+              // #08 Parasaurolophus: iconic long swept-back hollow tube crest
+              addCurvedHorn([V3(0.75, 0.38, 0), V3(-0.05, 0.72, 0), V3(-0.85, 1.05, 0)], 0.19, 0.11, accentMat, head);
+            } else if (isCorytho) {
+              // #09 Corythosaurus: tall semicircular helmet crest
+              addMesh(SG_LOW, accentMat, 0.48, 0.62, 0, head, 0.68, 0.58, 0.16);
+            }
           }
 
           jaw.position.set(0.32 * hScale, -0.36 * hScale, 0);
-          addMesh(SG_LOW, skin, 0.88 * hScale, -0.05 * hScale, 0, jaw, 0.98 * hScale, 0.15 * hScale, 0.32 * hScale);
+          addMesh(SG_LOW, skin, (0.45 + snoutLen * 0.45) * hScale, -0.05 * hScale, 0, jaw, (snoutLen + 0.05) * hScale, 0.15 * hScale, snoutWid * 0.82 * hScale);
         }
 
         const legs = [], wings = [];
         if (bt === 'pterosaur') {
+          const span = isAzhdarchid ? 6.2 : isPteranodon ? 5.2 : 4.2;
+          const chord = isAzhdarchid ? 1.85 : 1.55;
           [-1, 1].forEach(s => {
-            const wGrp = new THREE.Group(); wGrp.position.set(0.2, 3.25, s * 0.45);
-            const wMesh = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 4.6), skin);
-            wMesh.position.set(0, 0, s * 2.3); wMesh.castShadow = true; wGrp.add(wMesh); dinoRoot.add(wGrp);
-            wings.push({ grp: wGrp, side: s });
+            const wGrp = makePterosaurWing(span, chord, s);
+            wGrp.position.set(0.35, 3.25, s * 0.38);
+            dinoRoot.add(wGrp);
+            wings.push({ grp: wGrp, side: s, amp: 0.58 });
+          });
+        } else if (bt === 'archelon') {
+          // Huge sweeping front sea-turtle flippers + rear paddle flippers
+          [-1, 1].forEach(s => {
+            const f1Grp = new THREE.Group();
+            f1Grp.position.set(1.2, 1.9, s * 1.15);
+            const f1 = makeFlipper(3.15, 0.92, 0.14, skin);
+            f1.rotation.y = s > 0 ? -Math.PI / 2 - 0.22 : Math.PI / 2 + 0.22;
+            f1Grp.add(f1); dinoRoot.add(f1Grp);
+            const f2Grp = new THREE.Group();
+            f2Grp.position.set(-1.35, 1.82, s * 0.95);
+            const f2 = makeFlipper(1.55, 0.68, 0.12, darkTrimMat);
+            f2.rotation.y = s > 0 ? -Math.PI / 2 - 0.55 : Math.PI / 2 + 0.55;
+            f2Grp.add(f2); dinoRoot.add(f2Grp);
+            wings.push({ grp: f1Grp, side: s, amp: 0.34 }, { grp: f2Grp, side: s, amp: 0.2 });
+          });
+        } else if (bt === 'plesiosaur') {
+          // 4 large diamond/teardrop marine flippers
+          [-1, 1].forEach(s => {
+            const f1Grp = new THREE.Group();
+            f1Grp.position.set(0.65, 1.85, s * 0.85);
+            const f1 = makeFlipper(2.65, 0.88, 0.14, accentMat);
+            f1.rotation.y = s > 0 ? -Math.PI / 2 - 0.18 : Math.PI / 2 + 0.18;
+            f1Grp.add(f1); dinoRoot.add(f1Grp);
+            const f2Grp = new THREE.Group();
+            f2Grp.position.set(-1.35, 1.82, s * 0.78);
+            const f2 = makeFlipper(2.35, 0.82, 0.13, accentMat);
+            f2.rotation.y = s > 0 ? -Math.PI / 2 - 0.28 : Math.PI / 2 + 0.28;
+            f2Grp.add(f2); dinoRoot.add(f2Grp);
+            wings.push({ grp: f1Grp, side: s, amp: 0.34 }, { grp: f2Grp, side: s, amp: -0.3 });
+          });
+        } else if (bt === 'ichthyosaur') {
+          // Smooth swept pectoral + pelvic fins + tall triangular dorsal fin
+          const dFin = new THREE.Mesh(new THREE.ConeGeometry(0.52, 1.38, 4), accentMat);
+          dFin.scale.set(1.25, 1.0, 0.22);
+          dFin.position.set(0.15, 3.25, 0);
+          dFin.rotation.z = 0.28;
+          dFin.castShadow = true;
+          dinoRoot.add(dFin);
+          [-1, 1].forEach(s => {
+            const f1Grp = new THREE.Group();
+            f1Grp.position.set(1.35, 1.75, s * 0.72);
+            const f1 = makeFlipper(1.75, 0.62, 0.11, accentMat);
+            f1.rotation.y = s > 0 ? -Math.PI / 2 - 0.45 : Math.PI / 2 + 0.45;
+            f1Grp.add(f1); dinoRoot.add(f1Grp);
+            const f2Grp = new THREE.Group();
+            f2Grp.position.set(-1.15, 1.72, s * 0.55);
+            const f2 = makeFlipper(0.95, 0.42, 0.09, darkTrimMat);
+            f2.rotation.y = s > 0 ? -Math.PI / 2 - 0.55 : Math.PI / 2 + 0.55;
+            f2Grp.add(f2); dinoRoot.add(f2Grp);
+            wings.push({ grp: f1Grp, side: s, amp: 0.22 }, { grp: f2Grp, side: s, amp: 0.16 });
           });
         } else if (bt === 'marine') {
+          // Sculpted marine flippers for mosasaurs / pliosaurs / nothosaurus
           [-1, 1].forEach(s => {
-            const f1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.14, 2.2), accentMat);
-            f1.position.set(1.2, 1.65, s * 1.4); f1.rotation.y = s * 0.35; dinoRoot.add(f1);
-            const f2 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 1.7), accentMat);
-            f2.position.set(-1.6, 1.65, s * 1.15); f2.rotation.y = s * 0.45; dinoRoot.add(f2);
-            wings.push({ grp: f1, side: s }, { grp: f2, side: s });
+            const f1Grp = new THREE.Group();
+            f1Grp.position.set(1.25, 1.72, s * 0.78);
+            const f1 = makeFlipper(2.15, 0.76, 0.13, accentMat);
+            f1.rotation.y = s > 0 ? -Math.PI / 2 - 0.3 : Math.PI / 2 + 0.3;
+            f1Grp.add(f1); dinoRoot.add(f1Grp);
+            const f2Grp = new THREE.Group();
+            f2Grp.position.set(-1.55, 1.7, s * 0.65);
+            const f2 = makeFlipper(1.65, 0.62, 0.11, accentMat);
+            f2.rotation.y = s > 0 ? -Math.PI / 2 - 0.4 : Math.PI / 2 + 0.4;
+            f2Grp.add(f2); dinoRoot.add(f2Grp);
+            wings.push({ grp: f1Grp, side: s, amp: 0.28 }, { grp: f2Grp, side: s, amp: 0.24 });
           });
         } else if (bt === 'sauropod' || bt === 'ceratopsian' || bt === 'stegosaur' || bt === 'ankylosaur') {
           const hipXs = bt === 'ceratopsian' ? [-1.35, 1.35] : [-1.4, 1.45];
@@ -1466,13 +1789,23 @@
             });
           });
         } else {
+          // Bipedal dinosaurs (theropods, ornithopods, ornithomimids, prosauropod, microraptor, oviraptor, mononykus)
+          const slenderLegs = bt === 'ornithomimid' || bt === 'microraptor' || bt === 'mononykus';
+          const legScale = slenderLegs ? 0.72 : 1.0;
           [-1, 1].forEach(s => {
-            const lGrp = new THREE.Group(); lGrp.position.set(-0.2, 2.15, s * 0.78);
-            addMesh(SG_LOW, skin, 0.1, -0.1, 0, lGrp, 0.85, 1.05, 0.55);
-            addLimb(V3(0, 0, 0), V3(0.75, -0.85, 0), 0.48, 0.32, skin, lGrp);
-            addLimb(V3(0.75, -0.85, 0), V3(0.1, -1.5, 0), 0.32, 0.22, skin, lGrp);
-            addLimb(V3(0.1, -1.5, 0), V3(0.75, -2.02, 0), 0.22, 0.18, skin, lGrp);
-            addMesh(SG_LOW, clawMat, 1.0, -2.02, 0, lGrp, 0.58, 0.16, 0.32);
+            const lGrp = new THREE.Group(); lGrp.position.set(-0.2, 2.15, s * (slenderLegs ? 0.62 : 0.78));
+            addMesh(SG_LOW, skin, 0.1, -0.1, 0, lGrp, 0.85 * legScale, 1.05 * legScale, 0.55 * legScale);
+            addLimb(V3(0, 0, 0), V3(0.75, -0.85, 0), 0.46 * legScale, 0.3 * legScale, skin, lGrp);
+            addLimb(V3(0.75, -0.85, 0), V3(0.1, -1.5, 0), 0.3 * legScale, 0.2 * legScale, skin, lGrp);
+            addLimb(V3(0.1, -1.5, 0), V3(0.75, -2.02, 0), 0.2 * legScale, 0.16 * legScale, skin, lGrp);
+            addMesh(SG_LOW, clawMat, 1.0, -2.02, 0, lGrp, 0.56 * legScale, 0.15, 0.3 * legScale);
+            // #42 Microraptor hindlimb feather wings (4-winged dinosaur!)
+            if (bt === 'microraptor') {
+              const legWing = makeFeatherFan(5, 1.35, 0.16, 0.85, accentMat, darkTrimMat);
+              legWing.position.set(0.15, -1.35, s * 0.15);
+              legWing.rotation.y = s > 0 ? -Math.PI / 2 - 0.35 : Math.PI / 2 + 0.35;
+              lGrp.add(legWing);
+            }
             dinoRoot.add(lGrp);
             legs.push({ grp: lGrp, phase: s > 0 ? 0 : Math.PI });
 
@@ -1484,6 +1817,43 @@
                 const clawLen = bt === 'therizino' ? 1.15 : 0.72;
                 addMesh(new THREE.ConeGeometry(0.075, clawLen, 6), toothMat, wrist.x + 0.38, wrist.y - 0.18, wrist.z + oz, dinoRoot).rotation.z = -2.05;
               });
+            } else if (bt === 'microraptor') {
+              // Feathered forelimb wings that flap gently
+              const wGrp = new THREE.Group();
+              wGrp.position.set(1.1, 2.75, s * 0.55);
+              addLimb(V3(0, 0, 0), V3(0.35, -0.1, s * 1.55), 0.1, 0.07, skin, wGrp);
+              const fFan = makeFeatherFan(7, 2.35, 0.22, 0.65, accentMat, skin);
+              fFan.rotation.y = s > 0 ? -Math.PI / 2 - 0.15 : Math.PI / 2 + 0.15;
+              wGrp.add(fFan);
+              dinoRoot.add(wGrp);
+              wings.push({ grp: wGrp, side: s, amp: 0.42 });
+            } else if (bt === 'oviraptor') {
+              // Feathered grasping arms
+              addLimb(V3(1.15, 2.72, s * 0.52), V3(1.85, 2.15, s * 0.58), 0.12, 0.08, skin, dinoRoot);
+              const armF = makeFeatherFan(4, 0.85, 0.16, 0.55, accentMat, darkTrimMat);
+              armF.position.set(1.45, 2.4, s * 0.58);
+              armF.rotation.z = -0.7;
+              dinoRoot.add(armF);
+            } else if (bt === 'mononykus') {
+              // #26 Mononykus: very short stubby forelimbs with a single stout digging claw
+              addLimb(V3(1.25, 2.68, s * 0.46), V3(1.52, 2.42, s * 0.48), 0.11, 0.08, skin, dinoRoot);
+              const singleClaw = addMesh(new THREE.ConeGeometry(0.08, 0.36, 6), toothMat, 1.66, 2.32, s * 0.48, dinoRoot);
+              singleClaw.rotation.z = -2.1;
+            } else if (bt === 'prosauropod') {
+              // #13 Plateosaurus: strong semi-bipedal grasping forelimbs with thumb claw
+              addLimb(V3(1.15, 2.85, s * 0.68), V3(1.75, 2.18, s * 0.66), 0.18, 0.13, skin, dinoRoot);
+              addLimb(V3(1.75, 2.18, s * 0.66), V3(2.25, 1.75, s * 0.58), 0.13, 0.1, skin, dinoRoot);
+              addMesh(new THREE.ConeGeometry(0.08, 0.38, 6), toothMat, 2.42, 1.68, s * 0.52, dinoRoot).rotation.z = -1.9;
+            } else if (isIguanodon) {
+              // #07 Iguanodon: sturdy forelimbs with iconic conical thumb spikes
+              addLimb(V3(1.55, 2.72, s * 0.64), V3(2.25, 1.98, s * 0.58), 0.17, 0.12, skin, dinoRoot);
+              const thumbSpike = addMesh(new THREE.ConeGeometry(0.09, 0.52, 6), toothMat, 2.38, 2.02, s * 0.48, dinoRoot);
+              thumbSpike.rotation.z = -0.55; thumbSpike.rotation.x = -s * 0.35;
+            } else if (isBaryonyx || isSuchomimus) {
+              // #32 Baryonyx & #33 Suchomimus: muscular fishing arms with oversized curved thumb claws
+              addLimb(V3(1.55, 2.78, s * 0.68), V3(2.28, 2.08, s * 0.62), 0.18, 0.13, skin, dinoRoot);
+              const fishClaw = addMesh(new THREE.ConeGeometry(0.095, 0.68, 6), toothMat, 2.52, 1.92, s * 0.56, dinoRoot);
+              fishClaw.rotation.z = -2.15;
             } else {
               addLimb(V3(1.75, 2.75, s * 0.6), V3(2.35, 2.1, s * 0.52), 0.14, 0.09, skin, dinoRoot);
             }
@@ -1498,6 +1868,26 @@
             o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
           }
           addMesh(SG_LOW, accentMat, -4.9, 1.2, 0, dinoRoot, 0.9, 0.45, 0.25);
+        } else if (isAmarga) {
+          // #55 Amargasaurus: twin parallel rows of tall curved neck spines (double neck sails!)
+          for (let i = 0; i < 11; i++) {
+            const u = 0.48 + (i / 10) * 0.42;
+            const h = 0.65 + Math.sin((i / 10) * Math.PI) * 1.35;
+            [-1, 1].forEach(s => {
+              const o = new THREE.Mesh(new THREE.ConeGeometry(0.085, h, 6), accentMat);
+              o.castShadow = true;
+              o.userData = { u, h, zOff: s * 0.24 };
+              dinoRoot.add(o); spikes.push(o);
+            });
+          }
+        } else if (isSuchomimus) {
+          // #33 Suchomimus: low sail-like dorsal ridge
+          for (let i = 0; i < 12; i++) {
+            const u = 0.18 + (i / 12) * 0.55;
+            const h = 0.42 + Math.sin((i / 11) * Math.PI) * 0.68;
+            const o = new THREE.Mesh(new THREE.BoxGeometry(0.32, h, 0.14), accentMat);
+            o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
+          }
         } else if (bt === 'ceratopsian') {
           if (isTricera) {
             for (let i = 0; i < 7; i++) {
@@ -1506,20 +1896,51 @@
               o.scale.set(1.3, 0.65, 0.9); o.userData = { u, h: 0.12 }; dinoRoot.add(o); spikes.push(o);
             }
           }
-        } else {
-          const spikeCount = bt === 'spino' ? 14 : bt === 'stegosaur' ? 10 : bt === 'ankylosaur' ? 12 : 10;
+        } else if (bt === 'spino' || bt === 'stegosaur' || bt === 'ankylosaur' || bt === 'theropod_large' || bt === 'ceratosaurus') {
+          const spikeCount = bt === 'spino' ? 14 : bt === 'stegosaur' ? 10 : bt === 'ankylosaur' ? 12 : 9;
           for (let i = 0; i < spikeCount; i++) {
             const u = 0.15 + (i / spikeCount) * 0.62;
             const h = bt === 'spino' ? 0.6 + Math.sin((i / spikeCount) * Math.PI) * 1.65
               : bt === 'stegosaur' ? 0.55 + Math.sin((i / spikeCount) * Math.PI) * 0.85
-              : 0.26 + Math.sin((i / spikeCount) * Math.PI) * 0.35;
-            const geo = bt === 'stegosaur' ? new THREE.BoxGeometry(0.45, h, 0.1) : new THREE.ConeGeometry(bt === 'spino' ? 0.22 : 0.14, h, 6);
+              : 0.22 + Math.sin((i / spikeCount) * Math.PI) * 0.28;
+            const geo = bt === 'stegosaur' ? new THREE.BoxGeometry(0.45, h, 0.1) : new THREE.ConeGeometry(bt === 'spino' ? 0.22 : 0.13, h, 6);
             const o = new THREE.Mesh(geo, accentMat); o.castShadow = true; o.userData = { u, h }; dinoRoot.add(o); spikes.push(o);
           }
         }
 
+        // Tail tip attachments (club / crescent fluke / feather fan / diamond vane)
         let tailClub = null;
-        if (bt === 'ankylosaur') tailClub = addMesh(SG_LOW, accentMat, -4.7, 0.9, 0, dinoRoot, 0.55, 0.42, 0.55);
+        if (bt === 'ankylosaur' && !isNodo && !isEdmontonia) {
+          tailClub = new THREE.Group();
+          addMesh(SG_LOW, accentMat, -0.15, 0, 0.22, tailClub, 0.48, 0.36, 0.34);
+          addMesh(SG_LOW, accentMat, -0.15, 0, -0.22, tailClub, 0.48, 0.36, 0.34);
+          addMesh(SG_LOW, darkTrimMat, 0.05, 0, 0, tailClub, 0.36, 0.3, 0.4);
+          dinoRoot.add(tailClub);
+        } else if (bt === 'ichthyosaur') {
+          // Vertical crescent shark/tuna tail fluke
+          tailClub = new THREE.Group();
+          const upLobe = addMesh(new THREE.ConeGeometry(0.32, 1.45, 5), accentMat, -0.22, 0.58, 0, tailClub);
+          upLobe.scale.set(0.95, 1.0, 0.22); upLobe.rotation.z = 0.32;
+          const dnLobe = addMesh(new THREE.ConeGeometry(0.32, 1.38, 5), accentMat, -0.22, -0.55, 0, tailClub);
+          dnLobe.scale.set(0.95, 1.0, 0.22); dnLobe.rotation.z = Math.PI - 0.32;
+          dinoRoot.add(tailClub);
+        } else if (isMosasaur) {
+          // Subtle vertical mosasaur tail fin
+          tailClub = new THREE.Group();
+          const mFin = addMesh(SG_LOW, accentMat, -0.25, 0.05, 0, tailClub, 0.85, 0.58, 0.1);
+          dinoRoot.add(tailClub);
+        } else if (bt === 'microraptor' || bt === 'oviraptor' || bt === 'mononykus') {
+          // Broad feathered tail fan
+          tailClub = makeFeatherFan(5, 1.25, 0.24, 0.85, accentMat, darkTrimMat);
+          tailClub.rotation.y = Math.PI;
+          dinoRoot.add(tailClub);
+        } else if (isRhampho) {
+          // #82 Rhamphorhynchus: diamond-shaped tail vane
+          tailClub = new THREE.Group();
+          const vane = addMesh(new THREE.OctahedronGeometry(0.42, 0), accentMat, -0.18, 0, 0, tailClub);
+          vane.scale.set(1.35, 0.14, 0.95);
+          dinoRoot.add(tailClub);
+        }
 
         dinoRoot.scale.setScalar(scaleFactor);
         dinoRig = { dino, sp, radFn, bodyMesh, head, jaw, legs, wings, spikes, tailClub, riderAnchor, scaleFactor, curve: null };
@@ -1530,12 +1951,13 @@
         if (!dinoRig) return;
         const { sp, radFn, bodyMesh, head, jaw, legs, wings, spikes, tailClub, dino } = dinoRig;
         const spd = isMoving ? 2.6 : 1.0;
+        const swayAmp = dino.bodyType === 'archelon' ? 0.12 : (isMoving ? 0.85 : 0.5);
         const pts = sp.map((p, i) => {
           const u = i / 8, tl = Math.pow(1 - u, 2);
           return V3(
             p[0] + roarAmt * 0.28 * u * u * u,
             p[1] + Math.sin(t * 2.2 * spd) * (isMoving ? 0.12 : 0.04) + roarAmt * 0.42 * Math.pow(u, 3),
-            Math.sin(t * 1.8 * spd - u * 4.2) * tl * (isMoving ? 0.85 : 0.5)
+            Math.sin(t * 1.8 * spd - u * 4.2) * tl * swayAmp
           );
         });
         const curve = new THREE.CatmullRomCurve3(pts);
@@ -1567,12 +1989,16 @@
 
         spikes.forEach(o => {
           const u = o.userData.u, c = curve.getPointAt(u), T = curve.getTangentAt(u);
-          o.position.set(c.x, c.y + radFn(u) * 0.92 + o.userData.h * 0.25, c.z);
+          const zOff = o.userData.zOff || 0;
+          o.position.set(c.x, c.y + radFn(u) * 0.92 + o.userData.h * 0.25, c.z + zOff);
           o.quaternion.setFromUnitVectors(V3(0, 1, 0), V3(0, 1, 0).addScaledVector(T, -0.25).normalize());
         });
         if (tailClub) tailClub.position.copy(curve.getPointAt(0));
         legs.forEach(l => { l.grp.rotation.z = isMoving ? Math.sin(t * 9 + l.phase) * 0.45 : Math.sin(t * 1.5 + l.phase) * 0.04; });
-        wings.forEach(w => { w.grp.rotation.x = w.side * Math.sin(t * (isMoving ? 9 : 3.5)) * (dino.bodyType === 'pterosaur' ? 0.58 : 0.28); });
+        wings.forEach(w => {
+          const amp = w.amp || (dino.bodyType === 'pterosaur' ? 0.58 : 0.28);
+          w.grp.rotation.x = w.side * Math.sin(t * (isMoving ? 9 : 3.5)) * amp;
+        });
       }
 
       // 3D 주인공 (탐험가 소년: 사파리 모자·갈색 삐죽머리·초록 스카프·카키 셔츠·멜빵·청바지·부츠·안장) + 3D 훈련기구 4종
@@ -2126,7 +2552,7 @@
           return;
         }
         if (state.heroEnergy < 5) {
-          showToast('💙 주인공 에너지가 부족합니다! 먼저 에너지 회복을 눌러주세요.');
+          showToast('💙 주인공 에너지가 부족합니다! 잠시 훈련하거나 대기해 에너지를 회복해 주세요.');
           return;
         }
         if (getDinoEnergy(dino) < 5) {
@@ -2168,19 +2594,6 @@
           persistState(true);
           if (reason) showToast(reason);
         }
-      }
-
-      function startRest() {
-        getAudioContext();
-        vipBuckTimer = 0;
-        document.getElementById('vipBuckBanner').classList.add('hidden');
-        state.mode = 'rest';
-        state.ridingDinoId = null;
-        playSfx('tap');
-        updateTrainingButtons();
-        renderFavoriteDinos();
-        updateHud();
-        showToast('🛌 휴식 중! 주인공과 모든 공룡의 에너지가 빠르게 회복됩니다.');
       }
 
       function updateTrainingButtons() {
@@ -2596,7 +3009,6 @@
         playSfx('tap');
       });
 
-      document.getElementById('restBtn').addEventListener('click', startRest);
       document.getElementById('dismountOrRideBtn').addEventListener('click', () => {
         if (state.mode === 'ride') dismountDino('⬇️ 공룡에서 하차했습니다.');
         else mountDino(state.selectedDinoId || 'dino_1');
