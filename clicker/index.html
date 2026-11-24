@@ -286,12 +286,12 @@
       ];
 
       const PETS = [
-        { id: 'baby_slime', name: '아기 슬라임', icon: '💧', reqHonor: 1, bodyColor: '#38bdf8', subColor: '#bae6fd', pomColor: '#f472b6', cheers: ['용사님 화이팅!💧', '말랑말랑 응원~!', '할 수 있어요!✨'], desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임 (명예 Lv.1)' },
-        { id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', reqHonor: 10, bodyColor: '#f59e0b', subColor: '#fef3c7', pomColor: '#ef4444', cheers: ['멍멍! 힘내요!🐾', '최고의 용사님!', '가즈아 멍!!🔥'], desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지 (명예 Lv.10)' },
-        { id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', reqHonor: 100, bodyColor: '#f8fafc', subColor: '#fca5a5', pomColor: '#fbbf24', cheers: ['골드 쏟아져라냥!🪙', '냥냥 펀치 응원!', '대박 나라냥~💛'], desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이 (명예 Lv.100)' },
-        { id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', reqHonor: 1000, bodyColor: '#a7f3d0', subColor: '#34d399', pomColor: '#fef08a', cheers: ['반짝반짝 빛나라!✨', '요정의 축복을~!', '멋진 검술이에요!🌿'], desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정 (명예 Lv.1,000)' },
-        { id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', reqHonor: 10000, bodyColor: '#fb7185', subColor: '#fef08a', pomColor: '#f97316', cheers: ['크아앙! 다 부숴요!🔥', '불꽃 응원 발사!', '용사님 무적!!⚡'], desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤 (명예 Lv.10,000)' },
-        { id: 'gold_haetae', name: '황금 해태', icon: '🦁', reqHonor: 0, isVipOnly: true, bodyColor: '#fbbf24', subColor: '#fef08a', pomColor: '#c084fc', cheers: ['👑 천하무적 용사님!', '황금빛 승리!!✨', '전설의 일격!!👑'], desc: '👑 VIP 전용 - 신비한 황금 오오라를 두르고 응원하는 수호신 아기 해태' }
+        { id: 'baby_slime', name: '아기 슬라임', icon: '💧', reqHonor: 1, goldBonus: 1, bodyColor: '#38bdf8', subColor: '#bae6fd', pomColor: '#f472b6', cheers: ['용사님 화이팅!💧', '말랑말랑 응원~!', '할 수 있어요!✨'], desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임 (명예 Lv.1)' },
+        { id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', reqHonor: 10, goldBonus: 10, bodyColor: '#f59e0b', subColor: '#fef3c7', pomColor: '#ef4444', cheers: ['멍멍! 힘내요!🐾', '최고의 용사님!', '가즈아 멍!!🔥'], desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지 (명예 Lv.10)' },
+        { id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', reqHonor: 100, goldBonus: 100, bodyColor: '#f8fafc', subColor: '#fca5a5', pomColor: '#fbbf24', cheers: ['골드 쏟아져라냥!🪙', '냥냥 펀치 응원!', '대박 나라냥~💛'], desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이 (명예 Lv.100)' },
+        { id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', reqHonor: 1000, goldBonus: 1000, bodyColor: '#a7f3d0', subColor: '#34d399', pomColor: '#fef08a', cheers: ['반짝반짝 빛나라!✨', '요정의 축복을~!', '멋진 검술이에요!🌿'], desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정 (명예 Lv.1,000)' },
+        { id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', reqHonor: 10000, goldBonus: 10000, bodyColor: '#fb7185', subColor: '#fef08a', pomColor: '#f97316', cheers: ['크아앙! 다 부숴요!🔥', '불꽃 응원 발사!', '용사님 무적!!⚡'], desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤 (명예 Lv.10,000)' },
+        { id: 'gold_haetae', name: '황금 해태', icon: '🦁', reqHonor: 0, goldBonus: 100000, isVipOnly: true, bodyColor: '#fbbf24', subColor: '#fef08a', pomColor: '#c084fc', cheers: ['👑 천하무적 용사님!', '황금빛 승리!!✨', '전설의 일격!!👑'], desc: '👑 VIP 전용 - 신비한 황금 오오라를 두르고 응원하는 수호신 아기 해태' }
       ];
 
       const defaultState = () => ({
@@ -742,12 +742,14 @@
         return { current: RANKS[currentIdx], next: RANKS[currentIdx + 1] || null };
       }
 
-      function getClickRewards() {
+     function getClickRewards() {
         const weapon = getEquippedWeapon();
         const region = getCurrentRegion();
+        const pet = getEquippedPet();
+        const petGoldBonus = pet ? (pet.goldBonus || 0) : 0;
         return {
           powerGain: Math.max(1, Math.round(weapon.powerMult)),
-          goldGain: Math.max(1, Math.round(region.goldMult))
+          goldGain: Math.max(1, Math.round(region.goldMult) + petGoldBonus)
         };
       }
 
@@ -3509,7 +3511,10 @@
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${equipped ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40' : unlocked ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/60 text-amber-300 border border-amber-700/40'}">${equipped ? '응원 중' : unlocked ? '해금됨' : isVipOnly ? 'VIP 펫' : `명예 Lv.${pet.reqHonor.toLocaleString('ko-KR')}`}</span>
               </div>
               <p class="text-[11px] text-slate-400 mt-1">${pet.desc}</p>
-              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold"><span class="px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-300 border border-pink-500/25">📣 "${pet.cheers[0]}"</span></div>
+              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">🪙 골드 +${pet.goldBonus.toLocaleString('ko-KR')}</span>
+                <span class="px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-300 border border-pink-500/25">📣 "${pet.cheers[0]}"</span>
+              </div>
             </div>
             <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${equipped ? 'bg-slate-800 hover:bg-slate-700 text-pink-300 cursor-pointer' : unlocked ? 'bg-pink-600 hover:bg-pink-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'}">${equipped ? '응원 쉬기 (해제)' : actionLabel}</button>
           `;
