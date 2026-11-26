@@ -72,6 +72,10 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <button id="adminResetPwBtn" type="button"
+          class="hidden h-10 px-3 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-extrabold items-center justify-center transition cursor-pointer shadow-sm border border-rose-400/50 whitespace-nowrap">
+          비번초기화
+        </button>
         <button id="authHeaderBtn" type="button"
           class="h-10 px-3.5 rounded-full bg-white hover:bg-slate-50 active:scale-95 text-slate-800 text-xs font-extrabold flex items-center justify-center transition cursor-pointer shadow-sm border border-black/10 whitespace-nowrap">
           로그인
@@ -290,6 +294,41 @@
     </div>
   </div>
 
+  <!-- 🔑 관리자 전용 비밀번호 초기화 모달 -->
+  <div id="adminResetModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="w-full max-w-sm bg-slate-900 border border-rose-500/50 rounded-2xl p-5 shadow-2xl text-slate-100">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-base font-extrabold text-rose-400">🔑 비밀번호 초기화 (관리자)</h2>
+        <button id="adminResetCloseBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2 py-1 cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">변경할 유저의 전화번호와 새 비밀번호 4자리를 입력하세요.</p>
+
+      <form id="adminResetForm" class="flex flex-col gap-3">
+        <div>
+          <label for="resetTargetPhone" class="block text-[11px] font-bold text-slate-300 mb-1">대상 유저 전화번호</label>
+          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 focus-within:border-rose-400 overflow-hidden">
+            <span class="px-3 py-2 bg-slate-900 text-rose-300 font-extrabold text-xs border-r border-slate-800 select-none whitespace-nowrap shrink-0">010 -</span>
+            <input id="resetTargetPhone" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678"
+              class="min-w-0 flex-1 px-3 py-2 bg-transparent text-xs font-bold tracking-wider text-slate-100 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label for="resetNewPin" class="block text-[11px] font-bold text-slate-300 mb-1">새 비밀번호 (숫자 4자리)</label>
+          <input id="resetNewPin" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="숫자 4자리 입력"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold tracking-[0.35em] placeholder:tracking-normal text-slate-100 focus:outline-none focus:border-rose-400" />
+        </div>
+
+        <div id="adminResetMsg" class="hidden text-xs font-semibold"></div>
+
+        <button type="submit" id="adminResetSubmitBtn"
+          class="w-full py-2.5 rounded-xl text-xs font-black bg-rose-500 hover:bg-rose-400 text-white transition cursor-pointer">
+          변경
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- 토스트 알림 -->
   <div id="toastBox" class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
     <div id="toastMsg" class="px-4 py-2.5 rounded-xl bg-slate-900/95 text-white text-xs sm:text-sm font-bold shadow-xl whitespace-nowrap">
@@ -370,6 +409,7 @@
       let currentUsername = null;
       let currentNickname = null;
       let isVipUser = false;
+      let isAdminUser = false;
       try {
         for (const k of ALL_TOKEN_KEYS) { const v = localStorage.getItem(k); if (v) { authToken = v; break; } }
         for (const k of ALL_USER_KEYS) { const v = localStorage.getItem(k); if (v) { currentUsername = v; break; } }
@@ -396,9 +436,19 @@
       }
       if (authToken && currentUsername) syncAuthStorage(authToken, currentUsername, isVipUser, currentNickname);
 
+      const adminResetPwBtn = document.getElementById('adminResetPwBtn');
       const authHeaderBtn = document.getElementById('authHeaderBtn');
       const welcomeGreeting = document.getElementById('welcomeGreeting');
       function updateHeaderAuthBtn() {
+        if (adminResetPwBtn) {
+          if (authToken && isAdminUser) {
+            adminResetPwBtn.classList.remove('hidden');
+            adminResetPwBtn.classList.add('flex');
+          } else {
+            adminResetPwBtn.classList.add('hidden');
+            adminResetPwBtn.classList.remove('flex');
+          }
+        }
         if (welcomeGreeting) {
           welcomeGreeting.textContent = (authToken && currentNickname)
             ? `${currentNickname}님, 즐거운 시간 되세요~`
@@ -659,6 +709,7 @@
         currentUsername = null;
         currentNickname = null;
         isVipUser = false;
+        isAdminUser = false;
         isVipNicknameChecked = false;
         checkedVipNicknameValue = '';
         vipNicknameInput.value = '';
@@ -837,6 +888,7 @@
             currentUsername = data.username || fullId;
             currentNickname = data.nickname || (isRegisterMode ? nick : null);
             isVipUser = Boolean(data.isVip);
+            isAdminUser = Boolean(data.isAdmin);
             syncAuthStorage(authToken, currentUsername, isVipUser, currentNickname);
             updateHeaderAuthBtn();
             syncVipModalState();
@@ -1050,6 +1102,7 @@
           if (res.ok) {
             const data = await res.json();
             isVipUser = Boolean(data.isVip);
+            isAdminUser = Boolean(data.isAdmin);
             if (data.nickname) {
               currentNickname = data.nickname;
               ALL_NICK_KEYS.forEach((k) => { try { localStorage.setItem(k, currentNickname); } catch (e) {} });
@@ -1074,6 +1127,7 @@
           currentUsername = u;
           currentNickname = n;
           isVipUser = Boolean(t && v);
+          if (!t) isAdminUser = false;
           updateHeaderAuthBtn();
           syncVipModalState();
           if (authToken) checkLoginVipStatus();
@@ -1085,6 +1139,85 @@
       window.addEventListener('storage', refreshLobbyAuthFromStorage);
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') refreshLobbyAuthFromStorage();
+      });
+
+      // ==========================================
+      // 🔑 관리자 전용 비밀번호 초기화 모달 로직
+      // ==========================================
+      const adminResetModal = document.getElementById('adminResetModal');
+      const adminResetCloseBtn = document.getElementById('adminResetCloseBtn');
+      const adminResetForm = document.getElementById('adminResetForm');
+      const resetTargetPhone = document.getElementById('resetTargetPhone');
+      const resetNewPin = document.getElementById('resetNewPin');
+      const adminResetMsg = document.getElementById('adminResetMsg');
+      const adminResetSubmitBtn = document.getElementById('adminResetSubmitBtn');
+
+      adminResetPwBtn.addEventListener('click', () => {
+        adminResetMsg.classList.add('hidden');
+        resetTargetPhone.value = '';
+        resetNewPin.value = '';
+        adminResetModal.classList.remove('hidden');
+        setTimeout(() => resetTargetPhone.focus(), 50);
+      });
+
+      adminResetCloseBtn.addEventListener('click', () => adminResetModal.classList.add('hidden'));
+      adminResetModal.addEventListener('click', (e) => {
+        if (e.target === adminResetModal) adminResetModal.classList.add('hidden');
+      });
+
+      resetTargetPhone.addEventListener('input', (e) => {
+        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+        e.target.value = d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d;
+      });
+      resetNewPin.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      });
+
+      adminResetForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        adminResetMsg.classList.add('hidden');
+
+        const digits = resetTargetPhone.value.replace(/\D/g, '');
+        const newPin = resetNewPin.value.trim();
+
+        if (digits.length !== 8 || !/^\d{4}$/.test(newPin)) {
+          adminResetMsg.textContent = '전화번호 8자리와 숫자 비밀번호 4자리를 정확히 입력해 주세요.';
+          adminResetMsg.className = 'text-xs font-semibold text-rose-400';
+          adminResetMsg.classList.remove('hidden');
+          return;
+        }
+
+        const targetUsername = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+        adminResetSubmitBtn.disabled = true;
+        adminResetSubmitBtn.textContent = '변경 중...';
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/admin/reset-password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ targetUsername, newPassword: newPin })
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            adminResetModal.classList.add('hidden');
+            showToast(`🔑 ${targetUsername} 비밀번호 변경 완료!`);
+          } else {
+            adminResetMsg.textContent = data.error || '비밀번호 변경에 실패했습니다.';
+            adminResetMsg.className = 'text-xs font-semibold text-rose-400';
+            adminResetMsg.classList.remove('hidden');
+          }
+        } catch (err) {
+          adminResetMsg.textContent = '서버 연결에 실패했습니다.';
+          adminResetMsg.className = 'text-xs font-semibold text-rose-400';
+          adminResetMsg.classList.remove('hidden');
+        } finally {
+          adminResetSubmitBtn.disabled = false;
+          adminResetSubmitBtn.textContent = '변경';
+        }
       });
 
       updateHeaderAuthBtn();
