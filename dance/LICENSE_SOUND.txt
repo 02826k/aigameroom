@@ -1,0 +1,5 @@
+[수업 중 댄스왕 사운드 출처]
+- bgm.mp3 : "Funky House" by Of Far Different Nature — CC0 (퍼블릭 도메인)
+  https://opengameart.org/content/funky-house
+- bell / fever / watch / whoosh / sit / chalk_hit / chalk_write : 직접 합성한 효과음 (저작권 없음)
+- m_*.mp3 / f_*.mp3 : 선생님 목소리 — Higgsfield 음성 생성 (본인 계정으로 생성)
