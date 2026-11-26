@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>공룡 디펜스</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #020617;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #gameCanvas {
+      touch-action: none;
+      display: block;
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body class="text-slate-100 flex flex-col items-center justify-between h-[100dvh]">
+
+  <!-- 1. 표준 상단 헤더 (aigameroom 구조 계승) -->
+  <header class="w-full max-w-[460px] bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 shrink-0">
+    <div class="flex items-center gap-1.5 min-w-0">
+      <span class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-sm shrink-0">🦖</span>
+      <h1 class="text-sm font-black tracking-tight truncate">공룡 디펜스</h1>
+      <span id="biomeBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">트라이아스기</span>
+    </div>
+    <div class="flex items-center gap-1 shrink-0">
+      <button id="bgmBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-600/90 text-white active:scale-95">🎵 ON</button>
+      <button id="sfxBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-600/90 text-white active:scale-95">🔊 ON</button>
+      <button id="exitBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 active:scale-95">나가기</button>
+    </div>
+  </header>
+
+  <!-- 2. 상단 인게임 HUD (스크린샷 구조: 배속 | 목숨 | 화석(골드) | 호박(특수재화) | 일시정지) -->
+  <section class="w-full max-w-[460px] px-2 pt-1.5 pb-1 flex flex-col gap-1 shrink-0">
+    <div class="flex items-center gap-1.5">
+      <button id="speedBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-indigo-950 border border-indigo-400/60 text-xs font-black text-indigo-200 active:scale-95 shrink-0">x1</button>
+
+      <div class="flex-1 grid grid-cols-3 gap-1.5">
+        <div class="bg-slate-900 border border-rose-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
+          <span class="text-[10px] text-rose-300 font-bold">❤️ 목숨</span>
+          <span id="hudLife" class="text-xs font-black tabular-nums">20</span>
+        </div>
+        <div class="bg-slate-900 border border-amber-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
+          <span class="text-[10px] text-amber-300 font-bold">🦴 화석</span>
+          <span id="hudGold" class="text-xs font-black tabular-nums text-amber-200">300</span>
+        </div>
+        <div class="bg-slate-900 border border-purple-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
+          <span class="text-[10px] text-purple-300 font-bold">💎 호박</span>
+          <span id="hudGem" class="text-xs font-black tabular-nums text-purple-200">5</span>
+        </div>
+      </div>
+
+      <button id="pauseBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black text-slate-200 active:scale-95 shrink-0">⏸</button>
+    </div>
+
+    <!-- 웨이브 상태 바 -->
+    <div class="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-bold">
+      <div class="flex items-center gap-1.5">
+        <span class="text-sky-300">🌊 웨이브 <strong id="hudWave" class="text-white">1</strong></span>
+        <span class="text-slate-500">|</span>
+        <span class="text-slate-300">남은 적 <strong id="hudEnemies" class="text-rose-300">0</strong></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="hudTimer" class="tabular-nums text-amber-300">0:15</span>
+        <button id="skipWaveBtn" type="button" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-600 text-[10px] text-slate-200 active:scale-95">건너뛰기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 2D 캔버스 무대 -->
+  <main id="canvasContainer" class="relative w-full max-w-[460px] flex-1 min-h-0 px-2 flex items-center justify-center">
+    <canvas id="gameCanvas" class="rounded-2xl border-2 border-slate-800 shadow-2xl bg-slate-950"></canvas>
+
+    <!-- 게임오버 오버레이 -->
+    <div id="gameOverOverlay" class="hidden absolute inset-2 rounded-2xl bg-slate-950/85 backdrop-blur-sm flex-col items-center justify-center gap-3 z-20">
+      <div class="text-2xl font-black text-rose-400">🦕 방어 실패!</div>
+      <div id="gameOverStat" class="text-xs text-slate-300 font-bold">도달 웨이브: 1</div>
+      <button id="restartBtn" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 font-black text-sm shadow-lg active:scale-95">다시 도전</button>
+    </div>
+  </main>
+
+  <!-- 4. 하단 안내 & 3대 액션 버튼 (스크린샷 구조: 특수뽑기 | 공룡 소환 | 공룡 강화) -->
+  <footer class="w-full max-w-[460px] px-2 pt-1 pb-2 flex flex-col gap-1.5 shrink-0">
+    <!-- 선택된 유닛 정보 / 조작 팁 -->
+    <div id="infoBanner" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
+      <span id="infoText" class="text-slate-300 truncate">같은 공룡·같은 성급 2마리를 겹치면 합성! 끌어서 자리 이동</span>
+      <button id="sellBtn" type="button" class="hidden px-2 py-0.5 rounded-lg bg-rose-600/90 text-white text-[10px] font-black shrink-0 active:scale-95">판매 (+0)</button>
+    </div>
+
+    <!-- 3대 핵심 버튼 -->
+    <div class="grid grid-cols-4 gap-1.5">
+      <button id="gambleBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-purple-400/60 flex flex-col items-center justify-center active:scale-95 shadow-lg">
+        <span class="text-xs font-black text-purple-100">🥚 고급부화</span>
+        <span class="text-[10px] font-bold text-purple-300">💎 <span id="gambleCostText">2</span></span>
+      </button>
+
+      <button id="summonBtn" type="button" class="col-span-2 py-2.5 px-2 rounded-xl bg-gradient-to-b from-rose-600 to-red-800 border-2 border-amber-300/70 flex flex-col items-center justify-center active:scale-95 shadow-lg">
+        <span class="text-sm font-black text-white">🦖 공룡 소환</span>
+        <span class="text-[11px] font-extrabold text-amber-200">🦴 화석 <span id="summonCostText">40</span></span>
+      </button>
+
+      <button id="upgradeBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-slate-700 to-slate-900 border border-amber-400/50 flex flex-col items-center justify-center active:scale-95 shadow-lg">
+        <span class="text-xs font-black text-amber-200">⚔️ 강화</span>
+        <span class="text-[10px] font-bold text-slate-300">Lv.<span id="upgLvText">1</span> (🦴<span id="upgCostText">80</span>)</span>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // =========================================================================
+    // 1. 공룡 DB & 스프라이트 영역 (기존 index.html의 데이터를 그대로 붙여넣으세요)
+    // =========================================================================
+    const DINO_SPRITES = {
+      // 기존 index.html의 DINO_SPRITES 객체 내용을 그대로 붙여넣기:
+      // "dino_1": "data:image/webp;base64,...",
+    };
+
+    // 기존 index.html의 90종 공룡 배열을 그대로 넣으면 자동 분류됩니다.
+    // 필수 필드: id(1~90), name, diet('육식'|'초식'|'잡식'), era('트라이아스기'|'쥐라기'|'백악기')
+    const DINO_DB = [
+      // --- 샘플 DB (기존 index.html의 90종 DB로 교체 가능) ---
+      // 1성(일반)
+      { id: 1,  name: '콤프소그나투스', diet: '육식', era: '쥐라기',       tier: 1, color: '#4ade80' },
+      { id: 2,  name: '에오랍토르',     diet: '잡식', era: '트라이아스기', tier: 1, color: '#38bdf8' },
+      { id: 3,  name: '프로토케라톱스', diet: '초식', era: '백악기',       tier: 1, color: '#fbbf24' },
+      { id: 4,  name: '갈리미무스',     diet: '잡식', era: '백악기',       tier: 1, color: '#a78bfa' },
+      // 2성(희귀)
+      { id: 11, name: '벨로시랩터',     diet: '육식', era: '백악기',       tier: 2, color: '#f97316' },
+      { id: 12, name: '스테고사우루스', diet: '초식', era: '쥐라기',       tier: 2, color: '#22c55e' },
+      { id: 13, name: '오비랍토르',     diet: '잡식', era: '백악기',       tier: 2, color: '#06b6d4' },
+      // 3성(영웅)
+      { id: 25, name: '알로사우루스',   diet: '육식', era: '쥐라기',       tier: 3, color: '#ef4444' },
+      { id: 26, name: '트리케라톱스',   diet: '초식', era: '백악기',       tier: 3, color: '#eab308' },
+      { id: 27, name: '테리지노사우루스', diet: '잡식', era: '백악기',     tier: 3, color: '#c084fc' },
+      // 4성(전설)
+      { id: 50, name: '티라노사우루스', diet: '육식', era: '백악기',       tier: 4, color: '#dc2626' },
+      { id: 51, name: '브라키오사우루스', diet: '초식', era: '쥐라기',     tier: 4, color: '#10b981' },
+      { id: 52, name: '스피노사우루스', diet: '육식', era: '백악기',       tier: 4, color: '#0ea5e9' },
+      // 5성(신화)
+      { id: 88, name: '기가노토사우루스', diet: '육식', era: '백악기',     tier: 5, color: '#f43f5e' },
+      { id: 89, name: '아르젠티노사우루스', diet: '초식', era: '백악기',   tier: 5, color: '#facc15' },
+      { id: 90, name: '모사사우루스',   diet: '잡식', era: '백악기',       tier: 5, color: '#e879f9' },
+    ];
+
+    // DB에 tier가 없어도 id(1~90) 순서에 따라 1~5성 자동 배정
+    const TIER_POOLS = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    DINO_DB.forEach((d, idx) => {
+      if (!d.tier) {
+        const ratio = idx / Math.max(1, DINO_DB.length - 1);
+        d.tier = ratio < 0.35 ? 1 : ratio < 0.62 ? 2 : ratio < 0.82 ? 3 : ratio < 0.94 ? 4 : 5;
+      }
+      if (!d.color) {
+        d.color = d.diet === '육식' ? '#ef4444' : d.diet === '초식' ? '#22c55e' : '#38bdf8';
+      }
+      TIER_POOLS[d.tier].push(d);
+    });
+
+    // 식성별 전투 특성 (육식: 단일 고화력+치명타 / 초식: 범위 스플래시+둔화 / 잡식: 초고속 연사)
+    const DIET_TRAITS = {
+      '육식': { dmgMul: 1.35, rateMul: 0.90, range: 112, splash: 0,  slow: 0,    crit: 0.22, projColor: '#fb7185' },
+      '초식': { dmgMul: 0.95, rateMul: 0.82, range: 105, splash: 42, slow: 0.35, crit: 0.05, projColor: '#4ade80' },
+      '잡식': { dmgMul: 0.80, rateMul: 1.45, range: 122, splash: 0,  slow: 0,    crit: 0.12, projColor: '#38bdf8' },
+    };
+
+    const TIER_STYLE = {
+      1: { border: '#94a3b8', glow: 'rgba(148,163,184,0.35)', label: '★',     baseDmg: 14, baseRate: 1.0 },
+      2: { border: '#4ade80', glow: 'rgba(74,222,128,0.45)',  label: '★★',    baseDmg: 32, baseRate: 1.1 },
+      3: { border: '#38bdf8', glow: 'rgba(56,189,248,0.55)',  label: '★★★',   baseDmg: 72, baseRate: 1.2 },
+      4: { border: '#c084fc', glow: 'rgba(192,132,252,0.65)', label: '★★★★',  baseDmg: 165, baseRate: 1.32 },
+      5: { border: '#facc15', glow: 'rgba(250,204,21,0.85)',  label: '★★★★★', baseDmg: 380, baseRate: 1.48 },
+    };
+
+    // 스프라이트 이미지 사전 디코딩 캐시
+    const spriteCache = new Map();
+    function getDinoImage(id) {
+      const key = `dino_${id}`;
+      if (spriteCache.has(key)) return spriteCache.get(key);
+      const src = DINO_SPRITES[key];
+      if (!src) return null;
+      const img = new Image();
+      img.src = src;
+      spriteCache.set(key, img);
+      return img;
+    }
+
+    // =========================================================================
+    // 2. 스테이지 & S자(지그재그) 맵 레이아웃 (논리 해상도 420 x 640)
+    // =========================================================================
+    const LOGICAL_W = 420;
+    const LOGICAL_H = 640;
+
+    // 웨이브 구간별 바이옴 테마 (기존 index.html 시대 컨셉 반영)
+    const BIOMES = [
+      { name: '트라이아스기', bg: '#1e3a2f', path: '#7c5534', pathEdge: '#4a311c', slot: '#2b3445' },
+      { name: '쥐라기 정글',  bg: '#163529', path: '#6b4c32', pathEdge: '#3e2918', slot: '#273549' },
+      { name: '백악기 화산',  bg: '#2c1f24', path: '#5c3c36', pathEdge: '#361f1b', slot: '#33293a' },
+    ];
+
+    // S자 경로 웨이포인트 (상단 우측 스폰 → 지그재그 5단 하강 → 하단 좌측 성문)
+    const WAYPOINTS = [
+      { x: 374, y: 18  },
+      { x: 374, y: 86  },
+      { x: 46,  y: 86  },
+      { x: 46,  y: 204 },
+      { x: 374, y: 204 },
+      { x: 374, y: 322 },
+      { x: 46,  y: 322 },
+      { x: 46,  y: 440 },
+      { x: 374, y: 440 },
+      { x: 374, y: 558 },
+      { x: 46,  y: 558 },
+      { x: 46,  y: 612 },
+    ];
+
+    // 경로 구간별 길이 사전 계산 (이동 연산 최적화)
+    const SEGMENTS = [];
+    let TOTAL_PATH_LEN = 0;
+    for (let i = 0; i < WAYPOINTS.length - 1; i++) {
+      const a = WAYPOINTS[i], b = WAYPOINTS[i + 1];
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      SEGMENTS.push({ ax: a.x, ay: a.y, dx: (b.x - a.x) / len, dy: (b.y - a.y) / len, len, startDist: TOTAL_PATH_LEN });
+      TOTAL_PATH_LEN += len;
+    }
+
+    function getPosAtDist(dist) {
+      if (dist <= 0) return { x: WAYPOINTS[0].x, y: WAYPOINTS[0].y };
+      for (let i = 0; i < SEGMENTS.length; i++) {
+        const s = SEGMENTS[i];
+        if (dist <= s.startDist + s.len) {
+          const local = dist - s.startDist;
+          return { x: s.ax + s.dx * local, y: s.ay + s.dy * local };
+        }
+      }
+      const last = WAYPOINTS[WAYPOINTS.length - 1];
+      return { x: last.x, y: last.y };
+    }
+
+    // 타워 배치 슬롯 24개 (S자 길 사이사이에 깔끔하게 정렬)
+    const SLOT_SIZE = 44;
+    const SLOTS = [];
+    const slotRowsY = [34, 145, 263, 381, 499];
+    const slotColsX = [102, 156, 210, 264, 318];
+    let slotIdCounter = 0;
+    slotRowsY.forEach((y, rIdx) => {
+      slotColsX.forEach((x, cIdx) => {
+        if (rIdx === 0 && cIdx === 4) return; // 스폰 입구 옆 여백 확보
+        SLOTS.push({ id: slotIdCounter++, x, y, unit: null });
+      });
+    });
+
+    // =========================================================================
+    // 3. 게임 상태 & 오프스크린 배경 캐시
+    // =========================================================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const bgCanvas = document.createElement('canvas');
+    const bgCtx = bgCanvas.getContext('2d', { alpha: false });
+
+    const state = {
+      life: 20,
+      gold: 300,
+      gem: 5,
+      wave: 1,
+      waveTimer: 12,
+      spawnRemain: 0,
+      spawnAcc: 0,
+      summonCount: 0,
+      upgradeLv: 1,
+      speed: 1,
+      paused: false,
+      gameOver: false,
+      biomeIdx: 0,
+      selectedSlotId: -1,
+      enemies: [],
+      projectiles: [],
+      effects: [],
+      dmgTexts: [],
+    };
+
+    // 드래그 상태
+    const drag = { active: false, fromSlot: null, x: 0, y: 0, hoverSlot: null };
+
+    // DOM 캐시 & Dirty 체크 (매 프레임 DOM 쓰기 방지)
+    const ui = {
+      life: document.getElementById('hudLife'),
+      gold: document.getElementById('hudGold'),
+      gem: document.getElementById('hudGem'),
+      wave: document.getElementById('hudWave'),
+      enemies: document.getElementById('hudEnemies'),
+      timer: document.getElementById('hudTimer'),
+      biome: document.getElementById('biomeBadge'),
+      summonCost: document.getElementById('summonCostText'),
+      gambleCost: document.getElementById('gambleCostText'),
+      upgLv: document.getElementById('upgLvText'),
+      upgCost: document.getElementById('upgCostText'),
+      infoText: document.getElementById('infoText'),
+      sellBtn: document.getElementById('sellBtn'),
+      gameOver: document.getElementById('gameOverOverlay'),
+      gameOverStat: document.getElementById('gameOverStat'),
+    };
+    const prevUI = {};
+    function setText(key, el, val) {
+      if (prevUI[key] !== val) {
+        prevUI[key] = val;
+        el.textContent = val;
+      }
+    }
+
+    // 간단 WebAudio 효과음 (외부 파일 불필요)
+    let audioCtx = null;
+    let sfxEnabled = true;
+    function playBeep(freq, dur = 0.06, type = 'triangle', vol = 0.06) {
+      if (!sfxEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 4. 정적 맵 오프스크린 렌더링 (1회 캐싱)
+    // =========================================================================
+    function renderStaticBackground() {
+      bgCanvas.width = LOGICAL_W;
+      bgCanvas.height = LOGICAL_H;
+      const b = BIOMES[state.biomeIdx % BIOMES.length];
+
+      // 1) 바탕 잔디/지형
+      bgCtx.fillStyle = b.bg;
+      bgCtx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+      // 미세한 지형 점 무늬
+      bgCtx.fillStyle = 'rgba(255,255,255,0.035)';
+      for (let i = 0; i < 90; i++) {
+        const px = (i * 73) % LOGICAL_W;
+        const py = (i * 131) % LOGICAL_H;
+        bgCtx.fillRect(px, py, 6, 4);
+      }
+
+      // 2) S자 경로 테두리 & 도로
+      bgCtx.lineCap = 'round';
+      bgCtx.lineJoin = 'round';
+      bgCtx.beginPath();
+      bgCtx.moveTo(WAYPOINTS[0].x, WAYPOINTS[0].y);
+      for (let i = 1; i < WAYPOINTS.length; i++) bgCtx.lineTo(WAYPOINTS[i].x, WAYPOINTS[i].y);
+      bgCtx.strokeStyle = b.pathEdge;
+      bgCtx.lineWidth = 42;
+      bgCtx.stroke();
+
+      bgCtx.strokeStyle = b.path;
+      bgCtx.lineWidth = 34;
+      bgCtx.stroke();
+
+      // 도로 중앙 점선 방향 가이드
+      bgCtx.save();
+      bgCtx.setLineDash([6, 10]);
+      bgCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+      bgCtx.lineWidth = 2;
+      bgCtx.stroke();
+      bgCtx.restore();
+
+      // 3) 스폰 포탈(상단 우측) & 방어 성문(하단 좌측)
+      const sp = WAYPOINTS[0];
+      bgCtx.fillStyle = '#7f1d1d';
+      bgCtx.beginPath();
+      bgCtx.arc(sp.x, sp.y + 8, 16, 0, Math.PI * 2);
+      bgCtx.fill();
+      bgCtx.fillStyle = '#fca5a5';
+      bgCtx.font = 'bold 11px sans-serif';
+      bgCtx.textAlign = 'center';
+      bgCtx.fillText('IN', sp.x, sp.y + 12);
+
+      const ex = WAYPOINTS[WAYPOINTS.length - 1];
+      bgCtx.fillStyle = '#1e293b';
+      bgCtx.fillRect(ex.x - 20, ex.y - 14, 40, 26);
+      bgCtx.strokeStyle = '#f59e0b';
+      bgCtx.lineWidth = 2;
+      bgCtx.strokeRect(ex.x - 20, ex.y - 14, 40, 26);
+      bgCtx.fillStyle = '#fde68a';
+      bgCtx.fillText('기지', ex.x, ex.y + 4);
+
+      // 4) 타워 슬롯 받침대 24개
+      const half = SLOT_SIZE / 2;
+      for (let i = 0; i < SLOTS.length; i++) {
+        const s = SLOTS[i];
+        bgCtx.fillStyle = 'rgba(0,0,0,0.35)';
+        bgCtx.beginPath();
+        bgCtx.roundRect(s.x - half, s.y - half + 3, SLOT_SIZE, SLOT_SIZE, 9);
+        bgCtx.fill();
+
+        bgCtx.fillStyle = b.slot;
+        bgCtx.beginPath();
+        bgCtx.roundRect(s.x - half, s.y - half, SLOT_SIZE, SLOT_SIZE, 9);
+        bgCtx.fill();
+
+        bgCtx.strokeStyle = 'rgba(148,163,184,0.28)';
+        bgCtx.lineWidth = 1.5;
+        bgCtx.stroke();
+      }
+    }
+
+    // 캔버스 반응형 리사이즈
+    let scale = 1;
+    function resizeCanvas() {
+      const box = document.getElementById('canvasContainer');
+      const availW = box.clientWidth - 16;
+      const availH = box.clientHeight - 4;
+      scale = Math.min(availW / LOGICAL_W, availH / LOGICAL_H);
+      const cssW = Math.floor(LOGICAL_W * scale);
+      const cssH = Math.floor(LOGICAL_H * scale);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+      canvas.width = Math.floor(LOGICAL_W * dpr);
+      canvas.height = Math.floor(LOGICAL_H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // =========================================================================
+    // 5. 소환 / 합성 / 강화 / 판매 로직
+    // =========================================================================
+    function getSummonCost() { return 40 + state.summonCount * 8; }
+    function getUpgradeCost() { return 80 + (state.upgradeLv - 1) * 60; }
+
+    function createUnit(dinoData, tierOverride) {
+      const tier = tierOverride || dinoData.tier;
+      const st = TIER_STYLE[tier];
+      const tr = DIET_TRAITS[dinoData.diet] || DIET_TRAITS['육식'];
+      return {
+        dinoId: dinoData.id,
+        name: dinoData.name,
+        diet: dinoData.diet,
+        era: dinoData.era,
+        color: dinoData.color,
+        tier,
+        dmg: st.baseDmg * tr.dmgMul,
+        rate: st.baseRate * tr.rateMul,
+        range: tr.range + (tier - 1) * 8,
+        splash: tr.splash,
+        slow: tr.slow,
+        crit: tr.crit,
+        projColor: tr.projColor,
+        cd: 0,
+        recoil: 0,
+      };
+    }
+
+    function pickRandomDino(tier) {
+      const pool = TIER_POOLS[tier] && TIER_POOLS[tier].length ? TIER_POOLS[tier] : DINO_DB;
+      return pool[(Math.random() * pool.length) | 0];
+    }
+
+    function summonDino(forcedTier = 1) {
+      const empty = SLOTS.filter((s) => !s.unit);
+      if (!empty.length) {
+        showInfo('빈 슬롯이 없습니다! 같은 공룡을 겹쳐 합성하거나 판매하세요.');
+        return false;
+      }
+      const slot = empty[(Math.random() * empty.length) | 0];
+      const dino = pickRandomDino(forcedTier);
+      slot.unit = createUnit(dino, forcedTier);
+      spawnEffect(slot.x, slot.y, TIER_STYLE[forcedTier].border, 24);
+      playBeep(420 + forcedTier * 110, 0.07);
+      selectSlot(slot.id);
+      return true;
+    }
+
+    function selectSlot(slotId) {
+      state.selectedSlotId = slotId;
+      const slot = SLOTS.find((s) => s.id === slotId);
+      if (slot && slot.unit) {
+        const u = slot.unit;
+        const atk = Math.round(u.dmg * (1 + (state.upgradeLv - 1) * 0.25));
+        const sellVal = Math.round(20 * Math.pow(2.1, u.tier - 1));
+        ui.infoText.textContent = `[${TIER_STYLE[u.tier].label}] ${u.name} (${u.diet}) · 공격 ${atk} · 사거리 ${u.range}`;
+        ui.sellBtn.textContent = `판매 (+${sellVal})`;
+        ui.sellBtn.classList.remove('hidden');
+      } else {
+        ui.infoText.textContent = '같은 공룡·같은 성급 2마리를 겹치면 합성! 끌어서 자리 이동';
+        ui.sellBtn.classList.add('hidden');
+      }
+    }
+
+    function showInfo(msg) {
+      ui.infoText.textContent = msg;
+      ui.sellBtn.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 6. 웨이브 & 적 스폰 / 전투 업데이트
+    // =========================================================================
+    function startWave(waveNum) {
+      state.wave = waveNum;
+      state.waveTimer = 22;
+      const isBoss = waveNum % 5 === 0;
+      state.spawnRemain = isBoss ? 1 : 10 + waveNum * 2;
+      state.spawnAcc = 0;
+
+      const newBiome = Math.floor((waveNum - 1) / 5) % BIOMES.length;
+      if (newBiome !== state.biomeIdx) {
+        state.biomeIdx = newBiome;
+        renderStaticBackground();
+      }
+      if (isBoss) showInfo(`⚠️ 웨이브 ${waveNum} 보스 출현! 화력을 집중하세요!`);
+    }
+
+    function spawnEnemy() {
+      const isBoss = state.wave % 5 === 0;
+      const hpBase = 36 * Math.pow(1.26, state.wave - 1);
+      state.enemies.push({
+        dist: 0,
+        x: WAYPOINTS[0].x,
+        y: WAYPOINTS[0].y,
+        maxHp: isBoss ? hpBase * 12 : hpBase,
+        hp: isBoss ? hpBase * 12 : hpBase,
+        speed: isBoss ? 34 : 52 + Math.min(35, state.wave * 1.4),
+        radius: isBoss ? 18 : 11,
+        reward: isBoss ? 120 + state.wave * 10 : 9 + Math.floor(state.wave * 1.2),
+        gemReward: isBoss ? 3 : 0,
+        slowTimer: 0,
+        slowMul: 1,
+        boss: isBoss,
+        hitFlash: 0,
+      });
+    }
+
+    function spawnEffect(x, y, color, maxR = 20) {
+      if (state.effects.length > 40) return;
+      state.effects.push({ x, y, color, r: 4, maxR, life: 0.25, maxLife: 0.25 });
+    }
+
+    function spawnDmgText(x, y, text, color = '#fff') {
+      if (state.dmgTexts.length > 35) return;
+      state.dmgTexts.push({ x, y, text, color, life: 0.55 });
+    }
+
+    function update(dt) {
+      if (state.paused || state.gameOver) return;
+      const step = dt * state.speed;
+
+      // 1) 웨이브 타이머 & 스폰
+      if (state.spawnRemain > 0) {
+        state.spawnAcc -= step;
+        if (state.spawnAcc <= 0) {
+          spawnEnemy();
+          state.spawnRemain--;
+          state.spawnAcc = state.wave % 5 === 0 ? 1.0 : Math.max(0.28, 0.72 - state.wave * 0.015);
+        }
+      } else {
+        state.waveTimer -= step;
+        if (state.waveTimer <= 0 || state.enemies.length === 0) {
+          startWave(state.wave + 1);
+        }
+      }
+
+      // 2) 적 이동 (Swap-and-Pop 제거)
+      const enemies = state.enemies;
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        if (e.slowTimer > 0) {
+          e.slowTimer -= step;
+          if (e.slowTimer <= 0) e.slowMul = 1;
+        }
+        if (e.hitFlash > 0) e.hitFlash -= step;
+
+        e.dist += e.speed * e.slowMul * step;
+        if (e.dist >= TOTAL_PATH_LEN) {
+          state.life = Math.max(0, state.life - (e.boss ? 5 : 1));
+          enemies[i] = enemies[enemies.length - 1];
+          enemies.pop();
+          playBeep(140, 0.12, 'sawtooth', 0.08);
+          if (state.life <= 0) {
+            state.gameOver = true;
+            ui.gameOverStat.textContent = `도달 웨이브: ${state.wave}`;
+            ui.gameOver.classList.remove('hidden');
+            ui.gameOver.classList.add('flex');
+          }
+          continue;
+        }
+        const p = getPosAtDist(e.dist);
+        e.x = p.x;
+        e.y = p.y;
+      }
+
+      // 3) 공룡 타워 타게팅 & 공격 (가장 선두의 적 우선)
+      const upgMul = 1 + (state.upgradeLv - 1) * 0.25;
+      for (let i = 0; i < SLOTS.length; i++) {
+        const slot = SLOTS[i];
+        const u = slot.unit;
+        if (!u) continue;
+        if (u.recoil > 0) u.recoil = Math.max(0, u.recoil - step * 6);
+        u.cd -= step;
+        if (u.cd > 0 || enemies.length === 0) continue;
+
+        let target = null;
+        let maxDist = -1;
+        const rSq = u.range * u.range;
+        for (let j = 0; j < enemies.length; j++) {
+          const e = enemies[j];
+          const dx = e.x - slot.x;
+          const dy = e.y - slot.y;
+          if (dx * dx + dy * dy <= rSq && e.dist > maxDist) {
+            maxDist = e.dist;
+            target = e;
+          }
+        }
+        if (target) {
+          u.cd = 1 / u.rate;
+          u.recoil = 1;
+          const isCrit = Math.random() < u.crit;
+          state.projectiles.push({
+            x: slot.x,
+            y: slot.y - 6,
+            target,
+            dmg: u.dmg * upgMul * (isCrit ? 1.8 : 1),
+            isCrit,
+            splash: u.splash,
+            slow: u.slow,
+            color: u.projColor,
+            speed: 340,
+          });
+        }
+      }
+
+      // 4) 투사체 이동 & 적중 처리
+      const projs = state.projectiles;
+      for (let i = projs.length - 1; i >= 0; i--) {
+        const pr = projs[i];
+        if (!pr.target || pr.target.hp <= 0) {
+          projs[i] = projs[projs.length - 1];
+          projs.pop();
+          continue;
+        }
+        const dx = pr.target.x - pr.x;
+        const dy = pr.target.y - pr.y;
+        const d = Math.hypot(dx, dy);
+        const move = pr.speed * step;
+
+        if (d <= move + pr.target.radius) {
+          applyDamage(pr);
+          projs[i] = projs[projs.length - 1];
+          projs.pop();
+        } else {
+          pr.x += (dx / d) * move;
+          pr.y += (dy / d) * move;
+        }
+      }
+
+      // 5) 이펙트 & 데미지 텍스트 갱신
+      for (let i = state.effects.length - 1; i >= 0; i--) {
+        const ef = state.effects[i];
+        ef.life -= step;
+        if (ef.life <= 0) {
+          state.effects[i] = state.effects[state.effects.length - 1];
+          state.effects.pop();
+        } else {
+          ef.r = ef.maxR * (1 - ef.life / ef.maxLife);
+        }
+      }
+      for (let i = state.dmgTexts.length - 1; i >= 0; i--) {
+        const t = state.dmgTexts[i];
+        t.life -= step;
+        t.y -= 24 * step;
+        if (t.life <= 0) {
+          state.dmgTexts[i] = state.dmgTexts[state.dmgTexts.length - 1];
+          state.dmgTexts.pop();
+        }
+      }
+    }
+
+    function applyDamage(pr) {
+      const hitEnemy = (e, dmg) => {
+        e.hp -= dmg;
+        e.hitFlash = 0.08;
+        if (pr.slow > 0) {
+          e.slowMul = Math.min(e.slowMul, 1 - pr.slow);
+          e.slowTimer = 1.6;
+        }
+        spawnDmgText(e.x, e.y - 10, `${Math.round(dmg)}`, pr.isCrit ? '#fde047' : '#ffffff');
+      };
+
+      if (pr.splash > 0) {
+        const spSq = pr.splash * pr.splash;
+        spawnEffect(pr.target.x, pr.target.y, pr.color, pr.splash);
+        for (let j = state.enemies.length - 1; j >= 0; j--) {
+          const e = state.enemies[j];
+          const dx = e.x - pr.target.x;
+          const dy = e.y - pr.target.y;
+          if (dx * dx + dy * dy <= spSq) hitEnemy(e, pr.dmg);
+        }
+      } else {
+        hitEnemy(pr.target, pr.dmg);
+      }
+
+      // 사망 처리
+      for (let j = state.enemies.length - 1; j >= 0; j--) {
+        const e = state.enemies[j];
+        if (e.hp <= 0) {
+          state.gold += e.reward;
+          if (e.gemReward) state.gem += e.gemReward;
+          spawnEffect(e.x, e.y, '#fbbf24', e.boss ? 32 : 16);
+          state.enemies[j] = state.enemies[state.enemies.length - 1];
+          state.enemies.pop();
+        }
+      }
+    }
+
+    // =========================================================================
+    // 7. 2D 캔버스 렌더링
+    // =========================================================================
+    function drawDinoUnit(u, x, y, alpha = 1) {
+      const st = TIER_STYLE[u.tier];
+      const half = SLOT_SIZE / 2 - 2;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      const bounceY = u.recoil ? -u.recoil * 4 : 0;
+
+      // 성급 오라 & 테두리
+      ctx.fillStyle = st.glow;
+      ctx.beginPath();
+      ctx.roundRect(x - half, y - half + bounceY, half * 2, half * 2, 8);
+      ctx.fill();
+      ctx.strokeStyle = st.border;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 스프라이트 이미지 출력 (없으면 폴백 아이콘)
+      const img = getDinoImage(u.dinoId);
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, x - 18, y - 19 + bounceY, 36, 36);
+      } else {
+        ctx.fillStyle = u.color;
+        ctx.beginPath();
+        ctx.arc(x, y - 2 + bounceY, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(u.name.slice(0, 2), x, y + 2 + bounceY);
+      }
+
+      // 하단 성급 별표
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(x - 18, y + 10 + bounceY, 36, 10);
+      ctx.fillStyle = st.border;
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(st.label, x, y + 18 + bounceY);
+      ctx.restore();
+    }
+
+    function render() {
+      // 1) 캐시된 정적 맵 1회 복사
+      ctx.drawImage(bgCanvas, 0, 0);
+
+      // 2) 선택된 슬롯 사거리 표시
+      if (state.selectedSlotId !== -1) {
+        const sel = SLOTS[state.selectedSlotId];
+        if (sel && sel.unit) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(56,189,248,0.10)';
+          ctx.strokeStyle = 'rgba(56,189,248,0.55)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(sel.x, sel.y, sel.unit.range, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 3) 드래그 중 합성 가능 슬롯 하이라이트
+      if (drag.active && drag.fromSlot && drag.fromSlot.unit) {
+        const src = drag.fromSlot.unit;
+        for (let i = 0; i < SLOTS.length; i++) {
+          const s = SLOTS[i];
+          if (s === drag.fromSlot) continue;
+          const canMerge = s.unit && s.unit.dinoId === src.dinoId && s.unit.tier === src.tier && src.tier < 5;
+          if (canMerge) {
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(s.x - 22, s.y - 22, 44, 44);
+          }
+        }
+      }
+
+      // 4) 배치된 공룡 타워 그리기
+      for (let i = 0; i < SLOTS.length; i++) {
+        const s = SLOTS[i];
+        if (!s.unit) continue;
+        const isDraggingThis = drag.active && drag.fromSlot === s;
+        drawDinoUnit(s.unit, s.x, s.y, isDraggingThis ? 0.3 : 1);
+      }
+
+      // 5) 적 몬스터 그리기
+      for (let i = 0; i < state.enemies.length; i++) {
+        const e = state.enemies[i];
+        ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : (e.boss ? '#dc2626' : (e.slowTimer > 0 ? '#38bdf8' : '#1e1b4b'));
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = e.boss ? '#facc15' : '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 체력바
+        const bw = e.radius * 2.2;
+        const ratio = Math.max(0, e.hp / e.maxHp);
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(e.x - bw / 2, e.y - e.radius - 7, bw, 4);
+        ctx.fillStyle = ratio > 0.4 ? '#4ade80' : '#f43f5e';
+        ctx.fillRect(e.x - bw / 2, e.y - e.radius - 7, bw * ratio, 4);
+      }
+
+      // 6) 투사체 & 이펙트
+      for (let i = 0; i < state.projectiles.length; i++) {
+        const p = state.projectiles[i];
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.isCrit ? 5 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let i = 0; i < state.effects.length; i++) {
+        const ef = state.effects[i];
+        ctx.save();
+        ctx.globalAlpha = ef.life / ef.maxLife;
+        ctx.strokeStyle = ef.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(ef.x, ef.y, ef.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 7) 데미지 숫자
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      for (let i = 0; i < state.dmgTexts.length; i++) {
+        const t = state.dmgTexts[i];
+        ctx.fillStyle = '#000';
+        ctx.fillText(t.text, t.x + 1, t.y + 1);
+        ctx.fillStyle = t.color;
+        ctx.fillText(t.text, t.x, t.y);
+      }
+
+      // 8) 드래그 중인 공룡 최상단 출력
+      if (drag.active && drag.fromSlot && drag.fromSlot.unit) {
+        drawDinoUnit(drag.fromSlot.unit, drag.x, drag.y, 0.92);
+      }
+
+      // 9) HUD 갱신 (변경 시에만 DOM 반영)
+      setText('life', ui.life, state.life);
+      setText('gold', ui.gold, state.gold);
+      setText('gem', ui.gem, state.gem);
+      setText('wave', ui.wave, state.wave);
+      setText('enemies', ui.enemies, state.enemies.length + state.spawnRemain);
+      setText('timer', ui.timer, `0:${String(Math.max(0, Math.ceil(state.waveTimer))).padStart(2, '0')}`);
+      setText('biome', ui.biome, BIOMES[state.biomeIdx % BIOMES.length].name);
+      setText('summonCost', ui.summonCost, getSummonCost());
+      setText('upgLv', ui.upgLv, state.upgradeLv);
+      setText('upgCost', ui.upgCost, getUpgradeCost());
+    }
+
+    // =========================================================================
+    // 8. 드래그 & 드롭(합성 / 자리 이동 / 스왑) 포인터 이벤트
+    // =========================================================================
+    function getLogicalPos(ev) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: ((ev.clientX - rect.left) / rect.width) * LOGICAL_W,
+        y: ((ev.clientY - rect.top) / rect.height) * LOGICAL_H,
+      };
+    }
+
+    function findSlotAt(x, y) {
+      const half = SLOT_SIZE / 2 + 4;
+      for (let i = 0; i < SLOTS.length; i++) {
+        const s = SLOTS[i];
+        if (Math.abs(x - s.x) <= half && Math.abs(y - s.y) <= half) return s;
+      }
+      return null;
+    }
+
+    canvas.addEventListener('pointerdown', (ev) => {
+      if (state.gameOver) return;
+      const pos = getLogicalPos(ev);
+      const slot = findSlotAt(pos.x, pos.y);
+      if (slot && slot.unit) {
+        drag.active = true;
+        drag.fromSlot = slot;
+        drag.x = pos.x;
+        drag.y = pos.y;
+        selectSlot(slot.id);
+        canvas.setPointerCapture(ev.pointerId);
+      } else {
+        selectSlot(-1);
+      }
+    });
+
+    canvas.addEventListener('pointermove', (ev) => {
+      if (!drag.active) return;
+      const pos = getLogicalPos(ev);
+      drag.x = pos.x;
+      drag.y = pos.y;
+    });
+
+    canvas.addEventListener('pointerup', (ev) => {
+      if (!drag.active) return;
+      const pos = getLogicalPos(ev);
+      const targetSlot = findSlotAt(pos.x, pos.y);
+      const fromSlot = drag.fromSlot;
+      drag.active = false;
+      drag.fromSlot = null;
+
+      if (!targetSlot || targetSlot === fromSlot) return;
+
+      const uA = fromSlot.unit;
+      const uB = targetSlot.unit;
+
+      // 같은 공룡 + 같은 성급 → 상위 성급 랜덤 합성!
+      if (uB && uA.dinoId === uB.dinoId && uA.tier === uB.tier && uA.tier < 5) {
+        const nextTier = uA.tier + 1;
+        const newDino = pickRandomDino(nextTier);
+        targetSlot.unit = createUnit(newDino, nextTier);
+        fromSlot.unit = null;
+        spawnEffect(targetSlot.x, targetSlot.y, TIER_STYLE[nextTier].border, 34);
+        playBeep(660 + nextTier * 120, 0.11, 'sine', 0.09);
+        selectSlot(targetSlot.id);
+      } else {
+        // 빈 자리 이동 또는 위치 스왑
+        targetSlot.unit = uA;
+        fromSlot.unit = uB || null;
+        playBeep(320, 0.04);
+        selectSlot(targetSlot.id);
+      }
+    });
+
+    // =========================================================================
+    // 9. 버튼 이벤트 바인딩 & 메인 루프
+    // =========================================================================
+    document.getElementById('summonBtn').addEventListener('click', () => {
+      const cost = getSummonCost();
+      if (state.gold < cost) return showInfo(`화석이 부족합니다! (필요: ${cost})`);
+      if (summonDino(1)) {
+        state.gold -= cost;
+        state.summonCount++;
+      }
+    });
+
+    document.getElementById('gambleBtn').addEventListener('click', () => {
+      if (state.gem < 2) return showInfo('호박이 부족합니다! (보스 처치 시 획득)');
+      const roll = Math.random();
+      const tier = roll < 0.12 ? 4 : roll < 0.45 ? 3 : 2;
+      if (summonDino(tier)) state.gem -= 2;
+    });
+
+    document.getElementById('upgradeBtn').addEventListener('click', () => {
+      const cost = getUpgradeCost();
+      if (state.gold < cost) return showInfo(`강화 화석이 부족합니다! (필요: ${cost})`);
+      state.gold -= cost;
+      state.upgradeLv++;
+      playBeep(780, 0.08);
+      if (state.selectedSlotId !== -1) selectSlot(state.selectedSlotId);
+    });
+
+    document.getElementById('sellBtn').addEventListener('click', () => {
+      const slot = SLOTS[state.selectedSlotId];
+      if (!slot || !slot.unit) return;
+      const sellVal = Math.round(20 * Math.pow(2.1, slot.unit.tier - 1));
+      state.gold += sellVal;
+      slot.unit = null;
+      playBeep(260, 0.05);
+      selectSlot(-1);
+    });
+
+    document.getElementById('speedBtn').addEventListener('click', (e) => {
+      state.speed = state.speed === 1 ? 2 : 1;
+      e.currentTarget.textContent = `x${state.speed}`;
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', (e) => {
+      state.paused = !state.paused;
+      e.currentTarget.textContent = state.paused ? '▶' : '⏸';
+    });
+
+    document.getElementById('skipWaveBtn').addEventListener('click', () => {
+      if (state.spawnRemain === 0) {
+        state.gold += 15;
+        startWave(state.wave + 1);
+      }
+    });
+
+    document.getElementById('sfxBtn').addEventListener('click', (e) => {
+      sfxEnabled = !sfxEnabled;
+      e.currentTarget.textContent = sfxEnabled ? '🔊 ON' : '🔇 OFF';
+    });
+
+    document.getElementById('exitBtn').addEventListener('click', () => {
+      location.href = 'https://02826k.github.io/aigameroom/';
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      SLOTS.forEach((s) => (s.unit = null));
+      Object.assign(state, {
+        life: 20, gold: 300, gem: 5, wave: 1, summonCount: 0, upgradeLv: 1,
+        paused: false, gameOver: false, biomeIdx: 0, selectedSlotId: -1,
+        enemies: [], projectiles: [], effects: [], dmgTexts: [],
+      });
+      ui.gameOver.classList.add('hidden');
+      ui.gameOver.classList.remove('flex');
+      renderStaticBackground();
+      startWave(1);
+    });
+
+    // 초기화 & 루프 시작
+    window.addEventListener('resize', resizeCanvas);
+    renderStaticBackground();
+    resizeCanvas();
+    startWave(1);
+
+    let lastTime = performance.now();
+    function loop(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      update(dt);
+      render();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
