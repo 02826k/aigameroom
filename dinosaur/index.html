@@ -34,7 +34,8 @@
       height: 100dvh !important;
     }
     #gameCanvas { touch-action: pan-y; }
-    .pixel-art { image-rendering: pixelated; }
+    .pixel-art { image-rendering: auto; }
+    img.pixel-art[src^="data:"] { image-rendering: pixelated; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
     ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.75); border-radius: 9999px; }
@@ -547,8 +548,25 @@
         bodyType: d[9],
         color: d[10],
         accent: d[11],
-        sprite: DINO_SPRITES['dino_' + (idx + 1)] || ''
+        sprite: './img/dinos/dino_' + (idx + 1) + '.webp',
+        spriteOld: DINO_SPRITES['dino_' + (idx + 1)] || ''
       }));
+
+      // 고화질 배지 폴더가 없으면(또는 일부 파일이 없으면) 기존 도트 배지로 대체
+      document.addEventListener('error', (e) => {
+        const el = e.target;
+        if (!el || el.tagName !== 'IMG') return;
+        const m = /img\/dinos\/(dino_\d+)\.webp/.exec(el.getAttribute('src') || '');
+        if (m && DINO_SPRITES[m[1]]) el.src = DINO_SPRITES[m[1]];
+      }, true);
+      (() => {
+        const probe = new Image();
+        probe.onerror = () => {
+          DINOS.forEach((d) => { d.sprite = d.spriteOld; });
+          try { renderCodexGrid(); renderFavoriteDinos(); updateHud(); } catch (_) {}
+        };
+        probe.src = DINOS[0].sprite;
+      })();
 
       const MAX_FAVORITES = 10;
       const TRAINING_CONFIG = {
@@ -849,21 +867,40 @@
 
       const skyUniforms = {
         uTop: { value: new THREE.Color('#0284c7') },
-        uBot: { value: new THREE.Color('#bae6fd') }
+        uBot: { value: new THREE.Color('#bae6fd') },
+        uTex: { value: null },
+        uHas: { value: 0 }
       };
       scene.add(new THREE.Mesh(
         new THREE.SphereGeometry(95, 24, 14),
         new THREE.ShaderMaterial({
           side: THREE.BackSide, depthWrite: false, uniforms: skyUniforms,
           vertexShader: 'varying vec3 vPos; void main(){ vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-          fragmentShader: 'uniform vec3 uTop; uniform vec3 uBot; varying vec3 vPos; void main(){ float h = clamp(normalize(vPos).y, -0.1, 1.0); vec3 c = mix(uBot, uTop, smoothstep(-0.05, 0.72, h)); gl_FragColor = vec4(c, 1.0); }'
+          fragmentShader: [
+            'uniform vec3 uTop; uniform vec3 uBot; uniform sampler2D uTex; uniform float uHas; varying vec3 vPos;',
+            'void main(){',
+            '  vec3 d = normalize(vPos); float h = clamp(d.y, -0.1, 1.0);',
+            '  vec3 c = mix(uBot, uTop, smoothstep(-0.05, 0.72, h));',
+            '  if (uHas > 0.5) {',
+            '    float v = (d.y + 0.16) / 0.78;',
+            '    if (v > 0.0 && v < 1.0) {',
+            '      float u = fract((atan(d.z, d.x) / 6.2831853 + 0.5) * 2.0);',
+            '      u = u < 0.5 ? u * 2.0 : 2.0 - u * 2.0;',
+            '      vec3 tc = texture2D(uTex, vec2(u, v)).rgb;',
+            '      float a = smoothstep(1.0, 0.8, v) * smoothstep(0.0, 0.08, v);',
+            '      c = mix(c, tc, a);',
+            '    }',
+            '  }',
+            '  gl_FragColor = vec4(c, 1.0);',
+            '}'
+          ].join('\n')
         })
       ));
 
       scene.add(new THREE.HemisphereLight(0xfff0dd, 0x1a1a2e, 0.65));
       const keyLight = new THREE.DirectionalLight(0xfff3d6, 1.45);
       keyLight.position.set(8, 13, 9); keyLight.castShadow = true;
-      keyLight.shadow.mapSize.set(1024, 1024);
+      keyLight.shadow.mapSize.set(2048, 2048);
       Object.assign(keyLight.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 42 });
       keyLight.shadow.bias = -0.0005; scene.add(keyLight);
       const rimLight = new THREE.DirectionalLight(0x4aa8ff, 0.95);
@@ -894,6 +931,35 @@
         }
       }
 
+      const envTexLoader = new THREE.TextureLoader();
+      const ENV_TEX = {};
+      let currentBiomeId = '';
+      function getEnvTex(key, cb) {
+        if (ENV_TEX[key]) { cb(ENV_TEX[key]); return; }
+        if (ENV_TEX[key] === false || ENV_TEX[key] === 'loading') return;
+        ENV_TEX[key] = 'loading';
+        envTexLoader.load('./img/env/' + key + '.jpg', (t) => {
+          ENV_TEX[key] = t;
+          try { t.anisotropy = Math.min(8, renderer.capabilities ? renderer.capabilities.getMaxAnisotropy() : 1); } catch (_) {}
+          cb(t);
+        }, undefined, () => { ENV_TEX[key] = false; });
+      }
+      // 공룡 피부 비늘 텍스처 (불러오면 현재 공룡을 다시 만들어 적용)
+      let SCALE_IMG = null, SCALE_BUMP = null;
+      (() => {
+        const im = new Image();
+        im.onload = () => {
+          SCALE_IMG = im;
+          SCALE_BUMP = new THREE.Texture(im);
+          SCALE_BUMP.wrapS = SCALE_BUMP.wrapT = THREE.RepeatWrapping;
+          SCALE_BUMP.repeat.set(3, 2);
+          SCALE_BUMP.needsUpdate = true;
+          skinMatCache.clear();
+          try { if (renderer.capabilities) build3DDinosaur(getDinoById(state.selectedDinoId)); } catch (_) {}
+        };
+        im.src = './img/env/scales.jpg';
+      })();
+
       const skinMatCache = new Map();
       function getDinoSkinMat(dino) {
         if (skinMatCache.has(dino.id)) return skinMatCache.get(dino.id);
@@ -908,11 +974,19 @@
           gr.addColorStop(0.55, '#' + baseCol.getHexString());
           gr.addColorStop(1, '#' + lightCol.getHexString());
           g.fillStyle = gr; g.fillRect(0, 0, w, h);
-          for (let y = 0; y < h; y += 14) {
-            for (let x = ((y / 14) % 2) * 9; x < w; x += 18) {
-              g.fillStyle = `rgba(0,0,0,${0.06 + ((x + y) % 5) * 0.025})`;
-              g.beginPath(); g.ellipse(x, y, 8, 6, 0, 0, 6.28); g.fill();
-              g.strokeStyle = 'rgba(0,0,0,0.28)'; g.lineWidth = 1; g.stroke();
+          if (SCALE_IMG) {
+            g.save();
+            g.globalCompositeOperation = 'overlay'; g.globalAlpha = 0.9;
+            g.fillStyle = g.createPattern(SCALE_IMG, 'repeat');
+            g.scale(0.5, 0.5); g.fillRect(0, 0, w * 2, h * 2);
+            g.restore();
+          } else {
+            for (let y = 0; y < h; y += 14) {
+              for (let x = ((y / 14) % 2) * 9; x < w; x += 18) {
+                g.fillStyle = `rgba(0,0,0,${0.06 + ((x + y) % 5) * 0.025})`;
+                g.beginPath(); g.ellipse(x, y, 8, 6, 0, 0, 6.28); g.fill();
+                g.strokeStyle = 'rgba(0,0,0,0.28)'; g.lineWidth = 1; g.stroke();
+              }
             }
           }
           g.strokeStyle = 'rgba(15,4,0,0.65)';
@@ -929,7 +1003,7 @@
           map, emissiveMap: glowMap,
           emissive: new THREE.Color(dino.accent),
           emissiveIntensity: isLavaBoss ? 1.35 : 0.42,
-          bumpMap: map, bumpScale: 0.16, roughness: 0.52, metalness: 0.12
+          bumpMap: SCALE_BUMP || map, bumpScale: SCALE_BUMP ? 0.22 : 0.16, roughness: 0.52, metalness: 0.12
         });
         skinMatCache.set(dino.id, mat);
         return mat;
@@ -996,7 +1070,13 @@
           const ch = envGroup.children.pop();
           disposeObjTree(ch);
         }
+        currentBiomeId = biome.id;
         skyUniforms.uTop.value.set(biome.skyTop); skyUniforms.uBot.value.set(biome.skyBot);
+        skyUniforms.uHas.value = 0;
+        getEnvTex('sky_' + biome.id, (t) => {
+          if (currentBiomeId !== biome.id) return;
+          skyUniforms.uTex.value = t; skyUniforms.uHas.value = 1;
+        });
         scene.background.set(biome.skyTop); scene.fog.color.setHex(biome.fog);
         keyLight.color.setHex(biome.keyCol); rimLight.color.setHex(biome.rimCol);
         accentLight.color.setHex(biome.glowCol); arenaRing.material.color.setHex(biome.glowCol);
@@ -1042,6 +1122,13 @@
           map: fTex, emissiveMap: fGlow,
           emissive: fGlow ? new THREE.Color(0xffffff) : new THREE.Color(0x000000),
           emissiveIntensity: fGlow ? 1.4 : 0, roughness: biome.id === 'snow' ? 0.65 : 0.9
+        });
+        getEnvTex('ground_' + biome.id, (t) => {
+          if (currentBiomeId !== biome.id) return;
+          t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(9, 9);
+          floorMesh.material.map = t;
+          floorMesh.material.color.set(biome.groundTop).lerp(new THREE.Color(0xffffff), biome.id === 'abyss' || biome.id === 'volcano' ? 0.25 : 0.6);
+          floorMesh.material.needsUpdate = true;
         });
 
         // 1) 원경 산맥 / 지형 링 (모든 바이옴에 깊이감 부여)
@@ -2979,7 +3066,7 @@
         const dPct = Math.max(0, Math.min(100, (dE / activeDino.maxEnergy) * 100));
 
         const thumbEl = document.getElementById('hudDinoThumb');
-        if (thumbEl.src !== activeDino.sprite) thumbEl.src = activeDino.sprite;
+        if (thumbEl.getAttribute('src') !== activeDino.sprite) thumbEl.src = activeDino.sprite;
         document.getElementById('hudDinoName').textContent = activeDino.name;
         document.getElementById('dinoEnergyText').textContent = `${Math.round(dE)} / ${activeDino.maxEnergy}`;
         const dBar = document.getElementById('dinoEnergyBar');
