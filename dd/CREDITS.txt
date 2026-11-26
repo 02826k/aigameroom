@@ -1,0 +1,8 @@
+공룡 디펜스 에셋
+- img/units : 공룡타기 HD 공룡 카드 재사용 (u_{DINO_DB id}.webp)
+- img/enemy, img/env/path.jpg, nest.webp, cave.webp, title.jpg : Higgsfield 생성
+- img/env/ground_*.jpg : 공룡타기 바이옴 텍스처 재사용
+- snd/bgm_battle.mp3 : "Heavy battle music" by Davieplier (CC0) https://opengameart.org/content/heavy-battle-music
+- snd/bgm_boss.mp3   : "Horde War Drums loop" by William Hector (CC0) https://opengameart.org/node/176112
+- snd/bgm_title.mp3  : "Prehistoric Drum Loop" by hornpipe2 (CC0) https://opengameart.org/content/prehistoric-drum-loop
+- 나머지 효과음 : 직접 합성 (자유 사용)
