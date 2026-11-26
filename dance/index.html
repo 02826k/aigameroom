@@ -220,6 +220,13 @@
     .rules b { color: #fde68a; }
     .best-line { margin: 10px 0; font-size: 13px; color: #cbd5e1; }
     .best-line span { color: var(--gold); font-family: 'Black Han Sans', sans-serif; font-size: 18px; margin-left: 6px; }
+    .char-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 4px; }
+    .char-opt { border: 3px solid rgba(255,255,255,.15); background: rgba(0,0,0,.35); border-radius: 16px; padding: 6px 6px 8px;
+      cursor: pointer; color: #fff; font-family: 'Black Han Sans', sans-serif; font-size: 18px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .1s; }
+    .char-opt img { height: 120px; width: auto; object-fit: contain; pointer-events: none; }
+    .char-opt.sel { border-color: var(--gold); background: rgba(255,212,59,.18); transform: translateY(-2px); box-shadow: 0 0 18px rgba(255,212,59,.35); }
+    .char-opt.sel span::before { content: '✔ '; color: var(--gold); }
+    @media (max-height: 460px) and (orientation: landscape) { .char-pick { margin: 4px 0 0; gap: 8px; } .char-opt img { height: 58px; } .char-opt { font-size: 14px; padding: 3px; flex-direction: row; justify-content: center; gap: 8px; } #overlay-start .rules, #overlay-start .tag { display: none; } }
     .big-btn {
       width: 100%; border: 0; border-radius: 16px; padding: 14px; cursor: pointer;
       font-family: 'Black Han Sans', sans-serif; font-size: 22px; color: #1e1b4b;
@@ -318,6 +325,10 @@
           🔴 <b>감시 중</b> — 춤추다 걸리면 분필 세례 + 하트 -1 (2교시부터 훼이크 주의!)<br />
           🌈 <b>피버 타임</b> — 미러볼 등장 &amp; 점수 2배!
         </div>
+        <div class="char-pick">
+          <button type="button" class="char-opt" data-char="boy"><img id="pick-boy" alt="" /><span>남학생</span></button>
+          <button type="button" class="char-opt" data-char="girl"><img id="pick-girl" alt="" /><span>여학생</span></button>
+        </div>
         <div class="best-line">최고 기록 <span id="start-best">0 점</span></div>
         <div id="login-line" class="login-line" style="margin:-4px 0 8px">로그인 확인 중...</div>
         <button id="btn-start" class="big-btn" type="button" disabled>로딩 중...</button>
@@ -341,6 +352,7 @@
         <div id="go-rank" class="go-rank"></div>
         <button id="btn-retry" class="big-btn" type="button">🔄 반성문 쓰고 다시 도전!</button>
         <button id="btn-go-rank" class="btn-rank-sub" type="button">🏆 RANK 보기</button>
+        <button id="btn-change-char" class="btn-rank-sub" type="button" style="background:#e0e7ff">👥 캐릭터 바꾸기</button>
       </div>
     </div>
 
@@ -403,7 +415,19 @@
     teacherBack:   { file: 'teacher_back.png',  cdn: 'hf_20261126_061304_a8a88c48-3689-42a6-bcb8-92bb2a651cf0.png' },
     teacherSide:   { file: 'teacher_side.png',  cdn: 'hf_20261126_061424_c0fa0269-9043-484e-ba46-18e93f0db360.png' },
     teacherWatch:  { file: 'teacher_watch.png', cdn: 'hf_20261126_060937_27f6d36c-fa35-429b-92ec-95eff293ef97.png' },
-    teacherAngry:  { file: 'teacher_angry.png', cdn: 'hf_20261126_061424_ab7b8d83-32ac-482f-8c75-6334591e01f8.png' }
+    teacherAngry:  { file: 'teacher_angry.png', cdn: 'hf_20261126_061424_ab7b8d83-32ac-482f-8c75-6334591e01f8.png' },
+    // 여학생 (처음에 선택)
+    girlSit:       { file: 'girl_sit.png',      cdn: 'hf_20261126_072819_bc17dde1-b937-4245-8ea6-00246bcfe999.png' },
+    girlDance0:    { file: 'girl_dance1.png',   cdn: 'hf_20261126_072816_a80c13f0-b834-45b7-a454-0cd8e9aa830e.png' },
+    girlDance1:    { file: 'girl_dance2.png',   cdn: 'hf_20261126_072817_08a0f2e9-7106-4780-97cb-c784a798dd5d.png' },
+    girlDance2:    { file: 'girl_dance3.png',   cdn: 'hf_20261126_072819_1fb93045-e358-4007-9975-ccfb76c55c02.png' },
+    girlDance3:    { file: 'girl_dance4.png',   cdn: 'hf_20261126_072817_96165030-076b-48f7-920b-2e8888c18ad8.png' },
+    girlCaught:    { file: 'girl_caught.png',   cdn: 'hf_20261126_072816_882a33df-2647-4519-bfc5-3f329b2180f3.png' },
+    // 야간자율학습 감독 선생님
+    t2Back:        { file: 'teacher2_back.png',  cdn: 'hf_20261126_072755_fedaa2ea-f3f9-4991-b6b3-1d8739fb7f40.png' },
+    t2Side:        { file: 'teacher2_side.png',  cdn: 'hf_20261126_072758_17dac62c-0482-4f6c-b09d-7a6e7d20f598.png' },
+    t2Watch:       { file: 'teacher2_watch.png', cdn: 'hf_20261126_072721_1c5be4eb-feab-4e02-b0f3-5ee204b29109.png' },
+    t2Angry:       { file: 'teacher2_angry.png', cdn: 'hf_20261126_072755_5f7e8e18-0154-4f04-9862-f0291d5650b2.png' }
   };
   const IMG = {};
 
@@ -579,7 +603,106 @@
     sfxBell()  { if (!this.sfxEnabled) return; this.ensureContext(); [659.25,523.25,587.33,392].forEach((f, i) => this.playOsc(f, 0.22, 'triangle', 0.09, i * 0.14)); }
     sfxSit()   { if (!this.sfxEnabled) return; this.ensureContext(); this.playOsc(240, 0.05, 'triangle', 0.05, 0, 150); }
   }
-  const audio = new RetroAudioEngine();
+  /* 실제 음원(배경음악 · 효과음 · 선생님 목소리). ./sound/ 폴더 → 없으면 CDN → 그래도 없으면 8비트 대체 */
+  const SOUND_DIR = './sound/';
+  const SND_CDN = {
+    m_shout1: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072458_c8b509cb-07ca-42f8-9506-3e7586291941.mp3',
+    m_shout2: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072616_56b4a1af-9502-45ed-abc0-7912d504077e.mp3',
+    m_shout3: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072615_2e814422-d58f-4898-ab70-a370cd134c93.mp3',
+    m_shout4: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072619_c6baf902-cd3a-4160-a94c-481fc0c11aeb.mp3',
+    m_shout5: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072615_4d50d20b-f791-473c-bfed-96aa6f3cab0b.mp3',
+    m_hmm: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072620_2f8240e4-929f-4ef1-ba1d-5329faff2f3a.mp3',
+    m_fake: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072616_d86aafea-271f-4c6d-9b88-80cc2b697671.mp3',
+    f_shout1: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_072828_d3a0ab11-71cc-4f5f-9560-1738305e9920.mp3',
+    f_shout2: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073237_8afd19d5-5dc4-4689-9488-8b27b1668406.mp3',
+    f_shout3: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073236_465098d5-c3b2-4d94-9061-c0baad569ea4.mp3',
+    f_shout4: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073236_0eded2e0-0a7f-427b-95a5-92a7fe45880f.mp3',
+    f_shout5: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073236_0596fbf1-0ae0-4f0f-a50a-5d7c52a3f1e4.mp3',
+    f_hmm: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073235_c5f9820f-7eb0-4047-b336-d7467a9b2d25.mp3',
+    f_fake: 'https://d8j0ntlcm91z4.cloudfront.net/user_3MZHs6aKpMweXxbI7PfKKyIbZID/hf_20261126_073235_a37b6d35-1081-458a-b765-fa91da507259.mp3'
+  };
+  const SOUND_FILES = ['bgm', 'bell', 'fever', 'watch', 'whoosh', 'sit', 'chalk_hit', 'chalk_write',
+    'm_shout1', 'm_shout2', 'm_shout3', 'm_shout4', 'm_shout5', 'm_hmm', 'm_fake',
+    'f_shout1', 'f_shout2', 'f_shout3', 'f_shout4', 'f_shout5', 'f_hmm', 'f_fake'];
+  class GameAudio extends RetroAudioEngine {
+    constructor() {
+      super();
+      this.buf = {}; this.voice = 'm';
+      this.bgmSrc = null; this.bgmGain = null; this.bgmOffset = 0; this.bgmStartAt = 0; this.bgmRate = 1;
+      this.chalkT = 0;
+    }
+    decode(ab) {
+      return new Promise((res, rej) => { try { const p = this.ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); } catch (e) { rej(e); } });
+    }
+    async loadOne(name) {
+      const urls = [SOUND_DIR + name + '.mp3']; if (SND_CDN[name]) urls.push(SND_CDN[name]);
+      for (const u of urls) {
+        try { const r = await fetch(u); if (!r.ok) continue; this.buf[name] = await this.decode(await r.arrayBuffer()); return; } catch (_) {}
+      }
+    }
+    async loadAll() {
+      try {
+        if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
+        if (!this.ctx) return;
+        await Promise.all(SOUND_FILES.map((n) => this.loadOne(n)));
+      } catch (_) {}
+    }
+    play(name, vol = 1, delay = 0, rate = 1) {
+      const b = this.buf[name];
+      if (!b || !this.ctx || !this.sfxEnabled) return false;
+      try {
+        const src = this.ctx.createBufferSource(); src.buffer = b; src.playbackRate.value = rate;
+        const g = this.ctx.createGain(); g.gain.value = vol;
+        src.connect(g); g.connect(this.ctx.destination); src.start(this.ctx.currentTime + delay);
+        return true;
+      } catch (_) { return false; }
+    }
+    stopBgm() {
+      if (!this.bgmSrc) return;
+      const now = this.ctx.currentTime;
+      this.bgmOffset = (this.bgmOffset + (now - this.bgmStartAt) * this.bgmRate) % this.buf.bgm.duration;
+      try { this.bgmGain.gain.setTargetAtTime(0, now, 0.02); this.bgmSrc.stop(now + 0.12); } catch (_) {}
+      this.bgmSrc = null;
+    }
+    update(dt, playing, dancing, writing, fever) {
+      if (!this.ctx) return;
+      if (!this.buf.bgm) { super.update(dt, playing, dancing, writing, fever); return; }
+      const want = playing && dancing && this.bgmEnabled && this.ctx.state === 'running';
+      const rate = fever ? 1.08 : 1.0;
+      if (want && !this.bgmSrc) {
+        try {
+          const src = this.ctx.createBufferSource(); src.buffer = this.buf.bgm; src.loop = true; src.playbackRate.value = rate;
+          const g = this.ctx.createGain(); g.gain.value = 0.0001; g.gain.setTargetAtTime(0.55, this.ctx.currentTime, 0.03);
+          src.connect(g); g.connect(this.ctx.destination);
+          src.start(0, this.bgmOffset % this.buf.bgm.duration);
+          this.bgmSrc = src; this.bgmGain = g; this.bgmStartAt = this.ctx.currentTime; this.bgmRate = rate;
+        } catch (_) {}
+      } else if (want && this.bgmSrc && rate !== this.bgmRate) {
+        const now = this.ctx.currentTime;
+        this.bgmOffset = (this.bgmOffset + (now - this.bgmStartAt) * this.bgmRate) % this.buf.bgm.duration;
+        this.bgmStartAt = now; this.bgmRate = rate; this.bgmSrc.playbackRate.setValueAtTime(rate, now);
+      } else if (!want && this.bgmSrc) {
+        this.stopBgm();
+      }
+      if (playing && writing && !dancing && this.sfxEnabled) {
+        this.chalkT += dt;
+        if (this.chalkT >= 0.45) { this.chalkT = 0; if (!this.play('chalk_write', 0.35, 0, 0.85 + Math.random() * 0.3)) this.playNoise(0.045, 0.018, 3200); }
+      }
+    }
+    sfxWarn()  { this.ensureContext(); const a = this.play('whoosh', 0.6); const b = this.play(this.voice + '_hmm', 1.0, 0.05); if (!a && !b) super.sfxWarn(); }
+    sfxFake()  { this.ensureContext(); if (!this.play(this.voice + '_fake', 1.0)) super.sfxFake(); }
+    sfxWatch() { this.ensureContext(); if (!this.play('watch', 0.8)) super.sfxWatch(); }
+    sfxCaught(i = 0) {
+      this.ensureContext();
+      const a = this.play('chalk_hit', 0.9, 0.22);
+      const b = this.play(this.voice + '_shout' + (i + 1), 1.0, 0);
+      if (!a && !b) super.sfxCaught();
+    }
+    sfxFever() { this.ensureContext(); if (!this.play('fever', 0.8)) super.sfxFever(); }
+    sfxBell()  { this.ensureContext(); if (!this.play('bell', 0.7)) super.sfxBell(); }
+    sfxSit()   { this.ensureContext(); if (!this.play('sit', 0.55)) super.sfxSit(); }
+  }
+  const audio = new GameAudio();
 
   /* =========================================================================
    * 3. 게임 상태
@@ -648,6 +771,18 @@
   const period = () => PERIODS[game.periodIdx];
   const comboMult = () => Math.min(5, 1 + Math.floor(game.combo / 10) * 0.5);
   const isDancing = () => game.mode === 'playing' && game.holding && game.stun <= 0;
+  // 야간자율학습부터는 감독 선생님(여) 등장
+  const isNightTeacher = () => game.periodIdx === PERIODS.length - 1 && !!IMG.t2Back;
+  // 캐릭터 선택 (남학생 / 여학생)
+  const CHAR_KEY = 'classroom_dance_char';
+  try { game.char = localStorage.getItem(CHAR_KEY) === 'girl' ? 'girl' : 'boy'; } catch (_) { game.char = 'boy'; }
+  function heroImg(kind, i) {
+    if (game.char === 'girl') {
+      const g = kind === 'sit' ? IMG.girlSit : kind === 'caught' ? IMG.girlCaught : IMG['girlDance' + i];
+      if (g) return g;
+    }
+    return kind === 'sit' ? IMG.heroSit : kind === 'caught' ? IMG.heroCaught : IMG['dance' + i];
+  }
 
   function spawnNote() {
     const sym = ['♪', '♫', '★', '✦', '♬'], col = ['#ffd43b', '#ff4d94', '#38bdf8', '#4ade80', '#c084fc'];
@@ -674,7 +809,7 @@
    * ========================================================================= */
   function startGame() {
     if (!isLoggedIn()) { goLogin(); return; }
-    audio.ensureContext();
+    audio.ensureContext(); audio.voice = 'm'; audio.bgmOffset = 0;
     autoFullscreen();
     Object.assign(game, {
       mode: 'playing', score: 0, hearts: game.maxHearts, combo: 0, maxCombo: 0, comboFloat: 0, periodIdx: 0,
@@ -726,11 +861,14 @@
     game.teacherDouble = false; game.stun = 1.45; game.holding = false;
     game.hearts = Math.max(0, game.hearts - 1);
     game.combo = 0; game.comboFloat = 0; game.fever = game.feverActive ? game.fever : Math.max(0, game.fever - 25);
-    const shouts = ['거기!! 뭐하는 짓이야!!', '수업 중에 춤을 춰?!', '당장 복도로 나가!!', '내 눈을 속일 줄 알았나!', '너 이름 뭐야?!'];
-    game.teacherShout = shouts[Math.floor(Math.random() * shouts.length)];
+    const shouts = isNightTeacher()
+      ? ['거기!! 지금 뭐하는 거야!!', '야자 시간에 춤을 춰?!', '당장 교무실로 따라와!!', '내 눈은 못 속여!', '너 몇 반이야?!']
+      : ['거기!! 뭐하는 짓이야!!', '수업 중에 춤을 춰?!', '당장 복도로 나가!!', '내 눈을 속일 줄 알았나!', '너 이름 뭐야?!'];
+    const si = Math.floor(Math.random() * shouts.length);
+    game.teacherShout = shouts[si];
     game.chalk = { x: TEACHER.cx - 70, y: TEACHER.footY - TEACHER.h * 0.62, tx: HERO.cx, ty: HERO.footY - 400, t: 0, dur: 0.28, hit: false };
     game.shake = 0.5; game.shakeMag = 22;
-    audio.sfxCaught(); updateDanceBtn(); syncHUD();
+    audio.sfxCaught(si); updateDanceBtn(); syncHUD();
     if (navigator.vibrate) { try { navigator.vibrate([80, 40, 120]); } catch (_) {} }
   }
 
@@ -738,7 +876,8 @@
     const n = game.periodIdx + 1;
     if (n < PERIODS.length && game.score >= PERIODS[n].minScore) {
       game.periodIdx = n; game.boardChars = 0;
-      game.bannerText = `${PERIODS[n].name} 시작!`; game.bannerTimer = 2.0;
+      game.bannerText = n === PERIODS.length - 1 ? '야자 감독 선생님 등장!!' : `${PERIODS[n].name} 시작!`; game.bannerTimer = n === PERIODS.length - 1 ? 2.6 : 2.0;
+      audio.voice = isNightTeacher() ? 'f' : 'm';
       audio.sfxBell(); floatText(W / 2, 520, `LEVEL UP! ${PERIODS[n].name}`, '#4ade80', 48);
     }
   }
@@ -1052,18 +1191,18 @@
 
     let img, opts = {};
     if (st === 'SAFE') {
-      img = IMG.teacherBack;
+      img = isNightTeacher() ? IMG.t2Back : IMG.teacherBack;
       opts.rot = Math.sin(game.teacherAnim * 6) * 0.012;
       opts.sy = 1 + Math.sin(game.teacherAnim * 12) * 0.006;
     } else if (st === 'WARNING' || st === 'FAKE') {
-      img = IMG.teacherSide || IMG.teacherBack;
+      img = isNightTeacher() ? (IMG.t2Side || IMG.t2Back) : (IMG.teacherSide || IMG.teacherBack);
       if (st === 'FAKE') opts.rot = Math.sin(game.teacherAnim * 26) * 0.02;
       else opts.sx = 1 + Math.min(0.03, game.stateAge * 0.05);
     } else if (st === 'WATCHING') {
-      img = IMG.teacherWatch;
+      img = isNightTeacher() ? (IMG.t2Watch || IMG.teacherWatch) : IMG.teacherWatch;
       opts.sy = 1 + Math.sin(game.teacherAnim * 4) * 0.008;
     } else {
-      img = IMG.teacherAngry || IMG.teacherWatch;
+      img = isNightTeacher() ? (IMG.t2Angry || IMG.t2Watch) : (IMG.teacherAngry || IMG.teacherWatch);
       const pop = Math.min(1, game.stateAge / 0.12);
       opts.sx = opts.sy = 0.92 + 0.12 * pop;
       opts.rot = Math.sin(game.teacherAnim * 40) * 0.02;
@@ -1145,7 +1284,7 @@
     if (!dancing && !caught) {
       // 자리에 앉아 공부하는 척 (뒷모습)
       const breathe = 1 + Math.sin(game.t * 2.2) * 0.006;
-      if (!drawSprite(IMG.heroSit, HERO.cx, HERO.footY, deskH, { sy: breathe, footRatio: 0.975 })) {
+      if (!drawSprite(heroImg('sit'), HERO.cx, HERO.footY, deskH, { sy: breathe, footRatio: 0.975 })) {
         ctx.font = '200px serif'; ctx.textAlign = 'center'; ctx.fillText('🧑‍🎓', HERO.cx, HERO.footY - 40);
       }
       return;
@@ -1160,7 +1299,7 @@
 
     if (caught) {
       const shiver = Math.sin(game.t * 60) * 3;
-      if (!drawSprite(IMG.heroCaught, HERO.cx + shiver, HERO.footY - 10, heroH)) {
+      if (!drawSprite(heroImg('caught'), HERO.cx + shiver, HERO.footY - 10, heroH)) {
         ctx.font = '220px serif'; ctx.textAlign = 'center'; ctx.fillText('😱', HERO.cx, HERO.footY - 80);
       }
       return;
@@ -1169,7 +1308,7 @@
     const beat = game.danceBeat / 0.42; // 0..1
     const hop = Math.abs(Math.sin(beat * Math.PI));
     const squash = 1 - (1 - hop) * 0.06;
-    const img = IMG['dance' + game.danceIdx];
+    const img = heroImg('dance', game.danceIdx);
     const ok = drawSprite(img, HERO.cx + (game.danceFlip ? 18 : -18), HERO.footY - 10 - hop * 34, heroH, {
       flip: game.danceFlip, rot: Math.sin(game.t * 8) * 0.05, sx: 2 - squash, sy: squash
     });
@@ -1311,6 +1450,20 @@
   document.addEventListener('dblclick', (e) => e.preventDefault());
 
   el.btnStart.addEventListener('click', () => (isLoggedIn() ? startGame() : goLogin()));
+  function refreshCharPick() {
+    document.querySelectorAll('.char-opt').forEach((b) => b.classList.toggle('sel', b.dataset.char === game.char));
+    const pb = $('pick-boy'), pg = $('pick-girl');
+    if (IMG.dance1 && !pb.getAttribute('src')) pb.src = IMG.dance1.src;
+    if (IMG.girlDance1 && !pg.getAttribute('src')) pg.src = IMG.girlDance1.src;
+    pg.closest('.char-opt').style.display = IMG.girlSit ? '' : 'none';
+  }
+  document.querySelectorAll('.char-opt').forEach((b) => b.addEventListener('click', () => {
+    game.char = b.dataset.char; try { localStorage.setItem(CHAR_KEY, game.char); } catch (_) {}
+    refreshCharPick(); audio.ensureContext(); audio.sfxSit();
+  }));
+  $('btn-change-char').addEventListener('click', () => {
+    game.mode = 'start'; el.overGo.classList.add('hidden'); el.overStart.classList.remove('hidden'); refreshCharPick(); refreshLoginUI();
+  });
   $('btn-rank').addEventListener('click', openRank);
   $('btn-go-rank').addEventListener('click', openRank);
   $('rank-close').addEventListener('click', () => el.overRank.classList.add('hidden'));
@@ -1326,7 +1479,7 @@
   /* ---------- 상단 메뉴 ---------- */
   const btnBgm = $('btn-bgm'), btnSfx = $('btn-sfx'), btnFs = $('btn-fs');
   btnBgm.addEventListener('click', () => {
-    audio.ensureContext(); audio.bgmEnabled = !audio.bgmEnabled;
+    audio.ensureContext(); audio.bgmEnabled = !audio.bgmEnabled; if (!audio.bgmEnabled && audio.stopBgm) audio.stopBgm();
     btnBgm.classList.toggle('on', audio.bgmEnabled); btnBgm.classList.toggle('off', !audio.bgmEnabled);
     $('lbl-bgm').textContent = audio.bgmEnabled ? '배경음 ON' : '배경음 OFF';
     btnBgm.firstChild.textContent = audio.bgmEnabled ? '🎵' : '🔕';
@@ -1423,6 +1576,7 @@
     readAuth(); refreshLoginUI();
     const authReady = verifyAuth();
     requestAnimationFrame(loop);
+    audio.loadAll();
     const keys = Object.keys(ASSETS);
     let done = 0;
     const fontReady = (document.fonts && document.fonts.load)
@@ -1435,7 +1589,7 @@
     await Promise.race([authReady, new Promise((r) => setTimeout(r, 3000))]);
     game.mode = 'start';
     el.btnStart.disabled = false;
-    refreshLoginUI();
+    refreshLoginUI(); refreshCharPick();
     const missing = keys.filter((k) => !IMG[k]).length;
     el.loadMsg.textContent = missing ? `일부 그래픽(${missing}개)을 불러오지 못했어요` : (isTouch ? '화면 아무 곳이나 꾹 눌러도 춤춰요!' : 'SPACE 키 또는 마우스를 꾹 누르면 춤춰요!');
     if (isTouch && window.innerHeight > window.innerWidth) toast('📱 가로로 돌리면 더 크게 즐길 수 있어요!', 3200);
