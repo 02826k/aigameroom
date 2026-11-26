@@ -56,11 +56,12 @@
   <header class="w-full max-w-[460px] bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 shrink-0">
     <div class="flex items-center gap-1.5 min-w-0">
       <span class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-sm shrink-0">🦖</span>
-      <h1 class="text-sm font-black tracking-tight truncate">공룡 디펜스</h1>
-      <span id="stageBadge" class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 whitespace-nowrap">S1 트라이아스기</span>
+      <h1 class="text-sm font-black tracking-tight whitespace-nowrap shrink-0">공룡 디펜스</h1>
+      <span id="stageBadge" class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 whitespace-nowrap truncate min-w-0">S1 트라이아스기</span>
     </div>
     <div class="flex items-center gap-1 shrink-0">
-      <button id="codexBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-black bg-sky-600/90 hover:bg-sky-500 text-white active:scale-95">📖 도감</button>
+      <button id="rankBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-black bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-900 active:scale-95">🏆 RANK</button>
+      <button id="codexBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-black bg-sky-600/90 hover:bg-sky-500 text-white active:scale-95" title="도감">📖</button>
       <button id="bgmBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-600/90 text-white active:scale-95" title="배경음악">🎵</button>
       <button id="sfxBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-600/90 text-white active:scale-95" title="효과음">🔊</button>
       <button id="exitBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 active:scale-95">나가기</button>
@@ -96,6 +97,8 @@
         <span class="text-sky-300 whitespace-nowrap">🌊 W<strong id="hudWave" class="text-white">1</strong></span>
         <span class="text-slate-600">|</span>
         <span class="text-slate-300 whitespace-nowrap">적 <strong id="hudEnemies" class="text-rose-300">0</strong></span>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-300 whitespace-nowrap">🦖처치 <strong id="hudKills" class="text-amber-300">0</strong></span>
         <span class="text-slate-600">|</span>
         <span id="hudSynergy" class="text-[10px] text-emerald-300 truncate">시너지 없음</span>
       </div>
@@ -172,6 +175,30 @@
       </button>
     </div>
   </footer>
+
+  <!-- 처치 수 랭킹 모달 -->
+  <div id="rankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-4 shadow-2xl flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-black text-amber-300">🏆 공룡 디펜스 처치왕 TOP 10</h2>
+        <button id="rankCloseBtn" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">✕</button>
+      </div>
+      <div class="rounded-xl border-2 border-amber-400/70 bg-amber-950/40 px-3 py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span id="myRankPos" class="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 text-[11px] font-black shrink-0">내 순위</span>
+          <span id="myRankNick" class="text-xs font-black text-amber-100 truncate">게스트</span>
+        </div>
+        <span id="myRankScore" class="text-xs font-black text-amber-300 tabular-nums shrink-0">0마리</span>
+      </div>
+      <div id="rankLoginRow" class="hidden text-[11px] text-slate-300 flex items-center justify-between gap-2 px-1">
+        <span>로그인하면 누적 처치 수가 랭킹에 등록돼요!</span>
+        <button id="rankLoginBtn" type="button" class="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-[10px] shrink-0">로그인</button>
+      </div>
+      <div class="text-[10px] font-bold text-slate-400 px-1 flex justify-between"><span>순위 · 별명</span><span>누적 처치</span></div>
+      <div id="rankList" class="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto text-xs text-slate-400"></div>
+      <div id="rankMyStats" class="text-[10px] text-slate-500 text-center"></div>
+    </div>
+  </div>
 
   <!-- 공룡 도감 모달 -->
   <div id="codexModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3">
@@ -451,8 +478,8 @@
         slots: [[210,166],[314,478],[106,478],[210,478],[210,322],[106,166],[314,322],[106,322],[314,270],[314,426],[106,270],[106,426],[210,530],[210,270],[210,374],[210,218],[210,426],[314,374],[314,218],[106,374],[106,218],[210,114],[314,166]] },
       tail: { name: '지그재그 소용돌이', nest: [210, 374], paths: [[[366,-42],[366,62],[54,62],[54,166],[366,166],[366,582],[54,582],[54,270],[262,270],[262,478],[158,478],[158,374],[210,374]]],
         slots: [[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[210,218],[106,426],[210,322],[314,426],[314,322],[106,218],[314,218],[314,530],[106,322],[106,530],[314,114],[210,426],[106,114]] },
-      fork: { name: '두 갈래 합류', nest: [210, 582], paths: [[[54,-42],[54,374],[158,374],[158,166],[210,166],[210,582]],[[366,-42],[366,374],[262,374],[262,166],[210,166],[210,582]]],
-        slots: [[314,218],[106,218],[106,322],[314,322],[106,166],[314,166],[106,426],[314,426],[158,114],[262,114],[106,114],[314,114],[314,478],[106,478],[158,530],[262,530],[106,530],[314,530],[158,582],[262,582],[158,62],[262,62]] },
+      fork: { name: '두 갈래 합류', nest: [210, 322], paths: [[[54,-42],[54,478],[158,478],[158,270],[210,270],[210,322]],[[366,-42],[366,478],[262,478],[262,270],[210,270],[210,322]]],
+        slots: [[106,218],[106,270],[106,322],[106,374],[106,426],[314,218],[314,270],[314,322],[314,374],[314,426],[106,114],[158,114],[210,114],[262,114],[314,114],[106,530],[158,530],[210,530],[262,530],[314,530],[158,62],[262,62],[158,582],[262,582]] },
       twinsq: { name: '쌍둥이 소용돌이', nest: [210, 322], paths: [[[54,-42],[54,478],[262,478],[262,270],[210,270]],[[366,686],[366,166],[158,166],[158,374],[210,374]]],
         slots: [[106,374],[314,270],[106,270],[314,374],[106,218],[314,426],[210,218],[210,426],[106,426],[314,218],[106,322],[314,322],[106,114],[314,530],[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[106,530],[314,114],[210,62],[210,582]] },
     };
@@ -556,8 +583,63 @@
       enemies: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
       parts: [], shake: 0, time: 0, started: false, boss: null,
       queue: [], curLanes: [], nextLanes: [], eggs: [], skillCd: 0, shock: null,
-      combo: 0, comboT: -9, comboShow: 0,
+      combo: 0, comboT: -9, comboShow: 0, kills: 0,
     };
+
+    // 처치 수 기록 (누적 = 랭킹 점수) · AI게임장 공용 서버 연동
+    const GAME_ID = 'dinodefense_v1';
+    const API_BASE_URL = 'https://02826k.duckdns.org';
+    const LOBBY_URL = 'https://02826k.github.io/aigameroom/';
+    const USER_KEYS = ['aigameroom_username', 'hero_clicker_username', 'abuse_username', 'sky2026_username', 'gongdaegong_username', 'moto_racing_3d_user'];
+    const NICK_KEYS = ['aigameroom_nickname', 'hero_clicker_nickname'];
+    const REC_KEY = 'dinodefense_record_v1';
+    const record = (() => {
+      try { return Object.assign({ totalKills: 0, bestKills: 0, bestWave: 0 }, JSON.parse(localStorage.getItem(REC_KEY) || '{}')); }
+      catch (e) { return { totalKills: 0, bestKills: 0, bestWave: 0 }; }
+    })();
+    let recordDirty = false, lastCloudSave = 0;
+    function readKey(keys) { try { for (const k of keys) { const v = localStorage.getItem(k); if (v) return v; } } catch (e) {} return null; }
+    function authToken() { return readKey(AUTH_TOKEN_KEYS); }
+    function maskName(s) { return String(s || '').replace(/^(\d{3})\d+(\d{2})$/, '$1****$2'); }
+    function myNick() { return maskName(readKey(NICK_KEYS) || readKey(USER_KEYS) || '게스트'); }
+    function saveRecordLocal() { try { localStorage.setItem(REC_KEY, JSON.stringify(record)); } catch (e) {} }
+    function noteRunRecord() {
+      record.bestKills = Math.max(record.bestKills, state.kills);
+      record.bestWave = Math.max(record.bestWave, state.wave);
+      saveRecordLocal();
+    }
+    async function cloudSave(force = false) {
+      const t = authToken();
+      if (!t || (!recordDirty && !force)) return;
+      if (!force && Date.now() - lastCloudSave < 45000) return;
+      lastCloudSave = Date.now(); recordDirty = false;
+      noteRunRecord();
+      try {
+        await fetch(`${API_BASE_URL}/api/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+          body: JSON.stringify({ gameId: GAME_ID, saveData: record, score: record.totalKills }),
+          keepalive: true,
+        });
+      } catch (e) { recordDirty = true; }
+    }
+    async function cloudLoad() {
+      const t = authToken();
+      if (!t) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/load?gameId=${GAME_ID}`, { headers: { 'Authorization': `Bearer ${t}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (typeof data.isVip !== 'undefined') { try { localStorage.setItem('hero_clicker_is_vip', String(Boolean(data.isVip))); } catch (e) {} }
+        if (data.nickname) NICK_KEYS.forEach((k) => { try { localStorage.setItem(k, data.nickname); } catch (e) {} });
+        const sd = typeof data.saveData === 'string' ? JSON.parse(data.saveData || '{}') : (data.saveData || {});
+        record.totalKills = Math.max(record.totalKills, Number(sd.totalKills) || 0);
+        record.bestKills = Math.max(record.bestKills, Number(sd.bestKills) || 0);
+        record.bestWave = Math.max(record.bestWave, Number(sd.bestWave) || 0);
+        saveRecordLocal();
+        if (typeof refreshVipUI === 'function') refreshVipUI();
+      } catch (e) {}
+    }
 
     // VIP (AI게임장 공용 로그인 + VIP 플래그)
     const AUTH_TOKEN_KEYS = ['aigameroom_jwt_token', 'hero_clicker_jwt_token', 'abuse_jwt_token', 'sky2026_jwt_token', 'gongdaegong_jwt_token', 'moto_racing_3d_jwt'];
@@ -583,6 +665,7 @@
       stageBannerSub: document.getElementById('stageBannerSub'),
       summonCost: document.getElementById('summonCostText'),
       skipBtn: document.getElementById('skipWaveBtn'),
+      kills: document.getElementById('hudKills'),
       skillBtn: document.getElementById('skillBtn'),
       skillCd: document.getElementById('skillCdText'),
       upgLv: document.getElementById('upgLvText'),
@@ -823,7 +906,9 @@
     // =========================================================================
     function skipBonus() { return state.queue.length ? 10 : Math.max(5, Math.round(state.waveTimer * 1.5)); }
     function getSummonCost() { return 40 + state.summonCount * 8; }
-    function getUpgradeCost() { return 80 + (state.upgradeLv - 1) * 65; }
+    // 강화 1회 = 전체 공격력 +1% (무한). 비용은 25에서 시작해 1레벨마다 +3
+    function getUpgradeCost() { return 25 + (state.upgradeLv - 1) * 3; }
+    function upgradeMul() { return 1 + (state.upgradeLv - 1) * 0.01; }
 
     function createUnit(dinoData) {
       const tier = dinoData.tier;
@@ -904,9 +989,10 @@
 
     function summonDino(forcedTier = 1) {
       let empty = SLOTS.filter((s) => !s.unit);
-      if (!empty.length && autoMerge()) empty = SLOTS.filter((s) => !s.unit);
+      const vip = isVip();
+      if (!empty.length && vip && autoMerge()) empty = SLOTS.filter((s) => !s.unit);
       if (!empty.length) {
-        showInfo('합칠 수 있는 공룡이 없어요! (모두 ★5 패왕)');
+        showInfo(vip ? '합칠 수 있는 공룡이 없어요! (모두 ★5 패왕)' : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
         return false;
       }
       const slot = empty[(Math.random() * empty.length) | 0];
@@ -925,7 +1011,7 @@
       const slot = SLOTS[slotId];
       if (slot && slot.unit) {
         const u = slot.unit;
-        const atk = Math.round(u.dmg * (1 + (state.upgradeLv - 1) * 0.25) * state.synergy.dmgMul);
+        const atk = Math.round(u.dmg * upgradeMul() * state.synergy.dmgMul);
         const sellVal = Math.round(20 * Math.pow(2.2, u.tier - 1));
         ui.infoText.textContent = `[${TIER_STYLE[u.tier].label}] ${u.name} (${u.diet}) · 공격 ${atk} · 사거리 ${u.range}`;
         ui.sellBtn.textContent = `판매 (+${sellVal})`;
@@ -947,6 +1033,7 @@
     function startWave(waveNum) {
       state.wave = waveNum;
       state.waveTimer = 22;
+      cloudSave();
       const st = getStageForWave(waveNum);
       const isBoss = waveNum % 5 === 0;
       if (st.id !== state.stageId) {
@@ -980,7 +1067,7 @@
       const st = getStageForWave(q.wave);
       const isBoss = q.boss;
       const lane = LANES[q.lane % LANES.length];
-      const hpBase = 40 * Math.pow(1.27, q.wave - 1) * st.hpMul;
+      const hpBase = 38 * Math.pow(1.255, q.wave - 1) * st.hpMul;
       const brute = !isBoss && Math.random() < Math.min(0.45, 0.12 + q.wave * 0.02);
       const hpMul = isBoss ? 13 : brute ? 1.7 : 0.85;
       const spdMul = isBoss ? 1 : brute ? 0.78 : 1.12;
@@ -1083,7 +1170,8 @@
             state.gameOver = true;
             playBgm(null); sfx('over', 1);
             ui.gameOverTitle.textContent = '☄️ 방어 실패!';
-            ui.gameOverStat.textContent = `도달: Stage ${st.id} (${st.name}) · 웨이브 ${state.wave}`;
+            noteRunRecord(); cloudSave(true);
+            ui.gameOverStat.textContent = `도달: Stage ${st.id} (${st.name}) · 웨이브 ${state.wave} · 🦖처치 ${state.kills}마리 (누적 ${record.totalKills.toLocaleString()})`;
             ui.gameOver.classList.remove('hidden');
             ui.gameOver.classList.add('flex');
           }
@@ -1096,7 +1184,7 @@
         e.x = p.x; e.y = p.y;
       }
 
-      const upgMul = (1 + (state.upgradeLv - 1) * 0.25) * state.synergy.dmgMul;
+      const upgMul = upgradeMul() * state.synergy.dmgMul;
       for (let i = 0; i < SLOTS.length; i++) {
         const slot = SLOTS[i];
         const u = slot.unit;
@@ -1220,6 +1308,7 @@
       for (let j = state.enemies.length - 1; j >= 0; j--) {
         const e = state.enemies[j];
         if (e.hp <= 0) {
+          state.kills++; record.totalKills++; recordDirty = true;
           // 연속 처치 콤보
           state.combo = state.time - state.comboT < 1.4 ? state.combo + 1 : 1;
           state.comboT = state.time;
@@ -1648,13 +1737,10 @@
       setText('gem', ui.gem, state.gem);
       setText('wave', ui.wave, state.wave);
       setText('enemies', ui.enemies, state.enemies.length + state.queue.length);
+      setText('kills', ui.kills, state.kills.toLocaleString());
       setText('timer', ui.timer, state.queue.length ? '습격중' : `0:${String(Math.max(0, Math.ceil(state.waveTimer))).padStart(2, '0')}`);
       {
-        const vip = isVip();
-        const skipLabel = vip ? '⚡건너뛰기' : state.queue.length ? '⏳대기' : `건너뛰기 +${skipBonus()}`;
-        setText('skip', ui.skipBtn, skipLabel);
-        const dim = !vip && state.queue.length > 0;
-        if (prevUI.skipDim !== dim) { prevUI.skipDim = dim; ui.skipBtn.classList.toggle('opacity-50', dim); }
+        setText('skip', ui.skipBtn, `⏩건너뛰기 +${skipBonus()}`);
         const cdr = state.skillCd / SKILL_CD;
         const key = Math.ceil(state.skillCd);
         if (prevUI.skillKey !== key) {
@@ -1769,14 +1855,32 @@
       sfx('gamble', 0.7);
       if (summonDino(tier)) { state.gem -= 2; if (tier === 5) flashScreen(); }
     });
-    document.getElementById('upgradeBtn').addEventListener('click', () => {
+    function doUpgrade() {
       const cost = getUpgradeCost();
-      if (state.gold < cost) { sfx('fail', 0.6); return showInfo(`강화 화석이 부족합니다! (필요: ${cost})`); }
+      if (state.gold < cost) { sfx('fail', 0.6); showInfo(`강화 화석이 부족합니다! (필요: ${cost})`); return false; }
       state.gold -= cost; state.upgradeLv++;
-      sfx('upgrade', 0.8);
-      SLOTS.forEach((s) => { if (s.unit) { s.unit.pop = 0.5; burst(s.x, s.y + 10, '#fcd34d', 3, 40, 1.8, -40, 0.5); } });
+      sfx('upgrade', 0.55, 1 + Math.min(0.5, (state.upgradeLv % 10) * 0.04));
+      SLOTS.forEach((s) => { if (s.unit) s.unit.pop = Math.max(s.unit.pop, 0.25); });
+      if (state.upgradeLv % 10 === 1) {
+        SLOTS.forEach((s) => { if (s.unit) burst(s.x, s.y + 10, '#fcd34d', 4, 50, 1.8, -40, 0.6); });
+        spawnDmgText(CENTER.x, CENTER.y - 46, `⚔️ 공격력 +${state.upgradeLv - 1}%`, '#fde047');
+      }
       if (state.selectedSlotId !== -1) selectSlot(state.selectedSlotId);
+      else showInfo(`⚔️ 강화 Lv.${state.upgradeLv} — 전체 공격력 +${state.upgradeLv - 1}% (꾹 누르면 연속 강화)`);
+      return true;
+    }
+    // 꾹 누르면 연속 강화
+    const upgradeBtn = document.getElementById('upgradeBtn');
+    let upgHold = null, upgRepeated = false;
+    const stopHold = () => { clearTimeout(upgHold); clearInterval(upgHold); upgHold = null; };
+    upgradeBtn.addEventListener('pointerdown', () => {
+      upgRepeated = false; stopHold();
+      upgHold = setTimeout(() => {
+        upgHold = setInterval(() => { upgRepeated = true; if (!doUpgrade()) stopHold(); }, 110);
+      }, 380);
     });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => upgradeBtn.addEventListener(ev, stopHold));
+    upgradeBtn.addEventListener('click', () => { if (upgRepeated) { upgRepeated = false; return; } doUpgrade(); });
     document.getElementById('sellBtn').addEventListener('click', () => {
       const slot = SLOTS[state.selectedSlotId];
       if (!slot || !slot.unit) return;
@@ -1795,7 +1899,7 @@
     speedBtn.addEventListener('click', () => {
       if (!isVip()) {
         sfx('fail', 0.5);
-        return showInfo('👑 x2 배속은 VIP 전용이에요! (AI게임장 로비에서 VIP 확인)');
+        return showInfo('👑 x2 배속과 소환 자동 합성은 VIP 전용이에요!');
       }
       state.speed = state.speed === 1 ? 2 : 1;
       sfx('click', 0.6);
@@ -1804,17 +1908,58 @@
     ['pageshow', 'focus', 'storage'].forEach((ev) => window.addEventListener(ev, refreshVipUI));
     refreshVipUI();
     document.getElementById('skillBtn').addEventListener('click', useRoarSkill);
+
+    const rankModal = document.getElementById('rankModal');
+    async function openRank() {
+      rankModal.classList.remove('hidden'); rankModal.classList.add('flex');
+      cloudSave(true);
+      const t = authToken();
+      const listEl = document.getElementById('rankList');
+      document.getElementById('myRankNick').textContent = myNick() + (isVip() ? ' 👑' : '');
+      document.getElementById('myRankScore').textContent = `${record.totalKills.toLocaleString()}마리`;
+      document.getElementById('myRankPos').textContent = t ? '내 순위' : '비로그인';
+      document.getElementById('rankLoginRow').classList.toggle('hidden', !!t);
+      document.getElementById('rankLoginRow').classList.toggle('flex', !t);
+      document.getElementById('rankMyStats').textContent = `이번 판 ${state.kills}마리 · 한 판 최고 ${Math.max(record.bestKills, state.kills)}마리 · 최고 웨이브 ${Math.max(record.bestWave, state.wave)}`;
+      listEl.innerHTML = '<div class="text-center py-4 text-xs text-slate-500">불러오는 중...</div>';
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}&_t=${Date.now()}`, { headers: t ? { 'Authorization': `Bearer ${t}` } : {} });
+        const data = await res.json();
+        if (!res.ok) throw new Error();
+        if (data.myRank) {
+          document.getElementById('myRankPos').textContent = `${data.myRank.rank}위`;
+          document.getElementById('myRankScore').textContent = `${Math.max(record.totalKills, Number(data.myRank.score || 0)).toLocaleString()}마리`;
+        }
+        const list = (data.rankings || []).slice(0, 10);
+        listEl.innerHTML = list.length ? list.map((it, i) => `
+          <div class="rounded-xl px-3 py-2 border ${it.isMe ? 'bg-amber-950/30 border-amber-400/60' : 'bg-slate-950/80 border-slate-800'} flex items-center justify-between">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-black ${i < 3 ? 'text-amber-300' : 'text-slate-300'} w-8 shrink-0">${['🥇', '🥈', '🥉'][i] || (it.rank ?? i + 1) + '위'}</span>
+              <span class="font-bold text-slate-100 truncate">${maskName(it.nickname || it.maskedName || '익명')}</span>
+              ${it.isMe ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold shrink-0">나</span>' : ''}
+            </div>
+            <span class="font-black text-emerald-400 tabular-nums shrink-0">${Number(it.score || 0).toLocaleString()}마리</span>
+          </div>`).join('')
+          : '<div class="text-center py-4 text-xs text-slate-500">아직 등록된 기록이 없어요. 첫 처치왕에 도전하세요!</div>';
+      } catch (e) {
+        listEl.innerHTML = '<div class="text-center py-4 text-xs text-slate-500">랭킹 서버 연결 대기 중...</div>';
+      }
+    }
+    document.getElementById('rankBtn').addEventListener('click', openRank);
+    document.getElementById('rankCloseBtn').addEventListener('click', () => { rankModal.classList.add('hidden'); rankModal.classList.remove('flex'); });
+    rankModal.addEventListener('click', (e) => { if (e.target === rankModal) { rankModal.classList.add('hidden'); rankModal.classList.remove('flex'); } });
+    document.getElementById('rankLoginBtn').addEventListener('click', () => {
+      cloudSave(true);
+      location.href = `${LOBBY_URL}?auth=login&returnTo=${encodeURIComponent(location.href)}`;
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { noteRunRecord(); cloudSave(true); } });
+    cloudLoad();
     document.getElementById('pauseBtn').addEventListener('click', (e) => {
       state.paused = !state.paused;
       e.currentTarget.textContent = state.paused ? '▶' : '⏸';
     });
     document.getElementById('skipWaveBtn').addEventListener('click', () => {
       if (!state.started || state.gameOver || state.paused) return;
-      const vip = isVip();
-      if (!vip && state.queue.length > 0) {
-        sfx('fail', 0.5);
-        return showInfo(`⏳ 이번 웨이브 공룡(${state.queue.length})이 다 나온 뒤 건너뛸 수 있어요 · VIP는 즉시!`);
-      }
       const bonus = skipBonus();
       state.gold += bonus;
       spawnDmgText(CENTER.x, CENTER.y - BASE_R - 20, `⏩ +${bonus}🦴`, '#fde047');
@@ -1858,7 +2003,7 @@
         paused: false, gameOver: false, selectedSlotId: -1,
         enemies: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
         parts: [], shake: 0, boss: null, started: true,
-        queue: [], curLanes: [], nextLanes: [], eggs: [], skillCd: 0, shock: null, combo: 0, comboShow: 0,
+        queue: [], curLanes: [], nextLanes: [], eggs: [], skillCd: 0, shock: null, combo: 0, comboShow: 0, kills: 0,
       });
       bgmName = null; playBgm('bgm_battle');
       recalcSynergy();
