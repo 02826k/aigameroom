@@ -127,7 +127,7 @@
       <div>
         <div class="text-[11px] font-black tracking-[0.35em] text-amber-200/90 mb-1">JURASSIC TOWER DEFENSE</div>
         <div class="dd-title">공룡 디펜스</div>
-        <div class="text-xs font-bold text-amber-100/90 mt-2 drop-shadow">사방 10곳에서 몰려오는 공룡떼 — 중앙 둥지를 지켜라!</div>
+        <div class="text-xs font-bold text-amber-100/90 mt-2 drop-shadow">시대마다 바뀌는 6개의 맵 — 공룡 둥지를 지켜라!</div>
       </div>
       <div class="flex flex-col items-center gap-2.5 w-full">
         <div class="grid grid-cols-3 gap-1.5 w-full max-w-[300px] text-[10px] font-bold">
@@ -439,49 +439,103 @@
     const LOGICAL_W = 420;
     const LOGICAL_H = 640;
 
-    // 중앙 둥지 + 10방향 진입로: 위·아래(│), 대각선 4(╲╱), 좌우 가로 2줄씩(=)
-    const CENTER = { x: 210, y: 320 };
-    const BASE_R = 40;
+    // 스테이지(시대)별 맵 6종 — 슬롯은 52px 격자 위에 좌우·상하 대칭 배치
     const LIFE_MAX = 20;
-    const LANE_DEFS = [
-      // [시작x, 시작y, 끝x, 끝y, 이름]  ← 앞쪽일수록 초반부터 열림
-      [210, -16, 210, CENTER.y - BASE_R, '북'],
-      [210, 656, 210, CENTER.y + BASE_R, '남'],
-      [-14, 292, CENTER.x - BASE_R + 6, 292, '서①'],
-      [434, 348, CENTER.x + BASE_R - 6, 348, '동②'],
-      [-14, 348, CENTER.x - BASE_R + 6, 348, '서②'],
-      [434, 292, CENTER.x + BASE_R - 6, 292, '동①'],
-      [-16, -16, null, null, '북서'],
-      [436, 656, null, null, '남동'],
-      [436, -16, null, null, '북동'],
-      [-16, 656, null, null, '남서'],
-    ];
-    const LANES = LANE_DEFS.map(([ax, ay, bx, by, name], i) => {
-      if (bx === null) {
-        const vx = CENTER.x - ax, vy = CENTER.y - ay, vl = Math.hypot(vx, vy);
-        bx = CENTER.x - (vx / vl) * BASE_R; by = CENTER.y - (vy / vl) * BASE_R;
+    const BASE_R = 30;
+    const MAP_DEFS = {
+      zigzag: { name: '지그재그 협곡', nest: [54, 582], paths: [[[366,-42],[366,114],[54,114],[54,218],[366,218],[366,322],[54,322],[54,426],[366,426],[366,530],[54,530],[54,582]]],
+        slots: [[158,166],[262,478],[158,374],[262,270],[158,478],[158,270],[262,374],[262,166],[210,270],[210,374],[210,166],[210,478],[106,270],[314,374],[314,166],[106,478],[106,374],[314,270],[106,166],[314,478],[262,62],[158,582],[158,62],[262,582]] },
+      spiral: { name: '소용돌이 둥지', nest: [210, 322], paths: [[[54,-42],[54,582],[366,582],[366,62],[158,62],[158,478],[262,478],[262,166],[210,166],[210,270]]],
+        slots: [[314,166],[106,218],[314,218],[106,166],[314,478],[106,478],[210,114],[314,270],[106,270],[314,322],[106,114],[314,114],[210,530],[106,426],[314,374],[106,374],[106,322],[314,426],[314,530],[106,530]] },
+      canyon: { name: 'U턴 계곡', nest: [366, 62], paths: [[[54,-42],[54,582],[158,582],[158,62],[262,62],[262,582],[366,582],[366,114]]],
+        slots: [[210,166],[314,478],[106,478],[210,478],[210,322],[106,166],[314,322],[106,322],[314,270],[314,426],[106,270],[106,426],[210,530],[210,270],[210,374],[210,218],[210,426],[314,374],[314,218],[106,374],[106,218],[210,114],[314,166]] },
+      tail: { name: '지그재그 소용돌이', nest: [210, 374], paths: [[[366,-42],[366,62],[54,62],[54,166],[366,166],[366,582],[54,582],[54,270],[262,270],[262,478],[158,478],[158,374],[210,374]]],
+        slots: [[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[210,218],[106,426],[210,322],[314,426],[314,322],[106,218],[314,218],[314,530],[106,322],[106,530],[314,114],[210,426],[106,114]] },
+      fork: { name: '두 갈래 합류', nest: [210, 582], paths: [[[54,-42],[54,374],[158,374],[158,166],[210,166],[210,582]],[[366,-42],[366,374],[262,374],[262,166],[210,166],[210,582]]],
+        slots: [[314,218],[106,218],[106,322],[314,322],[106,166],[314,166],[106,426],[314,426],[158,114],[262,114],[106,114],[314,114],[314,478],[106,478],[158,530],[262,530],[106,530],[314,530],[158,582],[262,582],[158,62],[262,62]] },
+      twinsq: { name: '쌍둥이 소용돌이', nest: [210, 322], paths: [[[54,-42],[54,478],[262,478],[262,270],[210,270]],[[366,686],[366,166],[158,166],[158,374],[210,374]]],
+        slots: [[106,374],[314,270],[106,270],[314,374],[106,218],[314,426],[210,218],[210,426],[106,426],[314,218],[106,322],[314,322],[106,114],[314,530],[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[106,530],[314,114],[210,62],[210,582]] },
+    };
+    // 쉬운 맵 → 어려운 맵 (길이 짧고 입구가 2곳인 맵이 뒤로)
+    const STAGE_MAP = ['zigzag', 'spiral', 'canyon', 'tail', 'fork', 'twinsq'];
+    const CENTER = { x: 210, y: 322 }; // 현재 맵의 둥지 위치
+    let MAP = null;
+    let LANES = [];
+
+    function buildLane(pts, i, all) {
+      const segs = [];
+      let tot = 0;
+      for (let k = 0; k < pts.length - 1; k++) {
+        const [ax, ay] = pts[k], [bx, by] = pts[k + 1];
+        const len = Math.hypot(bx - ax, by - ay);
+        if (!len) continue;
+        segs.push({ ax, ay, dx: (bx - ax) / len, dy: (by - ay) / len, len, start: tot });
+        tot += len;
       }
-      const len = Math.hypot(bx - ax, by - ay);
-      const dx = (bx - ax) / len, dy = (by - ay) / len;
+      const [sx, sy] = pts[0];
+      let name = '동굴';
+      if (all.length > 1) {
+        const o = all[1 - i][0];
+        name = Math.abs(sx - o[0]) > Math.abs(sy - o[1]) ? (sx < o[0] ? '왼쪽' : '오른쪽') : (sy < o[1] ? '위쪽' : '아래쪽');
+      }
       return {
-        id: i, name, ax, ay, bx, by, len, dx, dy,
-        spd: Math.max(0.62, Math.min(1.25, len / 300)), // 짧은 가로길은 느리게 → 도착 시간 균등
-        mx: Math.max(20, Math.min(LOGICAL_W - 20, ax)), my: Math.max(20, Math.min(LOGICAL_H - 20, ay)),
+        id: i, name, pts, segs, len: tot, dx: segs[0].dx, dy: segs[0].dy,
+        mx: Math.max(22, Math.min(LOGICAL_W - 22, sx)), my: Math.max(22, Math.min(LOGICAL_H - 22, sy)),
       };
-    });
+    }
     function lanePos(lane, dist) {
-      const d = Math.max(0, Math.min(lane.len, dist));
-      return { x: lane.ax + lane.dx * d, y: lane.ay + lane.dy * d };
+      const segs = lane.segs;
+      if (dist <= 0) return { x: segs[0].ax, y: segs[0].ay };
+      for (let i = 0; i < segs.length; i++) {
+        const s = segs[i];
+        if (dist <= s.start + s.len) {
+          const l = dist - s.start;
+          return { x: s.ax + s.dx * l, y: s.ay + s.dy * l };
+        }
+      }
+      const s = segs[segs.length - 1];
+      return { x: s.ax + s.dx * s.len, y: s.ay + s.dy * s.len };
     }
 
-    // 길 사이 8개 쐐기 구역에 대칭 배치된 28개 슬롯
     const SLOT_SIZE = 46;
     const SLOTS = [];
-    const SLOT_Q = [[119, 254], [173, 197], [68, 254], [86, 203], [173, 146], [35, 203], [122, 122]];
-    const slotPts = [];
-    SLOT_Q.forEach(([x, y]) => slotPts.push([x, y], [LOGICAL_W - x, y], [x, LOGICAL_H - y], [LOGICAL_W - x, LOGICAL_H - y]));
-    slotPts.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
-    slotPts.forEach(([x, y], i) => SLOTS.push({ id: i, x, y, unit: null }));
+
+    // 맵 교체: 둥지·길·슬롯을 바꾸고 배치된 공룡은 성급 그대로 새 칸으로 옮김
+    function applyMap(key) {
+      const def = MAP_DEFS[key];
+      MAP = def;
+      CENTER.x = def.nest[0]; CENTER.y = def.nest[1];
+      LANES = def.paths.map((p, i, all) => buildLane(p, i, all));
+      for (const e of state.enemies) {
+        const r = e.dist / e.lane.len;
+        e.lane = LANES[e.lane.id % LANES.length];
+        e.dist = r * e.lane.len;
+        const p = lanePos(e.lane, e.dist); e.x = p.x; e.y = p.y;
+      }
+      const units = SLOTS.filter((s) => s.unit).map((s) => s.unit);
+      SLOTS.length = 0;
+      def.slots.forEach(([x, y], i) => SLOTS.push({ id: i, x, y, unit: null }));
+      let merged = 0;
+      while (units.length > SLOTS.length) {
+        units.sort((a, b) => a.tier - b.tier);
+        let i = 0;
+        while (i < units.length - 1 && !(units[i].tier === units[i + 1].tier && units[i].tier < 5)) i++;
+        if (i < units.length - 1) {
+          const t = units[i].tier + 1;
+          units.splice(i, 2, createUnit(pickRandomDino(t)));
+          merged++;
+        } else {
+          const u = units.shift();
+          state.gold += Math.round(20 * Math.pow(2.2, u.tier - 1));
+        }
+      }
+      units.sort((a, b) => b.tier - a.tier); // 강한 공룡일수록 길이 많이 지나가는 칸으로
+      units.forEach((u, i) => { SLOTS[i].unit = u; u.pop = 0.8; });
+      state.selectedSlotId = -1;
+      drag.active = false; drag.fromSlot = null;
+      recalcSynergy();
+      if (merged) setTimeout(() => showInfo(`🗺️ 칸이 줄어 ${merged}번 자동 합성됐어요!`), 3000);
+    }
 
     // =========================================================================
     // 4. 게임 상태, 시너지, 오프스크린 배경 캐시
@@ -661,7 +715,7 @@
 
     function showStageBanner(st) {
       ui.stageBannerTitle.textContent = st.title;
-      ui.stageBannerSub.textContent = st.sub;
+      ui.stageBannerSub.textContent = MAP ? `${st.sub} · 🗺️ ${MAP.name}` : st.sub;
       ui.stageBanner.classList.remove('hidden', 'stage-banner-anim');
       void ui.stageBanner.offsetWidth;
       ui.stageBanner.classList.add('stage-banner-anim');
@@ -691,48 +745,45 @@
 
       const traceLanes = () => {
         g.beginPath();
-        for (const L of LANES) { g.moveTo(L.ax, L.ay); g.lineTo(CENTER.x, CENTER.y); }
+        for (const L of LANES) { g.moveTo(L.pts[0][0], L.pts[0][1]); for (let i = 1; i < L.pts.length; i++) g.lineTo(L.pts[i][0], L.pts[i][1]); }
       };
       g.lineCap = 'round';
       g.lineJoin = 'round';
-      // 길 그림자 → 테두리 → 흙길 텍스처
-      g.save(); g.translate(0, 3); traceLanes(); g.strokeStyle = 'rgba(0,0,0,0.45)'; g.lineWidth = 40; g.stroke(); g.restore();
-      traceLanes(); g.strokeStyle = st.pathEdge; g.lineWidth = 36; g.stroke();
-      g.beginPath(); g.arc(CENTER.x, CENTER.y, BASE_R + 24, 0, Math.PI * 2); g.fillStyle = st.pathEdge; g.fill();
+      g.save(); g.translate(0, 3); traceLanes(); g.strokeStyle = 'rgba(0,0,0,0.45)'; g.lineWidth = 46; g.stroke(); g.restore();
+      traceLanes(); g.strokeStyle = st.pathEdge; g.lineWidth = 42; g.stroke();
       let pathFill = st.path;
       if (ENV.path) {
         pathFill = g.createPattern(ENV.path, 'repeat');
         if (pathFill.setTransform && window.DOMMatrix) pathFill.setTransform(new DOMMatrix().scale(0.32));
       }
-      traceLanes(); g.strokeStyle = pathFill; g.lineWidth = 29; g.stroke();
-      g.beginPath(); g.arc(CENTER.x, CENTER.y, BASE_R + 20, 0, Math.PI * 2); g.fillStyle = pathFill; g.fill();
-      traceLanes(); g.strokeStyle = st.meteor ? 'rgba(120,10,10,0.22)' : 'rgba(60,30,10,0.18)'; g.lineWidth = 29; g.stroke();
+      traceLanes(); g.strokeStyle = pathFill; g.lineWidth = 34; g.stroke();
+      traceLanes(); g.strokeStyle = st.meteor ? 'rgba(120,10,10,0.22)' : 'rgba(60,30,10,0.18)'; g.lineWidth = 34; g.stroke();
+      traceLanes(); g.save(); g.setLineDash([2, 9]); g.strokeStyle = 'rgba(255,240,200,0.18)'; g.lineWidth = 1.5; g.stroke(); g.restore();
 
       // 진행 방향 화살표
       g.fillStyle = 'rgba(255,240,200,0.22)';
       for (const L of LANES) {
-        const ang = Math.atan2(L.dy, L.dx);
-        for (let d = 40; d < L.len - 30; d += 62) {
-          const p = lanePos(L, d);
-          g.save(); g.translate(p.x, p.y); g.rotate(ang);
+        for (let d = 50; d < L.len - 40; d += 70) {
+          const p = lanePos(L, d), q = lanePos(L, d + 4);
+          g.save(); g.translate(p.x, p.y); g.rotate(Math.atan2(q.y - p.y, q.x - p.x));
           g.beginPath(); g.moveTo(6, 0); g.lineTo(-4, -5); g.lineTo(-1, 0); g.lineTo(-4, 5); g.closePath(); g.fill();
           g.restore();
         }
       }
 
-      // 10곳 적 출현 동굴
+      // 적 출현 동굴
       for (const L of LANES) {
-        if (ENV.cave) g.drawImage(ENV.cave, L.mx - 21, L.my - 22, 42, 42);
-        else { g.fillStyle = '#7f1d1d'; g.beginPath(); g.arc(L.mx, L.my, 12, 0, Math.PI * 2); g.fill(); }
+        if (ENV.cave) g.drawImage(ENV.cave, L.mx - 28, L.my - 30, 56, 56);
+        else { g.fillStyle = '#7f1d1d'; g.beginPath(); g.arc(L.mx, L.my, 14, 0, Math.PI * 2); g.fill(); }
       }
 
-      // 중앙 공룡 둥지
-      const glow = g.createRadialGradient(CENTER.x, CENTER.y, 6, CENTER.x, CENTER.y, BASE_R + 18);
+      // 공룡 둥지
+      const glow = g.createRadialGradient(CENTER.x, CENTER.y, 6, CENTER.x, CENTER.y, 46);
       glow.addColorStop(0, 'rgba(253,224,71,0.40)'); glow.addColorStop(1, 'rgba(253,224,71,0)');
-      g.fillStyle = glow; g.beginPath(); g.arc(CENTER.x, CENTER.y, BASE_R + 18, 0, Math.PI * 2); g.fill();
-      if (ENV.nest) g.drawImage(ENV.nest, CENTER.x - 42, CENTER.y - 46, 84, 84);
+      g.fillStyle = glow; g.beginPath(); g.arc(CENTER.x, CENTER.y, 46, 0, Math.PI * 2); g.fill();
+      if (ENV.nest) g.drawImage(ENV.nest, CENTER.x - 34, CENTER.y - 38, 68, 68);
       else {
-        g.fillStyle = '#1e293b'; g.beginPath(); g.arc(CENTER.x, CENTER.y, 26, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#1e293b'; g.beginPath(); g.arc(CENTER.x, CENTER.y, 22, 0, Math.PI * 2); g.fill();
         g.strokeStyle = '#f59e0b'; g.lineWidth = 2; g.stroke();
         g.fillStyle = '#fde68a'; g.font = 'bold 11px sans-serif'; g.textAlign = 'center'; g.fillText('둥지', CENTER.x, CENTER.y + 4);
       }
@@ -893,40 +944,33 @@
     // =========================================================================
     // 6. 웨이브 & 전투 업데이트
     // =========================================================================
-    function activeLaneCount(w) { return Math.min(10, 2 + 2 * Math.floor((w - 1) / 2)); }
-    function pickLanes(w) {
-      const n = activeLaneCount(w);
-      const pool = LANES.slice(0, n).map((l) => l.id);
-      for (let i = pool.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [pool[i], pool[j]] = [pool[j], pool[i]]; }
-      const k = Math.min(n, 2 + Math.floor(w / 3));
-      return pool.slice(0, k);
-    }
-
     function startWave(waveNum) {
       state.wave = waveNum;
       state.waveTimer = 22;
       const st = getStageForWave(waveNum);
       const isBoss = waveNum % 5 === 0;
-      const lanes = state.nextLanes.length ? state.nextLanes : pickLanes(waveNum);
-      state.curLanes = lanes;
-      state.nextLanes = pickLanes(waveNum + 1);
-      const count = isBoss ? 4 + Math.floor(waveNum / 4) : 10 + waveNum * 2;
-      if (isBoss) state.queue.push({ wave: waveNum, lane: lanes[0], boss: true });
-      for (let i = 0; i < count; i++) state.queue.push({ wave: waveNum, lane: lanes[i % lanes.length], boss: false });
-      state.spawnAcc = Math.min(state.spawnAcc, 0.4);
-
       if (st.id !== state.stageId) {
         if (state.stageId) sfx('clear', 0.8);
         state.stageId = st.id;
+        applyMap(STAGE_MAP[st.id - 1]);
         renderStaticBackground(st);
         showStageBanner(st);
         setText('stageBadge', ui.stageBadge, `S${st.id} ${st.name}`);
       }
+      const lanes = LANES.map((l) => l.id);
+      state.curLanes = lanes;
+      state.nextLanes = lanes;
+      const count = isBoss ? 2 + Math.floor(waveNum / 5) : 10 + waveNum * 2;
+      if (isBoss) state.queue.push({ wave: waveNum, lane: (waveNum / 5) % lanes.length, boss: true });
+      for (let i = 0; i < count; i++) state.queue.push({ wave: waveNum, lane: lanes[i % lanes.length], boss: false });
+      state.spawnAcc = Math.min(state.spawnAcc, 0.4);
+
+      const two = lanes.length > 1 ? ' — 두 방향 습격!' : '';
       if (isBoss) {
-        showInfo(`⚠️ [보스] ${st.bossName} — ${LANES[lanes[0]].name}쪽에서 출현!`);
+        showInfo(`⚠️ [보스] ${st.bossName} 출현! 화력을 집중하세요!${two}`);
         playBgm('bgm_boss');
       } else {
-        showInfo(`🌊 W${waveNum} — ${lanes.map((l) => LANES[l].name).join('·')} ${lanes.length}방향 습격!`);
+        showInfo(`🌊 웨이브 ${waveNum}${two}`);
         if (state.started) playBgm('bgm_battle');
         if (waveNum > 1) sfx('wave', 0.55);
       }
@@ -935,8 +979,8 @@
     function spawnEnemy(q) {
       const st = getStageForWave(q.wave);
       const isBoss = q.boss;
-      const lane = LANES[q.lane];
-      const hpBase = 56 * Math.pow(1.28, q.wave - 1) * st.hpMul;
+      const lane = LANES[q.lane % LANES.length];
+      const hpBase = 40 * Math.pow(1.27, q.wave - 1) * st.hpMul;
       const brute = !isBoss && Math.random() < Math.min(0.45, 0.12 + q.wave * 0.02);
       const hpMul = isBoss ? 13 : brute ? 1.7 : 0.85;
       const spdMul = isBoss ? 1 : brute ? 0.78 : 1.12;
@@ -945,7 +989,7 @@
         lane, dist: 0, x: p.x, y: p.y,
         maxHp: hpBase * hpMul,
         hp: hpBase * hpMul,
-        speed: (isBoss ? 18 : 30 + Math.min(22, q.wave * 0.9)) * st.spdMul * spdMul * lane.spd,
+        speed: (isBoss ? 33 : 50 + Math.min(34, q.wave * 1.3)) * st.spdMul * spdMul,
         radius: isBoss ? 22 : brute ? 13 : 10,
         size: isBoss ? 92 : brute ? 54 : 44,
         art: isBoss ? `boss_${st.id}` : `en_${st.id}${brute ? 'b' : 'a'}`,
@@ -1046,6 +1090,8 @@
           continue;
         }
         const p = lanePos(e.lane, e.dist);
+        const mdx = p.x - e.x;
+        if (mdx > 0.05) e.face = 1; else if (mdx < -0.05) e.face = -1;
         e.walk += step * e.speed * e.slowMul * 0.22;
         e.x = p.x; e.y = p.y;
       }
@@ -1478,7 +1524,7 @@
         ctx.save();
         ctx.globalAlpha = 1 - k;
         ctx.strokeStyle = '#fdba74'; ctx.lineWidth = 10 * (1 - k) + 2;
-        ctx.beginPath(); ctx.arc(CENTER.x, CENTER.y, 30 + k * 420, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(CENTER.x, CENTER.y, 30 + k * 720, 0, Math.PI * 2); ctx.stroke();
         ctx.restore();
       }
 
