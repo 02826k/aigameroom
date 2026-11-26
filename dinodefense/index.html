@@ -205,8 +205,8 @@
     <div class="bg-slate-900 border-2 border-sky-500/40 rounded-2xl max-w-md w-full max-h-[82dvh] p-3.5 shadow-2xl flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-sm font-black text-sky-300">📖 공룡 도감 (★1 ~ ★5 패왕)</h2>
-          <p class="text-[10px] text-slate-400">★1+★1→★2 · ★2+★2→★3 · ★3+★3→★4 · ★4+★4→★5 티라노</p>
+          <h2 class="text-sm font-black text-sky-300">📖 공룡 도감 (★1 ~ ★6 하늘의 제왕)</h2>
+          <p class="text-[10px] text-slate-400">같은 성급 2마리 → 한 단계 위 · ★5+★5 → ★6 케찰코아틀루스</p>
         </div>
         <button id="codexCloseBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">✕</button>
       </div>
@@ -253,13 +253,15 @@
       { id: 13, file: 'assets/dino_13.png', name: '기가노토사우루스', diet: '육식', era: '백악기',     tier: 5, color: '#ef4444', desc: '용암 비늘 거대 육식 패왕', apex: true },
       { id: 14, file: 'assets/dino_14.png', name: '아르젠티노사우루스', diet: '초식', era: '백악기',   tier: 5, color: '#3b82f6', desc: '지상 최대 초식 거신', apex: true },
       { id: 15, file: 'assets/dino_15.png', name: '모사사우루스',   diet: '잡식', era: '백악기',       tier: 5, color: '#06b6d4', desc: '심해의 전설 포식자', apex: true },
+      // ★6 (단 1종 - ★5 두 마리 합성으로만 탄생)
+      { id: 22, file: 'assets/dino_22.png', name: '케찰코아틀루스', diet: '육식', era: '백악기',       tier: 6, color: '#f0abfc', desc: '하늘의 제왕 · 맵 전체 급강하 · 기절 · 보스 2배', apex: true, mythic: true },
     ];
 
-    const TIER_POOLS = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    const TIER_POOLS = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
     DINO_DB.forEach((d) => TIER_POOLS[d.tier].push(d));
 
     // 공룡타기 HD 공룡 카드 이미지 매핑 (img/units/u_{id}.webp → ../dinosaur/img/dinos/dino_{badge}.webp → assets 원본)
-    const BADGE_NO = { 1: 1, 2: 21, 3: 11, 4: 23, 5: 17, 6: 3, 7: 20, 8: 39, 9: 40, 10: 57, 21: 22, 20: 31, 18: 8, 19: 19, 16: 29, 17: 35, 11: 80, 12: 74, 13: 79, 14: 60, 15: 70 };
+    const BADGE_NO = { 1: 1, 2: 21, 3: 11, 4: 23, 5: 17, 6: 3, 7: 20, 8: 39, 9: 40, 10: 57, 21: 22, 20: 31, 18: 8, 19: 19, 16: 29, 17: 35, 11: 80, 12: 74, 13: 79, 14: 60, 15: 70, 22: 88 };
     DINO_DB.forEach((d) => { d.badge = BADGE_NO[d.id]; d.img = `img/units/u_${d.id}.webp`; });
 
     const DIET_TRAITS = {
@@ -274,6 +276,7 @@
       3: { border: '#38bdf8', glow: 'rgba(56,189,248,0.44)',  label: '★★★',   baseDmg: 88,  baseRate: 1.24 },
       4: { border: '#c084fc', glow: 'rgba(192,132,252,0.55)', label: '★★★★',  baseDmg: 210, baseRate: 1.36 },
       5: { border: '#facc15', glow: 'rgba(250,204,21,0.75)',  label: '★★★★★', baseDmg: 520, baseRate: 1.55 },
+      6: { border: '#f0abfc', glow: 'rgba(240,171,252,0.85)', label: '★★★★★★', baseDmg: 1450, baseRate: 1.25 },
     };
 
     // 브라우저 내장 자동 초록 배경 투명화(Flood-Fill) + 타이트 크롭 캐시
@@ -546,7 +549,7 @@
       while (units.length > SLOTS.length) {
         units.sort((a, b) => a.tier - b.tier);
         let i = 0;
-        while (i < units.length - 1 && !(units[i].tier === units[i + 1].tier && units[i].tier < 5)) i++;
+        while (i < units.length - 1 && !(units[i].tier === units[i + 1].tier && units[i].tier < 6)) i++;
         if (i < units.length - 1) {
           const t = units[i].tier + 1;
           units.splice(i, 2, createUnit(pickRandomDino(t)));
@@ -925,11 +928,12 @@
         apex: isApex,
         dmg: st.baseDmg * tr.dmgMul * (isApex ? 1.2 : 1),
         rate: st.baseRate * tr.rateMul,
-        range: tr.range + (tier - 1) * 9 + (isApex ? 14 : 0),
-        splash: isApex ? 52 : tr.splash,
+        range: dinoData.mythic ? 9999 : tr.range + (tier - 1) * 9 + (isApex ? 14 : 0),
+        mythic: !!dinoData.mythic,
+        splash: dinoData.mythic ? 58 : isApex ? 52 : tr.splash,
         slow: tr.slow,
         crit: isApex ? 0.35 : tr.crit,
-        projColor: isApex ? '#facc15' : tr.projColor,
+        projColor: dinoData.mythic ? '#f0abfc' : isApex ? '#facc15' : tr.projColor,
         cd: 0,
         recoil: 0,
         aimX: 0, aimY: -1,
@@ -965,13 +969,20 @@
       spawnDmgText(targetSlot.x, targetSlot.y - 30, `${auto ? '자동 ' : ''}진화! ${TIER_STYLE[nextTier].label}`, tc);
       sfx('merge', 0.85, 0.9 + nextTier * 0.05);
       if (nextTier >= 4) { sfx('roar', nextTier === 5 ? 1 : 0.6, nextTier === 5 ? 0.9 : 1.1); shake(nextTier === 5 ? 9 : 4); }
-      if (nextTier === 5) { flashScreen(); showInfo(`👑 최종 ★5 패왕 ${newDino.name} 강림!!`); }
+      if (nextTier === 5) { flashScreen(); showInfo(`👑 ★5 패왕 ${newDino.name} 강림!!`); }
+      if (nextTier === 6) {
+        flashScreen(); shake(12); sfx('roar', 1, 1.45); sfx('clear', 0.8);
+        state.skyShadow = { t: 0 };
+        burst(targetSlot.x, targetSlot.y, '#f0abfc', 40, 160, 3, 0, 1);
+        burst(targetSlot.x, targetSlot.y, '#a5f3fc', 30, 130, 2.4, 0, 1);
+        showInfo('🌈 ★6 하늘의 제왕 케찰코아틀루스 강림!! (맵 전체 공격)');
+      }
       return targetSlot;
     }
 
     // 슬롯이 꽉 찼을 때: 가장 낮은 성급의 같은 성급 2마리를 자동 합성 (같은 공룡 우선)
     function autoMerge() {
-      for (let tier = 1; tier < 5; tier++) {
+      for (let tier = 1; tier < 6; tier++) {
         const list = SLOTS.filter((s) => s.unit && s.unit.tier === tier);
         if (list.length < 2) continue;
         let a = null, b = null;
@@ -992,7 +1003,7 @@
       const vip = isVip();
       if (!empty.length && vip && autoMerge()) empty = SLOTS.filter((s) => !s.unit);
       if (!empty.length) {
-        showInfo(vip ? '합칠 수 있는 공룡이 없어요! (모두 ★5 패왕)' : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
+        showInfo(vip ? '합칠 수 있는 공룡이 없어요! (모두 ★6 또는 짝이 없음)' : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
         return false;
       }
       const slot = empty[(Math.random() * empty.length) | 0];
@@ -1013,7 +1024,7 @@
         const u = slot.unit;
         const atk = Math.round(u.dmg * upgradeMul() * state.synergy.dmgMul);
         const sellVal = Math.round(20 * Math.pow(2.2, u.tier - 1));
-        ui.infoText.textContent = `[${TIER_STYLE[u.tier].label}] ${u.name} (${u.diet}) · 공격 ${atk} · 사거리 ${u.range}`;
+        ui.infoText.textContent = `[${TIER_STYLE[u.tier].label}] ${u.name} (${u.diet}) · 공격 ${atk} · 사거리 ${u.mythic ? '맵 전체' : u.range}`;
         ui.sellBtn.textContent = `판매 (+${sellVal})`;
         ui.sellBtn.classList.remove('hidden');
       } else {
@@ -1207,7 +1218,8 @@
           u.cd = 1 / u.rate;
           u.recoil = 1;
           { const ax = target.x - slot.x, ay = target.y - slot.y, al = Math.hypot(ax, ay) || 1; u.aimX = ax / al; u.aimY = ay / al; }
-          const kind = u.apex ? 'fire' : u.diet === '육식' ? 'claw' : u.diet === '초식' ? 'rock' : 'bolt';
+          const kind = u.mythic ? 'sky' : u.apex ? 'fire' : u.diet === '육식' ? 'claw' : u.diet === '초식' ? 'rock' : 'bolt';
+          if (kind === 'sky') sfx('zap', 0.35, 0.6);
           if (kind === 'bolt') sfx('zap', 0.28);
           else if (kind === 'fire') sfx('spit', 0.4, 0.8);
           const isCrit = Math.random() < (u.crit + state.synergy.critAdd);
@@ -1215,7 +1227,7 @@
             x: slot.x, y: slot.y - 6, target,
             dmg: u.dmg * upgMul * (isCrit ? 1.85 : 1),
             isCrit, splash: u.splash, slow: u.slow,
-            color: u.projColor, speed: u.apex ? 400 : kind === 'rock' ? 300 : 360, apex: u.apex,
+            color: u.projColor, speed: kind === 'sky' ? 620 : u.apex ? 400 : kind === 'rock' ? 300 : 360, apex: u.apex,
             kind, px: slot.x, py: slot.y, spin: Math.random() * 6, tier: u.tier,
           });
         }
@@ -1266,6 +1278,7 @@
 
     function applyDamage(pr) {
       const hitEnemy = (e, dmg) => {
+        if (pr.kind === 'sky') { if (e.boss) dmg *= 2; else e.stun = Math.max(e.stun || 0, 0.5); }
         e.hp -= dmg;
         e.hitFlash = 0.09;
         if (pr.slow > 0) { e.slowMul = Math.min(e.slowMul, 1 - pr.slow); e.slowTimer = 1.6; }
@@ -1282,6 +1295,10 @@
       } else if (pr.kind === 'rock') {
         burst(tx, ty, '#a8a29e', 6, 60, 2.6, 160, 0.45);
         sfx('thump', 0.42);
+      } else if (pr.kind === 'sky') {
+        burst(tx, ty, '#f0abfc', 16, 130, 2.6, 0, 0.5);
+        burst(tx, ty, '#a5f3fc', 10, 90, 2, 0, 0.45);
+        sfx('thump', 0.7, 0.6); shake(2);
       } else {
         burst(tx, ty, '#fb923c', 14, 110, 3, 40, 0.5);
         burst(tx, ty, '#fde047', 8, 70, 2, 0, 0.4);
@@ -1434,13 +1451,18 @@
       }
       ctx.restore();
 
-      ctx.strokeStyle = st.border;
-      ctx.lineWidth = u.apex ? 2.6 : u.tier >= 3 ? 2 : 1.5;
+      if (u.mythic) {
+        const hue = (t * 120) % 360;
+        const rg = ctx.createLinearGradient(-half, -half, half, half);
+        rg.addColorStop(0, `hsl(${hue},95%,70%)`); rg.addColorStop(0.5, `hsl(${(hue + 120) % 360},95%,70%)`); rg.addColorStop(1, `hsl(${(hue + 240) % 360},95%,70%)`);
+        ctx.strokeStyle = rg;
+      } else ctx.strokeStyle = st.border;
+      ctx.lineWidth = u.mythic ? 3 : u.apex ? 2.6 : u.tier >= 3 ? 2 : 1.5;
       ctx.beginPath();
       ctx.roundRect(-half, -half, half * 2, half * 2, 9);
       ctx.stroke();
 
-      ctx.font = 'bold 8px sans-serif';
+      ctx.font = u.tier === 6 ? 'bold 7px sans-serif' : 'bold 8px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#000';
       ctx.fillText(st.label, 0.6, half - 3.4);
@@ -1449,7 +1471,7 @@
       ctx.font = '9px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(u.diet === '육식' ? '🥩' : u.diet === '초식' ? '🌿' : '🍽️', -half + 2, -half + 10);
-      if (u.apex) { ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('👑', half - 6, -half + 4); }
+      if (u.apex) { ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(u.mythic ? '🌈' : '👑', half - 6, -half + 4); }
       ctx.restore();
     }
 
@@ -1498,6 +1520,18 @@
     }
 
     function drawProjectile(p) {
+      if (p.kind === 'sky') {
+        const ang = Math.atan2(p.target.y - p.y, p.target.x - p.x);
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = 'rgba(240,171,252,0.55)'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(p.x - Math.cos(ang) * 26, p.y - Math.sin(ang) * 26); ctx.lineTo(p.x, p.y); ctx.stroke();
+        ctx.translate(p.x, p.y); ctx.rotate(ang);
+        ctx.fillStyle = '#fdf4ff';
+        ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-6, -11); ctx.lineTo(-2, 0); ctx.lineTo(-6, 11); ctx.closePath(); ctx.fill();
+        ctx.restore();
+        return;
+      }
       if (p.kind === 'claw') {
         const ang = Math.atan2(p.target.y - p.y, p.target.x - p.x);
         ctx.save();
@@ -1549,7 +1583,7 @@
           ctx.setLineDash([5, 5]);
           ctx.lineDashOffset = -state.time * 20;
           ctx.beginPath();
-          ctx.arc(sel.x, sel.y, sel.unit.range, 0, Math.PI * 2);
+          ctx.arc(sel.x, sel.y, sel.unit.mythic ? 0 : sel.unit.range, 0, Math.PI * 2);
           ctx.fill(); ctx.stroke();
           ctx.restore();
         }
@@ -1562,7 +1596,7 @@
         for (let i = 0; i < SLOTS.length; i++) {
           const s = SLOTS[i];
           if (s === drag.fromSlot || !s.unit) continue;
-          if (s.unit.tier === src.tier && src.tier < 5) {
+          if (s.unit.tier === src.tier && src.tier < 6) {
             ctx.save();
             ctx.globalAlpha = pulse;
             ctx.strokeStyle = s.unit.dinoId === src.dinoId ? '#facc15' : '#38bdf8';
@@ -1698,6 +1732,21 @@
       }
       ctx.globalAlpha = 1;
 
+      // ★6 탄생: 맵을 가로지르는 거대한 날개 그림자
+      if (state.skyShadow) {
+        state.skyShadow.t += 1 / 60;
+        const k = state.skyShadow.t / 1.6;
+        if (k >= 1) state.skyShadow = null;
+        else {
+          const sx = -120 + k * (LOGICAL_W + 240), sy = 120 + k * 380;
+          ctx.save(); ctx.globalAlpha = 0.35 * Math.sin(k * Math.PI); ctx.fillStyle = '#000';
+          ctx.translate(sx, sy); ctx.rotate(0.5);
+          ctx.beginPath(); ctx.moveTo(60, 0); ctx.quadraticCurveTo(0, -20, -110, -70); ctx.quadraticCurveTo(-30, -6, -40, 0);
+          ctx.quadraticCurveTo(-30, 6, -110, 70); ctx.quadraticCurveTo(0, 20, 60, 0); ctx.fill();
+          ctx.restore();
+        }
+      }
+
       // 콤보
       if (state.comboShow > 0 && state.combo >= 3) {
         ctx.save();
@@ -1740,7 +1789,9 @@
       setText('kills', ui.kills, state.kills.toLocaleString());
       setText('timer', ui.timer, state.queue.length ? '습격중' : `0:${String(Math.max(0, Math.ceil(state.waveTimer))).padStart(2, '0')}`);
       {
-        setText('skip', ui.skipBtn, `⏩건너뛰기 +${skipBonus()}`);
+        const bossLock = state.wave % 5 === 0;
+        setText('skip', ui.skipBtn, bossLock ? '🔒보스전' : `⏩건너뛰기 +${skipBonus()}`);
+        if (prevUI.skipDim !== bossLock) { prevUI.skipDim = bossLock; ui.skipBtn.classList.toggle('opacity-50', bossLock); }
         const cdr = state.skillCd / SKILL_CD;
         const key = Math.ceil(state.skillCd);
         if (prevUI.skillKey !== key) {
@@ -1805,7 +1856,7 @@
 
       const uA = fromSlot.unit, uB = targetSlot.unit;
       // 같은 성급 2마리 겹치면 상위 성급으로 합성! (동종이면 +20 화석 보너스)
-      if (uB && uA.tier === uB.tier && uA.tier < 5) {
+      if (uB && uA.tier === uB.tier && uA.tier < 6) {
         mergeUnits(fromSlot, targetSlot);
         selectSlot(targetSlot.id);
       } else {
@@ -1960,6 +2011,10 @@
     });
     document.getElementById('skipWaveBtn').addEventListener('click', () => {
       if (!state.started || state.gameOver || state.paused) return;
+      if (state.wave % 5 === 0) {
+        sfx('fail', 0.5);
+        return showInfo('🔒 보스 웨이브는 건너뛸 수 없어요 — 다음 스테이지는 직접 넘어가요!');
+      }
       const bonus = skipBonus();
       state.gold += bonus;
       spawnDmgText(CENTER.x, CENTER.y - BASE_R - 20, `⏩ +${bonus}🦴`, '#fde047');
