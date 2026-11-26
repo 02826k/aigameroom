@@ -7,12 +7,8 @@
   <title>공룡 디펜스 — 대멸종 서사</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <style>
-    :root {
-      color-scheme: dark;
-      box-sizing: border-box;
-      padding-top: env(safe-area-inset-top, 0px);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
@@ -21,7 +17,40 @@
       background: #020617;
       font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
       user-select: none;
+      -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+    body {
+      height: 100vh;
+      height: 100dvh;
+      padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    }
+    #canvasContainer { overflow: hidden; }
+    /* 키 작은 폰(아이폰 SE 등): 상·하단 여백 압축 */
+    @media (max-height: 700px) {
+      #hudSection { padding-top: 2px; padding-bottom: 2px; gap: 2px; }
+      #footerBar { gap: 4px; padding-bottom: 4px; }
+      #footerBar .grid > button { padding-top: 6px; padding-bottom: 6px; }
+      #infoBanner { padding-top: 4px; padding-bottom: 4px; }
+    }
+    /* 좁은 폰(320~360px): 제목·라벨 숨기고 버튼 압축 */
+    @media (max-width: 370px) {
+      header h1 { display: none; }
+      header button { padding-left: 6px; padding-right: 6px; }
+      .hud-lbl { display: none; }
+      #footerBar .grid > button span.text-xs { font-size: 10.5px; letter-spacing: -0.3px; }
+      #footerBar .grid > button span.text-sm { font-size: 12.5px; }
+    }
+    /* 태블릿: 상·하단 UI를 크게 */
+    @media (min-width: 700px) and (min-height: 700px) {
+      header, #hudSection, #footerBar { zoom: 1.32; }
+    }
+    /* 가로 화면 · 아주 낮은 화면 */
+    @media (max-height: 520px) {
+      #infoBanner { display: none; }
     }
     #gameCanvas {
       touch-action: none;
@@ -50,7 +79,7 @@
     @keyframes ddFlash { from { opacity: 1; } to { opacity: 0; } }
   </style>
 </head>
-<body class="text-slate-100 flex flex-col items-center justify-between h-[100dvh]">
+<body class="text-slate-100 flex flex-col items-center justify-between">
 
   <!-- 1. 표준 상단 헤더 (aigameroom 구조 계승) -->
   <header class="w-full max-w-[460px] bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 shrink-0">
@@ -69,21 +98,21 @@
   </header>
 
   <!-- 2. 상단 인게임 HUD -->
-  <section class="w-full max-w-[460px] px-2 pt-1 pb-1 flex flex-col gap-1 shrink-0">
+  <section id="hudSection" class="w-full max-w-[460px] px-2 pt-1 pb-1 flex flex-col gap-1 shrink-0">
     <div class="flex items-center gap-1.5">
       <button id="speedBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-indigo-950 border border-indigo-400/60 text-xs font-black text-indigo-200 active:scale-95 shrink-0">x1</button>
 
       <div class="flex-1 grid grid-cols-3 gap-1.5">
         <div class="bg-slate-900 border border-rose-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-rose-300 font-bold">❤️ 목숨</span>
+          <span class="text-[10px] text-rose-300 font-bold whitespace-nowrap">❤️<span class="hud-lbl"> 목숨</span></span>
           <span id="hudLife" class="text-xs font-black tabular-nums">20</span>
         </div>
         <div class="bg-slate-900 border border-amber-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-amber-300 font-bold">🦴 화석</span>
+          <span class="text-[10px] text-amber-300 font-bold whitespace-nowrap">🦴<span class="hud-lbl"> 화석</span></span>
           <span id="hudGold" class="text-xs font-black tabular-nums text-amber-200">320</span>
         </div>
         <div class="bg-slate-900 border border-purple-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-purple-300 font-bold">💎 호박</span>
+          <span class="text-[10px] text-purple-300 font-bold whitespace-nowrap">💎<span class="hud-lbl"> 호박</span></span>
           <span id="hudGem" class="text-xs font-black tabular-nums text-purple-200">5</span>
         </div>
       </div>
@@ -110,7 +139,7 @@
   </section>
 
   <!-- 3. 2D 캔버스 무대 -->
-  <main id="canvasContainer" class="relative w-full max-w-[460px] flex-1 min-h-0 px-2 flex items-center justify-center">
+  <main id="canvasContainer" class="relative w-full max-w-[460px] md:max-w-[640px] flex-1 min-h-0 px-2 flex items-center justify-center">
     <canvas id="gameCanvas" class="rounded-2xl border-2 border-slate-800 shadow-2xl bg-slate-950"></canvas>
 
     <!-- 스테이지 전환 배너 -->
@@ -152,7 +181,7 @@
   </main>
 
   <!-- 4. 하단 안내 & 3대 액션 버튼 -->
-  <footer class="w-full max-w-[460px] px-2 pt-1 pb-2 flex flex-col gap-1.5 shrink-0">
+  <footer id="footerBar" class="w-full max-w-[460px] px-2 pt-1 pb-2 flex flex-col gap-1.5 shrink-0">
     <div id="infoBanner" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
       <span id="infoText" class="text-slate-300 truncate">같은 성급 2마리를 겹치면 진화! (동종 합성 시 +20 화석)</span>
       <button id="sellBtn" type="button" class="hidden px-2 py-0.5 rounded-lg bg-rose-600/90 text-white text-[10px] font-black shrink-0 active:scale-95">판매 (+0)</button>
@@ -160,7 +189,7 @@
 
     <div class="grid grid-cols-4 gap-1.5">
       <button id="gambleBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-purple-400/60 flex flex-col items-center justify-center active:scale-95 shadow-lg">
-        <span class="text-xs font-black text-purple-100">🥚 고급부화</span>
+        <span class="text-xs font-black text-purple-100 whitespace-nowrap">🥚 고급부화</span>
         <span class="text-[10px] font-bold text-purple-300">💎 <span id="gambleCostText">2</span></span>
       </button>
 
@@ -170,7 +199,7 @@
       </button>
 
       <button id="upgradeBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-slate-700 to-slate-900 border border-amber-400/50 flex flex-col items-center justify-center active:scale-95 shadow-lg">
-        <span class="text-xs font-black text-amber-200">⚔️ 강화</span>
+        <span class="text-xs font-black text-amber-200 whitespace-nowrap">⚔️ 강화</span>
         <span class="text-[10px] font-bold text-slate-300">Lv.<span id="upgLvText">1</span> (🦴<span id="upgCostText">80</span>)</span>
       </button>
     </div>
@@ -482,7 +511,7 @@
       tail: { name: '지그재그 소용돌이', nest: [210, 374], paths: [[[366,-42],[366,62],[54,62],[54,166],[366,166],[366,582],[54,582],[54,270],[262,270],[262,478],[158,478],[158,374],[210,374]]],
         slots: [[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[210,218],[106,426],[210,322],[314,426],[314,322],[106,218],[314,218],[314,530],[106,322],[106,530],[314,114],[210,426],[106,114]] },
       fork: { name: '두 갈래 합류', nest: [210, 322], paths: [[[54,-42],[54,478],[158,478],[158,270],[210,270],[210,322]],[[366,-42],[366,478],[262,478],[262,270],[210,270],[210,322]]],
-        slots: [[158,218],[262,218],[210,374],[210,426],[106,166],[314,166],[106,218],[106,270],[106,322],[106,374],[106,426],[314,218],[314,270],[314,322],[314,374],[314,426],[106,114],[314,114],[106,530],[158,530],[210,530],[262,530],[314,530]] },
+        slots: [[158,218],[262,218],[210,374],[210,426],[210,218],[210,478],[106,166],[314,166],[106,218],[106,270],[106,322],[106,374],[106,426],[314,218],[314,270],[314,322],[314,374],[314,426],[106,114],[314,114],[106,530],[158,530],[210,530],[262,530],[314,530]] },
       twinsq: { name: '쌍둥이 소용돌이', nest: [210, 322], paths: [[[54,-42],[54,478],[262,478],[262,270],[210,270]],[[366,686],[366,166],[158,166],[158,374],[210,374]]],
         slots: [[106,374],[314,270],[106,270],[314,374],[106,218],[314,426],[210,218],[210,426],[106,426],[314,218],[106,322],[314,322],[106,114],[314,530],[158,114],[262,530],[158,530],[262,114],[210,114],[210,530],[106,530],[314,114],[262,218],[158,426],[106,166],[314,478]] },
     };
@@ -890,15 +919,26 @@
       }
     }
 
+    let lastFit = '';
     function resizeCanvas() {
       const box = document.getElementById('canvasContainer');
       const availW = box.clientWidth - 16;
       const availH = box.clientHeight - 4;
+      const key = `${availW}x${availH}x${window.devicePixelRatio}`;
+      if (key === lastFit || availW <= 0 || availH <= 0) return;
+      lastFit = key;
       const sc = Math.min(availW / LOGICAL_W, availH / LOGICAL_H);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       canvas.style.width = `${Math.floor(LOGICAL_W * sc)}px`;
       canvas.style.height = `${Math.floor(LOGICAL_H * sc)}px`;
+      const sb = document.getElementById('skillBtn');
+      if (sb) {
+        const size = Math.max(50, Math.min(76, Math.round(58 * sc / 0.75)));
+        sb.style.width = sb.style.height = `${size}px`;
+        sb.style.right = `${Math.round((box.clientWidth - LOGICAL_W * sc) / 2 + 10)}px`;
+        sb.style.bottom = `${Math.round((box.clientHeight - LOGICAL_H * sc) / 2 + 10)}px`;
+      }
       canvas.width = Math.floor(LOGICAL_W * dpr);
       canvas.height = Math.floor(LOGICAL_H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2071,7 +2111,17 @@
 
     // 초기화 & 메인 루프
     preloadSprites();
-    window.addEventListener('resize', resizeCanvas);
+    // 폰·태블릿 화면 맞춤: 실제 보이는 높이(주소창 제외)로 body 높이 고정 + 영역 변화 감시
+    function fitViewport() {
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.body.style.height = `${Math.round(vh)}px`;
+      resizeCanvas();
+    }
+    window.addEventListener('resize', fitViewport);
+    window.addEventListener('orientationchange', () => setTimeout(fitViewport, 250));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fitViewport);
+    if (window.ResizeObserver) new ResizeObserver(() => resizeCanvas()).observe(document.getElementById('canvasContainer'));
+    fitViewport();
     resizeCanvas();
     startWave(1);
 
