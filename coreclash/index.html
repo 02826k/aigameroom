@@ -40,6 +40,10 @@
       50% { box-shadow: 0 0 24px rgba(56, 189, 248, 0.55); }
     }
     .frost-glow { animation: frostGlow 2.6s infinite ease-in-out; }
+    .skill-art { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+    .skill-art [id^="name"] { color: #fff !important; }
+    .champ-card { background-image: linear-gradient(160deg, rgba(56,189,248,.08), rgba(2,6,23,.6)); }
+    #canvasOuterBox { box-shadow: 0 0 0 1px rgba(56,189,248,.25), 0 20px 50px rgba(0,0,0,.6); }
 
     body.focus-fullscreen {
       overflow: hidden !important;
@@ -807,6 +811,32 @@
         tImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(makeTurretSvg(team));
       });
 
+      // ===================== 고퀄리티 리소스 (힉스필드 제작) =====================
+      const KA = {};
+      const STRIP_N = 24;
+      function kaTint(img, color) {
+        const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = color; g.fillRect(0, 0, c.width, c.height);
+        return c;
+      }
+      function kaLoad(key, src, white) { const i = new Image(); i.onload = () => { KA[key] = i; if (white) KA[white] = kaTint(i, '#ffffff'); }; i.src = src; }
+      ['karen', 'cash', 'karius'].forEach((id) => {
+        kaLoad('hero_' + id, `img/${id}.webp`, 'heroW_' + id);
+        kaLoad('run_' + id, `img/run_${id}.webp`);
+        kaLoad('atk_' + id, `img/atk_${id}.webp`);
+      });
+      ['blue', 'red'].forEach((t) => {
+        ['melee', 'caster', 'cannon'].forEach((k) => { kaLoad(`${k}_${t}`, `img/${k}_${t}.webp`, `minW_${k}_${t}`); kaLoad(`walk_${k}_${t}`, `img/walk_${k}_${t}.webp`); });
+        kaLoad('turret_' + t, `img/turret_${t}.webp`);
+        kaLoad('nexus_' + t, `img/nexus_${t}.webp`);
+      });
+      kaLoad('abyss', 'img/map_abyss.jpg');
+      kaLoad('floor', 'img/map_floor.jpg');
+      ['frost', 'q_karen', 'r_karen', 'shield', 'slam', 'bolt', 'destroy', 'flash', 'levelup'].forEach((k) => kaLoad('fx_' + k, `img/fx_${k}.webp`));
+      function heroImgHtml(id, cls) {
+        return `<img src="img/${id}.webp" class="${cls}" style="object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))" onerror="this.outerHTML=decodeURIComponent('${encodeURIComponent(CHAMPION_SVGS[id] || '')}')">`;
+      }
+
       const CHAMPIONS = {
         karen: {
           id: 'karen', name: '카렌', title: '칼든 기사', role: '근접 전사', icon: '⚔️',
@@ -940,7 +970,57 @@
           if (AC) audioCtx = new AC();
         }
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        if (audioCtx && !sndLoading) loadSounds();
         return audioCtx;
+      }
+
+      // ---- 실제 효과음 · 아나운서 · 배경음악 (snd/*.mp3) ----
+      const SND_FILES = ['atk_karen', 'atk_cash', 'atk_karius', 'q_karen', 'r_karen', 'shield', 'frost', 'slam', 'bolt', 'destroy', 'flash', 'levelup',
+        'ann_welcome', 'ann_minions', 'ann_kill', 'ann_dead', 'ann_turret', 'ann_turret_lost', 'ann_victory', 'ann_defeat',
+        'ann_double', 'ann_triple', 'ann_quadra', 'ann_penta', 'ann_firstblood', 'ann_danger', 'bgm'];
+      const SND = {};
+      let sndLoading = false;
+      let wantBgm = false;
+      function loadSounds() {
+        if (sndLoading || !audioCtx) return;
+        sndLoading = true;
+        SND_FILES.forEach((n) => {
+          fetch(`snd/${n}.mp3`)
+            .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('x'))))
+            .then((b) => new Promise((res, rej) => audioCtx.decodeAudioData(b, res, rej)))
+            .then((buf) => { SND[n] = buf; if (n === 'bgm' && wantBgm && state.bgmEnabled && !bgmSrc) startBGM(); })
+            .catch(() => {});
+        });
+      }
+      const SND_ALIAS = { bolt: 'frost', flash: 'levelup', shield: 'levelup', destroy: 'slam', ann_double: 'ann_kill', ann_triple: 'ann_kill', ann_quadra: 'ann_kill', ann_penta: 'ann_kill', ann_firstblood: 'ann_kill' };
+      function playSnd(name, vol = 1, rate = 1) {
+        if (!SND[name] && SND_ALIAS[name] && SND[SND_ALIAS[name]]) name = SND_ALIAS[name];
+        if (!SND[name]) return false;
+        if (!state.soundEnabled) return true;
+        const ctxA = audioCtx;
+        if (!ctxA) return true;
+        const src = ctxA.createBufferSource();
+        src.buffer = SND[name];
+        src.playbackRate.value = rate;
+        const g = ctxA.createGain();
+        g.gain.value = vol;
+        src.connect(g); g.connect(ctxA.destination);
+        src.start();
+        return true;
+      }
+      function sfxAt(name, x, y, vol = 0.8, rate = 1) {
+        let v = vol;
+        if (myHero) v = vol * Math.max(0.12, 1 - Math.hypot(x - myHero.x, y - myHero.y) / 950);
+        return playSnd(name, v, rate);
+      }
+      let annBusyUntil = 0;
+      function announce(name) {
+        const now = performance.now();
+        if (now < annBusyUntil) { setTimeout(() => announce(name), annBusyUntil - now + 30); return; }
+        if (!SND[name] && SND_ALIAS[name]) name = SND_ALIAS[name];
+        if (!SND[name]) return;
+        annBusyUntil = now + Math.min(1800, SND[name].duration * 1000 + 150);
+        playSnd(name, 1.0);
       }
 
       function playSfx(type) {
@@ -986,14 +1066,26 @@
         }
       }
 
+      let bgmSrc = null;
       function startBGM() {
         stopBGM();
+        wantBgm = true;
         if (!state.bgmEnabled) return;
         const ctxA = getAudioContext();
         if (!ctxA) return;
+        if (SND.bgm) {
+          bgmSrc = ctxA.createBufferSource();
+          bgmSrc.buffer = SND.bgm;
+          bgmSrc.loop = true;
+          const g = ctxA.createGain();
+          g.gain.value = 0.26;
+          bgmSrc.connect(g); g.connect(ctxA.destination);
+          bgmSrc.start();
+          return;
+        }
         const notes = [220, 261.63, 293.66, 329.63, 392, 329.63, 293.66, 261.63];
         bgmTimer = setInterval(() => {
-          if (!state.bgmEnabled || !audioCtx) return;
+          if (!state.bgmEnabled || !audioCtx || SND.bgm) return;
           try {
             const now = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
@@ -1010,7 +1102,9 @@
       }
 
       function stopBGM() {
+        wantBgm = false;
         if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+        if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
       }
 
       // ==========================================
@@ -1216,14 +1310,14 @@
           const isSel = state.selectedChamp === ch.id;
 
           const card = document.createElement('div');
-          card.className = `rounded-2xl p-3.5 border-2 transition cursor-pointer flex flex-col justify-between gap-2.5 ${
+          card.className = `champ-card rounded-2xl p-3.5 border-2 transition cursor-pointer flex flex-col justify-between gap-2.5 ${
             isSel ? 'bg-sky-950/40 border-sky-400 frost-glow' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
           }`;
           card.innerHTML = `
             <div>
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl border shadow-inner overflow-hidden shrink-0" style="background:${ch.color}22; border-color:${ch.color}66">${CHAMPION_SVGS[ch.id] || ch.icon}</div>
+                  <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl border shadow-inner overflow-hidden shrink-0" style="background:radial-gradient(circle at 50% 35%, ${ch.color}55, #020617); border-color:${ch.color}99">${heroImgHtml(ch.id, 'w-full h-full')}</div>
                   <div>
                     <div class="text-sm font-black text-white">${ch.name} <span class="text-xs font-bold text-sky-300">(${ch.title})</span></div>
                     <div class="text-[11px] font-bold text-slate-400">${ch.role} · 체력 ${ch.maxHp} · 공격 ${ch.ad}</div>
@@ -1253,7 +1347,7 @@
             isSel ? 'bg-indigo-600/30 border-indigo-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-indigo-500/60'
           }`;
           pBtn.innerHTML = `
-            <span class="w-7 h-7 flex items-center justify-center text-xl shrink-0">${CHAMPION_SVGS[ch.id] || ch.icon}</span>
+            <span class="w-9 h-9 flex items-center justify-center text-xl shrink-0">${heroImgHtml(ch.id, 'w-full h-full')}</span>
             <div class="min-w-0">
               <div class="text-xs font-black truncate">${ch.name}</div>
               <div class="text-[10px] text-slate-400 truncate">${ch.title}</div>
@@ -1291,14 +1385,32 @@
       let viewW = 900;
       let viewH = 450;
 
-      function getViewportTransform() {
-        const activeW = 1350;
-        const activeH = 435;
-        const scale = Math.min(viewW / activeW, viewH / activeH);
-        const ox = (viewW - WORLD_W * scale) / 2;
-        const oy = (viewH - WORLD_H * scale) / 2;
-        return { scale, ox, oy };
+      // 영웅을 따라가는 카메라 (리그 오브 레전드처럼 확대된 시점)
+      const cam = { x: 700, y: 280, s: 1, shake: 0, init: false };
+      function updateCamera(dt) {
+        const s = Math.max(viewH / 470, viewW / WORLD_W);
+        cam.s = s;
+        const hw = viewW / 2 / s, hh = viewH / 2 / s;
+        let fx = 700, fy = 280;
+        if (myHero) {
+          if (myHero.dead) {
+            const own = structures.find((st) => st.type === 'nexus' && st.team === myHero.team);
+            if (own) { fx = own.x; fy = own.y; }
+          } else { fx = myHero.x; fy = myHero.y; }
+        }
+        const tx = hw * 2 >= WORLD_W ? WORLD_W / 2 : Math.max(hw - 40, Math.min(WORLD_W - hw + 40, fx));
+        const ty = hh * 2 >= WORLD_H ? WORLD_H / 2 : Math.max(hh - 30, Math.min(WORLD_H - hh + 30, fy));
+        if (!cam.init) { cam.x = tx; cam.y = ty; cam.init = true; }
+        const k = 1 - Math.exp(-dt * 6);
+        cam.x += (tx - cam.x) * k;
+        cam.y += (ty - cam.y) * k;
+        if (cam.shake > 0) cam.shake = Math.max(0, cam.shake - dt * 30);
       }
+      function getViewportTransform() {
+        const scale = cam.s;
+        return { scale, ox: viewW / 2 - cam.x * scale, oy: viewH / 2 - cam.y * scale };
+      }
+      function shakeCam(v) { cam.shake = Math.max(cam.shake, v); }
 
       function resizeCanvas() {
         const rect = canvasWrapper.getBoundingClientRect();
@@ -1390,6 +1502,32 @@
         showToast(vipAutoEnabled ? '👑 VIP 자동공격 & 자동스킬 ON!' : '👑 VIP 자동공격 & 자동스킬 OFF');
       });
 
+      // 영상으로 만든 스킬 이펙트 스프라이트
+      function spawnFx(key, x, y, size, dur = 700, follow = null) {
+        vfxList.push({ type: 'fx', key, x, y, size, t0: performance.now(), dur, follow, oy: follow ? y - follow.y : 0, life: 99 });
+      }
+      function skillFx(hero, key, ang) {
+        const c = hero.champId;
+        const cx = hero.x, cy = hero.y;
+        if (key === 'D') { sfxAt('flash', cx, cy, 0.8); spawnFx('flash', cx, cy, 120, 500); return; }
+        if (c === 'karen') {
+          if (key === 'Q') { spawnFx('q_karen', cx, cy, 270, 650, hero); sfxAt('q_karen', cx, cy, 0.9); }
+          else if (key === 'W') { spawnFx('shield', cx, cy, 140, 900, hero); sfxAt('shield', cx, cy, 0.8); }
+          else if (key === 'E') { sfxAt('atk_karen', cx, cy, 0.8, 1.15); spawnFx('flash', cx + Math.cos(ang) * 90, cy + Math.sin(ang) * 90, 90, 400); }
+          else if (key === 'R') { const tx = cx + Math.cos(ang) * 110, ty = cy + Math.sin(ang) * 110; spawnFx('r_karen', tx, ty, 360, 1100); sfxAt('r_karen', tx, ty, 1.0); shakeCam(12); }
+        } else if (c === 'cash') {
+          if (key === 'Q') { spawnFx('shield', cx, cy, 110, 700, hero); sfxAt('shield', cx, cy, 0.6, 1.3); }
+          else if (key === 'W') { sfxAt('atk_cash', cx, cy, 0.85, 0.9); }
+          else if (key === 'E') { spawnFx('flash', cx, cy, 110, 450); sfxAt('flash', cx, cy, 0.7, 1.1); }
+          else if (key === 'R') { sfxAt('atk_cash', cx, cy, 0.9, 0.75); sfxAt('frost', cx, cy, 0.6, 0.8); }
+        } else if (c === 'karius') {
+          if (key === 'Q') { spawnFx('slam', cx + Math.cos(ang) * 65, cy + Math.sin(ang) * 65, 200, 650); sfxAt('slam', cx, cy, 0.8, 1.2); shakeCam(5); }
+          else if (key === 'W') { spawnFx('shield', cx, cy, 160, 1000, hero); sfxAt('shield', cx, cy, 0.8, 0.85); }
+          else if (key === 'E') { spawnFx('slam', cx, cy, 300, 750); sfxAt('slam', cx, cy, 0.9); shakeCam(8); }
+          else if (key === 'R') { spawnFx('slam', cx, cy, 390, 900); spawnFx('shield', cx, cy, 200, 1200, hero); sfxAt('slam', cx, cy, 1.0, 0.8); shakeCam(13); }
+        }
+      }
+
       function createHero(team, champId, name) {
         const c = CHAMPIONS[champId] || CHAMPIONS.karen;
         const vipBoost = (team === 'blue' && state.isVip) ? 1.15 : 1.0;
@@ -1462,6 +1600,7 @@
       function spawnMinionWave() {
         waveCount++;
         document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount}`;
+        if (waveCount === 1) announce('ann_minions');
 
         ['blue', 'red'].forEach(team => {
           const nx = team === 'blue' ? 105 : WORLD_W - 105;
@@ -1537,10 +1676,7 @@
       function setupHudForHero(h) {
         const c = CHAMPIONS[h.champId];
         const hpEl = document.getElementById('hudPortrait');
-        if (hpEl) {
-          if (CHAMPION_SVGS[c.id]) hpEl.innerHTML = CHAMPION_SVGS[c.id];
-          else hpEl.textContent = c.icon;
-        }
+        if (hpEl) hpEl.innerHTML = heroImgHtml(c.id, 'w-full h-full');
         const roleEl = document.getElementById('hudRoleLabel');
         if (roleEl) roleEl.textContent = `${c.role} · `;
         document.getElementById('hudChampName').textContent = `${c.name} (${c.title})`;
@@ -1548,8 +1684,27 @@
         ['Q', 'W', 'E', 'R'].forEach(k => {
           document.getElementById('icon' + k).textContent = c.skills[k].icon;
           document.getElementById('name' + k).textContent = c.skills[k].name;
+          setBtnArt('btn' + k, `img/sk_${c.id}_${k}.jpg`, 'icon' + k);
         });
+        setBtnArt('btnD', 'img/sk_flash.jpg');
+        setBtnArt('btnAtk', 'img/sk_attack.jpg');
+        setBtnArt('btnVipAuto', 'img/sk_vip.jpg');
         updateInGameHud();
+      }
+
+      function setBtnArt(btnId, src, hideId) {
+        const im = new Image();
+        im.onload = () => {
+          const b = document.getElementById(btnId);
+          if (!b) return;
+          b.style.backgroundImage = `linear-gradient(180deg, rgba(2,6,23,0) 30%, rgba(2,6,23,0.85) 100%), url(${src})`;
+          b.style.backgroundSize = 'cover';
+          b.style.backgroundPosition = 'center';
+          b.classList.add('skill-art');
+          if (hideId) { const h = document.getElementById(hideId); if (h) h.style.visibility = 'hidden'; }
+          b.querySelectorAll('span').forEach((sp) => { if (/\p{Extended_Pictographic}/u.test(sp.textContent) && !sp.className.includes('absolute')) sp.style.display = 'none'; });
+        };
+        im.src = src;
       }
 
       function runCountdown() {
@@ -1558,6 +1713,8 @@
         const ct = document.getElementById('countdownText');
         let n = 3;
         ct.textContent = '3';
+        getAudioContext();
+        setTimeout(() => announce('ann_welcome'), 150);
         co.classList.remove('hidden');
         co.classList.add('flex');
         countdownTimer = setInterval(() => {
@@ -1583,6 +1740,7 @@
         gameRunning = false;
         matchPaused = true;
         const iWon = myHero && myHero.team === winnerTeam;
+        setTimeout(() => announce(iWon ? 'ann_victory' : 'ann_defeat'), 600);
         if (iWon) state.wins++;
         else state.losses++;
         saveState(true);
@@ -1618,6 +1776,7 @@
           dmg -= absorbed;
         }
         target.hp = Math.max(0, target.hp - dmg);
+        target.hitFlash = 1;
         if (target.reflectDmg && attacker && !attacker.dead && Math.hypot(attacker.x - target.x, attacker.y - target.y) < 110) {
           attacker.hp = Math.max(1, attacker.hp - 18);
         }
@@ -1638,11 +1797,14 @@
 
       function handleEntityDeath(target, killer) {
         if (target.type === 'nexus') {
+          spawnFx('destroy', target.x, target.y, 460, 1400); sfxAt('destroy', target.x, target.y, 1.0, 0.8); shakeCam(18);
           endAramMatch(target.team === 'blue' ? 'red' : 'blue', `${target.name}가 파괴되었습니다!`);
           return;
         }
         if (target.type === 'turret') {
           vfxList.push({ type: 'ring', x: target.x, y: target.y, r: 10, maxR: 90, color: '#fbbf24', life: 0.7 });
+          spawnFx('destroy', target.x, target.y - 20, 300, 1200); sfxAt('destroy', target.x, target.y, 1.0); shakeCam(12);
+          if (myHero) announce(myHero.team !== target.team ? 'ann_turret' : 'ann_turret_lost');
           if (myHero && myHero.team !== target.team) { myHero.gold += 200; gainXp(myHero, 90); }
           if (enemyHero && enemyHero.team !== target.team) { enemyHero.gold += 200; gainXp(enemyHero, 90); }
           showToast(`💥 ${target.name} 파괴! (+200 G)`);
@@ -1665,6 +1827,15 @@
           target.deaths++;
           target.respawnTimer = 4 + Math.min(8, target.level);
           teamKills[target.team === 'blue' ? 'red' : 'blue']++;
+          spawnFx('bolt', target.x, target.y, 150, 700);
+          if (killer && killer.champId) {
+            const nowK = performance.now();
+            killer.multi = (killer.lastKillAt && nowK - killer.lastKillAt < 12000) ? (killer.multi || 1) + 1 : 1;
+            killer.lastKillAt = nowK;
+            if (teamKills.blue + teamKills.red === 1) announce('ann_firstblood');
+            else if (killer === myHero) announce(['ann_kill', 'ann_kill', 'ann_double', 'ann_triple', 'ann_quadra', 'ann_penta'][Math.min(5, killer.multi)]);
+            if (target === myHero) announce('ann_dead');
+          } else if (target === myHero) announce('ann_dead');
           if (killer && killer.champId) {
             killer.kills++;
             killer.gold += 300;
@@ -1692,6 +1863,8 @@
           hero.hp = Math.min(hero.maxHp, hero.hp + 95);
           hero.ad += 6;
           floatingTexts.push({ x: hero.x, y: hero.y - 36, text: `LEVEL ${hero.level}!`, color: '#38bdf8', life: 1.0 });
+          spawnFx('levelup', hero.x, hero.y - 30, 190, 1000, hero);
+          if (hero === myHero) playSnd('levelup', 0.7);
         }
       }
 
@@ -1767,7 +1940,8 @@
         hero.atkTimer = hero.qBuffTimer > 0 ? hero.atkCd * 0.78 : hero.atkCd;
         if (hero.inBush) hero.revealTimer = 1.6;
         hero.facing = Math.atan2(target.y - hero.y, target.x - hero.x);
-        if (hero === myHero) playSfx('atk');
+        hero.atkAnimUntil = performance.now() + 420;
+        if (!sfxAt('atk_' + hero.champId, hero.x, hero.y, 0.5, 0.95 + Math.random() * 0.1) && hero === myHero) playSfx('atk');
 
         let dmg = hero.ad;
         if (hero.critNext) { dmg *= 1.65; hero.critNext = false; }
@@ -1819,11 +1993,13 @@
           hero.cds.D = 22;
           const ang = Math.atan2((aimY ?? hero.y) - hero.y, (aimX ?? hero.x + Math.cos(hero.facing) * 100) - hero.x);
           vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 8, maxR: 40, color: '#fde047', life: 0.35 });
+          skillFx(hero, 'D', ang);
           hero.x = Math.max(40, Math.min(WORLD_W - 40, hero.x + Math.cos(ang) * 145));
           hero.y = Math.max(LANE_TOP, Math.min(LANE_BOT, hero.y + Math.sin(ang) * 145));
           hero.targetX = null; hero.targetY = null;
           vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 8, maxR: 45, color: '#fde047', life: 0.35 });
-          if (hero === myHero) playSfx('skill');
+          spawnFx('flash', hero.x, hero.y, 120, 500);
+          if (!SND.flash && hero === myHero) playSfx('skill');
           return;
         }
 
@@ -1836,12 +2012,13 @@
         hero.mp -= sk.mp;
         hero.cds[key] = sk.cd;
         if (hero.inBush) hero.revealTimer = 1.6;
-        if (hero === myHero) playSfx(key === 'R' ? 'ult' : 'skill');
-
         const ang = (aimX !== undefined && aimY !== undefined)
           ? Math.atan2(aimY - hero.y, aimX - hero.x)
           : hero.facing;
         hero.facing = ang;
+        hero.atkAnimUntil = performance.now() + 420;
+        if (!SND.slam && hero === myHero) playSfx(key === 'R' ? 'ult' : 'skill');
+        skillFx(hero, key, ang);
 
         const oppTeam = hero.team === 'blue' ? 'red' : 'blue';
         const getEnemiesInRadius = (cx, cy, rad) => {
@@ -2249,7 +2426,8 @@
               dealDamage(hit, pr.dmg, pr.owner);
               if (pr.slow && hit.champId) { hit.slowTimer = 1.5; hit.slowAmt = 0.3; }
               if (pr.stun && hit.champId) { hit.stunTimer = pr.stun; }
-              if (pr.isUltArrow) vfxList.push({ type: 'ring', x: pr.x, y: pr.y, r: 12, maxR: 75, color: '#38bdf8', life: 0.5 });
+              if (pr.isUltArrow) { vfxList.push({ type: 'ring', x: pr.x, y: pr.y, r: 12, maxR: 75, color: '#38bdf8', life: 0.5 }); spawnFx('frost', pr.x, pr.y, 240, 800); sfxAt('frost', pr.x, pr.y, 1.0); shakeCam(7); }
+              else spawnFx('frost', pr.x, pr.y, 70, 450);
               projectiles.splice(i, 1);
             }
           } else {
@@ -2257,6 +2435,8 @@
             if (!t || t.hp <= 0 || t.dead) { projectiles.splice(i, 1); continue; }
             const dx = t.x - pr.x, dy = t.y - pr.y, d = Math.hypot(dx, dy);
             if (d <= pr.speed * dt + 10) {
+              if (pr.owner && pr.owner.type === 'turret') { spawnFx('bolt', t.x, t.y, 95, 450); sfxAt('bolt', t.x, t.y, 0.45); }
+              else if (pr.slow) spawnFx('frost', t.x, t.y, 62, 420);
               dealDamage(t, pr.dmg, pr.owner);
               if (pr.slow && t.champId) { t.slowTimer = 1.5; t.slowAmt = 0.2; }
               projectiles.splice(i, 1);
@@ -2297,295 +2477,543 @@
         }
       }
 
-      function drawHowlingAbyss() {
-        const abyssGrad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
-        abyssGrad.addColorStop(0, '#020617');
-        abyssGrad.addColorStop(0.5, '#0c192c');
-        abyssGrad.addColorStop(1, '#020617');
-        ctx.fillStyle = abyssGrad;
-        ctx.fillRect(-400, -400, WORLD_W + 800, WORLD_H + 800);
-
-        const bridgeGrad = ctx.createLinearGradient(0, LANE_TOP, 0, LANE_BOT);
-        bridgeGrad.addColorStop(0, '#1e293b');
-        bridgeGrad.addColorStop(0.15, '#334155');
-        bridgeGrad.addColorStop(0.5, '#1e3a5f');
-        bridgeGrad.addColorStop(0.85, '#334155');
-        bridgeGrad.addColorStop(1, '#1e293b');
-        ctx.fillStyle = bridgeGrad;
-        ctx.fillRect(30, LANE_TOP, WORLD_W - 60, LANE_BOT - LANE_TOP);
-
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(30, LANE_TOP); ctx.lineTo(WORLD_W - 30, LANE_TOP);
-        ctx.moveTo(30, LANE_BOT); ctx.lineTo(WORLD_W - 30, LANE_BOT);
-        ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.14)';
-        ctx.lineWidth = 1.5;
-        for (let x = 90; x < WORLD_W - 60; x += 90) {
-          ctx.beginPath(); ctx.moveTo(x, LANE_TOP); ctx.lineTo(x, LANE_BOT); ctx.stroke();
-        }
+      // ===== 고퀄리티 전장 렌더링 =====
+      const HERO_H = { karen: 96, cash: 92, karius: 108 };
+      const HERO_FACE = { karen: 1, cash: 1, karius: 1 };
+      const MIN_H = { melee: 46, caster: 40, cannon: 50 };
+      const ABYSS = { x: -320, y: -230, w: 2040, h: 2040 * 1152 / 2688 };
+      function stripFrame(img, t) {
+        const fw = img.width / STRIP_N;
+        const f = ((Math.floor(t) % STRIP_N) + STRIP_N) % STRIP_N;
+        return [f * fw, fw];
+      }
+      function trackMotion(u, now) {
+        if (u._lx === undefined) { u._lx = u.x; u._ly = u.y; }
+        const d = Math.hypot(u.x - u._lx, u.y - u._ly);
+        if (d > 0.25) { u._moveUntil = now + 140; if (Math.abs(u.x - u._lx) > 0.15) u._dir = u.x > u._lx ? 1 : -1; }
+        u._lx = u.x; u._ly = u.y;
+        return now < (u._moveUntil || 0);
+      }
+      function drawTeamRing(x, y, rx, col, alpha) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(WORLD_W / 2, 280, 95, 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.arc(WORLD_W / 2, 280, 62, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalAlpha = alpha;
+        const g = ctx.createRadialGradient(x, y, 2, x, y, rx);
+        g.addColorStop(0, col + '00'); g.addColorStop(0.7, col + '33'); g.addColorStop(1, col + '00');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.globalAlpha = alpha * 0.9;
+        ctx.beginPath(); ctx.ellipse(x, y, rx * 0.8, rx * 0.34, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.restore();
+      }
+      function drawBar(x, y, w, h, ratio, col, back) {
+        ctx.fillStyle = back || 'rgba(2,6,23,0.88)';
+        ctx.beginPath(); ctx.roundRect(x - w / 2 - 1.5, y - 1.5, w + 3, h + 3, 3); ctx.fill();
+        const g = ctx.createLinearGradient(0, y, 0, y + h);
+        g.addColorStop(0, col[0]); g.addColorStop(1, col[1]);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x - w / 2, y, Math.max(0, w * ratio), h, 2); ctx.fill();
+      }
 
-        bushes.forEach(b => {
-          ctx.fillStyle = 'rgba(16, 185, 129, 0.28)';
-          ctx.strokeStyle = 'rgba(52, 211, 153, 0.65)';
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 14); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = 'rgba(110, 231, 183, 0.8)';
-          ctx.font = 'bold 11px "Noto Sans KR"';
-          ctx.textAlign = 'center';
-          ctx.fillText('🌿 은신 부시', b.x + b.w / 2, b.y + b.h / 2 + 4);
-        });
-
-        relics.forEach(r => {
-          if (!r.active) {
-            ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
-            ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.stroke();
-            return;
-          }
+      function drawHowlingAbyss() {
+        const now = performance.now();
+        const t = now / 1000;
+        // 1) 바닥: 얼어붙은 다리 맵
+        if (KA.abyss) {
+          ctx.drawImage(KA.abyss, ABYSS.x, ABYSS.y, ABYSS.w, ABYSS.h);
+        } else {
+          ctx.fillStyle = '#04101f'; ctx.fillRect(-400, -400, WORLD_W + 800, WORLD_H + 800);
+        }
+        if (KA.floor) {
           ctx.save();
-          ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
-          ctx.strokeStyle = '#4ade80';
-          ctx.lineWidth = 2.5;
-          ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 12;
-          ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 14px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('✚', r.x, r.y + 5);
+          ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 30;
+          ctx.drawImage(KA.floor, 14, LANE_TOP - 34, WORLD_W - 28, LANE_BOT - LANE_TOP + 68);
           ctx.restore();
-        });
+        } else {
+          const bridgeGrad = ctx.createLinearGradient(0, LANE_TOP, 0, LANE_BOT);
+          bridgeGrad.addColorStop(0, '#1e293b'); bridgeGrad.addColorStop(0.5, '#1e3a5f'); bridgeGrad.addColorStop(1, '#1e293b');
+          ctx.fillStyle = bridgeGrad;
+          ctx.fillRect(30, LANE_TOP, WORLD_W - 60, LANE_BOT - LANE_TOP);
+        }
+        // 다리 아래로 깔리는 냉기 안개
+        const fog = ctx.createLinearGradient(0, LANE_BOT + 20, 0, LANE_BOT + 160);
+        fog.addColorStop(0, 'rgba(186,230,253,0.18)'); fog.addColorStop(1, 'rgba(186,230,253,0)');
+        ctx.fillStyle = fog; ctx.fillRect(-300, LANE_BOT + 20, WORLD_W + 600, 140);
 
-        structures.forEach(s => {
-          if (s.hp <= 0) {
-            ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.radius * 0.7, 0, Math.PI * 2); ctx.fill();
-            return;
-          }
-          const col = s.team === 'blue' ? '#38bdf8' : '#f43f5e';
-          if (s.type === 'turret') {
-            ctx.strokeStyle = s.team === 'blue' ? 'rgba(56, 189, 248, 0.14)' : 'rgba(244, 63, 94, 0.14)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.range, 0, Math.PI * 2); ctx.stroke();
-          } else if (s.type === 'nexus') {
+        // 2) 은신 부시
+        bushes.forEach((b) => {
+          if (KA.bush) {
+            const w = b.w * 1.25, h = b.h * 1.9;
             ctx.save();
-            ctx.strokeStyle = s.team === 'blue' ? 'rgba(52, 211, 153, 0.45)' : 'rgba(251, 113, 133, 0.45)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 5]);
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.radius + 42, 0, Math.PI * 2); ctx.stroke();
+            const sway = Math.sin(t * 1.6 + b.x) * 0.012;
+            ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+            ctx.transform(1, 0, sway, 1, 0, 0);
+            ctx.drawImage(KA.bush, -w / 2, -h / 2, w, h);
             ctx.restore();
-          }
-
-          ctx.save();
-          ctx.shadowColor = col; ctx.shadowBlur = s.type === 'nexus' ? 22 : 12;
-          const sSp = s.type === 'nexus' ? worldSprites[`nexus_${s.team}`] : worldSprites[`turret_${s.team}`];
-          if (sSp && sSp.ready) {
-            if (s.type === 'nexus') {
-              const nsz = s.radius * 2.35;
-              ctx.drawImage(sSp.img, s.x - nsz / 2, s.y - nsz / 2, nsz, nsz);
-            } else {
-              const tw = s.radius * 2.75;
-              const th = s.radius * 3.3;
-              ctx.drawImage(sSp.img, s.x - tw / 2, s.y - th * 0.62, tw, th);
+          } else {
+            ctx.save();
+            const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+            const sway2 = Math.sin(t * 1.6 + b.x) * 2;
+            for (let k = 0; k < 9; k++) {
+              const ox = (k - 4) * b.w / 9.5, oy = Math.sin(k * 1.7) * b.h * 0.18;
+              const rr = b.h * (0.42 + (k % 3) * 0.06);
+              const g2 = ctx.createRadialGradient(cx + ox + sway2, cy + oy - rr * 0.3, 2, cx + ox, cy + oy, rr);
+              g2.addColorStop(0, '#4ade80'); g2.addColorStop(0.55, '#15803d'); g2.addColorStop(1, 'rgba(5,46,22,0.9)');
+              ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(cx + ox + sway2 * (k % 2 ? 1 : -0.5), cy + oy, rr, 0, Math.PI * 2); ctx.fill();
             }
-          } else {
-            ctx.fillStyle = s.team === 'blue' ? '#0284c7' : '#be123c';
-            ctx.strokeStyle = col;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-          }
-          ctx.restore();
-
-          const bw = s.type === 'nexus' ? 76 : 52;
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw, 7);
-          ctx.fillStyle = col;
-          ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw * (s.hp / s.maxHp), 7);
-        });
-
-        minions.forEach(m => {
-          const col = m.team === 'blue' ? '#60a5fa' : '#fb7185';
-          const mSp = worldSprites[`${m.kind}_${m.team}`];
-          if (mSp && mSp.ready) {
-            const sz = m.kind === 'cannon' ? 44 : 30;
-            ctx.save();
-            ctx.translate(m.x, m.y);
-            if (m.team === 'red') ctx.scale(-1, 1);
-            ctx.drawImage(mSp.img, -sz / 2, -sz / 2, sz, sz);
+            ctx.fillStyle = 'rgba(220,252,231,0.35)';
+            for (let k = 0; k < 7; k++) { ctx.beginPath(); ctx.arc(cx + (k - 3) * b.w / 8, cy - b.h * 0.25 + Math.sin(k) * 4, 2.2, 0, Math.PI * 2); ctx.fill(); }
             ctx.restore();
-          } else {
-            ctx.fillStyle = col;
-            ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
           }
-          const bw = m.kind === 'cannon' ? 40 : 26;
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw, 4.5);
-          ctx.fillStyle = m.kind === 'cannon' ? '#fbbf24' : col;
-          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw * (m.hp / m.maxHp), 4.5);
         });
 
-        // 스마트 어택 지정 타겟 발밑 붉은 타겟 링 표시
-        if (myHero && myHero.attackTarget && isTargetValid(myHero, myHero.attackTarget)) {
-          const t = myHero.attackTarget;
+        // 3) 회복 렐릭
+        relics.forEach((r) => {
+          if (!r.active) {
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)'; ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+            return;
+          }
+          const bob = Math.sin(t * 3 + r.x) * 4;
           ctx.save();
-          ctx.strokeStyle = '#f43f5e';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.arc(t.x, t.y, (t.radius || 16) + 6, 0, Math.PI * 2);
-          ctx.stroke();
+          ctx.globalCompositeOperation = 'lighter';
+          const g = ctx.createRadialGradient(r.x, r.y + bob, 2, r.x, r.y + bob, r.radius * 2.4);
+          g.addColorStop(0, 'rgba(187,247,208,0.95)'); g.addColorStop(0.35, 'rgba(74,222,128,0.6)'); g.addColorStop(1, 'rgba(22,163,74,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(r.x, r.y + bob, r.radius * 2.4, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = '#f0fdf4'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('✚', r.x, r.y + bob);
+          ctx.textBaseline = 'alphabetic';
+        });
+
+        // 4) 포탑 사거리 (내 근처만)
+        structures.forEach((s) => {
+          if (s.type !== 'turret' || s.hp <= 0 || !myHero) return;
+          const d = Math.hypot(myHero.x - s.x, myHero.y - s.y);
+          if (s.team === myHero.team || d > s.range + 120) return;
+          ctx.save();
+          ctx.globalAlpha = Math.min(0.85, (s.range + 120 - d) / 120);
+          ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2.5; ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * 20;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.range, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        });
+
+        // 5) 스마트 어택 타겟 링
+        if (myHero && myHero.attackTarget && isTargetValid(myHero, myHero.attackTarget)) {
+          const tg = myHero.attackTarget;
+          ctx.save(); ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2.5; ctx.shadowColor = '#f43f5e'; ctx.shadowBlur = 8;
+          ctx.beginPath(); ctx.ellipse(tg.x, tg.y + (tg.radius || 16) * 0.5, (tg.radius || 16) + 8, ((tg.radius || 16) + 8) * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
           ctx.restore();
         }
 
-        [myHero, enemyHero].forEach(h => {
-          if (!h || h.dead) return;
-          if (h !== myHero && h.inBush && h.revealTimer <= 0) {
-            const sameBushOrNear = myHero && !myHero.dead && Math.hypot(myHero.x - h.x, myHero.y - h.y) <= 95;
-            if (!sameBushOrNear) return;
-          }
-          const c = CHAMPIONS[h.champId];
-          const teamCol = h.team === 'blue' ? '#38bdf8' : '#f43f5e';
+        // 6) 깊이 정렬해서 유닛 그리기
+        const drawList = [];
+        structures.forEach((s) => drawList.push({ y: s.y + (s.type === 'nexus' ? 10 : 22), k: 'S', o: s }));
+        minions.forEach((m) => drawList.push({ y: m.y, k: 'M', o: m }));
+        [myHero, enemyHero].forEach((h) => { if (h && !h.dead) drawList.push({ y: h.y + 4, k: 'H', o: h }); });
+        drawList.sort((a, b) => a.y - b.y);
+        drawList.forEach((d) => {
+          if (d.k === 'S') drawStructure(d.o, t);
+          else if (d.k === 'M') drawMinion(d.o, now);
+          else drawHero(d.o, now, t);
+        });
+
+        // 7) 투사체
+        projectiles.forEach((pr) => {
+          let ang = 0;
+          if (pr.linear) ang = Math.atan2(pr.vy || 0, pr.vx || 1);
+          else if (pr.target) ang = Math.atan2(pr.target.y - pr.y, pr.target.x - pr.x);
+          const isArrow = pr.owner && pr.owner.champId === 'cash';
+          const len = pr.isUltArrow ? 70 : isArrow ? 26 : pr.radius >= 7 ? 22 : 12;
           ctx.save();
-          if (h.inBush && h.revealTimer <= 0) ctx.globalAlpha = 0.50;
-
-          if (h === myHero && h.targetX !== null) {
-            ctx.strokeStyle = h.attackMoveMode ? 'rgba(244, 63, 94, 0.8)' : 'rgba(56, 189, 248, 0.6)';
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(h.targetX, h.targetY, 8, 0, Math.PI * 2); ctx.stroke();
-          }
-
-          if (h === myHero && keysPressed['KeyA']) {
-            ctx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
-            ctx.lineWidth = 1.5;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath(); ctx.arc(h.x, h.y, h.range + 40, 0, Math.PI * 2); ctx.stroke();
-            ctx.setLineDash([]);
-          }
-
-          if (h.isHoldAttacking) {
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
-            ctx.lineWidth = 1.5;
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath(); ctx.arc(h.x, h.y, h.range + 20, 0, Math.PI * 2); ctx.stroke();
-            ctx.setLineDash([]);
-          }
-
-          if (h.onNexusWell) {
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(h.x, h.y, h.radius + 9, 0, Math.PI * 2); ctx.stroke();
-          }
-
-          if (h.shield > 0) {
-            ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(h.x, h.y, h.radius + 6, 0, Math.PI * 2); ctx.stroke();
-          }
-
-          ctx.shadowColor = teamCol; ctx.shadowBlur = 16;
-          ctx.fillStyle = h.team === 'blue' ? 'rgba(3, 105, 161, 0.55)' : 'rgba(159, 18, 57, 0.55)';
-          ctx.strokeStyle = teamCol; ctx.lineWidth = 3.5;
-          ctx.beginPath(); ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          ctx.shadowBlur = 0;
-
-          const sp = champSprites[h.champId];
-          if (sp && sp.ready) {
-            ctx.save();
-            ctx.translate(h.x, h.y - 2);
-            if (Math.cos(h.facing) < 0) ctx.scale(-1, 1);
-            ctx.drawImage(sp.img, -27, -27, 54, 54);
-            ctx.restore();
-          } else {
-            ctx.font = '20px sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(c.icon, h.x, h.y + 1);
-          }
-
-          ctx.fillStyle = '#f8fafc';
-          ctx.font = 'bold 11px "Noto Sans KR"';
-          ctx.fillText(`Lv.${h.level} ${h.name}`, h.x, h.y - h.radius - 20);
-
-          const bw = 60;
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(h.x - bw / 2, h.y - h.radius - 12, bw, 7);
-          ctx.fillStyle = h.team === 'blue' ? '#22c55e' : '#ef4444';
-          ctx.fillRect(h.x - bw / 2, h.y - h.radius - 12, bw * (h.hp / h.maxHp), 7);
-          if (h.stunTimer > 0) {
-            ctx.fillStyle = '#fde047';
-            ctx.font = 'bold 12px "Noto Sans KR"';
-            ctx.fillText('⚡기절', h.x, h.y - h.radius - 34);
-          } else if (h.onNexusWell) {
-            ctx.fillStyle = '#34d399';
-            ctx.font = 'bold 11px "Noto Sans KR"';
-            ctx.fillText('✚ 급속 회복중', h.x, h.y - h.radius - 34);
-          } else if (h === myHero && h.inBush) {
-            ctx.fillStyle = h.revealTimer > 0 ? '#fb7185' : '#6ee7b7';
-            ctx.font = 'bold 10px "Noto Sans KR"';
-            ctx.fillText(h.revealTimer > 0 ? '👁️ 공격 발각!' : '🌿 은신 중', h.x, h.y - h.radius - 34);
+          ctx.translate(pr.x, pr.y); ctx.rotate(ang);
+          ctx.globalCompositeOperation = 'lighter';
+          const tg = ctx.createLinearGradient(-len, 0, 0, 0);
+          tg.addColorStop(0, 'rgba(0,0,0,0)'); tg.addColorStop(1, pr.color);
+          ctx.strokeStyle = tg; ctx.lineCap = 'round'; ctx.lineWidth = pr.radius * (isArrow ? 1.1 : 1.6);
+          ctx.beginPath(); ctx.moveTo(-len, 0); ctx.lineTo(0, 0); ctx.stroke();
+          const gr = pr.radius * (pr.isUltArrow ? 3 : 2.4);
+          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, gr);
+          g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, pr.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, gr, 0, Math.PI * 2); ctx.fill();
+          if (isArrow || pr.isUltArrow) {
+            ctx.fillStyle = '#e0f2fe';
+            const ah = pr.isUltArrow ? 14 : 6;
+            ctx.beginPath(); ctx.moveTo(ah * 1.4, 0); ctx.lineTo(-ah * 0.4, -ah * 0.7); ctx.lineTo(-ah * 0.4, ah * 0.7); ctx.closePath(); ctx.fill();
           }
           ctx.restore();
         });
 
-        projectiles.forEach(pr => {
-          ctx.save();
-          ctx.fillStyle = pr.color;
-          ctx.shadowColor = pr.color; ctx.shadowBlur = 10;
-          ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2); ctx.fill();
-          ctx.restore();
-        });
-
+        // 8) 이펙트
         for (let i = vfxList.length - 1; i >= 0; i--) {
           const v = vfxList[i];
+          if (v.type === 'fx') {
+            const k = (now - v.t0) / v.dur;
+            const img = KA['fx_' + v.key];
+            if (k >= 1) { vfxList.splice(i, 1); continue; }
+            if (!img) continue;
+            if (v.follow && !v.follow.dead) { v.x = v.follow.x; v.y = v.follow.y + (v.oy || 0); }
+            const fw = img.width / STRIP_N, f = Math.min(STRIP_N - 1, Math.floor(k * STRIP_N));
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.translate(v.x, v.y); ctx.scale(1, v.flat ? 0.62 : 0.85);
+            ctx.drawImage(img, f * fw, 0, fw, img.height, -v.size / 2, -v.size / 2, v.size, v.size);
+            ctx.restore();
+            continue;
+          }
           v.life -= 0.016;
           if (v.life <= 0) { vfxList.splice(i, 1); continue; }
           ctx.save();
-          ctx.globalAlpha = Math.max(0, v.life * 2);
+          ctx.globalAlpha = Math.max(0, Math.min(1, v.life * 2));
+          ctx.globalCompositeOperation = 'lighter';
           ctx.strokeStyle = v.color;
-          ctx.lineWidth = 3.5;
+          ctx.shadowColor = v.color; ctx.shadowBlur = 14;
           if (v.type === 'ring') {
             v.r += (v.maxR - v.r) * 0.2;
-            ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2); ctx.stroke();
+            ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.ellipse(v.x, v.y, v.r, v.r * 0.6, 0, 0, Math.PI * 2); ctx.stroke();
+            ctx.lineWidth = 1.5; ctx.globalAlpha *= 0.6;
+            ctx.beginPath(); ctx.ellipse(v.x, v.y, v.r * 0.82, v.r * 0.49, 0, 0, Math.PI * 2); ctx.stroke();
           } else if (v.type === 'slash') {
-            ctx.beginPath(); ctx.arc(v.x, v.y, v.r * 0.8, v.angle - 0.8, v.angle + 0.8); ctx.stroke();
+            const prog = 1 - v.life / 0.22;
+            ctx.lineCap = 'round';
+            for (let j = 0; j < 3; j++) {
+              ctx.lineWidth = 7 - j * 2;
+              ctx.globalAlpha = Math.max(0, (1 - prog) * (1 - j * 0.25));
+              ctx.beginPath();
+              ctx.arc(v.x, v.y, v.r * (0.7 + j * 0.12), v.angle - 1.0 + prog * 0.6, v.angle + 0.2 + prog * 1.0);
+              ctx.stroke();
+            }
           } else if (v.type === 'ultSword') {
-            ctx.fillStyle = v.color;
-            ctx.fillRect(v.x - 10, v.y - 120 * v.life, 20, 120 * v.life);
-            ctx.beginPath(); ctx.arc(v.x, v.y, 120 * (1 - v.life * 0.5), 0, Math.PI * 2); ctx.stroke();
+            if (!KA.fx_r_karen) {
+              ctx.fillStyle = v.color;
+              ctx.fillRect(v.x - 10, v.y - 120 * v.life, 20, 120 * v.life);
+              ctx.beginPath(); ctx.arc(v.x, v.y, 120 * (1 - v.life * 0.5), 0, Math.PI * 2); ctx.stroke();
+            }
           }
           ctx.restore();
         }
 
+        // 9) 떠오르는 글자
         for (let i = floatingTexts.length - 1; i >= 0; i--) {
           const ft = floatingTexts[i];
-          ft.y -= 28 * 0.016;
+          ft.y -= 34 * 0.016;
           ft.life -= 0.016;
           if (ft.life <= 0) { floatingTexts.splice(i, 1); continue; }
           ctx.save();
-          ctx.globalAlpha = Math.min(1, ft.life * 1.5);
-          ctx.font = 'bold 12px "Noto Sans KR"';
+          ctx.globalAlpha = Math.min(1, ft.life * 1.8);
+          const big = /LEVEL|G$|HP/.test(ft.text);
+          const pop = 1 + Math.max(0, ft.life - (big ? 0.85 : 0.55)) * 2.2;
+          ctx.font = `900 ${Math.round((big ? 15 : 14) * pop)}px "Noto Sans KR", sans-serif`;
           ctx.textAlign = 'center';
+          ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.lineJoin = 'round';
+          ctx.strokeText(ft.text, ft.x, ft.y);
           ctx.fillStyle = ft.color;
           ctx.fillText(ft.text, ft.x, ft.y);
           ctx.restore();
         }
 
-        ctx.fillStyle = 'rgba(224, 242, 254, 0.55)';
-        snowParticles.forEach(sp => {
+        // 10) 눈보라
+        snowParticles.forEach((sp) => {
           sp.x += sp.vx * 0.016;
           sp.y += sp.vy * 0.016;
-          if (sp.x < 0) sp.x = WORLD_W;
-          if (sp.y > WORLD_H) sp.y = 0;
+          if (sp.x < -20) sp.x = WORLD_W + 20;
+          if (sp.y > WORLD_H + 40) sp.y = -40;
+          ctx.fillStyle = `rgba(224, 242, 254, ${0.35 + sp.r * 0.12})`;
           ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); ctx.fill();
         });
+      }
+
+      function drawStructure(s, t) {
+        const col = s.team === 'blue' ? '#38bdf8' : '#f43f5e';
+        const img = KA[`${s.type}_${s.team}`];
+        if (s.hp <= 0) {
+          ctx.save();
+          if (img) {
+            ctx.globalAlpha = 0.55;
+            ctx.filter = 'grayscale(1) brightness(0.35)';
+            const h = s.type === 'nexus' ? 120 : 112, w = h * img.width / img.height;
+            ctx.drawImage(img, s.x - w / 2, s.y + (s.type === 'nexus' ? 50 : 30) - h * 0.55, w, h * 0.55);
+            ctx.filter = 'none';
+          } else {
+            ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.radius * 0.7, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.restore();
+          return;
+        }
+        // 바닥 오라
+        const pulse = 0.75 + Math.sin(t * 2.4 + s.x) * 0.25;
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const ar = s.type === 'nexus' ? 95 : 55;
+        const ag = ctx.createRadialGradient(s.x, s.y + 14, 4, s.x, s.y + 14, ar);
+        ag.addColorStop(0, col + '66'); ag.addColorStop(1, col + '00');
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = ag; ctx.beginPath(); ctx.ellipse(s.x, s.y + 14, ar, ar * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        if (s.type === 'nexus') {
+          ctx.save();
+          ctx.strokeStyle = s.team === 'blue' ? 'rgba(52, 211, 153, 0.45)' : 'rgba(251, 113, 133, 0.45)';
+          ctx.lineWidth = 2; ctx.setLineDash([6, 5]); ctx.lineDashOffset = t * 10;
+          ctx.beginPath(); ctx.ellipse(s.x, s.y + 10, s.radius + 42, (s.radius + 42) * 0.6, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        }
+        if (img) {
+          const h = s.type === 'nexus' ? 130 : 118;
+          const w = h * img.width / img.height;
+          const bob = s.type === 'nexus' ? Math.sin(t * 1.5) * 2 : 0;
+          const baseY = s.y + (s.type === 'nexus' ? 48 : 30);
+          ctx.save();
+          if (s.hitFlash > 0) { s.hitFlash = Math.max(0, s.hitFlash - 0.08); ctx.filter = `brightness(${1 + s.hitFlash * 0.8})`; }
+          ctx.drawImage(img, s.x - w / 2, baseY - h + bob, w, h);
+          ctx.restore();
+          // 수정 오브 빛
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          const oy = baseY - h * (s.type === 'nexus' ? 0.62 : 0.86) + bob;
+          const og = ctx.createRadialGradient(s.x, oy, 2, s.x, oy, s.type === 'nexus' ? 60 : 30);
+          og.addColorStop(0, col + 'aa'); og.addColorStop(1, col + '00');
+          ctx.globalAlpha = pulse;
+          ctx.fillStyle = og; ctx.beginPath(); ctx.arc(s.x, oy, s.type === 'nexus' ? 60 : 30, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+          const bw = s.type === 'nexus' ? 86 : 60;
+          drawBar(s.x, baseY - h - 10, bw, 7, s.hp / s.maxHp, s.team === 'blue' ? ['#7dd3fc', '#0284c7'] : ['#fda4af', '#be123c']);
+        } else {
+          const sSp = s.type === 'nexus' ? worldSprites[`nexus_${s.team}`] : worldSprites[`turret_${s.team}`];
+          if (sSp && sSp.ready) {
+            const sz = s.radius * 2.6;
+            ctx.drawImage(sSp.img, s.x - sz / 2, s.y - sz * 0.6, sz, sz * 1.2);
+          }
+          const bw = s.type === 'nexus' ? 76 : 52;
+          drawBar(s.x, s.y - s.radius - 16, bw, 6, s.hp / s.maxHp, [col, col]);
+        }
+      }
+
+      function drawMinion(m, now) {
+        const col = m.team === 'blue' ? '#60a5fa' : '#fb7185';
+        const moving = trackMotion(m, now);
+        const dir = m._dir || (m.team === 'blue' ? 1 : -1);
+        const H = MIN_H[m.kind] || 38;
+        const img = KA[`${m.kind}_${m.team}`];
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath(); ctx.ellipse(m.x, m.y + H * 0.42, H * 0.38, H * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+        if (img) {
+          const strip = KA[`walk_${m.kind}_${m.team}`];
+          if (m._ph === undefined) m._ph = Math.random() * 24;
+          ctx.save();
+          ctx.translate(m.x, m.y + H * 0.45);
+          ctx.scale(dir, 1);
+          if (strip && moving) {
+            const [sx, fw] = stripFrame(strip, now / 1000 * 14 + m._ph);
+            const W = H * fw / strip.height;
+            ctx.drawImage(strip, sx, 0, fw, strip.height, -W / 2, -H, W, H);
+          } else {
+            const W = H * img.width / img.height;
+            const bob = moving ? Math.abs(Math.sin(now / 90 + m._ph)) * 2.5 : Math.sin(now / 300 + m._ph) * 0.6;
+            ctx.drawImage(img, -W / 2, -H - bob, W, H);
+            if (m.hitFlash > 0 && KA[`minW_${m.kind}_${m.team}`]) {
+              ctx.globalAlpha = m.hitFlash * 0.7;
+              ctx.drawImage(KA[`minW_${m.kind}_${m.team}`], -W / 2, -H - bob, W, H);
+            }
+          }
+          ctx.restore();
+          if (m.hitFlash > 0) m.hitFlash = Math.max(0, m.hitFlash - 0.12);
+        } else {
+          const mSp = worldSprites[`${m.kind}_${m.team}`];
+          if (mSp && mSp.ready) {
+            const sz = m.kind === 'cannon' ? 44 : 30;
+            ctx.save(); ctx.translate(m.x, m.y); if (m.team === 'red') ctx.scale(-1, 1);
+            ctx.drawImage(mSp.img, -sz / 2, -sz / 2, sz, sz); ctx.restore();
+          }
+        }
+        const bw = m.kind === 'cannon' ? 40 : 28;
+        drawBar(m.x, m.y - H * 0.62 - 6, bw, 4, m.hp / m.maxHp, m.kind === 'cannon' ? ['#fde68a', '#d97706'] : m.team === 'blue' ? ['#93c5fd', '#2563eb'] : ['#fda4af', '#e11d48']);
+      }
+
+      function drawHero(h, now, t) {
+        if (h !== myHero && h.inBush && h.revealTimer <= 0) {
+          const near = myHero && !myHero.dead && Math.hypot(myHero.x - h.x, myHero.y - h.y) <= 95;
+          if (!near) return;
+        }
+        const teamCol = h.team === 'blue' ? '#38bdf8' : '#f43f5e';
+        const moving = trackMotion(h, now) || h.dashTimer > 0;
+        const H = HERO_H[h.champId] || 84;
+        const img = KA['hero_' + h.champId];
+        ctx.save();
+        if (h.inBush && h.revealTimer <= 0) ctx.globalAlpha = 0.5;
+
+        if (h === myHero && h.targetX !== null) {
+          ctx.save();
+          ctx.strokeStyle = h.attackMoveMode ? 'rgba(244, 63, 94, 0.9)' : 'rgba(74, 222, 128, 0.85)';
+          ctx.lineWidth = 2;
+          const pr = 6 + (Math.sin(t * 8) + 1) * 2;
+          ctx.beginPath(); ctx.ellipse(h.targetX, h.targetY, pr * 1.4, pr * 0.7, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        }
+        if (h === myHero && keysPressed['KeyA']) {
+          ctx.strokeStyle = 'rgba(244, 63, 94, 0.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]);
+          ctx.beginPath(); ctx.ellipse(h.x, h.y + 18, h.range + 40, (h.range + 40) * 0.6, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        }
+        if (h.isHoldAttacking) {
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+          ctx.beginPath(); ctx.ellipse(h.x, h.y + 18, h.range + 20, (h.range + 20) * 0.6, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        }
+
+        // 발밑 팀 링 · 그림자
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.beginPath(); ctx.ellipse(h.x, h.y + 20, 26, 9, 0, 0, Math.PI * 2); ctx.fill();
+        drawTeamRing(h.x, h.y + 20, 34, teamCol, h === myHero ? 1 : 0.8);
+        if (h.onNexusWell) {
+          ctx.save(); ctx.strokeStyle = '#34d399'; ctx.lineWidth = 3; ctx.shadowColor = '#34d399'; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.ellipse(h.x, h.y + 20, 40, 16, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        }
+
+        if (img) {
+          const atk = now < (h.atkAnimUntil || 0);
+          const runStrip = KA['run_' + h.champId], atkStrip = KA['atk_' + h.champId];
+          const dir = (Math.cos(h.facing) >= 0 ? 1 : -1) * (HERO_FACE[h.champId] || 1);
+          if (h._ph === undefined) h._ph = Math.random() * 24;
+          ctx.save();
+          ctx.translate(h.x, h.y + 22);
+          ctx.scale(dir, 1);
+          let drawn = false;
+          if (atk && atkStrip) {
+            const k = Math.min(0.999, 1 - ((h.atkAnimUntil - now) / 420));
+            const [sx, fw] = stripFrame(atkStrip, k * STRIP_N);
+            const W = H * fw / atkStrip.height;
+            ctx.drawImage(atkStrip, sx, 0, fw, atkStrip.height, -W / 2, -H, W, H);
+            drawn = true;
+          } else if (moving && runStrip) {
+            const [sx, fw] = stripFrame(runStrip, now / 1000 * 16 + h._ph);
+            const W = H * fw / runStrip.height;
+            ctx.drawImage(runStrip, sx, 0, fw, runStrip.height, -W / 2, -H, W, H);
+            drawn = true;
+          }
+          if (!drawn) {
+            const W = H * img.width / img.height;
+            const breathe = 1 + Math.sin(now / 420 + h._ph) * 0.012;
+            const lean = atk ? 0.08 : 0;
+            ctx.rotate(lean);
+            ctx.drawImage(img, -W / 2, -H * breathe, W, H * breathe);
+            if (h.hitFlash > 0 && KA['heroW_' + h.champId]) {
+              ctx.globalAlpha = h.hitFlash * 0.65;
+              ctx.drawImage(KA['heroW_' + h.champId], -W / 2, -H * breathe, W, H * breathe);
+            }
+          }
+          ctx.restore();
+          if (h.hitFlash > 0) h.hitFlash = Math.max(0, h.hitFlash - 0.08);
+        } else {
+          const sp = champSprites[h.champId];
+          ctx.shadowColor = teamCol; ctx.shadowBlur = 16;
+          ctx.fillStyle = h.team === 'blue' ? 'rgba(3, 105, 161, 0.55)' : 'rgba(159, 18, 57, 0.55)';
+          ctx.beginPath(); ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowBlur = 0;
+          if (sp && sp.ready) {
+            ctx.save(); ctx.translate(h.x, h.y - 2); if (Math.cos(h.facing) < 0) ctx.scale(-1, 1);
+            ctx.drawImage(sp.img, -27, -27, 54, 54); ctx.restore();
+          }
+        }
+
+        // 보호막
+        if (h.shield > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          const sg = ctx.createRadialGradient(h.x, h.y - H * 0.35, H * 0.2, h.x, h.y - H * 0.35, H * 0.62);
+          sg.addColorStop(0, 'rgba(186,230,253,0)'); sg.addColorStop(0.85, 'rgba(125,211,252,0.35)'); sg.addColorStop(1, 'rgba(224,242,254,0.7)');
+          ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(h.x, h.y - H * 0.35, H * 0.5, H * 0.62, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+        if (h.dmgReduceTimer > 0 && h.champId === 'karius') {
+          ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + Math.sin(t * 10) * 0.2;
+          ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.ellipse(h.x, h.y - H * 0.35, H * 0.5, H * 0.62, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        }
+        if (h.qBuffTimer > 0) {
+          ctx.save(); ctx.globalCompositeOperation = 'lighter';
+          for (let i = 0; i < 3; i++) {
+            const a = t * 4 + i * 2.1;
+            ctx.fillStyle = h.champId === 'cash' ? '#67e8f9' : '#fde047';
+            ctx.beginPath(); ctx.arc(h.x + Math.cos(a) * 26, h.y + 6 + Math.sin(a) * 10, 3, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // 이름표 + 체력/마나 바
+        const topY = h.y + 22 - H - 8;
+        const bw = 66;
+        ctx.font = '800 11px "Noto Sans KR", sans-serif';
+        const label = `${h.name}`;
+        const lw = Math.max(bw, ctx.measureText(label).width + 30);
+        ctx.fillStyle = 'rgba(2,6,23,0.75)';
+        ctx.beginPath(); ctx.roundRect(h.x - lw / 2, topY - 30, lw, 16, 5); ctx.fill();
+        ctx.fillStyle = h.team === 'blue' ? '#0ea5e9' : '#e11d48';
+        ctx.beginPath(); ctx.roundRect(h.x - lw / 2, topY - 30, 18, 16, 5); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        ctx.font = '900 10px Inter, sans-serif';
+        ctx.fillText(String(h.level), h.x - lw / 2 + 9, topY - 18.5);
+        ctx.font = '800 11px "Noto Sans KR", sans-serif';
+        ctx.fillStyle = h === myHero ? '#fde68a' : '#f8fafc';
+        ctx.fillText(label, h.x + 9, topY - 18);
+        drawBar(h.x, topY - 11, bw, 6, h.hp / h.maxHp, h === myHero ? ['#86efac', '#16a34a'] : h.team === (myHero ? myHero.team : 'blue') ? ['#7dd3fc', '#0284c7'] : ['#fca5a5', '#dc2626']);
+        if (h.shield > 0) {
+          ctx.fillStyle = 'rgba(241,245,249,0.85)';
+          ctx.fillRect(h.x - bw / 2 + bw * (h.hp / h.maxHp), topY - 11, Math.min(bw * (1 - h.hp / h.maxHp), bw * h.shield / h.maxHp), 6);
+        }
+        ctx.fillStyle = '#1e3a8a'; ctx.fillRect(h.x - bw / 2, topY - 3, bw, 3);
+        ctx.fillStyle = '#60a5fa'; ctx.fillRect(h.x - bw / 2, topY - 3, bw * (h.mp / h.maxMp), 3);
+        // 칸 구분
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1;
+        for (let k = 100; k < h.maxHp; k += 100) {
+          const xx = h.x - bw / 2 + bw * (k / h.maxHp);
+          ctx.beginPath(); ctx.moveTo(xx, topY - 11); ctx.lineTo(xx, topY - (k % 500 === 0 ? 5 : 8)); ctx.stroke();
+        }
+
+        ctx.textAlign = 'center';
+        if (h.stunTimer > 0) {
+          ctx.fillStyle = '#fde047'; ctx.font = 'bold 12px "Noto Sans KR"';
+          ctx.fillText('💫 기절', h.x, topY - 36);
+        } else if (h.onNexusWell) {
+          ctx.fillStyle = '#34d399'; ctx.font = 'bold 11px "Noto Sans KR"';
+          ctx.fillText('✚ 급속 회복중', h.x, topY - 36);
+        } else if (h === myHero && h.inBush) {
+          ctx.fillStyle = h.revealTimer > 0 ? '#fb7185' : '#6ee7b7'; ctx.font = 'bold 10px "Noto Sans KR"';
+          ctx.fillText(h.revealTimer > 0 ? '👁️ 공격 발각!' : '🌿 은신 중', h.x, topY - 36);
+        }
+        ctx.restore();
+      }
+
+      // 미니맵 (화면 오른쪽 아래)
+      function drawMinimap() {
+        if (!myHero) return;
+        const mw = Math.min(190, Math.max(120, viewW * 0.2)), mh = mw * (WORLD_H / WORLD_W) * 0.9;
+        const mx = viewW - mw - 8, my = viewH - mh - 8;
+        ctx.save();
+        ctx.fillStyle = 'rgba(2,6,23,0.8)';
+        ctx.strokeStyle = 'rgba(148,163,184,0.5)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(mx - 3, my - 3, mw + 6, mh + 6, 7); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(mx, my, mw, mh, 5); ctx.clip();
+        const sx = mw / WORLD_W, sy = mh / WORLD_H;
+        if (KA.floor) ctx.drawImage(KA.floor, mx + 14 * sx, my + (LANE_TOP - 34) * sy, (WORLD_W - 28) * sx, (LANE_BOT - LANE_TOP + 68) * sy);
+        ctx.fillStyle = 'rgba(2,6,23,0.25)'; ctx.fillRect(mx, my, mw, mh);
+        structures.forEach((s) => {
+          if (s.hp <= 0) return;
+          ctx.fillStyle = s.team === 'blue' ? '#38bdf8' : '#f43f5e';
+          const r = s.type === 'nexus' ? 5 : 3.2;
+          ctx.beginPath(); ctx.rect(mx + s.x * sx - r, my + s.y * sy - r, r * 2, r * 2); ctx.fill();
+        });
+        minions.forEach((m) => {
+          ctx.fillStyle = m.team === 'blue' ? '#93c5fd' : '#fda4af';
+          ctx.fillRect(mx + m.x * sx - 1, my + m.y * sy - 1, 2, 2);
+        });
+        [myHero, enemyHero].forEach((h) => {
+          if (!h || h.dead) return;
+          if (h !== myHero && h.inBush && h.revealTimer <= 0) return;
+          ctx.fillStyle = h === myHero ? '#fde047' : (h.team === 'blue' ? '#38bdf8' : '#f43f5e');
+          ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(mx + h.x * sx, my + h.y * sy, h === myHero ? 4.5 : 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        });
+        const s = cam.s;
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1;
+        ctx.strokeRect(mx + (cam.x - viewW / s / 2) * sx, my + (cam.y - viewH / s / 2) * sy, viewW / s * sx, viewH / s * sy);
+        ctx.restore();
       }
 
       function updateInGameHud() {
@@ -2697,12 +3125,15 @@
         }
 
         ctx.clearRect(0, 0, viewW, viewH);
+        updateCamera(dt);
         const { scale, ox, oy } = getViewportTransform();
         ctx.save();
+        if (cam.shake > 0) ctx.translate((Math.random() - 0.5) * cam.shake, (Math.random() - 0.5) * cam.shake);
         ctx.translate(ox, oy);
         ctx.scale(scale, scale);
         drawHowlingAbyss();
         ctx.restore();
+        drawMinimap();
 
         updateInGameHud();
         requestAnimationFrame(aramLoop);
