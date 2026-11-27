@@ -572,6 +572,17 @@
     Object.entries(EXTRA_SLOTS).forEach(([key, cells]) => {
       cells.forEach(([c, r]) => MAP_DEFS[key].slots.push([210 + 52 * c, 322 + 52 * r]));
     });
+    // 맵4·맵5: 본진을 한 칸 아래로 내리고 그 자리를 길로, 밀려난 칸은 위쪽으로
+    (() => {
+      const P = (c, r) => [210 + 52 * c, 322 + 52 * r];
+      const drop = (m, cells) => { m.slots = m.slots.filter(([x, y]) => !cells.some(([c, r]) => P(c, r)[0] === x && P(c, r)[1] === y)); };
+      const t = MAP_DEFS.tail;
+      t.nest = P(0, 2); t.paths[0].push(P(0, 2));
+      drop(t, [[0, 2], [-3, -2]]); t.slots.push(P(2, -1), P(3, -4));
+      const f = MAP_DEFS.fork;
+      f.nest = P(0, 1); f.paths.forEach((p) => p.push(P(0, 1)));
+      drop(f, [[0, 1], [0, 5]]); f.slots.push(P(-2, -5), P(2, -5));
+    })();
 
     const CENTER = { x: 210, y: 322 }; // 현재 맵의 둥지 위치
     let MAP = null;
