@@ -29,20 +29,48 @@
       padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     }
     #canvasContainer { overflow: hidden; }
+    .stat { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 12px; background: linear-gradient(180deg, #111827, #0b1220); border: 1px solid rgba(148,163,184,.18); min-width: 0; }
+    .stat .ic { font-size: 15px; line-height: 1; flex-shrink: 0; }
+    .stat .tx { display: flex; flex-direction: column; min-width: 0; line-height: 1.05; }
+    .stat .lb { font-size: 9px; font-weight: 700; color: #94a3b8; white-space: nowrap; }
+    .stat .vl { font-size: 14px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .actbtn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 16px; padding: 7px 4px 8px; box-shadow: 0 4px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); transition: transform .08s; min-width: 0; }
+    .actbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+    .actbtn .ic { font-size: 20px; line-height: 1; }
+    .actbtn .nm { font-size: 12px; font-weight: 900; white-space: nowrap; letter-spacing: -.2px; }
+    .actbtn .cost { font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 999px; background: rgba(0,0,0,.35); white-space: nowrap; }
+    .actbtn.main .ic { font-size: 24px; }
+    .actbtn.main .nm { font-size: 15px; }
+    .actbtn.main .cost { font-size: 11px; }
+    .ctlbtn { height: 30px; min-width: 34px; padding: 0 8px; border-radius: 10px; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+    #toast { transition: opacity .25s, transform .25s; }
+    #toast.hide { opacity: 0; transform: translate(-50%, 8px); pointer-events: none; }
+    #menuPanel button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 800; color: #e2e8f0; text-align: left; }
+    #menuPanel button:hover { background: rgba(148,163,184,.12); }
+    #menuPanel { background: rgba(15,23,42,.98); border: 1px solid #334155; box-shadow: 0 18px 40px rgba(0,0,0,.6); z-index: 60; min-width: 190px; }
+    #menuPanel button { white-space: nowrap; }
+    #unitPanel { background: rgba(2,6,23,.93); border: 1px solid rgba(56,189,248,.55); box-shadow: 0 10px 26px rgba(0,0,0,.55); }
+    #unitPanel .row { display: flex; align-items: center; gap: 10px; }
+    #unitPanel .info { min-width: 0; flex: 1 1 auto; }
+    #unitName { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #sellBtn { white-space: nowrap; flex-shrink: 0; }
+    #toast { background: rgba(2,6,23,.92); }
     /* 키 작은 폰(아이폰 SE 등): 상·하단 여백 압축 */
     @media (max-height: 700px) {
-      #hudSection { padding-top: 2px; padding-bottom: 2px; gap: 2px; }
-      #footerBar { gap: 4px; padding-bottom: 4px; }
-      #footerBar .grid > button { padding-top: 6px; padding-bottom: 6px; }
-      #infoBanner { padding-top: 4px; padding-bottom: 4px; }
+      #hudSection { padding-top: 2px; padding-bottom: 2px; gap: 3px; }
+      #footerBar { padding-bottom: 4px; }
+      .actbtn { padding: 5px 4px 6px; }
+      .actbtn .ic { font-size: 17px; }
+      .actbtn.main .ic { font-size: 20px; }
     }
-    /* 좁은 폰(320~360px): 제목·라벨 숨기고 버튼 압축 */
+    /* 좁은 폰(320~360px) */
     @media (max-width: 370px) {
       header h1 { display: none; }
-      header button { padding-left: 6px; padding-right: 6px; }
-      .hud-lbl { display: none; }
-      #footerBar .grid > button span.text-xs { font-size: 10.5px; letter-spacing: -0.3px; }
-      #footerBar .grid > button span.text-sm { font-size: 12.5px; }
+      .stat { padding: 4px 6px; gap: 4px; }
+      .stat .ic { font-size: 13px; }
+      .stat .vl { font-size: 13px; }
+      .actbtn .nm { font-size: 11px; }
+      .actbtn.main .nm { font-size: 13.5px; }
     }
     /* 태블릿: 상·하단 UI를 크게 */
     @media (min-width: 700px) and (min-height: 700px) {
@@ -50,7 +78,7 @@
     }
     /* 가로 화면 · 아주 낮은 화면 */
     @media (max-height: 520px) {
-      #infoBanner { display: none; }
+      .stat .lb { display: none; }
     }
     #gameCanvas {
       touch-action: none;
@@ -82,59 +110,42 @@
 <body class="text-slate-100 flex flex-col items-center justify-between">
 
   <!-- 1. 표준 상단 헤더 (aigameroom 구조 계승) -->
-  <header class="w-full max-w-[460px] bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 shrink-0">
+  <header class="relative w-full max-w-[460px] bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between gap-2 shrink-0 z-40">
     <div class="flex items-center gap-1.5 min-w-0">
       <span class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-sm shrink-0">🦖</span>
       <h1 class="text-sm font-black tracking-tight whitespace-nowrap shrink-0">공룡 디펜스</h1>
-      <span id="stageBadge" class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 whitespace-nowrap truncate min-w-0">S1 트라이아스기</span>
+      <span id="stageBadge" class="px-2 py-0.5 rounded-md text-[11px] font-black bg-amber-500/15 text-amber-300 border border-amber-400/40 whitespace-nowrap shrink-0">S1 트라이아스기</span>
     </div>
-    <div class="flex items-center gap-1 shrink-0">
-      <button id="rankBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-black bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-900 active:scale-95">🏆 RANK</button>
-      <button id="codexBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-black bg-sky-600/90 hover:bg-sky-500 text-white active:scale-95" title="도감">📖</button>
-      <button id="bgmBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-600/90 text-white active:scale-95" title="배경음악">🎵</button>
-      <button id="sfxBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-600/90 text-white active:scale-95" title="효과음">🔊</button>
-      <button id="exitBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300 active:scale-95">나가기</button>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button id="rankBtn" type="button" class="ctlbtn bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-900">🏆 RANK</button>
+      <button id="menuBtn" type="button" class="ctlbtn bg-slate-800 border border-slate-600 text-slate-100 text-base" title="메뉴">☰</button>
+    </div>
+    <!-- 메뉴 -->
+    <div id="menuPanel" class="hidden absolute right-2 top-full mt-1 w-48 p-1.5 rounded-2xl bg-slate-900/98 border border-slate-700 shadow-2xl">
+      <button id="codexBtn" type="button"><span>📖</span>공룡 도감</button>
+      <button id="bgmBtn" type="button"><span>🎵</span>배경음악 <span class="ml-auto text-[11px] text-slate-400 bgm-state">켜짐</span></button>
+      <button id="sfxBtn" type="button"><span class="ico">🔊</span>효과음 <span class="ml-auto text-[11px] text-slate-400 sfx-state">켜짐</span></button>
+      <button id="exitBtn" type="button"><span>🚪</span>로비로 나가기</button>
     </div>
   </header>
 
   <!-- 2. 상단 인게임 HUD -->
-  <section id="hudSection" class="w-full max-w-[460px] px-2 pt-1 pb-1 flex flex-col gap-1 shrink-0">
-    <div class="flex items-center gap-1.5">
-      <button id="speedBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-indigo-950 border border-indigo-400/60 text-xs font-black text-indigo-200 active:scale-95 shrink-0">x1</button>
-
-      <div class="flex-1 grid grid-cols-3 gap-1.5">
-        <div class="bg-slate-900 border border-rose-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-rose-300 font-bold whitespace-nowrap">❤️<span class="hud-lbl"> 목숨</span></span>
-          <span id="hudLife" class="text-xs font-black tabular-nums">20</span>
-        </div>
-        <div class="bg-slate-900 border border-amber-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-amber-300 font-bold whitespace-nowrap">🦴<span class="hud-lbl"> 화석</span></span>
-          <span id="hudGold" class="text-xs font-black tabular-nums text-amber-200">320</span>
-        </div>
-        <div class="bg-slate-900 border border-purple-500/40 rounded-xl px-2 py-1 flex items-center justify-between">
-          <span class="text-[10px] text-purple-300 font-bold whitespace-nowrap">💎<span class="hud-lbl"> 호박</span></span>
-          <span id="hudGem" class="text-xs font-black tabular-nums text-purple-200">5</span>
-        </div>
-      </div>
-
-      <button id="pauseBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black text-slate-200 active:scale-95 shrink-0">⏸</button>
+  <section id="hudSection" class="w-full max-w-[460px] px-2 pt-1.5 pb-1 flex flex-col gap-1.5 shrink-0">
+    <div class="grid grid-cols-4 gap-1.5">
+      <div class="stat"><span class="ic">❤️</span><span class="tx"><span class="lb">목숨</span><span id="hudLife" class="vl text-rose-200">20</span></span></div>
+      <div class="stat"><span class="ic">🦴</span><span class="tx"><span class="lb">화석</span><span id="hudGold" class="vl text-amber-200">320</span></span></div>
+      <div class="stat"><span class="ic">💎</span><span class="tx"><span class="lb">호박</span><span id="hudGem" class="vl text-purple-200">5</span></span></div>
+      <div class="stat"><span class="ic">🦖</span><span class="tx"><span class="lb">처치</span><span id="hudKills" class="vl text-emerald-200">0</span></span></div>
     </div>
-
-    <!-- 웨이브 & 식성 시너지 바 -->
-    <div class="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-900/90 border border-slate-800 text-[10px] sm:text-[11px] font-bold gap-1">
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span class="text-sky-300 whitespace-nowrap">🌊 W<strong id="hudWave" class="text-white">1</strong></span>
-        <span class="text-slate-600">|</span>
-        <span class="text-slate-300 whitespace-nowrap">적 <strong id="hudEnemies" class="text-rose-300">0</strong></span>
-        <span class="text-slate-600">|</span>
-        <span class="text-slate-300 whitespace-nowrap">🦖처치 <strong id="hudKills" class="text-amber-300">0</strong></span>
-        <span class="text-slate-600">|</span>
-        <span id="hudSynergy" class="text-[10px] text-emerald-300 truncate">시너지 없음</span>
+    <div class="flex items-center gap-1.5">
+      <button id="pauseBtn" type="button" class="ctlbtn bg-slate-800 border border-slate-600 text-slate-100">⏸</button>
+      <button id="speedBtn" type="button" class="ctlbtn bg-indigo-950 border border-indigo-400/60 text-indigo-200">x1</button>
+      <div class="flex-1 min-w-0 h-[30px] px-2.5 rounded-[10px] bg-slate-900 border border-slate-800 flex items-center justify-center gap-2 text-[12px] font-black whitespace-nowrap">
+        <span class="text-sky-300">🌊 W<span id="hudWave" class="text-white">1</span></span>
+        <span class="text-slate-300">👾 <span id="hudEnemies" class="text-rose-300">0</span></span>
+        <span id="hudTimer" class="tabular-nums text-amber-300">0:22</span>
       </div>
-      <div class="flex items-center gap-1.5 shrink-0">
-        <span id="hudTimer" class="tabular-nums text-amber-300">0:20</span>
-        <button id="skipWaveBtn" type="button" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-600 text-[10px] text-slate-200 active:scale-95">건너뛰기</button>
-      </div>
+      <button id="skipWaveBtn" type="button" class="ctlbtn bg-sky-700 border border-sky-400/60 text-white">⏩ +10</button>
     </div>
   </section>
 
@@ -146,6 +157,23 @@
     <div id="stageBanner" class="pointer-events-none hidden absolute top-6 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-2xl bg-slate-950/92 border-2 border-amber-400/80 shadow-2xl text-center min-w-[230px]">
       <div id="stageBannerTitle" class="text-xs font-black text-amber-300">STAGE 1 · 트라이아스기</div>
       <div id="stageBannerSub" class="text-[11px] font-bold text-slate-200 mt-0.5">공룡의 탄생 — 판게아의 서막</div>
+    </div>
+
+    <!-- 시너지 표시 -->
+    <div id="hudSynergy" class="pointer-events-none absolute z-10 px-2 py-0.5 rounded-full bg-slate-950/75 border border-emerald-400/30 text-[10px] font-bold text-emerald-300 whitespace-nowrap" style="left:16px;top:8px">시너지 없음</div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="hide pointer-events-none absolute left-1/2 -translate-x-1/2 z-30 max-w-[86%] px-3 py-1.5 rounded-xl bg-slate-950/90 border border-amber-400/40 text-[12px] font-bold text-amber-100 text-center shadow-xl" style="bottom:84px"><span id="infoText"></span></div>
+
+    <!-- 선택한 공룡 정보 -->
+    <div id="unitPanel" class="hidden absolute z-20 px-3 py-2 rounded-2xl" style="bottom:12px;left:16px">
+      <div class="row">
+        <div class="info">
+          <div id="unitName" class="text-[12px] font-black text-white">공룡</div>
+          <div id="unitStat" class="text-[11px] font-bold text-slate-300 mt-0.5">공격 0 · 사거리 0</div>
+        </div>
+        <button id="sellBtn" type="button" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-[12px] font-black active:scale-95">판매 +0</button>
+      </div>
     </div>
 
     <!-- 액티브 스킬: 대지의 포효 -->
@@ -180,27 +208,17 @@
     </div>
   </main>
 
-  <!-- 4. 하단 안내 & 3대 액션 버튼 -->
-  <footer id="footerBar" class="w-full max-w-[460px] px-2 pt-1 pb-2 flex flex-col gap-1.5 shrink-0">
-    <div id="infoBanner" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
-      <span id="infoText" class="text-slate-300 truncate">같은 성급 2마리를 겹치면 진화! (동종 합성 시 +20 화석)</span>
-      <button id="sellBtn" type="button" class="hidden px-2 py-0.5 rounded-lg bg-rose-600/90 text-white text-[10px] font-black shrink-0 active:scale-95">판매 (+0)</button>
-    </div>
-
-    <div class="grid grid-cols-4 gap-1.5">
-      <button id="gambleBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-purple-400/60 flex flex-col items-center justify-center active:scale-95 shadow-lg">
-        <span class="text-xs font-black text-purple-100 whitespace-nowrap">🥚 고급부화</span>
-        <span class="text-[10px] font-bold text-purple-300">💎 <span id="gambleCostText">2</span></span>
+  <!-- 4. 하단 3대 액션 버튼 -->
+  <footer id="footerBar" class="w-full max-w-[460px] px-2 pt-1.5 pb-2 shrink-0">
+    <div class="grid grid-cols-4 gap-2">
+      <button id="gambleBtn" type="button" class="actbtn bg-gradient-to-b from-purple-600 to-indigo-900 border border-purple-300/50 text-white">
+        <span class="ic">🥚</span><span class="nm">고급부화</span><span class="cost text-purple-200">💎 <span id="gambleCostText">2</span></span>
       </button>
-
-      <button id="summonBtn" type="button" class="col-span-2 py-2.5 px-2 rounded-xl bg-gradient-to-b from-rose-600 to-red-800 border-2 border-amber-300/70 flex flex-col items-center justify-center active:scale-95 shadow-lg">
-        <span class="text-sm font-black text-white">🦖 공룡 소환</span>
-        <span class="text-[11px] font-extrabold text-amber-200">🦴 화석 <span id="summonCostText">40</span></span>
+      <button id="summonBtn" type="button" class="actbtn main col-span-2 bg-gradient-to-b from-rose-500 to-red-800 border-2 border-amber-300/80 text-white">
+        <span class="ic">🦖</span><span class="nm">공룡 소환</span><span class="cost text-amber-200">🦴 <span id="summonCostText">40</span></span>
       </button>
-
-      <button id="upgradeBtn" type="button" class="col-span-1 py-2.5 px-1.5 rounded-xl bg-gradient-to-b from-slate-700 to-slate-900 border border-amber-400/50 flex flex-col items-center justify-center active:scale-95 shadow-lg">
-        <span class="text-xs font-black text-amber-200 whitespace-nowrap">⚔️ 강화</span>
-        <span class="text-[10px] font-bold text-slate-300">Lv.<span id="upgLvText">1</span> (🦴<span id="upgCostText">80</span>)</span>
+      <button id="upgradeBtn" type="button" class="actbtn bg-gradient-to-b from-amber-600 to-orange-900 border border-amber-300/50 text-white">
+        <span class="ic">⚔️</span><span class="nm">강화 <span id="upgLvText" class="text-amber-200">1</span></span><span class="cost text-amber-100">🦴 <span id="upgCostText">25</span></span>
       </button>
     </div>
   </footer>
@@ -403,6 +421,10 @@
     const badgeSrc = new Map();
     const ART = {};      // 적/보스 스프라이트 { img, white, blue, w, h }
     const ENV = {};      // 지형 텍스처 / 둥지 / 동굴
+    const ANIM_N = 24;   // 애니메이션 스트립 프레임 수
+    const BADGE_ANIM = new Map();
+    let TREX_BITE = null;
+    let TREX_MOUTH = [0.44, 0.42];   // 스트립 기준 입 위치 (가로 비율, 높이 비율)
     function loadImgChain(srcs, onok, onfail) {
       let i = 0;
       const img = new Image();
@@ -435,8 +457,19 @@
       keys.forEach((k) => {
         loadImgChain([`img/enemy/${k}.webp`], (img) => {
           ART[k] = { img, white: tintCanvas(img, '#ffffff'), blue: tintCanvas(img, '#7dd3fc'), w: img.naturalWidth, h: img.naturalHeight };
+          // 살아 움직이는 걷기 애니메이션 스트립 (24프레임 가로 스트립)
+          loadImgChain([`img/anim/${k}.webp`], (aimg) => {
+            const fw = aimg.naturalWidth / ANIM_N;
+            ART[k].anim = { img: aimg, white: tintCanvas(aimg, '#ffffff'), blue: tintCanvas(aimg, '#7dd3fc'), fw, fh: aimg.naturalHeight };
+          });
         });
       });
+      // 타워 카드 숨쉬기 애니메이션
+      DINO_DB.forEach((d) => {
+        loadImgChain([`img/anim/u_${d.id}.webp`], (aimg) => { BADGE_ANIM.set(d.id, { img: aimg, fw: aimg.naturalWidth / ANIM_N, fh: aimg.naturalHeight }); });
+      });
+      // 티라노 포식 스트립
+      loadImgChain(['img/anim/trex_bite.webp'], (aimg) => { TREX_BITE = { img: aimg, fw: aimg.naturalWidth / ANIM_N, fh: aimg.naturalHeight }; });
       const envFiles = { path: 'img/env/path.jpg', nest: 'img/env/nest.webp', cave: 'img/env/cave.webp' };
       STAGES.forEach((st) => { envFiles['g' + st.id] = `img/env/ground_${st.ground}.jpg`; });
       Object.entries(envFiles).forEach(([k, f]) => {
@@ -612,7 +645,7 @@
       speed: 1, paused: false, gameOver: false,
       selectedSlotId: -1,
       synergy: { dmgMul: 1, rateMul: 1, critAdd: 0, label: '시너지 없음' },
-      enemies: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
+      enemies: [], devours: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
       parts: [], shake: 0, time: 0, started: false, boss: null,
       queue: [], curLanes: [], nextLanes: [], eggs: [], skillCd: 0, shock: null,
       combo: 0, comboT: -9, comboShow: 0, kills: 0,
@@ -939,6 +972,11 @@
         sb.style.right = `${Math.round((box.clientWidth - LOGICAL_W * sc) / 2 + 10)}px`;
         sb.style.bottom = `${Math.round((box.clientHeight - LOGICAL_H * sc) / 2 + 10)}px`;
       }
+      const padX = Math.round((box.clientWidth - LOGICAL_W * sc) / 2), padY = Math.round((box.clientHeight - LOGICAL_H * sc) / 2);
+      const up = document.getElementById('unitPanel'), sy = document.getElementById('hudSynergy'), ts = document.getElementById('toast');
+      if (up) { up.style.left = `${padX + 8}px`; up.style.width = `${Math.min(300, Math.round(LOGICAL_W * sc) - 16)}px`; up.dataset.padY = padY; }
+      if (sy) { sy.style.left = `${padX + 8}px`; sy.style.top = `${padY + 22}px`; }
+      if (ts) ts.style.bottom = `${padY + 78}px`;
       canvas.width = Math.floor(LOGICAL_W * dpr);
       canvas.height = Math.floor(LOGICAL_H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1057,6 +1095,7 @@
       return true;
     }
 
+    const unitPanel = document.getElementById('unitPanel');
     function selectSlot(slotId) {
       state.selectedSlotId = slotId;
       const slot = SLOTS[slotId];
@@ -1064,18 +1103,26 @@
         const u = slot.unit;
         const atk = Math.round(u.dmg * upgradeMul() * state.synergy.dmgMul);
         const sellVal = Math.round(20 * Math.pow(2.2, u.tier - 1));
-        ui.infoText.textContent = `[${TIER_STYLE[u.tier].label}] ${u.name} (${u.diet}) · 공격 ${atk} · 사거리 ${u.mythic ? '맵 전체' : u.range}`;
-        ui.sellBtn.textContent = `판매 (+${sellVal})`;
-        ui.sellBtn.classList.remove('hidden');
+        const dietIc = u.diet === '육식' ? '🥩' : u.diet === '초식' ? '🌿' : '🍽️';
+        document.getElementById('unitName').innerHTML = `<span style="color:${TIER_STYLE[u.tier].border}">${TIER_STYLE[u.tier].label}</span> ${u.name}`;
+        document.getElementById('unitStat').textContent = `${dietIc} ${u.diet} · ⚔️ ${atk.toLocaleString()} · 🎯 ${u.mythic ? '맵 전체' : u.range}`;
+        ui.sellBtn.textContent = `판매 +${sellVal}🦴`;
+        const py = Number(unitPanel.dataset.padY || 0) + 8;
+        if (slot.y > LOGICAL_H * 0.4) { unitPanel.style.bottom = ''; unitPanel.style.top = `${py + 30}px`; }
+        else { unitPanel.style.top = ''; unitPanel.style.bottom = `${py + 78}px`; }
+        unitPanel.classList.remove('hidden');
       } else {
-        ui.infoText.textContent = '같은 성급 2마리를 겹치면 진화! (동종 합성 시 +20 화석)';
-        ui.sellBtn.classList.add('hidden');
+        unitPanel.classList.add('hidden');
       }
     }
 
+    let toastTimer = 0;
     function showInfo(msg) {
       ui.infoText.textContent = msg;
-      ui.sellBtn.classList.add('hidden');
+      const t = document.getElementById('toast');
+      t.classList.remove('hide');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hide'), 2600);
     }
 
     // =========================================================================
@@ -1268,7 +1315,7 @@
             dmg: u.dmg * upgMul * (isCrit ? 1.85 : 1),
             isCrit, splash: u.splash, slow: u.slow,
             color: u.projColor, speed: kind === 'sky' ? 620 : u.apex ? 400 : kind === 'rock' ? 300 : 360, apex: u.apex,
-            kind, px: slot.x, py: slot.y, spin: Math.random() * 6, tier: u.tier,
+            kind, px: slot.x, py: slot.y, spin: Math.random() * 6, tier: u.tier, src: i,
           });
         }
       }
@@ -1289,6 +1336,26 @@
           projs[i] = projs[projs.length - 1]; projs.pop();
         } else {
           pr.x += (dx / d) * move; pr.y += (dy / d) * move;
+        }
+      }
+
+      const dv = state.devours || [];
+      for (let i = dv.length - 1; i >= 0; i--) {
+        const d = dv[i];
+        d.t += step;
+        const mx = d.ex - d.dir * 16, my = d.ey;
+        if (d.bit === 0 && d.t >= 0.42) {
+          d.bit = 1; sfx('bite', 0.8, 0.75); shake(3);
+          burst(d.ex, d.ey - 8, '#d6b98c', 10, 90, 2.6, 160, 0.5);
+          burst(d.ex, d.ey - 8, '#fde68a', 6, 70, 2, 120, 0.45);
+          spawnDmgText(mx, my - 46, '냠!', '#fca5a5');
+        } else if (d.bit === 1 && d.t >= 0.78) {
+          d.bit = 2; sfx('bite', 0.45, 1.25);
+          burst(mx + d.dir * 18, my - 30, '#d6b98c', 4, 50, 1.8, 140, 0.4);
+        }
+        if (d.t >= d.dur || !d.slot.unit || d.slot.unit !== d.unit) {
+          d.unit.eating = false;
+          dv[i] = dv[dv.length - 1]; dv.pop();
         }
       }
 
@@ -1321,6 +1388,7 @@
         if (pr.kind === 'sky') { if (e.boss) dmg *= 2; else e.stun = Math.max(e.stun || 0, 0.5); }
         e.hp -= dmg;
         e.hitFlash = 0.09;
+        e.killSrc = pr.src;
         if (pr.slow > 0) { e.slowMul = Math.min(e.slowMul, 1 - pr.slow); e.slowTimer = 1.6; }
         spawnDmgText(e.x + (Math.random() * 10 - 5), e.y - e.size * 0.5, `${Math.round(dmg)}`, pr.isCrit ? '#fde047' : '#ffffff');
       };
@@ -1387,7 +1455,17 @@
             if (state.boss === e) state.boss = null;
             playBgm('bgm_battle');
           } else {
-            sfx('die', 0.4, e.brute ? 0.8 : 1.1);
+            const ks = e.killSrc != null ? SLOTS[e.killSrc] : null;
+            const ku = ks && ks.unit;
+            if (TREX_BITE && ku && ku.dinoId === 11 && !ku.eating && (state.devours || (state.devours = [])).length < 3 &&
+                Math.hypot(e.x - ks.x, e.y - ks.y) <= 160) {
+              ku.eating = true;
+              state.devours.push({ unit: ku, slot: ks, sx: ks.x, sy: ks.y, ex: e.x, ey: e.y, art: e.art, size: e.size, face: e.face || 1,
+                dir: e.x >= ks.x ? 1 : -1, t: 0, dur: 1.5, bit: 0 });
+              sfx('roar', 0.35, 1.25);
+            } else {
+              sfx('die', 0.4, e.brute ? 0.8 : 1.1);
+            }
             sfx('coin', 0.25);
             // 황금알 드랍 (탭해서 줍기)
             if (state.eggs.length < 4 && Math.random() < (e.brute ? 0.07 : 0.035)) {
@@ -1464,11 +1542,16 @@
 
       const card = badgeCache.get(u.dinoId);
       const spr = spriteCache.get(u.dinoId);
+      const banim = BADGE_ANIM.get(u.dinoId);
       ctx.save();
       ctx.beginPath();
       ctx.roundRect(-half, -half, half * 2, half * 2, 9);
       ctx.clip();
-      if (card) {
+      if (u.eating) ctx.globalAlpha = alpha * 0.28;
+      if (banim) {
+        const f = Math.floor(performance.now() / 1000 * 7 + u.phase * 4) % ANIM_N;
+        ctx.drawImage(banim.img, f * banim.fw, 0, banim.fw, banim.fh, -half, -half, half * 2, half * 2);
+      } else if (card) {
         ctx.drawImage(card, -half, -half, half * 2, half * 2);
       } else if (spr) {
         ctx.fillStyle = st.glow; ctx.fillRect(-half, -half, half * 2, half * 2);
@@ -1480,6 +1563,7 @@
         ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(u.name.slice(0, 2), 0, 1);
       }
+      ctx.globalAlpha = alpha;
       // 하단 그라데이션 + 성급
       const bg = ctx.createLinearGradient(0, half - 14, 0, half);
       bg.addColorStop(0, 'rgba(2,6,23,0)'); bg.addColorStop(1, 'rgba(2,6,23,0.92)');
@@ -1532,7 +1616,18 @@
         ag.addColorStop(0, 'rgba(248,113,113,0.32)'); ag.addColorStop(1, 'rgba(248,113,113,0)');
         ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(e.x, e.y - e.size * 0.2, r, 0, Math.PI * 2); ctx.fill();
       }
-      if (art) {
+      if (art && art.anim) {
+        const A = art.anim;
+        const w = e.size * 1.08, h = w * A.fh / A.fw;
+        const f = Math.floor(e.walk * 1.2) % ANIM_N, sx = f * A.fw;
+        ctx.save();
+        ctx.translate(e.x, e.y + 7 - bob * 0.25);
+        ctx.scale(e.face, 1);
+        ctx.drawImage(A.img, sx, 0, A.fw, A.fh, -w / 2, -h, w, h);
+        if (e.slowTimer > 0) { ctx.globalAlpha = 0.38; ctx.drawImage(A.blue, sx, 0, A.fw, A.fh, -w / 2, -h, w, h); }
+        if (e.hitFlash > 0) { ctx.globalAlpha = 0.75; ctx.drawImage(A.white, sx, 0, A.fw, A.fh, -w / 2, -h, w, h); }
+        ctx.restore();
+      } else if (art) {
         const w = e.size, h = w * art.h / art.w;
         ctx.save();
         ctx.translate(e.x, e.y + 7 - bob);
@@ -1560,6 +1655,50 @@
         ctx.fillStyle = ratio > 0.5 ? '#4ade80' : ratio > 0.25 ? '#facc15' : '#f43f5e';
         ctx.fillRect(e.x - bw / 2, by, bw * ratio, 3);
       }
+    }
+
+    // 티라노가 슬롯에서 뛰쳐나가 적을 통째로 삼키는 연출
+    function drawDevour(d) {
+      const B = TREX_BITE; if (!B) return;
+      const t = d.t, W = 96, H = W * B.fh / B.fw;
+      const ease = (k) => k * k * (3 - 2 * k);
+      const hx = d.ex - d.dir * W * 0.44, hy = d.ey + 8;        // 사냥 위치(발 기준)
+      const fx = d.sx, fy = d.sy + 22;
+      let x, y, f = 0, a = 1, sc = 1;
+      if (t < 0.28) {                    // 도약
+        const k = ease(t / 0.28);
+        x = fx + (hx - fx) * k; y = fy + (hy - fy) * k - Math.sin(k * Math.PI) * 34; sc = 0.6 + 0.4 * k;
+      } else if (t < 1.2) {              // 물어뜯기 → 삼키기
+        const k = (t - 0.28) / 0.92;
+        x = hx; y = hy; f = Math.min(ANIM_N - 1, Math.floor(k * ANIM_N));
+      } else {                           // 복귀
+        const k = ease((t - 1.2) / (d.dur - 1.2));
+        x = hx + (fx - hx) * k; y = hy + (fy - hy) * k - Math.sin(k * Math.PI) * 26; sc = 1 - 0.4 * k; a = 1 - k * 0.6;
+      }
+      const art = ART[d.art];
+      const prey = (before) => {
+      // 먹잇감: 물리기 전엔 제자리, 물린 뒤엔 입으로 빨려들며 작아짐
+      if (art && t < 0.8 && (t < 0.42) === before) {
+        const k = t < 0.42 ? 0 : (t - 0.42) / 0.38;
+        const mx = hx + d.dir * W * TREX_MOUTH[0], my = hy - H * TREX_MOUTH[1];
+        const px = d.ex + (mx - d.ex) * k, py = d.ey + 7 + (my - d.ey - 7) * k;
+        const s = 1 - k * 0.85, w = d.size * s, h = w * art.h / art.w;
+        ctx.save(); ctx.globalAlpha = 1 - k * 0.5;
+        ctx.translate(px, py); ctx.rotate(d.dir * k * 1.2); ctx.scale(d.face, 1);
+        ctx.drawImage(art.img, -w / 2, -h * (1 - k * 0.5), w, h);
+        if (k > 0 && k < 0.35) { ctx.globalAlpha = 0.6 * (1 - k / 0.35); ctx.drawImage(art.white, -w / 2, -h * (1 - k * 0.5), w, h); }
+        ctx.restore();
+      }
+      };
+      prey(true);
+      // 그림자 + 티라노
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.ellipse(x, y - 2, W * 0.34 * sc, 6 * sc, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.translate(x, y); ctx.scale(d.dir * sc, sc);
+      ctx.drawImage(B.img, f * B.fw, 0, B.fw, B.fh, -W / 2, -H, W, H);
+      ctx.restore();
+      prey(false);
     }
 
     function drawProjectile(p) {
@@ -1713,6 +1852,7 @@
       for (let i = 0; i < state.enemies.length; i++) enemyOrder.push(state.enemies[i]);
       enemyOrder.sort((a, b) => a.y - b.y);
       for (let i = 0; i < enemyOrder.length; i++) drawEnemy(enemyOrder[i]);
+      for (const d of (state.devours || [])) drawDevour(d);
 
       for (let i = 0; i < state.projectiles.length; i++) drawProjectile(state.projectiles[i]);
 
@@ -1829,11 +1969,11 @@
       setText('gem', ui.gem, state.gem);
       setText('wave', ui.wave, state.wave);
       setText('enemies', ui.enemies, state.enemies.length + state.queue.length);
-      setText('kills', ui.kills, state.kills.toLocaleString());
+      setText('kills', ui.kills, state.kills >= 10000 ? `${(state.kills / 1000).toFixed(1)}k` : state.kills.toLocaleString());
       setText('timer', ui.timer, state.queue.length ? '습격중' : `0:${String(Math.max(0, Math.ceil(state.waveTimer))).padStart(2, '0')}`);
       {
         const bossLock = state.wave % 5 === 0;
-        setText('skip', ui.skipBtn, bossLock ? '🔒보스전' : `⏩건너뛰기 +${skipBonus()}`);
+        setText('skip', ui.skipBtn, bossLock ? '🔒 보스' : `⏩ +${skipBonus()}`);
         if (prevUI.skipDim !== bossLock) { prevUI.skipDim = bossLock; ui.skipBtn.classList.toggle('opacity-50', bossLock); }
         const cdr = state.skillCd / SKILL_CD;
         const key = Math.ceil(state.skillCd);
@@ -1846,7 +1986,7 @@
       }
       setText('synergy', ui.synergy, state.synergy.label);
       setText('summonCost', ui.summonCost, getSummonCost());
-      setText('upgLv', ui.upgLv, state.upgradeLv);
+      setText('upgLv', ui.upgLv, `Lv${state.upgradeLv}`);
       setText('upgCost', ui.upgCost, getUpgradeCost());
     }
 
@@ -1932,7 +2072,11 @@
       codexModal.classList.remove('hidden');
       codexModal.classList.add('flex');
     }
-    document.getElementById('codexBtn').addEventListener('click', openCodex);
+    document.getElementById('codexBtn').addEventListener('click', () => { closeMenu(); openCodex(); });
+    const menuPanel = document.getElementById('menuPanel');
+    function closeMenu() { menuPanel.classList.add('hidden'); }
+    document.getElementById('menuBtn').addEventListener('click', (e) => { e.stopPropagation(); menuPanel.classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => { if (!menuPanel.contains(e.target) && e.target.id !== 'menuBtn') closeMenu(); });
     document.getElementById('codexCloseBtn').addEventListener('click', () => {
       codexModal.classList.add('hidden'); codexModal.classList.remove('flex');
     });
@@ -2066,7 +2210,8 @@
     });
     document.getElementById('sfxBtn').addEventListener('click', (e) => {
       sfxEnabled = !sfxEnabled;
-      e.currentTarget.textContent = sfxEnabled ? '🔊' : '🔇';
+      e.currentTarget.querySelector('.ico').textContent = sfxEnabled ? '🔊' : '🔇';
+      e.currentTarget.querySelector('.sfx-state').textContent = sfxEnabled ? '켜짐' : '꺼짐';
       e.currentTarget.classList.toggle('opacity-50', !sfxEnabled);
     });
     document.getElementById('bgmBtn').addEventListener('click', (e) => {
@@ -2074,10 +2219,11 @@
       initAudio();
       if (masterBgm) masterBgm.gain.setTargetAtTime(bgmEnabled ? 0.4 : 0, audioCtx.currentTime, 0.15);
       e.currentTarget.classList.toggle('opacity-50', !bgmEnabled);
+      e.currentTarget.querySelector('.bgm-state').textContent = bgmEnabled ? '켜짐' : '꺼짐';
       try { localStorage.setItem('dd_bgm', bgmEnabled ? '1' : '0'); } catch (err) {}
     });
     try {
-      if (localStorage.getItem('dd_bgm') === '0') { bgmEnabled = false; document.getElementById('bgmBtn').classList.add('opacity-50'); }
+      if (localStorage.getItem('dd_bgm') === '0') { bgmEnabled = false; document.getElementById('bgmBtn').classList.add('opacity-50'); document.querySelector('#bgmBtn .bgm-state').textContent='꺼짐'; }
     } catch (err) {}
     document.getElementById('startBtn').addEventListener('click', () => {
       initAudio();
@@ -2099,7 +2245,7 @@
       Object.assign(state, {
         life: 20, gold: 320, gem: 5, wave: 1, stageId: 0, summonCount: 0, upgradeLv: 1,
         paused: false, gameOver: false, selectedSlotId: -1,
-        enemies: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
+        enemies: [], devours: [], projectiles: [], effects: [], dmgTexts: [], meteors: [],
         parts: [], shake: 0, boss: null, started: true, maxLife: LIFE_MAX,
         queue: [], curLanes: [], nextLanes: [], eggs: [], skillCd: 0, shock: null, combo: 0, comboShow: 0, kills: 0,
       });
