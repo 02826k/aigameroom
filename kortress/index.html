@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#0b1026" />
     <link rel="icon" type="image/png" href="./icon.png" />
     <link rel="apple-touch-icon" href="./icon.png" />
     <link rel="manifest" href="./manifest.json" />
@@ -13,284 +13,285 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            overscroll-behavior: none;
-            height: 100vh;
-            height: 100dvh;
-        }
+        :root { --glass: rgba(10, 16, 40, 0.72); --line: rgba(148, 163, 184, 0.22); }
+        html, body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; height: 100%; }
         body {
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
-            background-color: #020617;
-            color: #f8fafc;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #050816; color: #f8fafc;
+            user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none;
+            display: flex; flex-direction: column; height: 100vh; height: 100dvh;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
         }
-        .title-font {
-            font-family: 'Black Han Sans', sans-serif;
-        }
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
+        .title-font { font-family: 'Black Han Sans', sans-serif; }
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
-        .arcade-btn {
-            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
-            border: 2px solid #93c5fd;
-            box-shadow: 0 4px 0 #1e3a8a, 0 6px 12px rgba(0,0,0,0.4);
-            transition: all 0.1s ease;
+
+        /* ---------- 헤더 ---------- */
+        #topHeader { position: relative; z-index: 40; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+            background: linear-gradient(180deg, rgba(15,23,55,.96), rgba(8,12,32,.96)); border-bottom: 1px solid var(--line); }
+        #topHeader .logo { width: 30px; height: 30px; border-radius: 9px; box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 4px 12px rgba(0,0,0,.5); object-fit: cover; }
+        #topHeader h1 { font-size: 21px; line-height: 1; letter-spacing: .5px; margin: 0;
+            background: linear-gradient(180deg, #fde68a, #fb923c 55%, #ef4444); -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(0 2px 0 rgba(0,0,0,.45)); white-space: nowrap; }
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+        .hbtn { height: 32px; padding: 0 12px; border-radius: 11px; font-size: 12px; font-weight: 900; white-space: nowrap; cursor: pointer; transition: transform .08s; }
+        .hbtn:active { transform: scale(.94); }
+        #menuPanel { position: absolute; right: 10px; top: calc(100% + 6px); min-width: 190px; padding: 6px; border-radius: 16px;
+            background: rgba(12,18,44,.98); border: 1px solid #334155; box-shadow: 0 18px 40px rgba(0,0,0,.6); }
+        #menuPanel button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 800; color: #e2e8f0; text-align: left; white-space: nowrap; background: transparent; cursor: pointer; }
+        #menuPanel button:hover { background: rgba(148,163,184,.12); }
+        #menuPanel .st { margin-left: auto; font-size: 11px; color: #94a3b8; }
+        #menuPanel button.off { opacity: .55; }
+
+        /* ---------- 전장 ---------- */
+        #stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; background: #0b1026; }
+        #gameCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+        #hud { position: absolute; left: 0; right: 0; top: 0; z-index: 10; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 8px 10px; pointer-events: none; }
+        .pcard { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 0; max-width: 260px; padding: 6px 10px 7px; border-radius: 14px;
+            background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 8px 22px rgba(0,0,0,.35); transition: box-shadow .25s, border-color .25s; }
+        .pcard.on.p1 { border-color: rgba(56,189,248,.85); box-shadow: 0 0 0 1px rgba(56,189,248,.5), 0 0 22px rgba(56,189,248,.35); }
+        .pcard.on.p2 { border-color: rgba(251,113,133,.85); box-shadow: 0 0 0 1px rgba(251,113,133,.5), 0 0 22px rgba(251,113,133,.35); }
+        .pcard img { width: 40px; height: 28px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+        .pcard .nm span { overflow: hidden; text-overflow: ellipsis; }
+        .pcard .nm { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; font-weight: 900; margin-bottom: 3px; white-space: nowrap; }
+        .hpbar { position: relative; height: 9px; border-radius: 99px; background: rgba(2,6,23,.85); border: 1px solid rgba(148,163,184,.35); overflow: hidden; }
+        .hpbar > div { height: 100%; border-radius: 99px; transition: width .35s; }
+        #p2card { flex-direction: row-reverse; text-align: right; }
+        #p2card img { transform: scaleX(-1); }
+        #turnWrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+        #turn-indicator { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 900; letter-spacing: .5px; white-space: nowrap; border: 1px solid; backdrop-filter: blur(6px); }
+        #turn-indicator.p1 { background: rgba(14,116,144,.55); border-color: #38bdf8; color: #e0f2fe; }
+        #turn-indicator.p2 { background: rgba(159,18,57,.55); border-color: #fb7185; color: #ffe4e6; }
+        #toast-msg { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 50; max-width: 92%; padding: 8px 16px; border-radius: 14px;
+            background: rgba(8,12,32,.94); border: 1px solid rgba(56,189,248,.5); color: #bae6fd; font-size: 13px; font-weight: 800; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.5);
+            opacity: 0; transition: opacity .2s; pointer-events: none; }
+        .modal { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(3,6,20,.72); backdrop-filter: blur(4px); }
+        .mcard { width: 100%; max-width: 420px; border-radius: 22px; padding: 22px; text-align: center; background: linear-gradient(180deg, rgba(20,28,66,.97), rgba(10,14,36,.97)); border: 1px solid rgba(251,191,36,.35); box-shadow: 0 30px 70px rgba(0,0,0,.6); }
+        .mcard .hero { width: 120px; height: 120px; border-radius: 28px; margin: -70px auto 10px; display: block; box-shadow: 0 0 0 3px rgba(251,191,36,.6), 0 16px 40px rgba(0,0,0,.6); object-fit: cover; }
+        .bigbtn { width: 100%; padding: 13px; border-radius: 16px; font-size: 17px; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8); border: 2px solid #93c5fd; box-shadow: 0 5px 0 #1e3a8a, 0 10px 18px rgba(0,0,0,.4); transition: transform .08s; }
+        .bigbtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
+        .bigbtn.green { background: linear-gradient(180deg, #10b981, #047857); border-color: #6ee7b7; box-shadow: 0 5px 0 #064e3b, 0 10px 18px rgba(0,0,0,.4); }
+
+        /* ---------- 하단 컨트롤 ---------- */
+        #ctrl { flex-shrink: 0; z-index: 20; padding: 8px 10px 10px; background: linear-gradient(180deg, rgba(12,18,44,.98), rgba(6,9,24,.99)); border-top: 1px solid var(--line); }
+        #ctrlGrid > * { min-width: 0; }
+        #ctrlGrid { max-width: 1180px; margin: 0 auto; display: grid; gap: 8px;
+            grid-template-columns: 1fr auto; grid-template-areas: "wp ang" "pw pw" "pad fire"; }
+        .box { background: rgba(30,41,80,.55); border: 1px solid rgba(148,163,184,.22); border-radius: 14px; }
+        #wpBox { grid-area: wp; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 4px; }
+        .weapon-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 4px; border-radius: 11px; border: 1.5px solid transparent; cursor: pointer; background: rgba(2,6,23,.35); transition: all .12s; min-width: 0; }
+        .weapon-btn img { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+        .weapon-btn .wt { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; min-width: 0; }
+        .weapon-btn .wn { font-size: 11px; font-weight: 900; color: #e2e8f0; white-space: nowrap; }
+        .weapon-btn .wc { font-size: 10px; font-weight: 800; font-family: ui-monospace, monospace; }
+        .weapon-btn.active { border-color: #facc15; background: rgba(250,204,21,.16); box-shadow: 0 0 12px rgba(250,204,21,.45) inset, 0 0 10px rgba(250,204,21,.35); }
+        #angBox { grid-area: ang; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 5px 10px; min-width: 104px; }
+        #angBox .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; font-weight: 800; color: #94a3b8; }
+        #angle-display { font-size: 18px; font-weight: 900; color: #fbbf24; font-family: ui-monospace, monospace; }
+        #pwBox { grid-area: pw; display: flex; flex-direction: column; gap: 3px; }
+        #pwBox .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 900; padding: 0 2px; min-width: 0; }
+        #power-container { position: relative; height: 18px; border-radius: 99px; padding: 2px; background: #020617; border: 1px solid #475569; overflow: hidden; }
+        #power-container .ticks { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(255,255,255,.12) calc(10% - 1px) 10%); pointer-events: none; z-index: 5; }
+        #power-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #34d399, #fbbf24 55%, #f43f5e); box-shadow: 0 0 12px rgba(251,191,36,.5); }
+        @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 8px rgba(250,204,21,.6); } 50% { box-shadow: 0 0 18px rgba(239,68,68,.95); } }
+        .charging-glow { animation: pulseGlow .5s infinite; }
+        #padBox { grid-area: pad; display: flex; align-items: center; gap: 6px; }
+        .pad { display: flex; align-items: center; gap: 4px; padding: 4px; }
+        .pbtn { width: 44px; height: 44px; border-radius: 12px; font-size: 16px; font-weight: 900; color: #e2e8f0; cursor: pointer;
+            background: linear-gradient(180deg, #334155, #1e293b); border: 1px solid #475569; box-shadow: 0 3px 0 #0f172a; display: flex; align-items: center; justify-content: center; }
+        .pbtn.half { height: 21px; font-size: 10px; box-shadow: 0 2px 0 #0f172a; }
+        .pbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; background: #475569; }
+        .pbtn:disabled, .weapon-btn:disabled, #btn-fire:disabled { opacity: .45; cursor: not-allowed; }
+        #vip-sensor-btn { height: 44px; padding: 0 10px; border-radius: 12px; font-size: 11px; font-weight: 900; line-height: 1.15; white-space: nowrap; cursor: pointer; border: 1px solid rgba(251,191,36,.5); background: rgba(30,41,59,.9); color: #fcd34d; }
+        #vip-sensor-btn.on { background: linear-gradient(180deg, #fde047, #f59e0b); color: #0f172a; border-color: #fef08a; box-shadow: 0 0 14px rgba(251,191,36,.8); }
+        #vip-sensor-btn.lock { color: #94a3b8; border-color: #475569; }
+        #btn-fire { grid-area: fire; min-width: 120px; height: 52px; border-radius: 16px; font-size: 20px; font-weight: 900; letter-spacing: 1px; color: #fff; cursor: pointer;
+            background: radial-gradient(120% 140% at 50% 0%, #fb7185 0%, #ef4444 45%, #991b1b 100%); border: 2px solid #fecaca; box-shadow: 0 5px 0 #7f1d1d, 0 0 22px rgba(239,68,68,.55); text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+        #btn-fire:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #7f1d1d, 0 0 26px rgba(239,68,68,.8); }
+
+        /* 가로가 넓은 화면(태블릿 가로 · PC): 한 줄 배치 */
+        @media (min-width: 860px) {
+            #ctrlGrid { grid-template-columns: auto auto 1fr auto auto; grid-template-areas: "wp ang pw pad fire"; align-items: center; }
+            #wpBox { grid-template-columns: repeat(3, 92px); }
+            #btn-fire { height: 56px; min-width: 150px; }
+            #topHeader h1 { font-size: 24px; }
+            .pcard { width: 280px; }
         }
-        .arcade-btn:hover:not(:disabled) {
-            filter: brightness(1.1);
-            transform: translateY(-1px);
+        /* 높이가 낮은 화면(폰 가로): 컨트롤 압축 */
+        @media (max-height: 520px) {
+            #topHeader { padding: 4px 10px; }
+            #topHeader .logo { width: 24px; height: 24px; }
+            #ctrl { padding: 5px 8px 6px; }
+            #ctrlGrid { gap: 5px; grid-template-columns: auto auto 1fr auto auto; grid-template-areas: "wp ang pw pad fire"; align-items: center; }
+            #wpBox { grid-template-columns: repeat(3, auto); }
+            .weapon-btn img { width: 24px; height: 24px; }
+            .weapon-btn .wt { display: none; }
+            .pbtn { width: 38px; height: 38px; } .pbtn.half { height: 18px; }
+            #vip-sensor-btn { height: 38px; font-size: 10px; }
+            #btn-fire { height: 44px; min-width: 96px; font-size: 17px; }
+            #angBox { min-width: 84px; padding: 3px 8px; }
+            .pcard img { display: none; }
+            #hud { padding: 5px 8px; }
+            .pcard { max-width: 190px; padding: 3px 8px 4px; border-radius: 10px; }
+            .pcard .nm { font-size: 10px; margin-bottom: 2px; }
+            .hpbar { height: 6px; }
+            #turn-indicator { font-size: 10.5px; padding: 3px 10px; }
+            #topHeader h1 { font-size: 18px; }
+            .hbtn { height: 28px; }
         }
-        .arcade-btn:active:not(:disabled) {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #1e3a8a;
+        /* 좁은 폰 */
+        @media (max-width: 380px) {
+            .weapon-btn .wn { font-size: 10px; }
+            .weapon-btn img { width: 24px; height: 24px; }
+            .pbtn { width: 38px; }
+            #btn-fire { min-width: 96px; }
+            #topHeader h1 { font-size: 18px; }
+            .pcard { padding: 5px 7px; }
+            .pcard img { width: 30px; height: 22px; }
+            #turn-indicator { font-size: 10.5px; padding: 4px 9px; }
+            #winChip { display: none; }
+            #angBox { min-width: 78px; padding: 4px 7px; }
+            #angle-display { font-size: 15px; }
+            #btn-fire { min-width: 84px; font-size: 18px; }
+            #vip-sensor-btn { padding: 0 6px; font-size: 10px; }
+            .weapon-btn { gap: 3px; }
         }
-        .arcade-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .fire-btn {
-            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-            border: 2px solid #fca5a5;
-            box-shadow: 0 4px 0 #7f1d1d, 0 6px 15px rgba(239, 68, 68, 0.5);
-        }
-        .fire-btn:active:not(:disabled) {
-            box-shadow: 0 1px 0 #7f1d1d;
-        }
-        .weapon-btn.active {
-            border-color: #facc15;
-            background: rgba(250, 204, 21, 0.2);
-            box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
-        }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 8px rgba(250, 204, 21, 0.6); }
-            50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.9); }
-        }
-        .charging-glow {
-            animation: pulseGlow 0.5s infinite;
-        }
+        @media (min-width: 700px) and (min-height: 700px) { .weapon-btn img { width: 34px; height: 34px; } }
     </style>
 </head>
-<body class="flex flex-col w-screen overflow-hidden bg-slate-950 text-slate-100">
+<body>
 
-    <!-- 디자인 표준 2단 헤더 -->
-    <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/95 backdrop-blur px-3 py-2 sticky top-0 z-30 shadow-lg shadow-black/25 shrink-0">
-        <div class="max-w-5xl mx-auto flex flex-col gap-1.5">
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 min-w-0">
-                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400/25 to-indigo-600/25 text-sky-300 font-extrabold text-xs border border-sky-400/40 shrink-0">🎯</span>
-                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 truncate">코트리스 (KORTRESS)</h1>
-                    <span id="vipBadge" class="hidden px-1.5 py-0.5 text-[10px] font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 rounded shrink-0">VIP</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <span class="hidden sm:inline text-[10px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded-md">
-                        승리 <span id="winCountText">0</span>회
-                    </span>
-                    <button id="loginOpenBtn" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:brightness-110 text-slate-950 border border-yellow-200/80 shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
-                        로그인
-                    </button>
-                    <button id="logoutBtn" type="button" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
-                        로그아웃
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-800/70">
-                <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🎵 배경음 ON</button>
-                <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap">🔊 효과음 ON</button>
-                <button id="menu-btn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">메뉴</button>
-                <button id="headerExitLobbyBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer whitespace-nowrap">나가기</button>
-            </div>
+    <!-- 헤더 -->
+    <header id="topHeader">
+        <img class="logo" src="./icon.png" alt="" onerror="this.style.display='none'">
+        <h1 class="title-font">KORTRESS</h1>
+        <span id="vipBadge" class="hidden chip" style="background:linear-gradient(90deg,#fbbf24,#eab308);color:#0f172a;padding:2px 7px;font-size:10px;font-weight:900">👑 VIP</span>
+        <div style="flex:1"></div>
+        <span id="winChip" class="chip" style="background:rgba(14,165,233,.12);border:1px solid rgba(56,189,248,.35);color:#7dd3fc">🏆 승리 <span id="winCountText">0</span></span>
+        <button id="loginOpenBtn" type="button" class="hbtn" style="background:linear-gradient(180deg,#fde68a,#f59e0b);color:#0f172a;border:1px solid #fef3c7">로그인</button>
+        <button id="logoutBtn" type="button" class="hidden hbtn" style="background:#1e293b;color:#cbd5e1;border:1px solid #334155">로그아웃</button>
+        <button id="menuToggle" type="button" class="hbtn" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;font-size:16px;padding:0 11px" aria-label="메뉴">☰</button>
+        <div id="menuPanel" class="hidden">
+            <button id="bgmToggleBtn" type="button"><span>🎵</span>배경음 <span class="st">켜짐</span></button>
+            <button id="soundToggleBtn" type="button"><span>🔊</span>효과음 <span class="st">켜짐</span></button>
+            <button id="menu-btn" type="button"><span>🏠</span>메인 메뉴</button>
+            <button id="headerExitLobbyBtn" type="button"><span>🚪</span>로비로 나가기</button>
         </div>
     </header>
 
-    <!-- 상단 HUD (플레이어 체력, 턴 표시, 바람 게이지) -->
-    <div class="bg-slate-900/90 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between z-10 shrink-0 shadow-lg">
-        <!-- Player 1 상태 -->
-        <div class="flex items-center gap-2 w-1/3">
-            <div class="w-3.5 h-3.5 rounded-full bg-sky-500 border-2 border-white shrink-0"></div>
-            <div class="w-full max-w-[160px]">
-                <div class="flex justify-between text-[11px] font-bold mb-0.5">
-                    <span class="text-sky-400">PLAYER 1</span>
-                    <span id="p1-hp-text">100</span>
-                </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                    <div id="p1-hp-bar" class="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-300" style="width: 100%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 중앙 정보 (턴 표시) -->
-        <div class="flex flex-col items-center justify-center w-1/3">
-            <div id="turn-indicator" class="text-[11px] sm:text-xs font-black tracking-wider px-3 py-1 rounded-full bg-sky-600/30 border border-sky-400 text-sky-200">
-                P1 TURN
-            </div>
-        </div>
-
-        <!-- Player 2 상태 -->
-        <div class="flex items-center justify-end gap-1.5 w-1/3">
-            <div class="w-full max-w-[160px] text-right">
-                <div class="flex justify-between text-[11px] font-bold mb-0.5">
-                    <span id="p2-hp-text">100</span>
-                    <span id="p2-name" class="text-rose-400">CPU (AI)</span>
-                </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700 flex justify-end">
-                    <div id="p2-hp-bar" class="h-full bg-gradient-to-l from-rose-600 to-orange-400 transition-all duration-300" style="width: 100%;"></div>
-                </div>
-            </div>
-            <div class="w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white shrink-0"></div>
-        </div>
-    </div>
-
-    <!-- 메인 게임 캔버스 영역 -->
-    <main class="relative flex-1 min-h-0 w-full overflow-hidden bg-slate-950">
+    <!-- 전장 -->
+    <main id="stage">
         <canvas id="gameCanvas"></canvas>
 
-        <!-- 플로팅 알림 메시지 -->
-        <div id="toast-msg" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-sky-500/50 text-sky-200 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-2xl opacity-0 transition-opacity duration-200 z-50 whitespace-nowrap">
-            알림
-        </div>
-
-        <!-- 시작 및 모드 선택 모달 -->
-        <div id="start-modal" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center z-30 p-4">
-            <div class="bg-slate-900 border-2 border-sky-500/40 rounded-2xl p-5 sm:p-7 max-w-md w-full text-center shadow-2xl">
-                <div class="inline-block px-3 py-1 bg-amber-500/20 border border-amber-400/50 rounded-full text-amber-300 text-xs font-bold mb-2">
-                    코트리스 · ARCADE ARTILLERY
+        <div id="hud">
+            <div id="p1card" class="pcard p1">
+                <img src="img/tank_blue.webp" alt="" onerror="this.style.visibility='hidden'">
+                <div style="flex:1;min-width:0">
+                    <div class="nm"><span style="color:#7dd3fc">PLAYER 1</span><span id="p1-hp-text">100</span></div>
+                    <div class="hpbar"><div id="p1-hp-bar" style="width:100%;background:linear-gradient(90deg,#0ea5e9,#67e8f9)"></div></div>
                 </div>
-                <h1 class="title-font text-4xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-orange-400 to-red-500 mb-1.5 tracking-wide drop-shadow">
-                    KORTRESS
-                </h1>
-                <p class="text-slate-400 text-xs sm:text-sm mb-5">각도와 파워를 계산하여 상대 탱크를 파괴하세요!</p>
-
-                <div class="space-y-2.5 mb-5">
-                    <button type="button" onclick="startGame('ai')" class="arcade-btn w-full py-3 rounded-xl font-black text-base sm:text-lg text-white flex items-center justify-center gap-2 cursor-pointer">
-                        <span>🤖</span> 1인용 (AI 대전)
-                    </button>
-                    <button type="button" onclick="startGame('pvp')" class="arcade-btn w-full py-3 rounded-xl font-black text-base sm:text-lg text-white flex items-center justify-center gap-2 cursor-pointer" style="background: linear-gradient(180deg, #10b981 0%, #047857 100%); border-color: #6ee7b7; box-shadow: 0 4px 0 #064e3b;">
-                        <span>👥</span> 2인용 (로컬 대전)
-                    </button>
-                </div>
-
-                <div class="bg-slate-800/80 rounded-xl p-3 text-left text-[11px] text-slate-300 space-y-1 border border-slate-700">
-                    <div class="font-bold text-amber-400 mb-0.5">🎮 조작 가이드</div>
-                    <p>• <span class="text-white font-bold">이동:</span> 좌/우 방향키 (← / →) 또는 하단 버튼</p>
-                    <p>• <span class="text-white font-bold">각도:</span> 상/하 방향키 (↑ / ↓) 또는 하단 버튼</p>
-                    <p>• <span class="text-white font-bold">발사:</span> <span class="text-rose-400 font-bold">SPACE</span> 또는 <span class="text-rose-400 font-bold">FIRE!</span> 버튼을 길게 눌러 발사</p>
+            </div>
+            <div id="turnWrap"><div id="turn-indicator" class="p1">P1 TURN</div></div>
+            <div id="p2card" class="pcard p2">
+                <img src="img/tank_red.webp" alt="" onerror="this.style.visibility='hidden'">
+                <div style="flex:1;min-width:0">
+                    <div class="nm"><span id="p2-hp-text">100</span><span id="p2-name" style="color:#fda4af">CPU (AI)</span></div>
+                    <div class="hpbar" style="display:flex;justify-content:flex-end"><div id="p2-hp-bar" style="width:100%;background:linear-gradient(270deg,#e11d48,#fb923c)"></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- 게임 오버 모달 -->
-        <div id="gameover-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center z-30 p-4">
-            <div class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
-                <div class="text-4xl mb-2">🏆</div>
-                <h2 id="winner-title" class="title-font text-3xl text-amber-400 mb-2">PLAYER 1 WIN!</h2>
-                <p id="winner-desc" class="text-slate-300 text-xs sm:text-sm mb-5">완벽한 포격으로 적 탱크를 격파했습니다!</p>
-                <div class="space-y-2">
-                    <button type="button" onclick="restartGame()" class="arcade-btn w-full py-2.5 rounded-xl font-bold text-white text-sm sm:text-base cursor-pointer">
-                        🔄 다시 하기
-                    </button>
-                    <button type="button" onclick="showMainMenu()" class="w-full py-2 rounded-xl font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs sm:text-sm cursor-pointer">
-                        메인 메뉴로
-                    </button>
+        <div id="toast-msg">알림</div>
+
+        <!-- 시작 -->
+        <div id="start-modal" class="modal">
+            <div class="mcard" style="margin-top:56px">
+                <img class="hero" src="./icon.png" alt="" onerror="this.style.display='none'">
+                <div class="chip" style="background:rgba(245,158,11,.15);border:1px solid rgba(251,191,36,.45);color:#fcd34d;margin-bottom:6px">코트리스 · ARCADE ARTILLERY</div>
+                <h1 class="title-font" style="font-size:46px;line-height:1.05;margin:4px 0 6px;background:linear-gradient(180deg,#fde68a,#fb923c 55%,#ef4444);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(0,0,0,.5))">KORTRESS</h1>
+                <p style="color:#94a3b8;font-size:13px;margin:0 0 16px">각도와 파워를 계산해 상대 탱크를 파괴하세요!</p>
+                <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+                    <button type="button" onclick="startGame('ai')" class="bigbtn">🤖 1인용 (AI 대전)</button>
+                    <button type="button" onclick="startGame('pvp')" class="bigbtn green">👥 2인용 (로컬 대전)</button>
+                </div>
+                <div style="background:rgba(30,41,80,.6);border:1px solid #334155;border-radius:14px;padding:10px 12px;text-align:left;font-size:11.5px;color:#cbd5e1;line-height:1.6">
+                    <div style="font-weight:900;color:#fbbf24;margin-bottom:2px">🎮 조작 가이드</div>
+                    <div>• <b style="color:#fff">이동</b> ← / → 또는 ◀ ▶ 버튼</div>
+                    <div>• <b style="color:#fff">각도</b> ↑ / ↓ 또는 ▲ ▼ 버튼</div>
+                    <div>• <b style="color:#fff">발사</b> <b style="color:#fb7185">SPACE</b> 또는 <b style="color:#fb7185">FIRE!</b> 길게 눌렀다 떼기</div>
+                    <div>• <b style="color:#fff">전장 보기</b> 화면을 좌우로 드래그</div>
                 </div>
             </div>
         </div>
 
+        <!-- 게임 오버 -->
+        <div id="gameover-modal" class="modal hidden">
+            <div class="mcard">
+                <div style="font-size:46px;margin-bottom:4px">🏆</div>
+                <h2 id="winner-title" class="title-font" style="font-size:32px;color:#fbbf24;margin:0 0 6px">PLAYER 1 WIN!</h2>
+                <p id="winner-desc" style="color:#cbd5e1;font-size:13px;margin:0 0 18px">완벽한 포격으로 적 탱크를 격파했습니다!</p>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <button type="button" onclick="restartGame()" class="bigbtn">🔄 다시 하기</button>
+                    <button type="button" onclick="showMainMenu()" class="hbtn" style="height:42px;background:#1e293b;color:#cbd5e1;border:1px solid #475569">메인 메뉴로</button>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- 하단 아케이드 컨트롤 패널 -->
-    <footer class="bg-slate-900 border-t border-slate-800 px-2 py-2 sm:p-2.5 z-10 shrink-0">
-        <div class="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
-            <!-- 좌측: 포탄 선택 & 연료 게이지 -->
-            <div class="flex items-center justify-between md:justify-start gap-2 w-full md:w-auto">
-                <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
-                    <button id="wp-0" type="button" onclick="selectWeapon(0)" class="weapon-btn active px-2 py-1 rounded-lg border border-transparent flex flex-col items-center min-w-[54px] transition cursor-pointer">
-                        <span class="text-xs">💣</span>
-                        <span class="text-[10px] font-bold text-slate-200">일반탄</span>
-                        <span class="text-[9px] text-amber-400 font-mono">∞</span>
-                    </button>
-                    <button id="wp-1" type="button" onclick="selectWeapon(1)" class="weapon-btn px-2 py-1 rounded-lg border border-transparent flex flex-col items-center min-w-[54px] transition cursor-pointer">
-                        <span class="text-xs">☄️</span>
-                        <span class="text-[10px] font-bold text-slate-200">3연발</span>
-                        <span id="wp-1-count" class="text-[9px] text-cyan-400 font-mono">2발</span>
-                    </button>
-                    <button id="wp-2" type="button" onclick="selectWeapon(2)" class="weapon-btn px-2 py-1 rounded-lg border border-transparent flex flex-col items-center min-w-[54px] transition cursor-pointer">
-                        <span class="text-xs">☢️</span>
-                        <span class="text-[10px] font-bold text-slate-200">고폭탄</span>
-                        <span id="wp-2-count" class="text-[9px] text-rose-400 font-mono">1발</span>
-                    </button>
-                </div>
-
-                <div class="flex flex-col gap-0.5 bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[96px]">
-                    <div class="flex justify-between items-center text-[11px]">
-                        <span class="text-slate-400 font-bold">각도</span>
-                        <span id="angle-display" class="font-mono font-black text-amber-400">45°</span>
-                    </div>
-                    <div class="flex justify-between text-[9px] text-slate-400">
-                        <span>FUEL</span>
-                        <span id="fuel-text">100%</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                        <div id="fuel-bar" class="h-full bg-amber-400 transition-all duration-75" style="width: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 중앙: 파워 게이지 바 + VIP 정밀 조준 추천 -->
-            <div class="w-full md:flex-1 max-w-md flex flex-col gap-0.5">
-                <div class="flex justify-between items-center text-[10px] font-bold px-1 gap-2">
-                    <span class="text-slate-400 shrink-0">SHOT POWER</span>
-                    <button id="vip-assist-badge" type="button" title="VIP 자동센서 계산 결과"
-                        class="hidden px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-[10px] font-black truncate transition cursor-pointer">
-                        👑 VIP 센서: 계산중...
-                    </button>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span id="vip-target-power-label" class="hidden font-mono text-[10px] font-black text-yellow-300 bg-yellow-400/15 border border-yellow-400/50 px-1.5 py-0.2 rounded">목표 0%</span>
-                        <span id="power-text" class="font-mono text-amber-400">0%</span>
-                    </div>
-                </div>
-                <div id="power-container" class="w-full h-4 bg-slate-950 rounded-full p-0.5 border border-slate-600 relative overflow-hidden">
-                    <div id="last-power-marker" class="hidden absolute top-0 bottom-0 w-0.5 bg-white/70 z-10" style="left: 0%;"></div>
-                    <div id="vip-power-marker" class="hidden absolute top-0 bottom-0 w-1.5 -translate-x-1/2 bg-yellow-300 border-x border-amber-950/60 shadow-[0_0_10px_#fde047] z-20" style="left: 0%;"></div>
-                    <div id="power-bar" class="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-600 transition-none" style="width: 0%;"></div>
-                </div>
-            </div>
-
-            <!-- 우측: 이동/각도 조절 패드 및 발사 버튼 -->
-            <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
-                <div class="flex flex-col items-center gap-1">
-                    <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
-                        <button id="btn-left" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">◀</button>
-                        <div class="flex flex-col gap-0.5">
-                            <button id="btn-up" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▲</button>
-                            <button id="btn-down" type="button" class="w-9 h-5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded font-bold text-[10px] flex items-center justify-center cursor-pointer">▼</button>
-                        </div>
-                        <button id="btn-right" type="button" class="w-9 h-9 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg font-bold text-base flex items-center justify-center cursor-pointer">▶</button>
-                    </div>
-                    <button id="vip-sensor-btn" type="button"
-                        class="w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800 border-amber-400/50 text-amber-300 hover:bg-slate-700 whitespace-nowrap">
-                        👑 VIP자동센서
-                    </button>
-                </div>
-
-                <button id="btn-fire" type="button" class="fire-btn px-5 py-2.5 rounded-xl font-black text-white text-sm sm:text-base tracking-wider uppercase flex-1 md:flex-none text-center cursor-pointer">
-                    FIRE!
+    <!-- 하단 컨트롤 -->
+    <footer id="ctrl">
+        <div id="ctrlGrid">
+            <div id="wpBox" class="box">
+                <button id="wp-0" type="button" onclick="selectWeapon(0)" class="weapon-btn active">
+                    <img src="img/w0.webp" alt="" onerror="this.outerHTML='<span style=&quot;font-size:20px&quot;>💣</span>'">
+                    <span class="wt"><span class="wn">일반탄</span><span class="wc" style="color:#fbbf24">∞</span></span>
+                </button>
+                <button id="wp-1" type="button" onclick="selectWeapon(1)" class="weapon-btn">
+                    <img src="img/w1.webp" alt="" onerror="this.outerHTML='<span style=&quot;font-size:20px&quot;>☄️</span>'">
+                    <span class="wt"><span class="wn">3연발</span><span id="wp-1-count" class="wc" style="color:#22d3ee">2발</span></span>
+                </button>
+                <button id="wp-2" type="button" onclick="selectWeapon(2)" class="weapon-btn">
+                    <img src="img/w2.webp" alt="" onerror="this.outerHTML='<span style=&quot;font-size:20px&quot;>☢️</span>'">
+                    <span class="wt"><span class="wn">고폭탄</span><span id="wp-2-count" class="wc" style="color:#fb7185">1발</span></span>
                 </button>
             </div>
+
+            <div id="angBox" class="box">
+                <div class="row"><span>각도</span><span id="angle-display">45°</span></div>
+                <div class="row" style="font-size:9.5px"><span>FUEL</span><span id="fuel-text">100%</span></div>
+                <div style="height:5px;border-radius:9px;background:#020617;overflow:hidden"><div id="fuel-bar" style="height:100%;width:100%;background:linear-gradient(90deg,#f59e0b,#fde047)"></div></div>
+            </div>
+
+            <div id="pwBox">
+                <div class="row">
+                    <span style="color:#94a3b8;flex-shrink:0">SHOT POWER</span>
+                    <button id="vip-assist-badge" type="button" class="hidden chip" style="background:rgba(245,158,11,.2);border:1px solid rgba(251,191,36,.6);color:#fcd34d;font-size:10px;padding:2px 8px;overflow:hidden;text-overflow:ellipsis;min-width:0;cursor:pointer">👑 VIP 센서: 계산중...</button>
+                    <span style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                        <span id="vip-target-power-label" class="hidden" style="font-family:monospace;font-size:10px;color:#fde047;background:rgba(250,204,21,.15);border:1px solid rgba(250,204,21,.5);padding:0 5px;border-radius:5px">목표 0%</span>
+                        <span id="power-text" style="font-family:monospace;color:#fbbf24;font-size:12px">0%</span>
+                    </span>
+                </div>
+                <div id="power-container">
+                    <div class="ticks"></div>
+                    <div id="last-power-marker" class="hidden" style="position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.8);z-index:10;left:0%"></div>
+                    <div id="vip-power-marker" class="hidden" style="position:absolute;top:0;bottom:0;width:6px;transform:translateX(-50%);background:#fde047;box-shadow:0 0 10px #fde047;z-index:20;left:0%"></div>
+                    <div id="power-bar" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div id="padBox">
+                <div class="pad box">
+                    <button id="btn-left" type="button" class="pbtn">◀</button>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                        <button id="btn-up" type="button" class="pbtn half">▲</button>
+                        <button id="btn-down" type="button" class="pbtn half">▼</button>
+                    </div>
+                    <button id="btn-right" type="button" class="pbtn">▶</button>
+                </div>
+                <button id="vip-sensor-btn" type="button">👑 VIP<br>자동센서</button>
+            </div>
+
+            <button id="btn-fire" type="button">FIRE!</button>
         </div>
     </footer>
 
@@ -547,6 +548,11 @@
                 gain.connect(this.ctx.destination);
                 noise.start(now);
                 noise.stop(now + duration);
+                // 묵직한 저음 쿵
+                const sub = this.ctx.createOscillator(), sg = this.ctx.createGain();
+                sub.type = 'sine'; sub.frequency.setValueAtTime(isBig ? 70 : 95, now); sub.frequency.exponentialRampToValueAtTime(28, now + duration);
+                sg.gain.setValueAtTime(isBig ? 0.9 : 0.6, now); sg.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                sub.connect(sg); sg.connect(this.ctx.destination); sub.start(now); sub.stop(now + duration);
             }
             playChargeTick(powerRatio) {
                 if (this.muted) return;
@@ -590,6 +596,39 @@
         const TANK_WIDTH = 40;
         const MAX_FUEL = 100;
 
+        // ===================== 그래픽 리소스 · 카메라 =====================
+        const PIVOT_Y = 24;   // 포탑 회전축 높이 (지면 기준)
+        const HIT_Y = 17;     // 피격 판정 중심 높이
+        const HIT_R = 21;     // 피격 판정 반경
+        const TANK_W = 58;    // 탱크 스프라이트 폭 (월드 px)
+        const STRIP_N = 24;   // 애니메이션 스트립 프레임 수
+        const ART = {};
+        function tintCanvas(img, color) {
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+            const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+            g.globalCompositeOperation = 'source-in'; g.fillStyle = color; g.fillRect(0, 0, c.width, c.height);
+            return c;
+        }
+        function loadArt(key, src, after) {
+            const img = new Image();
+            img.onload = () => { ART[key] = img; if (after) after(img); };
+            img.src = src;
+        }
+        loadArt('sky', 'img/bg_sky.jpg');
+        loadArt('hills', 'img/bg_hills.webp');
+        loadArt('soil', 'img/soil.jpg', (img) => { ART.soilPat = ctx.createPattern(img, 'repeat'); });
+        loadArt('tank0', 'img/tank_blue.webp', (img) => { ART.tankW0 = tintCanvas(img, '#ffffff'); });
+        loadArt('tank1', 'img/tank_red.webp', (img) => { ART.tankW1 = tintCanvas(img, '#ffffff'); });
+        loadArt('drive0', 'img/tank_blue_drive.webp');
+        loadArt('drive1', 'img/tank_red_drive.webp');
+        loadArt('boom', 'img/boom.webp');
+        loadArt('boomBig', 'img/boom_big.webp');
+
+        const cam = { x: 0, y: 0, s: 1, vw: WORLD_WIDTH, vh: WORLD_HEIGHT, manualUntil: 0, hold: null, holdUntil: 0, inited: false };
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+
         const WEAPONS = [
             { id: 0, name: '일반탄', radius: 42, damage: 34, color: '#fbbf24', trailColor: 'rgba(251, 191, 36, 0.6)' },
             { id: 1, name: '3연발탄', radius: 30, damage: 18, color: '#38bdf8', trailColor: 'rgba(56, 189, 248, 0.6)' },
@@ -606,6 +645,8 @@
             projectiles: [],
             particles: [],
             shockwaves: [],
+            booms: [],
+            flash: 0,
             muzzleFlashes: [],
             floatingTexts: [],
             stars: [],
@@ -636,6 +677,7 @@
                 this.ammo = [Infinity, 2, 1];
                 this.lastPower = 0;
                 this.slopeAngle = 0;
+                this.recoil = 0; this.hitFlash = 0; this.drivePhase = 0; this.driveT = 0;
             }
 
             updatePositionOnTerrain() {
@@ -656,6 +698,7 @@
                 this.x = nextX;
                 this.facing = dir;
                 this.fuel = Math.max(0, this.fuel - 0.8);
+                this.drivePhase = (this.drivePhase || 0) + 0.9; this.driveT = Date.now() + 140;
                 this.updatePositionOnTerrain();
                 sfx.playMove();
             }
@@ -667,6 +710,64 @@
             }
 
             draw(ctx) {
+                const now = Date.now();
+                if (this.recoil > 0) this.recoil = Math.max(0, this.recoil - 0.07);
+                if (this.hitFlash > 0) this.hitFlash = Math.max(0, this.hitFlash - 0.04);
+                const img = ART['tank' + this.id];
+                if (img) {
+                    const W = TANK_W, H = W * img.height / img.width;
+                    const px = this.x, py = this.y - PIVOT_Y;
+                    // 그림자
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                    ctx.beginPath(); ctx.ellipse(this.x, this.y + 1, W * 0.47, 5, 0, 0, Math.PI * 2); ctx.fill();
+                    // VIP 오라
+                    if (this.id === 0 && authState.isVip) {
+                        const aura = ctx.createRadialGradient(px, py + 6, 4, px, py + 6, 44);
+                        aura.addColorStop(0, 'rgba(250, 204, 21, 0.35)'); aura.addColorStop(1, 'rgba(250, 204, 21, 0)');
+                        ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(px, py + 6, 44, 0, Math.PI * 2); ctx.fill();
+                    }
+                    // 포신 (몸통 뒤에서 포탑 돔으로 들어가도록 먼저 그림)
+                    ctx.save();
+                    ctx.translate(px, py);
+                    ctx.rotate((-this.angle * Math.PI) / 180);
+                    const rc = this.recoil * 7;
+                    const bg = ctx.createLinearGradient(0, -4, 0, 4);
+                    bg.addColorStop(0, '#f8fafc'); bg.addColorStop(0.45, '#94a3b8'); bg.addColorStop(1, '#1e293b');
+                    ctx.fillStyle = bg; ctx.strokeStyle = '#0b1220'; ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.roundRect(4 - rc, -3.8, 26, 7.6, 2.6); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = this.id === 0 ? '#2563eb' : '#dc2626';
+                    ctx.beginPath(); ctx.roundRect(23 - rc, -5.2, 8, 10.4, 2); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(8 - rc, -3, 13, 1.4);
+                    ctx.restore();
+                    // 몸통 (이동 중엔 궤도가 굴러가는 애니메이션)
+                    ctx.save();
+                    ctx.translate(px, py);
+                    ctx.rotate(this.slopeAngle * 0.85);
+                    ctx.scale(this.facing, 1);
+                    const idleBob = this.driveT > now ? Math.sin(now / 45) * 0.5 : Math.sin(now / 260 + this.id) * 0.35;
+                    const top = -H * 0.30 + idleBob;
+                    const strip = ART['drive' + this.id];
+                    if (strip && this.driveT > now) {
+                        const fw = strip.width / STRIP_N, f = Math.floor(this.drivePhase || 0) % STRIP_N;
+                        ctx.drawImage(strip, f * fw, 0, fw, strip.height, -W / 2, top, W, H);
+                    } else {
+                        ctx.drawImage(img, -W / 2, top, W, H);
+                    }
+                    if (this.hitFlash > 0 && ART['tankW' + this.id]) {
+                        ctx.globalAlpha = this.hitFlash * 0.85;
+                        ctx.drawImage(ART['tankW' + this.id], -W / 2, top, W, H);
+                        ctx.globalAlpha = 1;
+                    }
+                    ctx.restore();
+                    // 머리 위 체력 바
+                    const bw = 46, by = py - H * 0.30 - 22;
+                    ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+                    ctx.beginPath(); ctx.roundRect(this.x - bw / 2 - 1.5, by - 1.5, bw + 3, 7, 3.5); ctx.fill();
+                    const hr = Math.max(0, this.hp / this.maxHp);
+                    ctx.fillStyle = this.id === 0 ? (hr > 0.3 ? '#38bdf8' : '#f43f5e') : (hr > 0.3 ? '#fb7185' : '#f43f5e');
+                    ctx.beginPath(); ctx.roundRect(this.x - bw / 2, by, bw * hr, 4, 2); ctx.fill();
+                } else {
+
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.slopeAngle);
@@ -752,6 +853,7 @@
                 ctx.fill();
 
                 ctx.restore();
+                }
 
                 if (gameState.phase !== 'GAMEOVER' && gameState.tanks[gameState.turn] === this && !this.isAI) {
                     const bob = Math.sin(Date.now() / 180) * 4;
@@ -759,9 +861,9 @@
                     ctx.shadowColor = '#facc15';
                     ctx.shadowBlur = 8;
                     ctx.beginPath();
-                    ctx.moveTo(this.x, this.y - 46 + bob);
-                    ctx.lineTo(this.x - 7, this.y - 56 + bob);
-                    ctx.lineTo(this.x + 7, this.y - 56 + bob);
+                    ctx.moveTo(this.x, this.y - 66 + bob);
+                    ctx.lineTo(this.x - 8, this.y - 78 + bob);
+                    ctx.lineTo(this.x + 8, this.y - 78 + bob);
                     ctx.closePath();
                     ctx.fill();
                     ctx.shadowBlur = 0;
@@ -769,7 +871,7 @@
                     if (gameState.phase === 'AIMING' || gameState.phase === 'CHARGING') {
                         const rad = (-this.angle * Math.PI) / 180;
                         const startX = this.x + Math.cos(rad) * 32;
-                        const startY = (this.y - 13) + Math.sin(rad) * 32;
+                        const startY = (this.y - PIVOT_Y) + Math.sin(rad) * 32;
                         ctx.strokeStyle = 'rgba(250, 204, 21, 0.7)';
                         ctx.setLineDash([5, 5]);
                         ctx.lineWidth = 2;
@@ -786,7 +888,7 @@
                             if (sensorSol) {
                                 const spd = (sensorSol.power / 100) * MAX_POWER;
                                 let px = this.x + Math.cos(rad) * 30;
-                                let py = (this.y - 13) + Math.sin(rad) * 30;
+                                let py = (this.y - PIVOT_Y) + Math.sin(rad) * 30;
                                 let pvx = Math.cos(rad) * spd;
                                 let pvy = Math.sin(rad) * spd;
 
@@ -804,7 +906,7 @@
                                             stopped = true;
                                             break;
                                         }
-                                        if (opp && opp.hp > 0 && Math.hypot(px - opp.x, py - (opp.y - 11)) < 16) {
+                                        if (opp && opp.hp > 0 && Math.hypot(px - opp.x, py - (opp.y - HIT_Y)) < HIT_R - 2) {
                                             hitTarget = true;
                                             impactPt = { x: px, y: py };
                                             pts.push(impactPt);
@@ -891,6 +993,7 @@
                 if (this.trail.length > 26) this.trail.shift();
 
                 this.vy += GRAVITY;
+                if (Math.random() < 0.5) gameState.particles.push({ type: 'smoke', x: this.x, y: this.y, vx: (Math.random() - 0.5) * 0.3, vy: -0.15, size: this.weapon.id === 2 ? 5 : 3.5, grow: 0.22, alpha: 0.45, decay: 0.018, color: '210,210,220' });
 
                 const steps = 4;
                 for (let s = 0; s < steps; s++) {
@@ -902,7 +1005,7 @@
                     }
                     for (let tank of gameState.tanks) {
                         if (tank.hp <= 0) continue;
-                        if (Math.hypot(this.x - tank.x, this.y - (tank.y - 11)) < 19) {
+                        if (Math.hypot(this.x - tank.x, this.y - (tank.y - HIT_Y)) < HIT_R) {
                             this.explode();
                             return;
                         }
@@ -945,6 +1048,7 @@
                         const falloff = Math.max(0.2, 1 - dist / (r + 15));
                         const dmg = Math.round(this.weapon.damage * falloff);
                         tank.hp = Math.max(0, tank.hp - dmg);
+                        tank.hitFlash = 1;
                         gameState.floatingTexts.push({
                             x: tank.x, y: tank.y - 38,
                             text: `-${dmg}`, color: '#ef4444', alpha: 1, vy: -1.6
@@ -967,29 +1071,55 @@
                         decay: Math.random() * 0.024 + 0.014
                     });
                 }
+
+                // 고퀄리티 폭발: 스프라이트 화염 + 흙 파편 + 연기 + 그을음 + 섬광
+                const isBig = this.weapon.id === 2;
+                gameState.booms.push({ x: this.x, y: this.y, r, t0: Date.now(), big: isBig });
+                gameState.craterMarks.push({ x: this.x, y: this.y, r: r * 1.1 });
+                if (gameState.craterMarks.length > 40) gameState.craterMarks.shift();
+                gameState.flash = Math.max(gameState.flash || 0, isBig ? 1 : 0.6);
+                const soil = ['#7c4a24', '#5b3418', '#9a6436', '#3f2a1a', '#4d7c2f'];
+                for (let i = 0; i < (isBig ? 34 : 20); i++) {
+                    const a = -Math.PI * (0.1 + Math.random() * 0.8);
+                    const sp = Math.random() * (isBig ? 9 : 6.5) + 2;
+                    gameState.particles.push({ type: 'debris', x: this.x, y: this.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                        size: Math.random() * 4 + 2, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.5,
+                        color: soil[(Math.random() * soil.length) | 0], alpha: 1, decay: 0.008 + Math.random() * 0.008 });
+                }
+                for (let i = 0; i < (isBig ? 16 : 9); i++) {
+                    gameState.particles.push({ type: 'smoke', x: this.x + (Math.random() - 0.5) * r * 0.8, y: this.y - Math.random() * r * 0.5,
+                        vx: (Math.random() - 0.5) * 0.9, vy: -0.4 - Math.random() * 0.8, size: r * (0.25 + Math.random() * 0.3),
+                        grow: 0.35 + Math.random() * 0.3, alpha: 0.75, decay: 0.006 + Math.random() * 0.006, color: isBig ? '64,30,40' : '55,50,60' });
+                }
+                cam.hold = { x: this.x, y: this.y }; cam.holdUntil = Date.now() + 1000;
+
                 updateHUD();
             }
 
             draw(ctx) {
                 if (!this.active) return;
-                if (this.trail.length > 1) {
+                const big = this.weapon.id === 2;
+                for (let i = 1; i < this.trail.length; i++) {
+                    const a = i / this.trail.length;
+                    ctx.globalAlpha = a * 0.85;
                     ctx.strokeStyle = this.weapon.trailColor;
-                    ctx.lineWidth = this.weapon.id === 2 ? 4.5 : 2.8;
-                    ctx.beginPath();
-                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                    for (let pt of this.trail) ctx.lineTo(pt.x, pt.y);
-                    ctx.stroke();
+                    ctx.lineWidth = (big ? 7 : 4.5) * a;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath(); ctx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y); ctx.lineTo(this.trail[i].x, this.trail[i].y); ctx.stroke();
                 }
+                ctx.globalAlpha = 1;
                 ctx.save();
-                ctx.shadowColor = this.weapon.color;
-                ctx.shadowBlur = 12;
-                ctx.fillStyle = this.weapon.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.weapon.id === 2 ? 6 : 4.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.2;
-                ctx.stroke();
+                ctx.globalCompositeOperation = 'lighter';
+                const gr = big ? 22 : 16;
+                const g = ctx.createRadialGradient(this.x, this.y, 1, this.x, this.y, gr);
+                g.addColorStop(0, 'rgba(255,255,255,0.95)'); g.addColorStop(0.3, this.weapon.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = g; ctx.beginPath(); ctx.arc(this.x, this.y, gr, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+                ctx.save();
+                ctx.translate(this.x, this.y); ctx.rotate(Math.atan2(this.vy, this.vx));
+                ctx.fillStyle = big ? '#7f1d1d' : '#334155'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.ellipse(0, 0, big ? 8 : 6, big ? 4.6 : 3.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = this.weapon.color; ctx.beginPath(); ctx.arc(big ? 5 : 3.5, 0, big ? 3 : 2.2, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             }
         }
@@ -1055,6 +1185,8 @@
             gameState.projectiles = [];
             gameState.particles = [];
             gameState.shockwaves = [];
+            gameState.booms = [];
+            gameState.craterMarks = [];
             gameState.muzzleFlashes = [];
             gameState.floatingTexts = [];
             gameState.turn = 0;
@@ -1118,6 +1250,7 @@
             gameState.phase = 'FIRING';
             setControlsEnabled(false);
             tank.lastPower = gameState.power;
+            tank.recoil = 1;
 
             const weapon = WEAPONS[tank.selectedWeapon];
             if (tank.ammo[tank.selectedWeapon] !== Infinity) {
@@ -1127,10 +1260,12 @@
             const speed = (gameState.power / 100) * MAX_POWER;
             const baseRad = (-tank.angle * Math.PI) / 180;
             const muzzleX = tank.x + Math.cos(baseRad) * 30;
-            const muzzleY = (tank.y - 13) + Math.sin(baseRad) * 30;
+            const muzzleY = (tank.y - PIVOT_Y) + Math.sin(baseRad) * 30;
 
             sfx.playShoot(weapon.id);
-            gameState.muzzleFlashes.push({ x: muzzleX, y: muzzleY, radius: 18, alpha: 1 });
+            gameState.muzzleFlashes.push({ x: muzzleX, y: muzzleY, radius: 22, alpha: 1 });
+            for (let i = 0; i < 6; i++) gameState.particles.push({ type: 'smoke', x: muzzleX, y: muzzleY, vx: Math.cos(baseRad) * (1 + Math.random() * 1.5) + (Math.random() - 0.5), vy: Math.sin(baseRad) * (1 + Math.random()) - 0.3, size: 6 + Math.random() * 6, grow: 0.35, alpha: 0.6, decay: 0.012, color: '200,200,210' });
+            gameState.screenShake = Math.max(gameState.screenShake, 3);
 
             if (weapon.id === 1) {
                 for (let sp of [-0.07, 0, 0.07]) {
@@ -1182,7 +1317,7 @@
                 for (let testPower = 25; testPower <= 95; testPower += 3) {
                     const speed = (testPower / 100) * MAX_POWER;
                     let simX = ai.x + Math.cos(rad) * 30;
-                    let simY = (ai.y - 13) + Math.sin(rad) * 30;
+                    let simY = (ai.y - PIVOT_Y) + Math.sin(rad) * 30;
                     let vx = Math.cos(rad) * speed;
                     let vy = Math.sin(rad) * speed;
 
@@ -1219,149 +1354,289 @@
             }, 25);
         }
 
-        function drawBackground() {
-            const t = Date.now() * 0.001;
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
-            skyGrad.addColorStop(0, '#020617');
-            skyGrad.addColorStop(0.45, '#0f172a');
-            skyGrad.addColorStop(1, '#1e1b4b');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-            const aurora = ctx.createLinearGradient(0, 80, WORLD_WIDTH, 260);
-            aurora.addColorStop(0, 'rgba(56, 189, 248, 0.06)');
-            aurora.addColorStop(0.5, 'rgba(168, 85, 247, 0.08)');
-            aurora.addColorStop(1, 'rgba(52, 211, 153, 0.05)');
-            ctx.fillStyle = aurora;
-            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT * 0.65);
-
-            for (let star of gameState.stars) {
-                const alpha = 0.3 + 0.6 * Math.abs(Math.sin(t * 1.4 + star.phase));
-                ctx.fillStyle = `rgba(248, 250, 252, ${alpha.toFixed(2)})`;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-                ctx.fill();
+        // ===================== 렌더링 =====================
+        function updateCamera(W, H) {
+            const sFit = Math.max(H / 560, W / WORLD_WIDTH);
+            const sCap = Math.max(W / 520, W / WORLD_WIDTH);
+            cam.s = Math.min(sFit, sCap);
+            cam.vw = W / cam.s; cam.vh = H / cam.s;
+            const now = Date.now();
+            const act = gameState.tanks[gameState.turn];
+            const opp = gameState.tanks[(gameState.turn + 1) % 2];
+            const proj = gameState.projectiles.find((p) => p.active);
+            let fx = WORLD_WIDTH / 2, fy = 420;
+            if (proj) { fx = proj.x + proj.vx * 10; fy = proj.y; }
+            else if (cam.hold && now < cam.holdUntil) { fx = cam.hold.x; fy = cam.hold.y; }
+            else if (act) {
+                const dir = opp ? (Math.sign(opp.x - act.x) || 1) : 1;
+                fx = act.x + dir * cam.vw * 0.2; fy = act.y - 70;
             }
+            let tx = cam.vw >= WORLD_WIDTH ? (WORLD_WIDTH - cam.vw) / 2 : clamp(fx - cam.vw / 2, 0, WORLD_WIDTH - cam.vw);
+            const maxY = WORLD_HEIGHT - cam.vh;
+            const ty = cam.vh >= WORLD_HEIGHT ? maxY : clamp(fy - cam.vh * 0.55, Math.min(-240, maxY), maxY);
+            if (!cam.inited || gameState.phase === 'MENU') { cam.x = tx; cam.y = ty; cam.inited = true; }
+            if (now < cam.manualUntil && !proj) tx = cam.x;
+            const k = proj ? 0.14 : 0.07;
+            cam.x += (tx - cam.x) * k;
+            cam.y += (ty - cam.y) * k;
+        }
 
-            const mx = WORLD_WIDTH * 0.82;
-            const my = 105;
-            const moonHalo = ctx.createRadialGradient(mx, my, 15, mx, my, 95);
-            moonHalo.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
-            moonHalo.addColorStop(1, 'rgba(254, 240, 138, 0)');
-            ctx.fillStyle = moonHalo;
-            ctx.beginPath();
-            ctx.arc(mx, my, 95, 0, Math.PI * 2);
-            ctx.fill();
+        function drawBackground(W, H) {
+            const sky = ART.sky;
+            if (sky) {
+                const ar = sky.width / sky.height;
+                let dh = Math.max(H * 1.12, (W * 1.12) / ar), dw = dh * ar;
+                const span = Math.max(1, WORLD_WIDTH - cam.vw);
+                const ox = -(dw - W) * clamp(cam.x / span, 0, 1);
+                const oy = -(dh - H) * clamp(0.75 + cam.y / 2400, 0, 1);
+                ctx.drawImage(sky, ox, oy, dw, dh);
+            } else {
+                const g = ctx.createLinearGradient(0, 0, 0, H);
+                g.addColorStop(0, '#0b1026'); g.addColorStop(0.55, '#2a1f5c'); g.addColorStop(1, '#f97316');
+                ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+            }
+        }
 
-            ctx.fillStyle = '#fef08a';
-            ctx.beginPath();
-            ctx.arc(mx, my, 34, 0, Math.PI * 2);
-            ctx.fill();
+        function drawHills() {
+            const hills = ART.hills;
+            if (!hills) return;
+            const tw = 1300, th = tw * hills.height / hills.width;
+            const par = 0.45, base = cam.x * par;
+            const y = 620 - th;
+            const k0 = Math.floor((cam.x - base) / tw) - 1, k1 = Math.ceil((cam.x + cam.vw - base) / tw);
+            for (let k = k0; k <= k1; k++) {
+                const x = base + k * tw;
+                ctx.save();
+                if (k & 1) { ctx.translate(x + tw, y); ctx.scale(-1, 1); ctx.drawImage(hills, 0, 0, tw + 1, th); }
+                else ctx.drawImage(hills, x, y, tw + 1, th);
+                ctx.restore();
+            }
+            const haze = ctx.createLinearGradient(0, y + th * 0.2, 0, WORLD_HEIGHT);
+            haze.addColorStop(0, 'rgba(10, 14, 40, 0)'); haze.addColorStop(1, 'rgba(10, 14, 40, 0.55)');
+            ctx.fillStyle = haze; ctx.fillRect(cam.x - 10, y, cam.vw + 20, WORLD_HEIGHT - y + 300);
+        }
 
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+        function terrainPath(x0, x1, bottom) {
             ctx.beginPath();
-            ctx.moveTo(0, WORLD_HEIGHT);
-            ctx.lineTo(0, 420);
-            ctx.lineTo(180, 310);
-            ctx.lineTo(390, 410);
-            ctx.lineTo(640, 285);
-            ctx.lineTo(890, 395);
-            ctx.lineTo(1080, 320);
-            ctx.lineTo(WORLD_WIDTH, 390);
-            ctx.lineTo(WORLD_WIDTH, WORLD_HEIGHT);
+            ctx.moveTo(x0, bottom);
+            for (let x = x0; x <= x1; x += 2) ctx.lineTo(x, gameState.terrain[x]);
+            ctx.lineTo(x1, gameState.terrain[x1]);
+            ctx.lineTo(x1, bottom);
             ctx.closePath();
-            ctx.fill();
         }
 
         function drawTerrain() {
-            const groundGrad = ctx.createLinearGradient(0, 220, 0, WORLD_HEIGHT);
-            groundGrad.addColorStop(0, '#16a34a');
-            groundGrad.addColorStop(0.18, '#15803d');
-            groundGrad.addColorStop(0.45, '#573b26');
-            groundGrad.addColorStop(1, '#1c1917');
-
-            ctx.fillStyle = groundGrad;
-            ctx.beginPath();
-            ctx.moveTo(0, WORLD_HEIGHT);
-            for (let x = 0; x < WORLD_WIDTH; x++) ctx.lineTo(x, gameState.terrain[x]);
-            ctx.lineTo(WORLD_WIDTH, WORLD_HEIGHT);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.strokeStyle = '#4ade80';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                if (x === 0) ctx.moveTo(x, gameState.terrain[x]);
-                else ctx.lineTo(x, gameState.terrain[x]);
+            const x0 = Math.max(0, Math.floor(cam.x) - 4), x1 = Math.min(WORLD_WIDTH - 1, Math.ceil(cam.x + cam.vw) + 4);
+            const bottom = WORLD_HEIGHT + 400;
+            terrainPath(x0, x1, bottom);
+            if (ART.soilPat) {
+                ART.soilPat.setTransform(new DOMMatrix([0.42, 0, 0, 0.42, 0, 0]));
+                ctx.fillStyle = ART.soilPat;
+            } else {
+                const gg = ctx.createLinearGradient(0, 220, 0, WORLD_HEIGHT);
+                gg.addColorStop(0, '#573b26'); gg.addColorStop(1, '#1c1917');
+                ctx.fillStyle = gg;
             }
+            ctx.fill();
+            ctx.save();
+            ctx.clip();
+            // 깊이감: 아래로 갈수록 어둡게
+            const dg = ctx.createLinearGradient(0, 300, 0, WORLD_HEIGHT);
+            dg.addColorStop(0, 'rgba(0,0,0,0)'); dg.addColorStop(1, 'rgba(0,0,0,0.5)');
+            ctx.fillStyle = dg; ctx.fillRect(x0, 200, x1 - x0, bottom);
+            // 포격 그을음
+            for (const c of gameState.craterMarks) {
+                if (c.x + c.r < x0 || c.x - c.r > x1) continue;
+                const sg = ctx.createRadialGradient(c.x, c.y, 2, c.x, c.y, c.r);
+                sg.addColorStop(0, 'rgba(20,10,5,0.55)'); sg.addColorStop(0.7, 'rgba(30,15,8,0.3)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.fill();
+            }
+            // 지표 아래 그림자 띠
+            ctx.strokeStyle = 'rgba(25, 12, 4, 0.45)'; ctx.lineWidth = 18; ctx.lineJoin = 'round';
+            ctx.beginPath();
+            for (let x = x0; x <= x1; x += 2) { if (x === x0) ctx.moveTo(x, gameState.terrain[x] + 6); else ctx.lineTo(x, gameState.terrain[x] + 6); }
             ctx.stroke();
+            ctx.restore();
+            // 잔디 가장자리
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.beginPath();
+            for (let x = x0; x <= x1; x += 2) { if (x === x0) ctx.moveTo(x, gameState.terrain[x]); else ctx.lineTo(x, gameState.terrain[x]); }
+            ctx.strokeStyle = '#166534'; ctx.lineWidth = 9; ctx.stroke();
+            ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 5; ctx.stroke();
+            ctx.save(); ctx.translate(0, -2);
+            ctx.strokeStyle = 'rgba(187, 247, 208, 0.55)'; ctx.lineWidth = 1.6; ctx.stroke();
+            ctx.restore();
         }
 
         function drawEffects() {
+            const now = Date.now();
             for (let i = gameState.muzzleFlashes.length - 1; i >= 0; i--) {
                 const mf = gameState.muzzleFlashes[i];
-                mf.alpha -= 0.14;
+                mf.alpha -= 0.12;
                 if (mf.alpha <= 0) { gameState.muzzleFlashes.splice(i, 1); continue; }
                 ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
                 ctx.globalAlpha = mf.alpha;
-                const g = ctx.createRadialGradient(mf.x, mf.y, 2, mf.x, mf.y, mf.radius);
-                g.addColorStop(0, '#ffffff');
-                g.addColorStop(0.4, '#fde047');
-                g.addColorStop(1, 'rgba(249, 115, 22, 0)');
-                ctx.fillStyle = g;
-                ctx.beginPath();
-                ctx.arc(mf.x, mf.y, mf.radius, 0, Math.PI * 2);
-                ctx.fill();
+                const g = ctx.createRadialGradient(mf.x, mf.y, 2, mf.x, mf.y, mf.radius * 1.4);
+                g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, '#fde047'); g.addColorStop(1, 'rgba(249, 115, 22, 0)');
+                ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mf.x, mf.y, mf.radius * 1.4, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+
+            // 연기 (화염 뒤)
+            for (let i = gameState.particles.length - 1; i >= 0; i--) {
+                const p = gameState.particles[i];
+                if (p.type !== 'smoke') continue;
+                p.x += p.vx; p.y += p.vy; p.vy *= 0.985; p.size += p.grow; p.alpha -= p.decay;
+                if (p.alpha <= 0) { gameState.particles.splice(i, 1); continue; }
+                const sg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                sg.addColorStop(0, `rgba(${p.color},${(p.alpha * 0.55).toFixed(3)})`); sg.addColorStop(1, `rgba(${p.color},0)`);
+                ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // 화염 스프라이트
+            for (let i = gameState.booms.length - 1; i >= 0; i--) {
+                const b = gameState.booms[i];
+                const strip = b.big ? (ART.boomBig || ART.boom) : ART.boom;
+                const dur = b.big ? 1150 : 850;
+                const k = (now - b.t0) / dur;
+                if (k >= 1) { gameState.booms.splice(i, 1); continue; }
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                if (strip) {
+                    const fw = strip.width / STRIP_N, f = Math.min(STRIP_N - 1, Math.floor(k * STRIP_N));
+                    const size = b.r * (b.big ? 4.4 : 3.6);
+                    ctx.drawImage(strip, f * fw, 0, fw, strip.height, b.x - size / 2, b.y - size * 0.58, size, size);
+                } else {
+                    const rr = b.r * (0.6 + k);
+                    const g = ctx.createRadialGradient(b.x, b.y, 2, b.x, b.y, rr);
+                    g.addColorStop(0, `rgba(255,255,220,${1 - k})`); g.addColorStop(0.4, `rgba(251,146,60,${0.9 * (1 - k)})`); g.addColorStop(1, 'rgba(239,68,68,0)');
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, rr, 0, Math.PI * 2); ctx.fill();
+                }
                 ctx.restore();
             }
 
             for (let i = gameState.shockwaves.length - 1; i >= 0; i--) {
                 const sw = gameState.shockwaves[i];
-                sw.radius += (sw.maxRadius - sw.radius) * 0.22;
-                sw.alpha -= 0.06;
+                sw.radius += (sw.maxRadius - sw.radius) * 0.2;
+                sw.alpha -= 0.05;
                 if (sw.alpha <= 0) { gameState.shockwaves.splice(i, 1); continue; }
                 ctx.save();
                 ctx.globalAlpha = sw.alpha;
-                ctx.strokeStyle = sw.color;
-                ctx.lineWidth = 3.5;
-                ctx.beginPath();
-                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-                ctx.stroke();
+                ctx.strokeStyle = '#fff7ed'; ctx.lineWidth = 5 * sw.alpha + 1;
+                ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2); ctx.stroke();
+                ctx.strokeStyle = sw.color; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.radius * 0.92, 0, Math.PI * 2); ctx.stroke();
                 ctx.restore();
             }
 
+            // 불꽃 · 흙 파편
             for (let i = gameState.particles.length - 1; i >= 0; i--) {
                 const p = gameState.particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.12;
-                p.alpha -= p.decay;
+                if (p.type === 'smoke') continue;
+                if (p.type === 'debris') {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.24; p.vx *= 0.99; p.rot += p.vr; p.alpha -= p.decay;
+                    const ix = Math.floor(p.x);
+                    if (ix >= 0 && ix < WORLD_WIDTH && p.y > gameState.terrain[ix]) { p.y = gameState.terrain[ix]; p.vy *= -0.35; p.vx *= 0.6; p.vr *= 0.5; }
+                    if (p.alpha <= 0) { gameState.particles.splice(i, 1); continue; }
+                    ctx.save(); ctx.globalAlpha = Math.min(1, p.alpha * 1.5);
+                    ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                    ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.8);
+                    ctx.restore();
+                    continue;
+                }
+                p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.alpha -= p.decay;
                 if (p.alpha <= 0) { gameState.particles.splice(i, 1); continue; }
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
                 ctx.globalAlpha = p.alpha;
                 ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.5 + p.alpha * 0.5), 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
             }
             ctx.globalAlpha = 1;
 
             for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
                 const ft = gameState.floatingTexts[i];
-                ft.y += ft.vy;
-                ft.alpha -= 0.018;
+                ft.y += ft.vy; ft.vy *= 0.97;
+                ft.alpha -= 0.014;
                 if (ft.alpha <= 0) { gameState.floatingTexts.splice(i, 1); continue; }
-                ctx.globalAlpha = ft.alpha;
-                ctx.font = '900 22px "Noto Sans KR", sans-serif';
+                ctx.globalAlpha = Math.min(1, ft.alpha * 1.6);
+                ctx.font = '900 26px "Black Han Sans", "Noto Sans KR", sans-serif';
                 ctx.textAlign = 'center';
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#000000'; ctx.lineWidth = 5; ctx.lineJoin = 'round';
                 ctx.strokeText(ft.text, ft.x, ft.y);
                 ctx.fillStyle = ft.color;
                 ctx.fillText(ft.text, ft.x, ft.y);
             }
             ctx.globalAlpha = 1;
         }
+
+        // 화면 고정 요소: 섬광 · 화면 밖 탱크 표시 · 미니맵
+        function drawScreenOverlay(W, H) {
+            if (gameState.flash > 0.01) {
+                ctx.save(); ctx.globalCompositeOperation = 'lighter';
+                ctx.fillStyle = `rgba(255, 200, 140, ${(gameState.flash * 0.32).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+                ctx.restore();
+                gameState.flash *= 0.88;
+            }
+            if (gameState.phase === 'MENU' || !gameState.tanks.length) return;
+            const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.8);
+            vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.35)');
+            ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+            const topPad = document.getElementById('hud').offsetHeight + 4;
+            for (const t of gameState.tanks) {
+                if (t.hp <= 0) continue;
+                const sx = (t.x - cam.x) * cam.s;
+                if (sx > -10 && sx < W + 10) continue;
+                const left = sx < 0;
+                const sy = clamp((t.y - PIVOT_Y - cam.y) * cam.s, topPad + 30, H - 30);
+                const ex = left ? 22 : W - 22;
+                ctx.save();
+                ctx.translate(ex, sy);
+                const col = t.id === 0 ? '#38bdf8' : '#fb7185';
+                ctx.fillStyle = 'rgba(2,6,23,0.8)'; ctx.strokeStyle = col; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = col;
+                ctx.beginPath();
+                if (left) { ctx.moveTo(-23, 0); ctx.lineTo(-15, -7); ctx.lineTo(-15, 7); } else { ctx.moveTo(23, 0); ctx.lineTo(15, -7); ctx.lineTo(15, 7); }
+                ctx.fill();
+                ctx.font = '900 10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(t.id === 0 ? 'P1' : 'P2', 0, -4);
+                ctx.fillStyle = '#e2e8f0'; ctx.font = '800 8.5px Inter, sans-serif';
+                const dist = Math.round(Math.abs(t.x - (cam.x + cam.vw / 2)) / 10);
+                ctx.fillText(`${dist}m`, 0, 7);
+                ctx.restore();
+            }
+
+            // 미니맵
+            const mw = Math.min(200, Math.max(96, Math.min(W * 0.3, H * 0.55))), mh = mw * 0.2;
+            const mx = (W - mw) / 2, my = topPad;
+            ctx.save();
+            ctx.fillStyle = 'rgba(8,12,32,0.72)'; ctx.strokeStyle = 'rgba(148,163,184,0.35)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(mx - 4, my - 3, mw + 8, mh + 6, 8); ctx.fill(); ctx.stroke();
+            const sxm = mw / WORLD_WIDTH, sym = mh / WORLD_HEIGHT;
+            ctx.beginPath(); ctx.moveTo(mx, my + mh);
+            for (let x = 0; x < WORLD_WIDTH; x += 12) ctx.lineTo(mx + x * sxm, my + gameState.terrain[x] * sym);
+            ctx.lineTo(mx + mw, my + mh); ctx.closePath();
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.45)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1;
+            ctx.strokeRect(mx + Math.max(0, cam.x) * sxm, my + Math.max(0, cam.y) * sym, Math.min(WORLD_WIDTH, cam.vw) * sxm, Math.min(mh / sym, cam.vh) * sym);
+            for (const t of gameState.tanks) {
+                if (t.hp <= 0) continue;
+                ctx.fillStyle = t.id === 0 ? '#38bdf8' : '#fb7185';
+                ctx.beginPath(); ctx.arc(mx + t.x * sxm, my + (t.y - 8) * sym, 3, 0, Math.PI * 2); ctx.fill();
+            }
+            for (const p of gameState.projectiles) {
+                if (!p.active) continue;
+                ctx.fillStyle = '#fde047';
+                ctx.beginPath(); ctx.arc(mx + clamp(p.x, 0, WORLD_WIDTH) * sxm, my + clamp(p.y, 0, WORLD_HEIGHT) * sym, 2, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+        }
+
 
         const FIXED_STEP_MS = 1000 / 60;
         const POWER_CHARGE_SPEED = 38; // 초당 38% (5%→100% 약 2.5초, 모든 모니터 주사율 동일)
@@ -1406,28 +1681,46 @@
         }
 
         function render() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0 && (canvas.width !== rect.width || canvas.height !== rect.height)) {
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-            }
-            if (canvas.width === 0 || canvas.height === 0) return;
+            const rect = canvas.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            if (W <= 0 || H <= 0) return;
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            const cw = Math.round(W * dpr), ch = Math.round(H * dpr);
+            if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
 
-            ctx.save();
-            const scaleX = canvas.width / WORLD_WIDTH;
-            const scaleY = canvas.height / WORLD_HEIGHT;
-            ctx.scale(scaleX, scaleY);
-            if (gameState.screenShake > 0) {
-                ctx.translate((Math.random() - 0.5) * gameState.screenShake, (Math.random() - 0.5) * gameState.screenShake);
-            }
+            updateCamera(W, H);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawBackground(W, H);
 
-            drawBackground();
+            let shx = 0, shy = 0;
+            if (gameState.screenShake > 0) { shx = (Math.random() - 0.5) * gameState.screenShake; shy = (Math.random() - 0.5) * gameState.screenShake; }
+            const s = cam.s;
+            ctx.setTransform(dpr * s, 0, 0, dpr * s, (-cam.x * s + shx) * dpr, (-cam.y * s + shy) * dpr);
+            drawHills();
             drawTerrain();
             for (let tank of gameState.tanks) { if (tank.hp > 0) tank.draw(ctx); }
             for (let proj of gameState.projectiles) proj.draw(ctx);
             drawEffects();
-            ctx.restore();
+
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawScreenOverlay(W, H);
         }
+
+        // 전장 드래그로 둘러보기
+        (() => {
+            let dragging = false, lastX = 0;
+            canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+            canvas.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                const dx = e.clientX - lastX; lastX = e.clientX;
+                if (Math.abs(dx) < 0.5) return;
+                cam.x = cam.vw >= WORLD_WIDTH ? cam.x : clamp(cam.x - dx / cam.s, 0, WORLD_WIDTH - cam.vw);
+                cam.manualUntil = Date.now() + 2500;
+            });
+            const end = () => { dragging = false; canvas.style.cursor = 'grab'; };
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointercancel', end);
+        })();
 
         function gameLoop(timestamp) {
             if (!lastFrameTime) lastFrameTime = timestamp;
@@ -1458,13 +1751,11 @@
             document.getElementById('p2-hp-bar').style.width = `${p2.hp}%`;
 
             const turnEl = document.getElementById('turn-indicator');
-            if (gameState.turn === 0) {
-                turnEl.textContent = 'PLAYER 1 TURN';
-                turnEl.className = 'text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-sky-600/30 border border-sky-400 text-sky-200 mb-0.5';
-            } else {
-                turnEl.textContent = p2.isAI ? 'CPU (AI) TURN' : 'PLAYER 2 TURN';
-                turnEl.className = 'text-[11px] sm:text-xs font-black tracking-wider px-2.5 py-0.5 rounded-full bg-rose-600/30 border border-rose-400 text-rose-200 mb-0.5';
-            }
+            const shortTxt = window.innerWidth < 520;
+            turnEl.textContent = gameState.turn === 0 ? (shortTxt ? 'P1 TURN' : 'PLAYER 1 TURN') : (p2.isAI ? (shortTxt ? 'CPU TURN' : 'CPU (AI) TURN') : (shortTxt ? 'P2 TURN' : 'PLAYER 2 TURN'));
+            turnEl.className = gameState.turn === 0 ? 'p1' : 'p2';
+            document.getElementById('p1card').classList.toggle('on', gameState.turn === 0);
+            document.getElementById('p2card').classList.toggle('on', gameState.turn === 1);
 
             document.getElementById('angle-display').textContent = `${active.angle}°`;
             document.getElementById('fuel-bar').style.width = `${active.fuel}%`;
@@ -1505,7 +1796,7 @@
             for (let p = 5; p <= 100; p += 0.5) {
                 const speed = (p / 100) * MAX_POWER;
                 let sx = shooter.x + Math.cos(rad) * 30;
-                let sy = (shooter.y - 13) + Math.sin(rad) * 30;
+                let sy = (shooter.y - PIVOT_Y) + Math.sin(rad) * 30;
                 let vx = Math.cos(rad) * speed;
                 let vy = Math.sin(rad) * speed;
 
@@ -1515,13 +1806,13 @@
                         sx += vx / 4;
                         sy += vy / 4;
                         if (sx < 0 || sx >= WORLD_WIDTH) break;
-                        const dTank = Math.hypot(sx - target.x, sy - (target.y - 11));
-                        if (dTank < 16) {
+                        const dTank = Math.hypot(sx - target.x, sy - (target.y - HIT_Y));
+                        if (dTank < HIT_R - 2) {
                             return { angle: angleDeg, power: Math.round(p), dist: 0 };
                         }
                         const ix = Math.floor(sx);
                         if (ix >= 0 && ix < WORLD_WIDTH && sy >= gameState.terrain[ix]) {
-                            const d = Math.hypot(sx - target.x, sy - (target.y - 11));
+                            const d = Math.hypot(sx - target.x, sy - (target.y - HIT_Y));
                             if (d < minDist) {
                                 minDist = d;
                                 bestPower = Math.round(p);
@@ -1538,15 +1829,14 @@
         function updateVipSensorButtonStyle() {
             const btn = document.getElementById('vip-sensor-btn');
             if (!btn) return;
+            btn.classList.remove('on', 'lock');
             if (!authState.isVip) {
-                btn.textContent = '🔒 VIP자동센서';
-                btn.className = 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800/80 border-slate-600 text-slate-400 hover:border-amber-400/50 hover:text-amber-300 whitespace-nowrap';
+                btn.innerHTML = '🔒 VIP<br>자동센서';
+                btn.classList.add('lock');
                 return;
             }
-            btn.textContent = vipSensorEnabled ? '👑 VIP자동센서 ON' : '👑 VIP자동센서 OFF';
-            btn.className = vipSensorEnabled
-                ? 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-amber-400 border-yellow-200 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.85)] whitespace-nowrap'
-                : 'w-full px-2.5 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer bg-slate-800 border-amber-400/50 text-amber-300 hover:bg-slate-700 whitespace-nowrap';
+            btn.innerHTML = vipSensorEnabled ? '👑 센서<br>ON' : '👑 센서<br>OFF';
+            if (vipSensorEnabled) btn.classList.add('on');
         }
 
         function calculateVipSolution(shooter, target) {
@@ -1562,7 +1852,7 @@
                 const rad = (-angleDeg * Math.PI) / 180;
                 const speed = (powerPct / 100) * MAX_POWER;
                 let sx = shooter.x + Math.cos(rad) * 30;
-                let sy = (shooter.y - 13) + Math.sin(rad) * 30;
+                let sy = (shooter.y - PIVOT_Y) + Math.sin(rad) * 30;
                 let vx = Math.cos(rad) * speed;
                 let vy = Math.sin(rad) * speed;
 
@@ -1572,11 +1862,11 @@
                         sx += vx / 4;
                         sy += vy / 4;
                         if (sx < 0 || sx >= WORLD_WIDTH) return Infinity;
-                        const dTank = Math.hypot(sx - target.x, sy - (target.y - 11));
-                        if (dTank < 16) return 0;
+                        const dTank = Math.hypot(sx - target.x, sy - (target.y - HIT_Y));
+                        if (dTank < HIT_R - 2) return 0;
                         const ix = Math.floor(sx);
                         if (ix >= 0 && ix < WORLD_WIDTH && sy >= gameState.terrain[ix]) {
-                            return Math.hypot(sx - target.x, sy - (target.y - 11));
+                            return Math.hypot(sx - target.x, sy - (target.y - HIT_Y));
                         }
                     }
                 }
@@ -1756,19 +2046,15 @@
         function refreshSoundButtons() {
             const bgmBtn = document.getElementById('bgmToggleBtn');
             const sfxBtn = document.getElementById('soundToggleBtn');
-            if (bgmBtn) {
-                bgmBtn.textContent = sfx.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
-                bgmBtn.className = sfx.bgmEnabled
-                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
-                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
-            }
-            if (sfxBtn) {
-                sfxBtn.textContent = !sfx.muted ? '🔊 효과음 ON' : '🔇 효과음 OFF';
-                sfxBtn.className = !sfx.muted
-                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-400/70 text-white transition active:scale-95 cursor-pointer whitespace-nowrap'
-                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 transition active:scale-95 cursor-pointer whitespace-nowrap';
-            }
+            if (bgmBtn) { bgmBtn.querySelector('.st').textContent = sfx.bgmEnabled ? '켜짐' : '꺼짐'; bgmBtn.classList.toggle('off', !sfx.bgmEnabled); }
+            if (sfxBtn) { sfxBtn.querySelector('.st').textContent = !sfx.muted ? '켜짐' : '꺼짐'; sfxBtn.classList.toggle('off', sfx.muted); }
         }
+        (() => {
+            const panel = document.getElementById('menuPanel');
+            document.getElementById('menuToggle').addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('hidden'); });
+            document.addEventListener('click', (e) => { if (!panel.contains(e.target) && e.target.id !== 'menuToggle') panel.classList.add('hidden'); });
+            ['menu-btn', 'headerExitLobbyBtn'].forEach((id) => document.getElementById(id).addEventListener('click', () => panel.classList.add('hidden')));
+        })();
         refreshSoundButtons();
 
         document.getElementById('bgmToggleBtn').addEventListener('click', () => {
