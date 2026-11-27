@@ -561,6 +561,18 @@
     };
     // 쉬운 맵 → 어려운 맵 (길이 짧고 입구가 2곳인 맵이 뒤로)
     const STAGE_MAP = ['zigzag', 'spiral', 'canyon', 'tail', 'fork', 'twinsq'];
+    // 모든 맵 공룡 칸 26개로 통일 (맵이 바뀌어도 공룡이 사라지지 않도록)
+    const EXTRA_SLOTS = {
+      zigzag: [[0, -5], [0, 5]],
+      spiral: [[-2, -5], [1, -4], [0, 1], [0, 2], [-1, 4], [1, 4]],
+      canyon: [[-2, 4], [2, 4], [0, 5]],
+      tail: [[-3, -2], [-1, -2], [1, -2], [-2, 1], [2, 1], [-2, 3], [2, 3]],
+      fork: [[0, 5]],
+    };
+    Object.entries(EXTRA_SLOTS).forEach(([key, cells]) => {
+      cells.forEach(([c, r]) => MAP_DEFS[key].slots.push([210 + 52 * c, 322 + 52 * r]));
+    });
+
     const CENTER = { x: 210, y: 322 }; // 현재 맵의 둥지 위치
     let MAP = null;
     let LANES = [];
@@ -619,6 +631,9 @@
       SLOTS.push(sl); layoutNest();
       return sl;
     }
+    // ★6은 한 판에 1마리만
+    function hasSky() { return SLOTS.some((sl) => sl.unit && sl.unit.tier >= 6); }
+    function canMergeTier(t) { return t < 5 || (t === 5 && !hasSky()); }
     function clearNest() {
       for (let i = SLOTS.length - 1; i >= 0; i--) if (SLOTS[i].nest) SLOTS.splice(i, 1);
     }
@@ -643,7 +658,7 @@
       while (units.length > SLOTS.length) {
         units.sort((a, b) => a.tier - b.tier);
         let i = 0;
-        while (i < units.length - 1 && !(units[i].tier === units[i + 1].tier && units[i].tier < 6)) i++;
+        while (i < units.length - 1 && !(units[i].tier === units[i + 1].tier && (units[i].tier < 5 || (units[i].tier === 5 && !nestUnits.length && !units.some((u) => u.tier >= 6))))) i++;
         if (i < units.length - 1) {
           const t = units[i].tier + 1;
           units.splice(i, 2, createUnit(pickRandomDino(t)));
@@ -1100,6 +1115,7 @@
     // 슬롯이 꽉 찼을 때: 가장 낮은 성급의 같은 성급 2마리를 자동 합성 (같은 공룡 우선)
     function autoMerge() {
       for (let tier = 1; tier < 6; tier++) {
+        if (!canMergeTier(tier)) continue;
         const list = SLOTS.filter((s) => s.unit && s.unit.tier === tier);
         if (list.length < 2) continue;
         let a = null, b = null;
@@ -1120,7 +1136,7 @@
       const vip = isVip();
       if (!empty.length && vip && autoMerge()) empty = SLOTS.filter((s) => !s.unit && !s.nest);
       if (!empty.length) {
-        showInfo(vip ? '합칠 수 있는 공룡이 없어요! (모두 ★6 또는 짝이 없음)' : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
+        showInfo(vip ? (hasSky() ? '합칠 수 있는 공룡이 없어요! (★6은 1마리만 — ★5끼리는 더 못 합쳐요)' : '합칠 수 있는 공룡이 없어요! (같은 성급 짝이 없음)') : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
         return false;
       }
       const slot = empty[(Math.random() * empty.length) | 0];
@@ -1196,7 +1212,7 @@
 
       const two = lanes.length > 1 ? ' — 두 방향 습격!' : '';
       if (isBoss || openBoss) {
-        showInfo(isBoss ? `⚠️ [최종 보스] ${st.bossName} 출현! 화력을 집중하세요!${two}` : `⚠️ [보스] ${st.bossName}가 먼저 정찰하러 왔다!${two}`);
+        showInfo(isBoss ? `⚠️ [최종 보스] ${st.bossName} 출현! 화력을 집중하세요!${two}` : `⚠️ [보스] ${st.bossName}${((st.bossName.charCodeAt(st.bossName.length - 1) - 0xAC00) % 28) ? '이' : '가'} 먼저 정찰하러 왔다!${two}`);
         playBgm('bgm_boss');
       } else {
         showInfo(`🌊 웨이브 ${waveNum}${two}`);
@@ -1822,7 +1838,7 @@
         for (let i = 0; i < SLOTS.length; i++) {
           const s = SLOTS[i];
           if (s === drag.fromSlot || !s.unit) continue;
-          if (s.unit.tier === src.tier && src.tier < 6) {
+          if (s.unit.tier === src.tier && canMergeTier(src.tier)) {
             ctx.save();
             ctx.globalAlpha = pulse;
             ctx.strokeStyle = s.unit.dinoId === src.dinoId ? '#facc15' : '#38bdf8';
@@ -2089,6 +2105,11 @@
         return;
       }
       // 같은 성급 2마리 겹치면 상위 성급으로 합성! (동종이면 +20 화석 보너스)
+      if (uB && uA.tier === 5 && uB.tier === 5 && hasSky()) {
+        sfx('fail', 0.5);
+        showInfo('🌈 ★6 케찰코아틀루스는 한 마리만! 이미 본진을 지키고 있어요');
+        return;
+      }
       if (uB && uA.tier === uB.tier && uA.tier < 6) {
         const res = mergeUnits(fromSlot, targetSlot);
         selectSlot(res.id);
