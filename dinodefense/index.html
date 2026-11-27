@@ -142,8 +142,8 @@
       <button id="pauseBtn" type="button" class="ctlbtn bg-slate-800 border border-slate-600 text-slate-100">⏸</button>
       <button id="speedBtn" type="button" class="ctlbtn bg-indigo-950 border border-indigo-400/60 text-indigo-200">x1</button>
       <div class="flex-1 min-w-0 h-[30px] px-2.5 rounded-[10px] bg-slate-900 border border-slate-800 flex items-center justify-center gap-2 text-[12px] font-black whitespace-nowrap">
-        <span class="text-sky-300">🌊 W<span id="hudWave" class="text-white">1</span></span>
-        <span class="text-slate-300">👾 <span id="hudEnemies" class="text-rose-300">0</span></span>
+        <span class="text-sky-300">🌊 웨이브 <span id="hudWave" class="text-white">1</span></span>
+        <span class="text-slate-300">🦖 <span id="hudEnemies" class="text-rose-300">0</span></span>
         <span id="hudTimer" class="tabular-nums text-amber-300">0:22</span>
       </div>
       <button id="skipWaveBtn" type="button" class="ctlbtn bg-sky-700 border border-sky-400/60 text-white">⏩ +10</button>
@@ -1463,8 +1463,8 @@
               sfx('die', 0.4, e.brute ? 0.8 : 1.1);
             }
             sfx('coin', 0.25);
-            // 황금알 드랍 (탭해서 줍기)
-            if (state.eggs.length < 4 && Math.random() < (e.brute ? 0.07 : 0.035)) {
+            // 호박(💎) 드랍 (탭해서 줍기) — 일반 5%, 덩치 큰 적 10%
+            if (state.eggs.length < 4 && Math.random() < (e.brute ? 0.10 : 0.05)) {
               state.eggs.push({ x: e.x, y: e.y - 4, life: 6, max: 6, ph: Math.random() * 6 });
             }
           }
