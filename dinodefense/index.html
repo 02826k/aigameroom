@@ -172,7 +172,6 @@
           <div id="unitName" class="text-[12px] font-black text-white">공룡</div>
           <div id="unitStat" class="text-[11px] font-bold text-slate-300 mt-0.5">공격 0 · 사거리 0</div>
         </div>
-        <button id="sellBtn" type="button" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-[12px] font-black active:scale-95">판매 +0</button>
       </div>
     </div>
 
@@ -736,7 +735,6 @@
       upgLv: document.getElementById('upgLvText'),
       upgCost: document.getElementById('upgCostText'),
       infoText: document.getElementById('infoText'),
-      sellBtn: document.getElementById('sellBtn'),
       gameOver: document.getElementById('gameOverOverlay'),
       gameOverTitle: document.getElementById('gameOverTitle'),
       gameOverStat: document.getElementById('gameOverStat'),
@@ -1106,7 +1104,6 @@
         const dietIc = u.diet === '육식' ? '🥩' : u.diet === '초식' ? '🌿' : '🍽️';
         document.getElementById('unitName').innerHTML = `<span style="color:${TIER_STYLE[u.tier].border}">${TIER_STYLE[u.tier].label}</span> ${u.name}`;
         document.getElementById('unitStat').textContent = `${dietIc} ${u.diet} · ⚔️ ${atk.toLocaleString()} · 🎯 ${u.mythic ? '맵 전체' : u.range}`;
-        ui.sellBtn.textContent = `판매 +${sellVal}🦴`;
         const py = Number(unitPanel.dataset.padY || 0) + 8;
         if (slot.y > LOGICAL_H * 0.4) { unitPanel.style.bottom = ''; unitPanel.style.top = `${py + 30}px`; }
         else { unitPanel.style.top = ''; unitPanel.style.bottom = `${py + 78}px`; }
@@ -1503,10 +1500,10 @@
         const g = state.eggs[i];
         if (Math.hypot(x - g.x, y - g.y) < 22) {
           state.eggs.splice(i, 1);
-          state.gem += 1; state.gold += 25;
-          burst(g.x, g.y, '#fde047', 16, 90, 2.2, 0, 0.6);
-          spawnEffect(g.x, g.y, '#fde047', 26);
-          spawnDmgText(g.x, g.y - 16, '+1💎 +25🦴', '#fde68a');
+          state.gem += 1;
+          burst(g.x, g.y, '#7dd3fc', 16, 90, 2.2, 0, 0.6);
+          spawnEffect(g.x, g.y, '#7dd3fc', 26);
+          spawnDmgText(g.x, g.y - 16, '+1💎 호박!', '#bae6fd');
           sfx('coin', 0.8); sfx('summon', 0.5, 1.3);
           return true;
         }
@@ -1833,18 +1830,18 @@
         ctx.restore();
       }
 
-      // 황금알
+      // 호박(💎) 드랍 — 탭해서 줍기
       for (const g of state.eggs) {
         const bob = Math.sin(state.time * 5 + g.ph) * 3;
         if (g.life < 2 && Math.floor(g.life * 8) % 2 === 0) continue;
         ctx.save();
-        const gl = ctx.createRadialGradient(g.x, g.y + bob, 2, g.x, g.y + bob, 20);
-        gl.addColorStop(0, 'rgba(253,224,71,0.7)'); gl.addColorStop(1, 'rgba(253,224,71,0)');
-        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(g.x, g.y + bob, 20, 0, Math.PI * 2); ctx.fill();
-        const eg = ctx.createLinearGradient(g.x - 7, g.y - 10, g.x + 7, g.y + 10);
-        eg.addColorStop(0, '#fffbeb'); eg.addColorStop(0.5, '#fbbf24'); eg.addColorStop(1, '#b45309');
-        ctx.fillStyle = eg; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.ellipse(g.x, g.y + bob, 7.5, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        const gl = ctx.createRadialGradient(g.x, g.y + bob, 2, g.x, g.y + bob, 22);
+        gl.addColorStop(0, 'rgba(125,211,252,0.75)'); gl.addColorStop(1, 'rgba(125,211,252,0)');
+        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(g.x, g.y + bob, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.translate(g.x, g.y + bob);
+        ctx.scale(Math.cos(state.time * 3 + g.ph) * 0.25 + 0.95, 1);
+        ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('💎', 0, 0);
         ctx.restore();
       }
 
@@ -2119,14 +2116,6 @@
     });
     ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => upgradeBtn.addEventListener(ev, stopHold));
     upgradeBtn.addEventListener('click', () => { if (upgRepeated) { upgRepeated = false; return; } doUpgrade(); });
-    document.getElementById('sellBtn').addEventListener('click', () => {
-      const slot = SLOTS[state.selectedSlotId];
-      if (!slot || !slot.unit) return;
-      state.gold += Math.round(20 * Math.pow(2.2, slot.unit.tier - 1));
-      burst(slot.x, slot.y, '#fcd34d', 10, 70, 2, 60, 0.5);
-      slot.unit = null; recalcSynergy();
-      sfx('sell', 0.7); selectSlot(-1);
-    });
     const speedBtn = document.getElementById('speedBtn');
     function refreshVipUI() {
       const vip = isVip();
