@@ -517,9 +517,23 @@
       },
     ];
 
+    // 스테이지는 끝없이 올라가고(S7, S8…), 맵·적은 1~6을 반복. 한 바퀴 돌 때마다 더 강해짐
+    const stageCache = new Map();
     function getStageForWave(wave) {
-      const idx = Math.min(STAGES.length - 1, Math.floor((wave - 1) / 5));
-      return STAGES[idx];
+      const num = Math.floor((wave - 1) / 5) + 1;
+      let st = stageCache.get(num);
+      if (!st) {
+        const base = STAGES[(num - 1) % STAGES.length];
+        const loop = Math.floor((num - 1) / STAGES.length);
+        st = Object.assign({}, base, {
+          num, loop,
+          hpMul: base.hpMul * Math.pow(2.3, loop),
+          spdMul: base.spdMul * Math.min(1.3, 1 + loop * 0.06),
+          title: `STAGE ${num} · ${base.name}${loop ? ` (${loop + 1}회차)` : ''}`,
+        });
+        stageCache.set(num, st);
+      }
+      return st;
     }
 
     // =========================================================================
@@ -589,6 +603,26 @@
     const SLOT_SIZE = 46;
     const SLOTS = [];
 
+    // ★6 전용 본진 자리: SLOTS 뒤에 nest:true 칸으로 붙이고 둥지 주변에 배치
+    const NEST_OFS = [[[0, 0]], [[-24, 0], [24, 0]], [[0, -22], [-25, 18], [25, 18]], [[-24, -24], [24, -24], [-24, 24], [24, 24]]];
+    function layoutNest() {
+      const ns = SLOTS.filter((sl) => sl.nest);
+      ns.forEach((sl, k) => {
+        let ox, oy;
+        if (ns.length <= 4) [ox, oy] = NEST_OFS[ns.length - 1][k];
+        else { const a = -Math.PI / 2 + (k / ns.length) * Math.PI * 2, r = 26 + ns.length * 3; ox = Math.cos(a) * r; oy = Math.sin(a) * r; }
+        sl.x = CENTER.x + ox; sl.y = CENTER.y + oy;
+      });
+    }
+    function addNestUnit(u) {
+      const sl = { id: SLOTS.length, x: CENTER.x, y: CENTER.y, unit: u, nest: true };
+      SLOTS.push(sl); layoutNest();
+      return sl;
+    }
+    function clearNest() {
+      for (let i = SLOTS.length - 1; i >= 0; i--) if (SLOTS[i].nest) SLOTS.splice(i, 1);
+    }
+
     // 맵 교체: 둥지·길·슬롯을 바꾸고 배치된 공룡은 성급 그대로 새 칸으로 옮김
     function applyMap(key) {
       const def = MAP_DEFS[key];
@@ -601,7 +635,8 @@
         e.dist = r * e.lane.len;
         const p = lanePos(e.lane, e.dist); e.x = p.x; e.y = p.y;
       }
-      const units = SLOTS.filter((s) => s.unit).map((s) => s.unit);
+      const nestUnits = SLOTS.filter((s) => s.nest && s.unit).map((s) => s.unit);
+      const units = SLOTS.filter((s) => s.unit && !s.nest).map((s) => s.unit);
       SLOTS.length = 0;
       def.slots.forEach(([x, y], i) => SLOTS.push({ id: i, x, y, unit: null }));
       let merged = 0;
@@ -619,7 +654,8 @@
         }
       }
       units.sort((a, b) => b.tier - a.tier); // 강한 공룡일수록 길이 많이 지나가는 칸으로
-      units.forEach((u, i) => { SLOTS[i].unit = u; u.pop = 0.8; });
+      units.forEach((u, i) => { if (u.tier >= 6) nestUnits.push(u); else { SLOTS[i].unit = u; u.pop = 0.8; } });
+      nestUnits.forEach((u) => { addNestUnit(u); u.pop = 0.8; });
       state.selectedSlotId = -1;
       drag.active = false; drag.fromSlot = null;
       recalcSynergy();
@@ -936,6 +972,7 @@
       const half = SLOT_SIZE / 2;
       for (let i = 0; i < SLOTS.length; i++) {
         const s = SLOTS[i];
+        if (s.nest) continue;
         g.fillStyle = 'rgba(0,0,0,0.42)';
         g.beginPath(); g.roundRect(s.x - half, s.y - half + 3, SLOT_SIZE, SLOT_SIZE, 10); g.fill();
         const sg = g.createLinearGradient(0, s.y - half, 0, s.y + half);
@@ -1048,7 +1085,14 @@
         state.skyShadow = { t: 0 };
         burst(targetSlot.x, targetSlot.y, '#f0abfc', 40, 160, 3, 0, 1);
         burst(targetSlot.x, targetSlot.y, '#a5f3fc', 30, 130, 2.4, 0, 1);
-        showInfo('🌈 ★6 하늘의 제왕 케찰코아틀루스 강림!! (맵 전체 공격)');
+        const sky = targetSlot.unit; targetSlot.unit = null;
+        const ns = addNestUnit(sky); sky.pop = 1;
+        state.effects.push({ x: targetSlot.x, y: targetSlot.y, color: '#f0abfc', r: 0, maxR: 20, life: 0.45, maxLife: 0.45, link: ns });
+        spawnEffect(ns.x, ns.y, '#f0abfc', 70);
+        burst(ns.x, ns.y, '#f0abfc', 30, 140, 3, 0, 0.9);
+        recalcSynergy();
+        showInfo('🌈 ★6 케찰코아틀루스가 본진에 둥지를 틀었다!! (맵 전체 공격)');
+        return ns;
       }
       return targetSlot;
     }
@@ -1072,9 +1116,9 @@
     }
 
     function summonDino(forcedTier = 1) {
-      let empty = SLOTS.filter((s) => !s.unit);
+      let empty = SLOTS.filter((s) => !s.unit && !s.nest);
       const vip = isVip();
-      if (!empty.length && vip && autoMerge()) empty = SLOTS.filter((s) => !s.unit);
+      if (!empty.length && vip && autoMerge()) empty = SLOTS.filter((s) => !s.unit && !s.nest);
       if (!empty.length) {
         showInfo(vip ? '합칠 수 있는 공룡이 없어요! (모두 ★6 또는 짝이 없음)' : '빈 칸이 없어요! 같은 성급끼리 끌어다 합성하세요 · 👑VIP는 소환 시 자동 합성');
         return false;
@@ -1130,25 +1174,29 @@
       cloudSave();
       const st = getStageForWave(waveNum);
       const isBoss = waveNum % 5 === 0;
-      if (st.id !== state.stageId) {
+      const openBoss = waveNum % 5 === 1;   // 스테이지 첫 웨이브에도 보스 등장 (체력 절반 정도)
+      if (st.num !== state.stageId) {
         if (state.stageId) sfx('clear', 0.8);
-        state.stageId = st.id;
+        state.stageId = st.num;
         applyMap(STAGE_MAP[st.id - 1]);
         renderStaticBackground(st);
         showStageBanner(st);
-        setText('stageBadge', ui.stageBadge, `S${st.id} ${st.name}`);
+        setText('stageBadge', ui.stageBadge, `S${st.num} ${st.name}`);
       }
       const lanes = LANES.map((l) => l.id);
       state.curLanes = lanes;
       state.nextLanes = lanes;
       const count = isBoss ? 2 + Math.floor(waveNum / 5) : 10 + waveNum * 2;
       if (isBoss) state.queue.push({ wave: waveNum, lane: (waveNum / 5) % lanes.length, boss: true });
-      for (let i = 0; i < count; i++) state.queue.push({ wave: waveNum, lane: lanes[i % lanes.length], boss: false });
+      for (let i = 0; i < count; i++) {
+        state.queue.push({ wave: waveNum, lane: lanes[i % lanes.length], boss: false });
+        if (openBoss && i === 3) state.queue.push({ wave: waveNum, lane: lanes[0], boss: true, mini: true });
+      }
       state.spawnAcc = Math.min(state.spawnAcc, 0.4);
 
       const two = lanes.length > 1 ? ' — 두 방향 습격!' : '';
-      if (isBoss) {
-        showInfo(`⚠️ [보스] ${st.bossName} 출현! 화력을 집중하세요!${two}`);
+      if (isBoss || openBoss) {
+        showInfo(isBoss ? `⚠️ [최종 보스] ${st.bossName} 출현! 화력을 집중하세요!${two}` : `⚠️ [보스] ${st.bossName}가 먼저 정찰하러 왔다!${two}`);
         playBgm('bgm_boss');
       } else {
         showInfo(`🌊 웨이브 ${waveNum}${two}`);
@@ -1163,7 +1211,7 @@
       const lane = LANES[q.lane % LANES.length];
       const hpBase = 38 * Math.pow(1.255, q.wave - 1) * st.hpMul;
       const brute = !isBoss && Math.random() < Math.min(0.45, 0.12 + q.wave * 0.02);
-      const hpMul = isBoss ? 13 : brute ? 1.7 : 0.85;
+      const hpMul = isBoss ? (q.mini ? 6 : 13) : brute ? 1.7 : 0.85;
       const spdMul = isBoss ? 1 : brute ? 0.78 : 1.12;
       const p = lanePos(lane, 0);
       const e = {
@@ -1174,8 +1222,8 @@
         radius: isBoss ? 22 : brute ? 13 : 10,
         size: isBoss ? 92 : brute ? 54 : 44,
         art: isBoss ? `boss_${st.id}` : `en_${st.id}${brute ? 'b' : 'a'}`,
-        reward: isBoss ? 140 + q.wave * 12 : Math.round((10 + Math.floor(q.wave * 1.3)) * (brute ? 1.5 : 1)),
-        gemReward: isBoss ? 3 : 0,
+        reward: isBoss ? (q.mini ? 60 + q.wave * 8 : 140 + q.wave * 12) : Math.round((10 + Math.floor(q.wave * 1.3)) * (brute ? 1.5 : 1)),
+        gemReward: isBoss ? (q.mini ? 2 : 3) : 0, mini: !!q.mini,
         slowTimer: 0, slowMul: 1, boss: isBoss, brute, hitFlash: 0, stun: 0,
         face: lane.dx > 0.05 ? 1 : lane.dx < -0.05 ? -1 : (Math.random() < 0.5 ? 1 : -1),
         walk: Math.random() * 6.28, name: isBoss ? st.bossName : '',
@@ -1265,7 +1313,7 @@
             playBgm(null); sfx('over', 1);
             ui.gameOverTitle.textContent = '☄️ 방어 실패!';
             noteRunRecord(); cloudSave(true);
-            ui.gameOverStat.textContent = `도달: Stage ${st.id} (${st.name}) · 웨이브 ${state.wave} · 🦖처치 ${state.kills}마리 (누적 ${record.totalKills.toLocaleString()})`;
+            ui.gameOverStat.textContent = `도달: Stage ${st.num} (${st.name}) · 웨이브 ${state.wave} · 🦖처치 ${state.kills}마리 (누적 ${record.totalKills.toLocaleString()})`;
             ui.gameOver.classList.remove('hidden');
             ui.gameOver.classList.add('flex');
           }
@@ -1443,7 +1491,7 @@
           burst(e.x, e.y - 6, '#fde047', e.boss ? 24 : 5, e.boss ? 120 : 60, 1.8, -10, 0.6);
           spawnDmgText(e.x, e.y - e.size * 0.6 - 6, `+${reward}🦴`, '#fcd34d');
           if (e.boss) {
-            spawnDmgText(e.x, e.y - e.size * 0.6 - 22, '+3💎 +1❤️ 보스 격파!', '#e9d5ff');
+            spawnDmgText(e.x, e.y - e.size * 0.6 - 22, `+${e.gemReward}💎 +1❤️ 보스 격파!`, '#e9d5ff');
             state.life += 1; state.maxLife = Math.max(state.maxLife || LIFE_MAX, state.life);
             spawnDmgText(CENTER.x, CENTER.y - 46, '+1❤️', '#86efac');
             burst(CENTER.x, CENTER.y, '#86efac', 14, 80, 2.4, -30, 0.7);
@@ -1497,7 +1545,7 @@
     function collectEggAt(x, y) {
       for (let i = 0; i < state.eggs.length; i++) {
         const g = state.eggs[i];
-        if (Math.hypot(x - g.x, y - g.y) < 22) {
+        if (Math.hypot(x - g.x, y - g.y) < 40) {
           state.eggs.splice(i, 1);
           state.gem += 1;
           burst(g.x, g.y, '#7dd3fc', 16, 90, 2.2, 0, 0.6);
@@ -1829,21 +1877,6 @@
         ctx.restore();
       }
 
-      // 호박(💎) 드랍 — 탭해서 줍기
-      for (const g of state.eggs) {
-        const bob = Math.sin(state.time * 5 + g.ph) * 3;
-        if (g.life < 2 && Math.floor(g.life * 8) % 2 === 0) continue;
-        ctx.save();
-        const gl = ctx.createRadialGradient(g.x, g.y + bob, 2, g.x, g.y + bob, 22);
-        gl.addColorStop(0, 'rgba(125,211,252,0.75)'); gl.addColorStop(1, 'rgba(125,211,252,0)');
-        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(g.x, g.y + bob, 22, 0, Math.PI * 2); ctx.fill();
-        ctx.translate(g.x, g.y + bob);
-        ctx.scale(Math.cos(state.time * 3 + g.ph) * 0.25 + 0.95, 1);
-        ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('💎', 0, 0);
-        ctx.restore();
-      }
-
       enemyOrder.length = 0;
       for (let i = 0; i < state.enemies.length; i++) enemyOrder.push(state.enemies[i]);
       enemyOrder.sort((a, b) => a.y - b.y);
@@ -1925,6 +1958,22 @@
           ctx.restore();
         }
       }
+
+      // 호박(💎) 드랍 — 탭해서 줍기
+      for (const g of state.eggs) {
+        const bob = Math.sin(state.time * 5 + g.ph) * 3;
+        if (g.life < 2 && Math.floor(g.life * 8) % 2 === 0) continue;
+        ctx.save();
+        const gl = ctx.createRadialGradient(g.x, g.y + bob, 4, g.x, g.y + bob, 42);
+        gl.addColorStop(0, 'rgba(125,211,252,0.75)'); gl.addColorStop(1, 'rgba(125,211,252,0)');
+        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(g.x, g.y + bob, 42, 0, Math.PI * 2); ctx.fill();
+        ctx.translate(g.x, g.y + bob);
+        ctx.scale(Math.cos(state.time * 3 + g.ph) * 0.25 + 0.95, 1);
+        ctx.font = '40px sans-serif'; ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('💎', 0, 0);
+        ctx.restore();
+      }
+
 
       // 콤보
       if (state.comboShow > 0 && state.combo >= 3) {
@@ -2034,10 +2083,15 @@
       if (!targetSlot || targetSlot === fromSlot) return;
 
       const uA = fromSlot.unit, uB = targetSlot.unit;
+      if (fromSlot.nest || targetSlot.nest) {
+        sfx('fail', 0.4);
+        showInfo('🌈 본진은 ★6 케찰코아틀루스 전용 자리예요!');
+        return;
+      }
       // 같은 성급 2마리 겹치면 상위 성급으로 합성! (동종이면 +20 화석 보너스)
       if (uB && uA.tier === uB.tier && uA.tier < 6) {
-        mergeUnits(fromSlot, targetSlot);
-        selectSlot(targetSlot.id);
+        const res = mergeUnits(fromSlot, targetSlot);
+        selectSlot(res.id);
       } else {
         targetSlot.unit = uA;
         fromSlot.unit = uB || null;
@@ -2229,6 +2283,7 @@
       location.href = 'https://02826k.github.io/aigameroom/';
     });
     document.getElementById('restartBtn').addEventListener('click', () => {
+      clearNest();
       SLOTS.forEach((s) => (s.unit = null));
       Object.assign(state, {
         life: 20, gold: 320, gem: 5, wave: 1, stageId: 0, summonCount: 0, upgradeLv: 1,
